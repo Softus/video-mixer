@@ -1,28 +1,26 @@
 #include "mainwindow.h"
 #include <QApplication>
+#include <QResizeEvent>
 #include <QFrame>
 #include <QBoxLayout>
 #include <QPushButton>
+#include <QListWidget>
+#include <QLabel>
+#include <QMessageBox>
 #include <QSettings>
 #include <QDir>
 #include <QFileInfo>
+#include <QTimer>
+#include <qscrollbar.h>
 
 #include <QGlib/Type>
-#include <QGlib/Error>
 #include <QGlib/Connect>
 #include <QGst/Bus>
 #include <QGst/Parse>
 
-static const QSize minSize(96,96);
-
-QPushButton* MainWindow::createButton(const char *slot)
+static inline QBoxLayout::Direction bestDirection(const QSize &s)
 {
-    auto btn = new QPushButton();
-    btn->setMinimumSize(minSize);
-    btn->setIconSize(minSize);
-    connect(btn, SIGNAL(clicked()), this, slot);
-
-    return btn;
+	return s.width() >= s.height()? QBoxLayout::LeftToRight: QBoxLayout::TopToBottom;
 }
 
 static void Dump(QGst::ElementPtr elm)
@@ -58,38 +56,15 @@ MainWindow::MainWindow(QWidget *parent) :
     running(false),
     recording(false)
 {
-    QSettings settings;
+	pipeline = createPipeline();
 
-    imageFileName = settings.value("image-file", "'/video/'yyyy-MM-dd/HH-mm'/image%03d.png'").toString();
-    videoFileName = settings.value("video-file", "'/video/'yyyy-MM-dd/HH-mm'/out.mpg'").toString();
-
-    const QString pipeTemplate = settings.value("pipeline", "%1 ! tee name=splitter ! %2 splitter. ! valve name=videovalve ! queue ! %3 splitter. ! valve name=imagevalve ! queue ! %4 splitter.").toString();
-    const QString srcDef = settings.value("src", "autovideosrc").toString();
-    const QString displaySinkDef = settings.value("display-sink", "queue ! autovideoconvert ! autovideosink").toString();
-    const QString videoSinkDef    = settings.value("video-sink",  "mpeg2enc ! mpegtsmux ! filesink name=videosink").toString();
-    const QString imageSinkDef   = settings.value("image-sink",   "videorate ! video/x-raw-yuv,framerate=1/2 ! colorspace ! pngenc snapshot=false ! multifilesink name=imagesink  post-messages=true").toString();
-
-    const QString pipe = pipeTemplate.arg(srcDef, displaySinkDef, videoSinkDef, imageSinkDef);
-    qCritical() << pipe;
-
-    pipeline = QGst::Parse::launch(pipe).dynamicCast<QGst::Pipeline>();
-    if (pipeline)
-    {
-        QGlib::connect(pipeline->bus(), "message", this, &MainWindow::onBusMessage);
-        pipeline->bus()->addSignalWatch();
-        Dump(pipeline);
-
-        videoValve = pipeline->getElementByName("videovalve");
-        videoSink  = pipeline->getElementByName("videosink");
-        imageValve = pipeline->getElementByName("imagevalve");
-        imageSink  = pipeline->getElementByName("imagesink");
-
-        splitter = pipeline->getElementByName("splitter");
-    }
+	imageTimer = new QTimer(this);
+	imageTimer->setSingleShot(true);
+	connect(imageTimer, SIGNAL(timeout()), this, SLOT(onUpdateImage()));
 
     auto buttonsLayout = new QHBoxLayout();
-
     btnStart = createButton(SLOT(onStartClick()));
+	btnStart->setAutoDefault(true);
     buttonsLayout->addWidget(btnStart);
 
     btnSnapshot = createButton(SLOT(onSnapshotClick()));
@@ -101,7 +76,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // TODO: implement fragment record
     //buttonsLayout->addWidget(btnRecord);
 
-    buttonsLayout->addSpacing(200);
+    //buttonsLayout->addSpacing(200);
     btnRecordAll = createButton(SLOT(onRecordAllClick()));
 
     btnRecordAll->setFlat(true);
@@ -110,30 +85,116 @@ MainWindow::MainWindow(QWidget *parent) :
     // TODO: implement record all
     //buttonsLayout->addWidget(btnRecordAll);
 
-    auto outputLayout = new QHBoxLayout();
+	outputLayout = new QBoxLayout(bestDirection(size()));
 
     videoOut = new QGst::Ui::VideoWidget();
-    videoOut->setMinimumSize(minSize);
+	videoOut->setMinimumSize(160, 120);
     outputLayout->addWidget(videoOut);
 
-    imageOut = new QLabel();
+    imageOut = new QLabel(tr("A bit of useful information shown here.\n"
+		"The end user should see this message and be able to use the app without learning."));
+	imageOut->setAlignment(Qt::AlignCenter);
+	imageOut->setMinimumSize(160, 120);
     outputLayout->addWidget(imageOut);
 
+	imageList = new QListWidget();
+	imageList->setViewMode(QListView::IconMode);
+	imageList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	imageList->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	imageList->setIconSize(QSize(96,96));
+	imageList->setMaximumHeight(1);
+	imageList->setMovement(QListView::Static);
 
     auto mainLayout = new QVBoxLayout();
     mainLayout->addLayout(buttonsLayout);
     mainLayout->addLayout(outputLayout);
+	mainLayout->addWidget(imageList);
 
     setLayout(mainLayout);
     videoOut->watchPipeline(pipeline);
 
+	btnStart->setEnabled(pipeline);
     updateStartButton();
     updateRecordButton();
 }
 
 MainWindow::~MainWindow()
 {
-    pipeline->setState(QGst::StateNull);
+	if (pipeline)
+	{
+		pipeline->setState(QGst::StateNull);
+	}
+}
+
+QPushButton* MainWindow::createButton(const char *slot)
+{
+	const QSize minSize(96,96);
+    auto btn = new QPushButton();
+    btn->setMinimumSize(minSize);
+    btn->setIconSize(minSize);
+    connect(btn, SIGNAL(clicked()), this, slot);
+
+    return btn;
+}
+
+QGst::PipelinePtr MainWindow::createPipeline()
+{
+    QSettings settings;
+	QGst::PipelinePtr pl;
+
+    imageFileName = settings.value("image-file", "'/video/'yyyy-MM-dd/HH-mm'/image%03d.png'").toString();
+    videoFileName = settings.value("video-file", "'/video/'yyyy-MM-dd/HH-mm'/out.mpg'").toString();
+
+    const QString pipeTemplate = settings.value("pipeline", "%1 ! tee name=splitter"
+		" ! queue ! %2 splitter."
+		" ! valve name=videovalve ! queue ! %3 ! filesink name=videosink splitter."
+		" ! valve name=imagevalve ! queue ! %4 ! multifilesink name=imagesink  post-messages=true splitter."
+		).toString();
+    const QString srcDef = settings.value("src", "autovideosrc").toString();
+    const QString displaySinkDef = settings.value("display-sink", "autoconvert ! autovideosink").toString();
+    const QString videoSinkDef   = settings.value("video-sink",  "mpeg2enc ! mpegtsmux").toString();
+    const QString imageSinkDef   = settings.value("image-sink",  "videorate ! capsfilter caps=video/x-raw-yuv,framerate=1/3 ! ffmpegcolorspace ! pngenc snapshot=false").toString();
+
+    const QString pipe = pipeTemplate.arg(srcDef, displaySinkDef, videoSinkDef, imageSinkDef);
+    qCritical() << pipe;
+
+	try
+	{
+		pl = QGst::Parse::launch(pipe).dynamicCast<QGst::Pipeline>();
+//		Dump(pl);
+	}
+	catch (QGlib::Error ex)
+	{
+		error(ex);
+	}
+
+    if (pl)
+    {
+        QGlib::connect(pl->bus(), "message", this, &MainWindow::onBusMessage);
+        pl->bus()->addSignalWatch();
+
+        videoValve = pl->getElementByName("videovalve");
+        videoSink  = pl->getElementByName("videosink");
+        imageValve = pl->getElementByName("imagevalve");
+        imageSink  = pl->getElementByName("imagesink");
+
+        splitter = pl->getElementByName("splitter");
+
+		if (!videoValve || !videoSink || !imageValve || !imageSink || !splitter)
+		{
+			error(tr("The pipeline does not have all required elements"));
+			pl.clear();
+		}
+    }
+
+	return pl;
+}
+
+void MainWindow::error(const QString& msg)
+{
+	qCritical() << msg;
+	QMessageBox msgBox(QMessageBox::Critical, windowTitle(), msg, QMessageBox::Ok, this);
+	msgBox.exec();
 }
 
 void MainWindow::onBusMessage(const QGst::MessagePtr & message)
@@ -146,31 +207,47 @@ void MainWindow::onBusMessage(const QGst::MessagePtr & message)
             QGst::StateChangedMessagePtr m = message.staticCast<QGst::StateChangedMessage>();
             if (m->newState() == QGst::StatePaused)
             {
-//                videoValve->setProperty("drop", 1);
-//                imageValve->setProperty("drop", 1);
+                //videoValve->setProperty("drop", 1);
+                //imageValve->setProperty("drop", 1);
                 pipeline->setState(QGst::StatePlaying);
+
+                //Dump(pipeline);
             }
+			else if (m->newState() == QGst::StatePlaying)
+			{
+				// At this time the video output finally has a sink, so set it up now
+				//
+				auto videoSink = videoOut->videoSink();
+				if (videoSink)
+				{
+					videoSink->setProperty("force-aspect-ratio", TRUE);
+				}
+			}
         }
         break;
     case QGst::MessageEos:
         qCritical() << "EOS???";
         break;
     case QGst::MessageError:
-        qCritical() << message.staticCast<QGst::ErrorMessage>()->error();
+        error(message.staticCast<QGst::ErrorMessage>()->error());
         break;
     case QGst::MessageNewClock:
     case QGst::MessageStreamStatus:
         break;
     case QGst::MessageElement:
+		if (message->source() == imageSink)
         {
             QGst::ElementMessagePtr m = message.staticCast<QGst::ElementMessage>();
             const QGst::StructurePtr s = m->internalStructure();
             if (s && s->name() == "GstMultiFileSink")
             {
                 imageValve->setProperty("drop", 1);
-                QPixmap p;
-                p.load(s->value("filename").toString());
-                imageOut->setPixmap(p);
+				lastImageFile = s->value("filename").toString();
+				imageTimer->start(500);
+            }
+            else
+            {
+                qCritical() << s->name();
             }
         }
         break;
@@ -187,6 +264,7 @@ void MainWindow::onStartClick()
 {
     running = !running;
     updateStartButton();
+    imageOut->clear();
 
     if (running)
     {
@@ -205,7 +283,6 @@ void MainWindow::onStartClick()
     {
         recording = false;
         updateRecordButton();
-        imageOut->clear();
     }
 
     // start recording
@@ -228,6 +305,7 @@ void MainWindow::onRecordClick()
 
 void MainWindow::onRecordAllClick()
 {
+	const QSize minSize(96,96);
     QIcon icon(":/buttons/record_on");
 
     recordAll = !recordAll;
@@ -237,6 +315,34 @@ void MainWindow::onRecordAllClick()
     btnRecordAll->setText(tr("Record\nis %1").arg(strOnOff));
 }
 
+void MainWindow::onUpdateImage()
+{
+	qCritical() << lastImageFile << " " << imageList->sizePolicy().horizontalPolicy() << " " << imageList->sizeHint() ;
+
+    QPixmap pm;
+	if (pm.load(lastImageFile))
+	{
+		auto mini = pm.scaledToWidth(96);
+		auto item = new QListWidgetItem(QIcon(mini), QString());
+		item->setToolTip(lastImageFile);
+		imageList->insertItem(0, item);
+		imageList->setMaximumHeight(mini.height());
+		imageList->setMinimumHeight(mini.height());
+		imageOut->setPixmap(pm);
+	}
+	else
+	{
+		imageOut->setText(tr("Failed to load image %1").arg(lastImageFile));
+	}
+	lastImageFile.clear();
+}
+
+void MainWindow::resizeEvent(QResizeEvent *evt)
+{
+	QWidget::resizeEvent(evt);
+	outputLayout->setDirection(bestDirection(evt->size()));
+}
+
 void MainWindow::updateStartButton()
 {
     QIcon icon(running? ":/buttons/stop": ":/buttons/add");
@@ -244,8 +350,9 @@ void MainWindow::updateStartButton()
     btnStart->setIcon(icon);
     btnStart->setText(strOnOff);
 
-    btnRecord->setDisabled(!running);
-    btnSnapshot->setDisabled(!running);
+    btnRecord->setEnabled(running);
+    btnSnapshot->setEnabled(running);
+	videoOut->setVisible(running);
 }
 
 void MainWindow::updateRecordButton()

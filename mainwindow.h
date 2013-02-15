@@ -2,29 +2,52 @@
 #define MAINWINDOW_H
 
 #include <QWidget>
-#include <QPushButton>
-#include <QLabel>
 
 #include <QGst/Message>
 #include <QGst/Pipeline>
 #include <QGst/Buffer>
 #include <QGst/Ui/VideoWidget>
 
+#include <QGlib/Error>
+
+class QResizeEvent;
+class QBoxLayout;
+class QPushButton;
+class QListWidget;
+class QLabel;
+class QTimer;
+
 class MainWindow : public QWidget
 {
-    bool recordAll;
+    Q_OBJECT
+
+	// State machine
+	//
+	bool recordAll;
     bool running;
     bool recording;
 
-    QGst::PipelinePtr pipeline;
-
+	// UI
+	//
+	QBoxLayout*  outputLayout;
     QPushButton* btnRecordAll;
     QPushButton* btnStart;
     QPushButton* btnRecord;
     QPushButton* btnSnapshot;
-    QGst::Ui::VideoWidget* videoOut;
-    QLabel* imageOut;
 
+    QLabel*      imageOut;
+	QTimer*      imageTimer;
+	QString      lastImageFile;
+	QListWidget* imageList;
+    QGst::Ui::VideoWidget* videoOut;
+
+    QPushButton* createButton(const char *slot);
+    void updateStartButton();
+    void updateRecordButton();
+
+	// GStreamer pipeline
+	//
+    QGst::PipelinePtr pipeline;
     QGst::ElementPtr splitter;
 
     QGst::ElementPtr imageValve;
@@ -35,24 +58,27 @@ class MainWindow : public QWidget
     QGst::ElementPtr videoSink;
     QString videoFileName;
 
-    QPushButton* createButton(const char *slot);
-    void updateStartButton();
-    void updateRecordButton();
-
+    QGst::PipelinePtr createPipeline();
     void onBusMessage(const QGst::MessagePtr & message);
 
-    Q_OBJECT
-    
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-    
+
+	void error(const QString& msg);
+	inline void error(const QGlib::Error& ex) { error(ex.message()); }
+
+protected:
+    // Event handlers
+	//
+	virtual void resizeEvent(QResizeEvent *evt);
+
 private slots:
     void onStartClick();
     void onSnapshotClick();
     void onRecordClick();
     void onRecordAllClick();
-
+	void onUpdateImage();
 };
 
 #endif // MAINWINDOW_H

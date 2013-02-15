@@ -1,16 +1,20 @@
 * text=auto !eol
+/cronica.cpp -text
 /cronica.pro -text
+/cronica.qrc -text
+/cronica.sln -text
+/cronica.vcxproj -text
+/cronica.vcxproj.filters -text
 /cronica_ru.ts -text
-/main.cpp -text
 /mainwindow.cpp -text
 /mainwindow.h -text
 /mainwindow.ui -text
 pixmaps/1record_on.png -text
 pixmaps/add.png -text
 pixmaps/camera.png -text
+pixmaps/cronica.png -text
 pixmaps/pause.png -text
 pixmaps/play.png -text
 pixmaps/record_on.png -text
 pixmaps/stop.png -text
-/res.qrc -text
 /сronica.pro -text

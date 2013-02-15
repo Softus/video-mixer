@@ -6,22 +6,24 @@
 
 QT       += core gui
 
-CONFIG += link_pkgconfig
-PKGCONFIG += QtGStreamer-0.10 QtGStreamerUi-0.10
+win32 {
+    INCLUDEPATH += c:/usr/include
+    LIBS += c:/usr/lib/*.lib
+}
 
-TARGET = cronica
+unux {
+    CONFIG += link_pkgconfig
+    PKGCONFIG += QtGStreamer-0.10 QtGStreamerUi-0.10
+    QMAKE_CXXFLAGS += -std=c++11
+}
+
+TARGET   = cronica
 TEMPLATE = app
 
-QMAKE_CXXFLAGS += -std=c++11
+SOURCES += cronica.cpp mainwindow.cpp
+HEADERS += mainwindow.h
 
-SOURCES += main.cpp\
-        mainwindow.cpp
+FORMS   +=
 
-HEADERS  += mainwindow.h
-
-FORMS    +=
-
-RESOURCES += \
-    res.qrc
-
+RESOURCES    += cronica.qrc
 TRANSLATIONS += cronica_ru.ts

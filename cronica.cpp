@@ -1,6 +1,7 @@
 #include <QApplication>
 #include <QLocale>
 #include <QTranslator>
+#include <QIcon>
 #include <QGst/Init>
 #include "mainwindow.h"
 
@@ -12,6 +13,7 @@ int main(int argc, char *argv[])
     app.setOrganizationName("irk-dc");
     app.setApplicationName("cronica");
     app.setApplicationVersion("1.0");
+	app.setWindowIcon(QIcon(":/buttons/cronica"));
 
     // GStreamer
     //
@@ -28,7 +30,7 @@ int main(int argc, char *argv[])
     // Start the UI
     //
     MainWindow wnd;
-    wnd.showMaximized();
+    wnd.show();
 
     int errCode = app.exec();
     QGst::cleanup();
