@@ -39,7 +39,7 @@ class MainWindow : public QWidget
     QLabel*      imageOut;
 	QTimer*      imageTimer;
 	QString      lastImageFile;
-	QListWidget* imageList;
+//	QListWidget* imageList;
     QGst::Ui::VideoWidget* displayWidget;
 
     QPushButton* createButton(const char *slot);
@@ -63,7 +63,7 @@ class MainWindow : public QWidget
 
     QGst::PipelinePtr createPipeline();
     void onBusMessage(const QGst::MessagePtr & message);
-    void onTestHandoff(const QGst::BufferPtr&);
+//    void onTestHandoff(const QGst::BufferPtr&);
 
 public:
     explicit MainWindow(QWidget *parent = 0);

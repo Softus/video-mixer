@@ -16,38 +16,39 @@
 #include <QGlib/Connect>
 #include <QGst/Bus>
 #include <QGst/Parse>
+#include <QGst/Event>
 
 static inline QBoxLayout::Direction bestDirection(const QSize &s)
 {
 	return s.width() >= s.height()? QBoxLayout::LeftToRight: QBoxLayout::TopToBottom;
 }
 
-static void Dump(QGst::ElementPtr elm)
-{
-    if (!elm)
-    {
-        qCritical() << " (null) ";
-    }
+//static void Dump(QGst::ElementPtr elm)
+//{
+//    if (!elm)
+//    {
+//        qDebug() << " (null) ";
+//    }
 
-    foreach(auto prop,  elm->listProperties())
-    {
-        const QString n = prop->name();
-        const QGlib::Value v = elm->property(n.toUtf8());
-        qCritical() << n << " = " << v.get<QString>();
-    }
+//    foreach (auto prop, elm->listProperties())
+//    {
+//        const QString n = prop->name();
+//        const QGlib::Value v = elm->property(n.toUtf8());
+//        qDebug() << n << " = " << v.get<QString>();
+//    }
 
-    QGst::ChildProxyPtr childProxy =  elm.dynamicCast<QGst::ChildProxy>();
-    if (childProxy)
-    {
-        childProxy->data(NULL);
-        auto cnt = childProxy->childrenCount();
-        for (uint i = 0; i < cnt; ++i)
-        {
-            qCritical() << "==== CHILD ==== " << i;
-            Dump(childProxy->childByIndex(i).dynamicCast<QGst::Element>());
-        }
-    }
-}
+//    QGst::ChildProxyPtr childProxy =  elm.dynamicCast<QGst::ChildProxy>();
+//    if (childProxy)
+//    {
+//        childProxy->data(NULL);
+//        auto cnt = childProxy->childrenCount();
+//        for (uint i = 0; i < cnt; ++i)
+//        {
+//            qDebug() << "==== CHILD ==== " << i;
+//            Dump(childProxy->childByIndex(i).dynamicCast<QGst::Element>());
+//        }
+//    }
+//}
 
 MainWindow::MainWindow(QWidget *parent) :
     QWidget(parent),
@@ -55,7 +56,7 @@ MainWindow::MainWindow(QWidget *parent) :
     running(false),
     recording(false)
 {
-	pipeline = createPipeline();
+    pipeline = createPipeline();
 
 	imageTimer = new QTimer(this);
 	imageTimer->setSingleShot(true);
@@ -95,19 +96,21 @@ MainWindow::MainWindow(QWidget *parent) :
     imageOut->setMinimumSize(320, 240);
     outputLayout->addWidget(imageOut);
 
-	imageList = new QListWidget();
-	imageList->setViewMode(QListView::IconMode);
-	imageList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	imageList->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    imageList->setMinimumHeight(96);
-    imageList->setMaximumHeight(96);
-    imageList->setMovement(QListView::Static);
-    imageList->setWrapping(false);
+    // TODO: implement snapshot image list
+    //
+//    imageList = new QListWidget();
+//    imageList->setViewMode(QListView::IconMode);
+//    imageList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+//    imageList->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+//    imageList->setMinimumHeight(96);
+//    imageList->setMaximumHeight(96);
+//    imageList->setMovement(QListView::Static);
+//    imageList->setWrapping(false);
 
     auto mainLayout = new QVBoxLayout();
     mainLayout->addLayout(buttonsLayout);
     mainLayout->addLayout(outputLayout);
-	mainLayout->addWidget(imageList);
+//    mainLayout->addWidget(imageList);
 
     setLayout(mainLayout);
     displayWidget->watchPipeline(pipeline);
@@ -149,10 +152,10 @@ QGst::PipelinePtr MainWindow::createPipeline()
         " ! valve name=videovalve ! %3 ! multifilesink name=videosink next-file=1 splitter."
         " ! valve name=imagevalve ! %4 ! multifilesink name=imagesink post-messages=1 splitter."
 		).toString();
-    const QString srcDef = settings.value("src", "autovideosrc").toString();
-    const QString displaySinkDef = settings.value("display-sink", "autoconvert ! autovideosink name=displaysink").toString();
-    const QString videoSinkDef   = settings.value("video-sink",  "ffenc_mpeg2video ! identity name=test ! mpegtsmux").toString();
-    const QString imageSinkDef   = settings.value("image-sink",  "videorate skip-to-first=1 drop-only=1 ! capsfilter caps=video/x-raw-yuv,framerate=1/3 ! ffmpegcolorspace ! pngenc snapshot=0").toString();
+    const QString srcDef = settings.value("src", "autovideosrc ! queue").toString();
+    const QString displaySinkDef = settings.value("display-sink", "autoconvert ! timeoverlay name=displayoverlay ! autovideosink name=displaysink").toString();
+    const QString videoSinkDef   = settings.value("video-sink",  "ffenc_mpeg2video ! mpegtsmux").toString();
+    const QString imageSinkDef   = settings.value("image-sink",  "videorate skip-to-first=1 drop-only=1 ! capsfilter caps=video/x-raw-yuv,framerate=1/1 ! ffmpegcolorspace ! clockoverlay name=imageoverlay time-format=\"%Y/%m/%d %H:%M:%S\" ! pngenc snapshot=0").toString();
 
     const QString pipe = pipeTemplate.arg(srcDef, displaySinkDef, videoSinkDef, imageSinkDef);
     qCritical() << pipe;
@@ -186,16 +189,16 @@ QGst::PipelinePtr MainWindow::createPipeline()
 			pl.clear();
 		}
 
-        QGlib::connect(pl->getElementByName("test"), "handoff", this, &MainWindow::onTestHandoff);
+//        QGlib::connect(pl->getElementByName("test"), "handoff", this, &MainWindow::onTestHandoff);
     }
 
 	return pl;
 }
 
-void MainWindow::onTestHandoff(const QGst::BufferPtr& buf)
-{
-    qCritical() << "handoff " << buf->size() << " " << buf->timeStamp() << " " << buf->flags();
-}
+//void MainWindow::onTestHandoff(const QGst::BufferPtr& buf)
+//{
+//    qDebug() << "handoff " << buf->size() << " " << buf->timeStamp() << " " << buf->flags();
+//}
 
 void MainWindow::error(const QString& msg)
 {
@@ -206,14 +209,14 @@ void MainWindow::error(const QString& msg)
 
 void MainWindow::onBusMessage(const QGst::MessagePtr & message)
 {
-//    qCritical() << message->typeName() << " " << message->source()->property("name").toString();
+//    qDebug() << message->typeName() << " " << message->source()->property("name").toString();
 
     switch (message->type())
     {
     case QGst::MessageStateChanged:
         {
             QGst::StateChangedMessagePtr m = message.staticCast<QGst::StateChangedMessage>();
-            //qCritical() << m->oldState() << " => " << m->newState();
+//            qDebug() << m->oldState() << " => " << m->newState();
 
             // The pipeline will not start by itself since 2 of 3 renders are in NULL state
             // We need to kick off the display renderer to start the capture
@@ -246,13 +249,21 @@ void MainWindow::onBusMessage(const QGst::MessagePtr & message)
             const QGst::StructurePtr s = m->internalStructure();
             if (!s)
             {
-                qCritical() << "Got empty QGst::MessageElement";
+                qDebug() << "Got empty QGst::MessageElement";
             }
             else if (s->name() == "GstMultiFileSink" && message->source() == imageSink)
             {
                 imageValve->setProperty("drop", 1);
-                lastImageFile = s->value("filename").toString();
-                imageTimer->start(500);
+                const QString fileName = s->value("filename").toString();
+                if (!lastImageFile.isEmpty())
+                {
+                    // We got more then one file for the snapshot.
+                    // We should drop all of them except the last one.
+                    //
+                    QFile::remove(lastImageFile);
+                }
+                lastImageFile = fileName;
+                imageTimer->start(200);
             }
             else if (s->name() == "prepare-xwindow-id")
             {
@@ -267,13 +278,13 @@ void MainWindow::onBusMessage(const QGst::MessagePtr & message)
             }
             else
             {
-                qCritical() << s->name();
+                qDebug() << s->name();
             }
         }
         break;
         break;
     default:
-        qCritical() << message->type();
+        qDebug() << message->type();
         break;
     }
 }
@@ -303,14 +314,18 @@ void MainWindow::onStartClick()
         updateRecordButton();
     }
 
-    // start recording
+    // start/stop the recording
     //
     pipeline->setState(running? QGst::StatePaused: QGst::StateNull);
 }
 
 void MainWindow::onSnapshotClick()
 {
+    // Turn the valve on for a while.
+    //
     imageValve->setProperty("drop", 0);
+    //
+    // Once an image will be ready, the valve will be turned off again.
 }
 
 void MainWindow::onRecordClick()
@@ -318,8 +333,27 @@ void MainWindow::onRecordClick()
     recording = !recording;
     updateRecordButton();
 
+    if (recording)
+    {
+        // Force output file to close
+        //
+        videoSink->setState(QGst::StateNull);
+
+        // Manually increment video clip file name
+        //
+        videoSink->setProperty("index", videoSink->property("index").toInt() + 1);
+
+        // And start to write a new file
+        //
+        videoSink->setState(QGst::StatePlaying);
+    }
+
     videoValve->setProperty("drop", !recording);
-    videoSink->setProperty("index", videoSink->property("index").toInt() + 1);
+    auto displayOverlay = pipeline->getElementByName("displayoverlay");
+    if (displayOverlay)
+    {
+        displayOverlay->setProperty("text", recording? "R": "   ");
+    }
 }
 
 void MainWindow::onRecordAllClick()
@@ -336,25 +370,26 @@ void MainWindow::onRecordAllClick()
 
 void MainWindow::onUpdateImage()
 {
-	qCritical() << lastImageFile << " " << imageList->sizePolicy().horizontalPolicy() << " " << imageList->sizeHint() ;
+    qDebug() << lastImageFile;
 
     QPixmap pm;
 	if (pm.load(lastImageFile))
 	{
-        auto mini = pm.scaledToHeight(96);
-		auto item = new QListWidgetItem(QIcon(mini), QString());
-        item->setSizeHint(QSize(mini.width(), 96));
-        imageList->setIconSize(QSize(mini.width(), 96));
-        item->setToolTip(lastImageFile);
-        imageList->addItem(item);
-        imageList->scrollToItem(item);
+//        auto mini = pm.scaledToHeight(96);
+//        auto item = new QListWidgetItem(QIcon(mini), QString());
+//        item->setSizeHint(QSize(mini.width(), 96));
+//        imageList->setIconSize(QSize(mini.width(), 96));
+//        item->setToolTip(lastImageFile);
+//        imageList->addItem(item);
+//        imageList->select(item);
 		imageOut->setPixmap(pm);
 	}
 	else
 	{
 		imageOut->setText(tr("Failed to load image %1").arg(lastImageFile));
 	}
-	lastImageFile.clear();
+
+    lastImageFile.clear();
 }
 
 void MainWindow::resizeEvent(QResizeEvent *evt)

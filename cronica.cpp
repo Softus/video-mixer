@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
     app.setOrganizationName("irk-dc");
     app.setApplicationName("cronica");
     app.setApplicationVersion("1.0");
-	app.setWindowIcon(QIcon(":/buttons/cronica"));
+    app.setWindowIcon(QIcon(":/buttons/cronica"));
 
     // GStreamer
     //
@@ -22,8 +22,9 @@ int main(int argc, char *argv[])
     // Translations
     //
     QTranslator  translator;
-
-    if (translator.load(app.applicationFilePath() + "_" + QLocale::system().name())) {
+//    qDebug() << app.applicationFilePath() + "_" + QLocale::system().name();
+    if (translator.load(app.applicationFilePath() + "_" + QLocale::system().name()))
+    {
         app.installTranslator(&translator);
     }
 
