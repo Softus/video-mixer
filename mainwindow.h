@@ -5,6 +5,7 @@
 
 #include <QGst/Message>
 #include <QGst/Pipeline>
+#include <QGst/Pad>
 #include <QGst/Buffer>
 #include <QGst/Ui/VideoWidget>
 
@@ -60,6 +61,7 @@ class MainWindow : public QWidget
 
     QGst::PipelinePtr createPipeline();
     void onBusMessage(const QGst::MessagePtr & message);
+    void onImageValveHandoff(const QGst::BufferPtr&);
 
 public:
     explicit MainWindow(QWidget *parent = 0);

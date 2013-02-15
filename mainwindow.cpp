@@ -101,9 +101,10 @@ MainWindow::MainWindow(QWidget *parent) :
 	imageList->setViewMode(QListView::IconMode);
 	imageList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	imageList->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	imageList->setIconSize(QSize(96,96));
-	imageList->setMaximumHeight(1);
-	imageList->setMovement(QListView::Static);
+    imageList->setMinimumHeight(96);
+    imageList->setMaximumHeight(96);
+    imageList->setMovement(QListView::Static);
+    imageList->setWrapping(false);
 
     auto mainLayout = new QVBoxLayout();
     mainLayout->addLayout(buttonsLayout);
@@ -148,11 +149,11 @@ QGst::PipelinePtr MainWindow::createPipeline()
     const QString pipeTemplate = settings.value("pipeline", "%1 ! tee name=splitter"
 		" ! queue ! %2 splitter."
 		" ! valve name=videovalve ! queue ! %3 ! filesink name=videosink splitter."
-		" ! valve name=imagevalve ! queue ! %4 ! multifilesink name=imagesink  post-messages=true splitter."
+        " ! identity name=imagevalve signal-handoffs=true ! %4 ! multifilesink name=imagesink  post-messages=true splitter."
 		).toString();
     const QString srcDef = settings.value("src", "autovideosrc").toString();
     const QString displaySinkDef = settings.value("display-sink", "autoconvert ! autovideosink").toString();
-    const QString videoSinkDef   = settings.value("video-sink",  "mpeg2enc ! mpegtsmux").toString();
+    const QString videoSinkDef   = settings.value("video-sink",  "ffenc_mpeg2video ! mpegtsmux").toString();
     const QString imageSinkDef   = settings.value("image-sink",  "videorate ! capsfilter caps=video/x-raw-yuv,framerate=1/3 ! ffmpegcolorspace ! pngenc snapshot=false").toString();
 
     const QString pipe = pipeTemplate.arg(srcDef, displaySinkDef, videoSinkDef, imageSinkDef);
@@ -185,9 +186,22 @@ QGst::PipelinePtr MainWindow::createPipeline()
 			error(tr("The pipeline does not have all required elements"));
 			pl.clear();
 		}
+        else
+        {
+            QGlib::connect(imageValve, "handoff", this, &MainWindow::onImageValveHandoff);
+
+        }
     }
 
 	return pl;
+}
+
+void MainWindow::onImageValveHandoff(const QGst::BufferPtr&)
+{
+    qCritical() << "handoff";
+    static int a = 0;
+    if (!a++) return;
+    imageValve->setProperty("drop-probability", 1.0);
 }
 
 void MainWindow::error(const QString& msg)
@@ -208,7 +222,7 @@ void MainWindow::onBusMessage(const QGst::MessagePtr & message)
             if (m->newState() == QGst::StatePaused)
             {
                 //videoValve->setProperty("drop", 1);
-                //imageValve->setProperty("drop", 1);
+                //imageValve->setProperty("drop-probability", 1);
                 pipeline->setState(QGst::StatePlaying);
 
                 //Dump(pipeline);
@@ -233,6 +247,7 @@ void MainWindow::onBusMessage(const QGst::MessagePtr & message)
         break;
     case QGst::MessageNewClock:
     case QGst::MessageStreamStatus:
+    case QGst::MessageQos:
         break;
     case QGst::MessageElement:
 		if (message->source() == imageSink)
@@ -241,7 +256,7 @@ void MainWindow::onBusMessage(const QGst::MessagePtr & message)
             const QGst::StructurePtr s = m->internalStructure();
             if (s && s->name() == "GstMultiFileSink")
             {
-                imageValve->setProperty("drop", 1);
+                imageValve->setProperty("drop-probability", 1.0);
 				lastImageFile = s->value("filename").toString();
 				imageTimer->start(500);
             }
@@ -277,7 +292,7 @@ void MainWindow::onStartClick()
         const QString currentImageFileName(now.toString(imageFileName));
         QDir::current().mkpath(QFileInfo(currentImageFileName).absolutePath());
         imageSink->setProperty("location", currentImageFileName);
-        imageValve->setProperty("drop", 0);
+        imageValve->setProperty("drop-probability", 0.0);
     }
     else
     {
@@ -292,7 +307,7 @@ void MainWindow::onStartClick()
 
 void MainWindow::onSnapshotClick()
 {
-    imageValve->setProperty("drop", 0);
+    imageValve->setProperty("drop-probability", 0.0);
 }
 
 void MainWindow::onRecordClick()
@@ -322,12 +337,13 @@ void MainWindow::onUpdateImage()
     QPixmap pm;
 	if (pm.load(lastImageFile))
 	{
-		auto mini = pm.scaledToWidth(96);
+        auto mini = pm.scaledToHeight(96);
 		auto item = new QListWidgetItem(QIcon(mini), QString());
-		item->setToolTip(lastImageFile);
-		imageList->insertItem(0, item);
-		imageList->setMaximumHeight(mini.height());
-		imageList->setMinimumHeight(mini.height());
+        item->setSizeHint(QSize(mini.width(), 96));
+        imageList->setIconSize(QSize(mini.width(), 96));
+        item->setToolTip(lastImageFile);
+        imageList->addItem(item);
+        imageList->scrollToItem(item);
 		imageOut->setPixmap(pm);
 	}
 	else

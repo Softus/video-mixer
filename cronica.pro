@@ -11,7 +11,7 @@ win32 {
     LIBS += c:/usr/lib/*.lib
 }
 
-unux {
+unix {
     CONFIG += link_pkgconfig
     PKGCONFIG += QtGStreamer-0.10 QtGStreamerUi-0.10
     QMAKE_CXXFLAGS += -std=c++11
