@@ -4,17 +4,25 @@
 #include <QWidget>
 #include <QPushButton>
 
+#include <QGst/Message>
+#include <QGst/Pipeline>
+#include <QGst/Ui/VideoWidget>
+
 class MainWindow : public QWidget
 {
     bool recordAll;
     bool running;
     bool recording;
 
+    QGst::PipelinePtr pipeline;
+
     QPushButton* btnRecordAll;
     QPushButton* btnStart;
     QPushButton* btnRecord;
+    QGst::Ui::VideoWidget* videoOut;
 
     QPushButton* createButton(const char *slot);
+    void onBusMessage(const QGst::MessagePtr & message);
 
     Q_OBJECT
     

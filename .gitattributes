@@ -1,4 +1,5 @@
 * text=auto !eol
+/cronica.pro -text
 /cronica_ru.ts -text
 /main.cpp -text
 /mainwindow.cpp -text
