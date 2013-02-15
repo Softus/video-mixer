@@ -40,7 +40,7 @@ class MainWindow : public QWidget
 	QTimer*      imageTimer;
 	QString      lastImageFile;
 	QListWidget* imageList;
-    QGst::Ui::VideoWidget* videoOut;
+    QGst::Ui::VideoWidget* displayWidget;
 
     QPushButton* createButton(const char *slot);
     void updateStartButton();
@@ -50,6 +50,8 @@ class MainWindow : public QWidget
 	//
     QGst::PipelinePtr pipeline;
     QGst::ElementPtr splitter;
+
+    QGst::ElementPtr displaySink;
 
     QGst::ElementPtr imageValve;
     QGst::ElementPtr imageSink;
@@ -61,7 +63,7 @@ class MainWindow : public QWidget
 
     QGst::PipelinePtr createPipeline();
     void onBusMessage(const QGst::MessagePtr & message);
-    void onImageValveHandoff(const QGst::BufferPtr&);
+    void onTestHandoff(const QGst::BufferPtr&);
 
 public:
     explicit MainWindow(QWidget *parent = 0);

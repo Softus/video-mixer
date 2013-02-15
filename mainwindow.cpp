@@ -11,7 +11,6 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QTimer>
-#include <qscrollbar.h>
 
 #include <QGlib/Type>
 #include <QGlib/Connect>
@@ -73,8 +72,7 @@ MainWindow::MainWindow(QWidget *parent) :
     buttonsLayout->addWidget(btnSnapshot);
 
     btnRecord = createButton(SLOT(onRecordClick()));
-    // TODO: implement fragment record
-    //buttonsLayout->addWidget(btnRecord);
+    buttonsLayout->addWidget(btnRecord);
 
     //buttonsLayout->addSpacing(200);
     btnRecordAll = createButton(SLOT(onRecordAllClick()));
@@ -87,14 +85,14 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	outputLayout = new QBoxLayout(bestDirection(size()));
 
-    videoOut = new QGst::Ui::VideoWidget();
-	videoOut->setMinimumSize(160, 120);
-    outputLayout->addWidget(videoOut);
+    displayWidget = new QGst::Ui::VideoWidget();
+    displayWidget->setMinimumSize(320, 240);
+    outputLayout->addWidget(displayWidget);
 
     imageOut = new QLabel(tr("A bit of useful information shown here.\n"
 		"The end user should see this message and be able to use the app without learning."));
 	imageOut->setAlignment(Qt::AlignCenter);
-	imageOut->setMinimumSize(160, 120);
+    imageOut->setMinimumSize(320, 240);
     outputLayout->addWidget(imageOut);
 
 	imageList = new QListWidget();
@@ -112,7 +110,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	mainLayout->addWidget(imageList);
 
     setLayout(mainLayout);
-    videoOut->watchPipeline(pipeline);
+    displayWidget->watchPipeline(pipeline);
 
 	btnStart->setEnabled(pipeline);
     updateStartButton();
@@ -144,17 +142,17 @@ QGst::PipelinePtr MainWindow::createPipeline()
 	QGst::PipelinePtr pl;
 
     imageFileName = settings.value("image-file", "'/video/'yyyy-MM-dd/HH-mm'/image%03d.png'").toString();
-    videoFileName = settings.value("video-file", "'/video/'yyyy-MM-dd/HH-mm'/out.mpg'").toString();
+    videoFileName = settings.value("video-file", "'/video/'yyyy-MM-dd/HH-mm'/video%03d.mpg'").toString();
 
     const QString pipeTemplate = settings.value("pipeline", "%1 ! tee name=splitter"
-		" ! queue ! %2 splitter."
-		" ! valve name=videovalve ! queue ! %3 ! filesink name=videosink splitter."
-        " ! identity name=imagevalve signal-handoffs=true ! %4 ! multifilesink name=imagesink  post-messages=true splitter."
+        " ! %2 splitter."
+        " ! valve name=videovalve ! %3 ! multifilesink name=videosink next-file=1 splitter."
+        " ! valve name=imagevalve ! %4 ! multifilesink name=imagesink post-messages=1 splitter."
 		).toString();
     const QString srcDef = settings.value("src", "autovideosrc").toString();
-    const QString displaySinkDef = settings.value("display-sink", "autoconvert ! autovideosink").toString();
-    const QString videoSinkDef   = settings.value("video-sink",  "ffenc_mpeg2video ! mpegtsmux").toString();
-    const QString imageSinkDef   = settings.value("image-sink",  "videorate ! capsfilter caps=video/x-raw-yuv,framerate=1/3 ! ffmpegcolorspace ! pngenc snapshot=false").toString();
+    const QString displaySinkDef = settings.value("display-sink", "autoconvert ! autovideosink name=displaysink").toString();
+    const QString videoSinkDef   = settings.value("video-sink",  "ffenc_mpeg2video ! identity name=test ! mpegtsmux").toString();
+    const QString imageSinkDef   = settings.value("image-sink",  "videorate skip-to-first=1 drop-only=1 ! capsfilter caps=video/x-raw-yuv,framerate=1/3 ! ffmpegcolorspace ! pngenc snapshot=0").toString();
 
     const QString pipe = pipeTemplate.arg(srcDef, displaySinkDef, videoSinkDef, imageSinkDef);
     qCritical() << pipe;
@@ -174,6 +172,7 @@ QGst::PipelinePtr MainWindow::createPipeline()
         QGlib::connect(pl->bus(), "message", this, &MainWindow::onBusMessage);
         pl->bus()->addSignalWatch();
 
+        displaySink = pl->getElementByName("displaysink");
         videoValve = pl->getElementByName("videovalve");
         videoSink  = pl->getElementByName("videosink");
         imageValve = pl->getElementByName("imagevalve");
@@ -181,27 +180,21 @@ QGst::PipelinePtr MainWindow::createPipeline()
 
         splitter = pl->getElementByName("splitter");
 
-		if (!videoValve || !videoSink || !imageValve || !imageSink || !splitter)
+        if (!displaySink || !videoValve || !videoSink || !imageValve || !imageSink || !splitter)
 		{
 			error(tr("The pipeline does not have all required elements"));
 			pl.clear();
 		}
-        else
-        {
-            QGlib::connect(imageValve, "handoff", this, &MainWindow::onImageValveHandoff);
 
-        }
+        QGlib::connect(pl->getElementByName("test"), "handoff", this, &MainWindow::onTestHandoff);
     }
 
 	return pl;
 }
 
-void MainWindow::onImageValveHandoff(const QGst::BufferPtr&)
+void MainWindow::onTestHandoff(const QGst::BufferPtr& buf)
 {
-    qCritical() << "handoff";
-    static int a = 0;
-    if (!a++) return;
-    imageValve->setProperty("drop-probability", 1.0);
+    qCritical() << "handoff " << buf->size() << " " << buf->timeStamp() << " " << buf->flags();
 }
 
 void MainWindow::error(const QString& msg)
@@ -213,52 +206,64 @@ void MainWindow::error(const QString& msg)
 
 void MainWindow::onBusMessage(const QGst::MessagePtr & message)
 {
+//    qCritical() << message->typeName() << " " << message->source()->property("name").toString();
+
     switch (message->type())
     {
     case QGst::MessageStateChanged:
-        if (message->source() == pipeline)
         {
             QGst::StateChangedMessagePtr m = message.staticCast<QGst::StateChangedMessage>();
-            if (m->newState() == QGst::StatePaused)
-            {
-                //videoValve->setProperty("drop", 1);
-                //imageValve->setProperty("drop-probability", 1);
-                pipeline->setState(QGst::StatePlaying);
+            //qCritical() << m->oldState() << " => " << m->newState();
 
-                //Dump(pipeline);
+            // The pipeline will not start by itself since 2 of 3 renders are in NULL state
+            // We need to kick off the display renderer to start the capture
+            //
+            if (m->oldState() == QGst::StateReady && m->newState() == QGst::StatePaused)
+            {
+                message->source().staticCast<QGst::Element>()->setState(QGst::StatePlaying);
             }
-			else if (m->newState() == QGst::StatePlaying)
-			{
-				// At this time the video output finally has a sink, so set it up now
-				//
-				auto videoSink = videoOut->videoSink();
-				if (videoSink)
-				{
-					videoSink->setProperty("force-aspect-ratio", TRUE);
-				}
-			}
+            else if (m->newState() == QGst::StateNull && message->source() == pipeline)
+            {
+                // The display area of the main window is filled with some garbage.
+                // We need to redraw the contents.
+                //
+                update();
+            }
         }
-        break;
-    case QGst::MessageEos:
-        qCritical() << "EOS???";
         break;
     case QGst::MessageError:
         error(message.staticCast<QGst::ErrorMessage>()->error());
         break;
+    case QGst::MessageEos:
     case QGst::MessageNewClock:
     case QGst::MessageStreamStatus:
     case QGst::MessageQos:
+    case QGst::MessageAsyncDone:
         break;
     case QGst::MessageElement:
-		if (message->source() == imageSink)
         {
             QGst::ElementMessagePtr m = message.staticCast<QGst::ElementMessage>();
             const QGst::StructurePtr s = m->internalStructure();
-            if (s && s->name() == "GstMultiFileSink")
+            if (!s)
             {
-                imageValve->setProperty("drop-probability", 1.0);
-				lastImageFile = s->value("filename").toString();
-				imageTimer->start(500);
+                qCritical() << "Got empty QGst::MessageElement";
+            }
+            else if (s->name() == "GstMultiFileSink" && message->source() == imageSink)
+            {
+                imageValve->setProperty("drop", 1);
+                lastImageFile = s->value("filename").toString();
+                imageTimer->start(500);
+            }
+            else if (s->name() == "prepare-xwindow-id")
+            {
+                // At this time the video output finally has a sink, so set it up now
+                //
+                auto videoSink = displayWidget->videoSink();
+                if (videoSink)
+                {
+                    videoSink->setProperty("force-aspect-ratio", TRUE);
+                    displayWidget->update();
+                }
             }
             else
             {
@@ -266,8 +271,6 @@ void MainWindow::onBusMessage(const QGst::MessagePtr & message)
             }
         }
         break;
-    case QGst::MessageAsyncDone:
-        qCritical() << "MessageAsyncDone";
         break;
     default:
         qCritical() << message->type();
@@ -287,12 +290,12 @@ void MainWindow::onStartClick()
         const QString currentVideoFileName(now.toString(videoFileName));
         QDir::current().mkpath(QFileInfo(currentVideoFileName).absolutePath());
         videoSink->setProperty("location", currentVideoFileName);
-        videoValve->setProperty("drop", 0);
+        videoValve->setProperty("drop", 1);
 
         const QString currentImageFileName(now.toString(imageFileName));
         QDir::current().mkpath(QFileInfo(currentImageFileName).absolutePath());
         imageSink->setProperty("location", currentImageFileName);
-        imageValve->setProperty("drop-probability", 0.0);
+        imageValve->setProperty("drop", 1);
     }
     else
     {
@@ -307,7 +310,7 @@ void MainWindow::onStartClick()
 
 void MainWindow::onSnapshotClick()
 {
-    imageValve->setProperty("drop-probability", 0.0);
+    imageValve->setProperty("drop", 0);
 }
 
 void MainWindow::onRecordClick()
@@ -316,6 +319,7 @@ void MainWindow::onRecordClick()
     updateRecordButton();
 
     videoValve->setProperty("drop", !recording);
+    videoSink->setProperty("index", videoSink->property("index").toInt() + 1);
 }
 
 void MainWindow::onRecordAllClick()
@@ -368,7 +372,7 @@ void MainWindow::updateStartButton()
 
     btnRecord->setEnabled(running);
     btnSnapshot->setEnabled(running);
-	videoOut->setVisible(running);
+    displayWidget->setVisible(running);
 }
 
 void MainWindow::updateRecordButton()
