@@ -18,33 +18,6 @@ class QListWidget;
 class QLabel;
 class QTimer;
 
-
-#include <QGst/Utils/ApplicationSink>
-#include <QGst/Utils/ApplicationSource>
-
-class MySink : public QGst::Utils::ApplicationSink
-{
-public:
-    MySink(QGst::Utils::ApplicationSource *src)
-        : QGst::Utils::ApplicationSink(), m_src(src) {}
-
-protected:
-    virtual void eos()
-    {
-        m_src->endOfStream();
-    }
-
-    virtual QGst::FlowReturn newBuffer()
-    {
-        m_src->pushBuffer(pullBuffer());
-        return QGst::FlowOk;
-    }
-
-private:
-    QGst::Utils::ApplicationSource *m_src;
-};
-
-
 class MainWindow : public QWidget
 {
     Q_OBJECT
@@ -84,25 +57,24 @@ class MainWindow : public QWidget
     QGst::ElementPtr imageSink;
     QString imageFileName;
 
-    QGst::ElementPtr videoValve;
+    QGst::ElementPtr clipValve;
+    QGst::ElementPtr clipSink;
+    QString clipFileName;
+
     QGst::ElementPtr videoSink;
     QString videoFileName;
 
     QGst::PipelinePtr createPipeline();
     void onBusMessage(const QGst::MessagePtr & message);
-    void onTestHandoff(const QGst::BufferPtr&);
-
-
-    QGst::Utils::ApplicationSource m_src;
-    MySink m_sink;
-    QGst::PipelinePtr videoPipeline;
+//    void onTestHandoff(const QGst::BufferPtr&);
+    void error(const QGlib::ObjectPtr& obj, const QGlib::Error& ex);
+    void restartElement(const char* name);
 
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
 	void error(const QString& msg);
-	void error(const QGlib::ObjectPtr& obj, const QGlib::Error& ex);
 
 protected:
     // Event handlers

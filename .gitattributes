@@ -8,7 +8,6 @@
 /cronica_ru.ts -text
 /mainwindow.cpp -text
 /mainwindow.h -text
-/mainwindow.ui -text
 pixmaps/add.png -text
 pixmaps/camera.png -text
 pixmaps/cronica.png -text
