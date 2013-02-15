@@ -1,0 +1,10 @@
+<RCC>
+    <qresource prefix="/buttons">
+        <file alias="record_on">pixmaps/record_on.png</file>
+        <file alias="stop">pixmaps/stop.png</file>
+        <file alias="add">pixmaps/add.png</file>
+        <file alias="camera">pixmaps/camera.png</file>
+        <file alias="pause">pixmaps/pause.png</file>
+        <file alias="play">pixmaps/play.png</file>
+    </qresource>
+</RCC>

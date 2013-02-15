@@ -1,5 +1,15 @@
 * text=auto !eol
-part1/Part1.pro -text
-part1/main.cpp -text
-part1/vlc_on_qt.cpp -text
-part1/vlc_on_qt.h -text
+/cronica_ru.ts -text
+/main.cpp -text
+/mainwindow.cpp -text
+/mainwindow.h -text
+/mainwindow.ui -text
+pixmaps/1record_on.png -text
+pixmaps/add.png -text
+pixmaps/camera.png -text
+pixmaps/pause.png -text
+pixmaps/play.png -text
+pixmaps/record_on.png -text
+pixmaps/stop.png -text
+/res.qrc -text
+/сronica.pro -text
