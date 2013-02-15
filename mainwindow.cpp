@@ -149,13 +149,14 @@ QGst::PipelinePtr MainWindow::createPipeline()
 
     const QString pipeTemplate = settings.value("pipeline", "%1 ! tee name=splitter"
         " ! %2 splitter."
-        " ! valve name=videovalve ! %3 ! multifilesink name=videosink next-file=1 splitter."
+        " ! valve name=videovalve ! %3 ! multifilesink name=videosink next-file=4 splitter."
         " ! valve name=imagevalve ! %4 ! multifilesink name=imagesink post-messages=1 splitter."
 		).toString();
-    const QString srcDef = settings.value("src", "autovideosrc ! queue").toString();
-    const QString displaySinkDef = settings.value("display-sink", "autoconvert ! timeoverlay name=displayoverlay ! autovideosink name=displaysink").toString();
-    const QString videoSinkDef   = settings.value("video-sink",  "ffenc_mpeg2video ! mpegtsmux").toString();
-    const QString imageSinkDef   = settings.value("image-sink",  "videorate skip-to-first=1 drop-only=1 ! capsfilter caps=video/x-raw-yuv,framerate=1/1 ! ffmpegcolorspace ! clockoverlay name=imageoverlay time-format=\"%Y/%m/%d %H:%M:%S\" ! pngenc snapshot=0").toString();
+    const QString rtpClientsDef = settings.value("rtp-clients", "127.0.0.1:5000").toString();
+    const QString srcDef = settings.value("src", "autovideosrc").toString();
+    const QString displaySinkDef = settings.value("display-sink", "ffmpegcolorspace ! timeoverlay name=displayoverlay ! autovideosink name=displaysink").toString();
+    const QString videoSinkDef   = settings.value("video-sink",  "queue ! videoscale ! video/x-raw-yuv,width=160,height=120 ! x264enc tune=zerolatency bitrate=1000 byte-stream=1 ! tee name=videosplitter ! rtph264pay ! udpsink clients=%1 videosplitter. queue ! matroskamux").toString().arg(rtpClientsDef);
+    const QString imageSinkDef   = settings.value("image-sink",  "videorate drop-only=1 ! capsfilter caps=video/x-raw-yuv,framerate=1/1 ! ffmpegcolorspace ! pngenc snapshot=0").toString();
 
     const QString pipe = pipeTemplate.arg(srcDef, displaySinkDef, videoSinkDef, imageSinkDef);
     qCritical() << pipe;
@@ -237,6 +238,12 @@ void MainWindow::onBusMessage(const QGst::MessagePtr & message)
     case QGst::MessageError:
         error(message.staticCast<QGst::ErrorMessage>()->error());
         break;
+    case QGst::MessageInfo:
+        qDebug() << message.staticCast<QGst::InfoMessage>()->error();
+        break;
+    case QGst::MessageWarning:
+        qWarning() << message.staticCast<QGst::WarningMessage>()->error();
+        break;
     case QGst::MessageEos:
     case QGst::MessageNewClock:
     case QGst::MessageStreamStatus:
@@ -253,17 +260,18 @@ void MainWindow::onBusMessage(const QGst::MessagePtr & message)
             }
             else if (s->name() == "GstMultiFileSink" && message->source() == imageSink)
             {
-                imageValve->setProperty("drop", 1);
                 const QString fileName = s->value("filename").toString();
+
+                // We want to get more then one image for the snapshot.
+                // And drop all of them except the last one.
+                //
                 if (!lastImageFile.isEmpty())
                 {
-                    // We got more then one file for the snapshot.
-                    // We should drop all of them except the last one.
-                    //
                     QFile::remove(lastImageFile);
+                    imageValve->setProperty("drop", 1);
                 }
                 lastImageFile = fileName;
-                imageTimer->start(200);
+                imageTimer->start(500);
             }
             else if (s->name() == "prepare-xwindow-id")
             {
@@ -326,6 +334,7 @@ void MainWindow::onSnapshotClick()
     imageValve->setProperty("drop", 0);
     //
     // Once an image will be ready, the valve will be turned off again.
+    btnSnapshot->setEnabled(false);
 }
 
 void MainWindow::onRecordClick()
@@ -389,7 +398,9 @@ void MainWindow::onUpdateImage()
 		imageOut->setText(tr("Failed to load image %1").arg(lastImageFile));
 	}
 
+    imageValve->setProperty("drop", 1);
     lastImageFile.clear();
+    btnSnapshot->setEnabled(running);
 }
 
 void MainWindow::resizeEvent(QResizeEvent *evt)

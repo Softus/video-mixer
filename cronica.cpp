@@ -31,7 +31,11 @@ int main(int argc, char *argv[])
     // Start the UI
     //
     MainWindow wnd;
-    wnd.show();
+#ifdef QT_DEBUG
+    wnd.showNormal();
+#else
+    wnd.showFullScreen();
+#endif
 
     int errCode = app.exec();
     QGst::cleanup();
