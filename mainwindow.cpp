@@ -11,6 +11,8 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QTimer>
+#include <QMenu>
+#include <QMenuBar>
 
 #include <QGlib/Type>
 #include <QGlib/Connect>
@@ -84,8 +86,6 @@ MainWindow::MainWindow(QWidget *parent) :
     running(false),
     recording(false)
 {
-    pipeline = createPipeline();
-
 	imageTimer = new QTimer(this);
 	imageTimer->setSingleShot(true);
 	connect(imageTimer, SIGNAL(timeout()), this, SLOT(onUpdateImage()));
@@ -136,14 +136,13 @@ MainWindow::MainWindow(QWidget *parent) :
 //    imageList->setWrapping(false);
 
     auto mainLayout = new QVBoxLayout();
+	mainLayout->setMenuBar(createMenu());
     mainLayout->addLayout(buttonsLayout);
     mainLayout->addLayout(outputLayout);
 //    mainLayout->addWidget(imageList);
 
     setLayout(mainLayout);
-    displayWidget->watchPipeline(pipeline);
 
-	btnStart->setEnabled(pipeline);
     updateStartButton();
     updateRecordButton();
 }
@@ -152,8 +151,42 @@ MainWindow::~MainWindow()
 {
 	if (pipeline)
 	{
-		pipeline->setState(QGst::StateNull);
+		releasePipeline();
 	}
+}
+
+QMenuBar* MainWindow::createMenu()
+{
+    QSettings settings;
+	const QString profile = settings.value("profile").toString();
+
+	QMenuBar* mnuBar = new QMenuBar();
+    QMenu*   mnu   = new QMenu(tr("&Menu"));
+
+    mnu->addAction(tr("&About Qt"), qApp, SLOT(aboutQt()));
+    mnu->addSeparator();
+
+    QMenu* mnuSubMenu = new QMenu(tr("&Profiles"), mnu);
+    mnu->addMenu(mnuSubMenu);
+	auto defaultProfileAction = mnuSubMenu->addAction(tr("&Default"), this, SLOT(setProfile()), Qt::CTRL | Qt::Key_0);
+	mnuSubMenu->setDefaultAction(defaultProfileAction);
+
+	int idx = 0;
+	Q_FOREACH(auto grp, settings.childGroups())
+	{
+		auto shortcut = ++idx < 10? (Qt::CTRL | Qt::Key_0 + idx): idx < 20? (Qt::CTRL | Qt::SHIFT | Qt::Key_0 + idx - 10): 0;
+		auto profileAction = mnuSubMenu->addAction(grp, this, SLOT(setProfile()), shortcut);
+		profileAction->setData(grp);
+		if (grp == profile)
+			mnuSubMenu->setDefaultAction(profileAction);
+	}
+
+    mnu->addSeparator();
+	mnu->addAction("&Exit", qApp, SLOT(quit()), Qt::ALT | Qt::Key_F4);
+
+    mnuBar->addMenu(mnu);
+    mnuBar->show();
+	return mnuBar;
 }
 
 QPushButton* MainWindow::createButton(const char *slot)
@@ -167,11 +200,19 @@ QPushButton* MainWindow::createButton(const char *slot)
     return btn;
 }
 
+void MainWindow::error(const QString& msg)
+{
+	qCritical() << msg;
+	QMessageBox msgBox(QMessageBox::Critical, windowTitle(), msg, QMessageBox::Ok, this);
+	msgBox.exec();
+}
+
 QGst::PipelinePtr MainWindow::createPipeline()
 {
     QSettings settings;
 	QGst::PipelinePtr pl;
 
+	settings.beginGroup(settings.value("profile").toString());
     imageFileName = settings.value("image-file", "'/video/'yyyy-MM-dd/HH-mm'/image%03d.png'").toString();
      clipFileName = settings.value("clip-file",  "'/video/'yyyy-MM-dd/HH-mm'/clip%03d.mpg'").toString();
     videoFileName = settings.value("video-file", "'/video/'yyyy-MM-dd/HH-mm'/video.mpg'").toString();
@@ -187,10 +228,12 @@ QGst::PipelinePtr MainWindow::createPipeline()
     const QString srcDef = settings.value("src", "autovideosrc").toString();
     const QString displaySinkDef = settings.value("display-sink", "ffmpegcolorspace ! timeoverlay name=displayoverlay ! autovideosink name=displaysink sync=0").toString();
     const QString videoEncoderDef   = settings.value("video-encoder",  "timeoverlay ! ffmpegcolorspace ! x264enc tune=zerolatency bitrate=1000 byte-stream=1").toString();
-    const QString imageEncoderDef   = settings.value("image-encoder",  "videorate drop-only=1 ! video/x-raw-yuv,framerate=1/1 ! ffmpegcolorspace ! clockoverlay ! pngenc snapshot=0").toString();
+    const QString imageEncoderDef   = settings.value("image-encoder",  "videorate drop-only=1 ! video/x-raw-yuv,framerate=1/1 ! clockoverlay ! ffmpegcolorspace ! pngenc snapshot=0").toString();
 
     const QString pipe = pipeTemplate.arg(srcDef, displaySinkDef, videoEncoderDef, imageEncoderDef);
     qCritical() << pipe;
+
+	settings.endGroup();
 
 	try
 	{
@@ -206,6 +249,7 @@ QGst::PipelinePtr MainWindow::createPipeline()
     {
         QGlib::connect(pl->bus(), "message", this, &MainWindow::onBusMessage);
         pl->bus()->addSignalWatch();
+		displayWidget->watchPipeline(pl);
 
         displaySink = pl->getElementByName("displaysink");
 		if (!displaySink)
@@ -237,17 +281,33 @@ QGst::PipelinePtr MainWindow::createPipeline()
 	return pl;
 }
 
+void MainWindow::releasePipeline()
+{
+	displayWidget->stopPipelineWatch();
+
+	pipeline->setState(QGst::StateNull);
+    pipeline->getState(NULL, NULL, -1);
+
+    displaySink.clear();
+
+    imageValve.clear();
+    imageSink.clear();
+    imageFileName.clear();
+
+    clipValve.clear();
+    clipSink.clear();
+    clipFileName.clear();
+
+    videoSink.clear();
+    videoFileName.clear();
+
+	pipeline.clear();
+}
+
 //void MainWindow::onTestHandoff(const QGst::BufferPtr& buf)
 //{
 //    qDebug() << "handoff " << buf->size() << " " << buf->timeStamp() << " " << buf->flags();
 //}
-
-void MainWindow::error(const QString& msg)
-{
-	qCritical() << msg;
-	QMessageBox msgBox(QMessageBox::Critical, windowTitle(), msg, QMessageBox::Ok, this);
-	msgBox.exec();
-}
 
 void MainWindow::error(const QGlib::ObjectPtr& obj, const QGlib::Error& ex)
 {
@@ -259,14 +319,14 @@ void MainWindow::error(const QGlib::ObjectPtr& obj, const QGlib::Error& ex)
 
 void MainWindow::onBusMessage(const QGst::MessagePtr & message)
 {
-//    qDebug() << message->typeName() << " " << message->source()->property("name").toString();
+    qDebug() << message->typeName() << " " << message->source()->property("name").toString();
 
     switch (message->type())
     {
     case QGst::MessageStateChanged:
         {
             QGst::StateChangedMessagePtr m = message.staticCast<QGst::StateChangedMessage>();
-//            qDebug() << m->oldState() << " => " << m->newState();
+            qDebug() << m->oldState() << " => " << m->newState();
 
             // The pipeline will not start by itself since 2 of 3 renders are in NULL state
             // We need to kick off the display renderer to start the capture
@@ -367,54 +427,64 @@ void MainWindow::restartElement(const char* name)
 void MainWindow::onStartClick()
 {
     running = !running;
-    updateStartButton();
     imageOut->clear();
 
     if (running)
     {
-        const QDateTime now = QDateTime::currentDateTime();
-		if (videoSink)
+	    pipeline = createPipeline();
+		if (pipeline)
 		{
-			const QString currentVideoFileName(now.toString(videoFileName));
-			QDir::current().mkpath(QFileInfo(currentVideoFileName).absolutePath());
-			videoSink->setProperty("location", currentVideoFileName);
+			const QDateTime now = QDateTime::currentDateTime();
+			if (videoSink)
+			{
+				const QString currentVideoFileName(now.toString(videoFileName));
+				QDir::current().mkpath(QFileInfo(currentVideoFileName).absolutePath());
+				videoSink->setProperty("location", currentVideoFileName);
+			}
+
+			if (clipSink)
+			{
+				const QString currentClipFileName(now.toString(clipFileName));
+				QDir::current().mkpath(QFileInfo(currentClipFileName).absolutePath());
+				clipSink->setProperty("location", currentClipFileName);
+				clipSink->setProperty("index", 0);
+			}
+
+			if (imageSink)
+			{
+				const QString currentImageFileName(now.toString(imageFileName));
+				QDir::current().mkpath(QFileInfo(currentImageFileName).absolutePath());
+				imageSink->setProperty("location", currentImageFileName);
+				imageSink->setProperty("index", 0);
+			}
+
+			if (clipValve)
+			{
+				clipValve->setProperty("drop", TRUE);
+			}
+
+			if (imageValve)
+			{
+				imageValve->setProperty("drop", TRUE);
+			}
+
+			pipeline->setState(QGst::StatePaused);
 		}
-
-        if (clipSink)
-        {
-            const QString currentClipFileName(now.toString(clipFileName));
-            QDir::current().mkpath(QFileInfo(currentClipFileName).absolutePath());
-            clipSink->setProperty("location", currentClipFileName);
-            clipSink->setProperty("index", 0);
-        }
-
-		if (imageSink)
+		else
 		{
-			const QString currentImageFileName(now.toString(imageFileName));
-			QDir::current().mkpath(QFileInfo(currentImageFileName).absolutePath());
-			imageSink->setProperty("location", currentImageFileName);
-	        imageSink->setProperty("index", 0);
+			// switch back to false
+			//
+			running = false;
 		}
-
-        if (clipValve)
-        {
-            clipValve->setProperty("drop", TRUE);
-        }
-
-        if (imageValve)
-        {
-			imageValve->setProperty("drop", TRUE);
-        }
     }
     else
     {
         recording = false;
         updateRecordButton();
+		releasePipeline();
     }
 
-    // start/stop the recording
-    //
-    pipeline->setState(running? QGst::StatePaused: QGst::StateNull);
+	updateStartButton();
 }
 
 void MainWindow::onSnapshotClick()
@@ -520,4 +590,11 @@ void MainWindow::updateRecordButton()
     QString strOnOff(recording? tr("Pause"): tr("Record"));
     btnRecord->setIcon(icon);
     btnRecord->setText(strOnOff);
+}
+
+void MainWindow::setProfile()
+{
+	auto action = static_cast<QAction*>(sender());
+	static_cast<QMenu*>(action->parent())->setDefaultAction(action);
+	QSettings().setValue("profile", action->data());
 }

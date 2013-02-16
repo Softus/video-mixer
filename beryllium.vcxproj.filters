@@ -57,7 +57,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="cronica.cpp">
+    <ClCompile Include="beryllium.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="mainwindow.cpp">
@@ -69,7 +69,7 @@
     <ClCompile Include="GeneratedFiles\Release\moc_mainwindow.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\qrc_cronica.cpp">
+    <ClCompile Include="GeneratedFiles\qrc_beryllium.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -79,10 +79,10 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <None Include="cronica_ru.ts">
+    <None Include="beryllium_ru.ts">
       <Filter>Translation Files</Filter>
     </None>
-    <None Include="pixmaps\cronica.png">
+    <None Include="pixmaps\beryllium.png">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
@@ -93,7 +93,7 @@
     <None Include="pixmaps\camera.png">
       <Filter>Resource Files</Filter>
     </None>
-    <CustomBuild Include="cronica.qrc">
+    <CustomBuild Include="beryllium.qrc">
       <Filter>Resource Files</Filter>
     </CustomBuild>
     <None Include="pixmaps\pause.png">

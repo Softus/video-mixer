@@ -1,6 +1,6 @@
 #-------------------------------------------------
 #
-# Project cronica
+# Project beryllium
 #
 #-------------------------------------------------
 
@@ -17,13 +17,13 @@ unix {
     QMAKE_CXXFLAGS += -std=c++11
 }
 
-TARGET   = cronica
+TARGET   = beryllium
 TEMPLATE = app
 
-SOURCES += cronica.cpp mainwindow.cpp
+SOURCES += beryllium.cpp mainwindow.cpp
 HEADERS += mainwindow.h
 
 FORMS   +=
 
-RESOURCES    += cronica.qrc
-TRANSLATIONS += cronica_ru.ts
+RESOURCES    += beryllium.qrc
+TRANSLATIONS += beryllium_ru.ts

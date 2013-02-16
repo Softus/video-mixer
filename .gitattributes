@@ -1,16 +1,16 @@
 * text=auto !eol
-/cronica.cpp -text
-/cronica.pro -text
-/cronica.qrc -text
-/cronica.sln -text
-/cronica.vcxproj -text
-/cronica.vcxproj.filters -text
-/cronica_ru.ts -text
+/beryllium.cpp -text
+/beryllium.pro -text
+/beryllium.qrc -text
+/beryllium.sln -text
+/beryllium.vcxproj -text
+/beryllium.vcxproj.filters -text
+/beryllium_ru.ts -text
 /mainwindow.cpp -text
 /mainwindow.h -text
 pixmaps/add.png -text
+pixmaps/beryllium.png -text
 pixmaps/camera.png -text
-pixmaps/cronica.png -text
 pixmaps/pause.png -text
 pixmaps/play.png -text
 pixmaps/record_on.png -text

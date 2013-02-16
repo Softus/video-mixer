@@ -11,9 +11,9 @@ int main(int argc, char *argv[])
     //
     QApplication app(argc, argv);
     app.setOrganizationName("irk-dc");
-    app.setApplicationName("cronica");
+    app.setApplicationName("beryllium");
     app.setApplicationVersion("1.0");
-    app.setWindowIcon(QIcon(":/buttons/cronica"));
+    app.setWindowIcon(QIcon(":/buttons/beryllium"));
 
     // GStreamer
     //

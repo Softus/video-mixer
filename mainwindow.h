@@ -11,6 +11,7 @@
 
 #include <QGlib/Error>
 
+class QMenuBar;
 class QResizeEvent;
 class QBoxLayout;
 class QPushButton;
@@ -42,6 +43,7 @@ class MainWindow : public QWidget
 //	QListWidget* imageList;
     QGst::Ui::VideoWidget* displayWidget;
 
+	QMenuBar* createMenu();
     QPushButton* createButton(const char *slot);
     void updateStartButton();
     void updateRecordButton();
@@ -49,8 +51,6 @@ class MainWindow : public QWidget
 	// GStreamer pipeline
 	//
     QGst::PipelinePtr pipeline;
-    QGst::ElementPtr splitter;
-
     QGst::ElementPtr displaySink;
 
     QGst::ElementPtr imageValve;
@@ -65,6 +65,8 @@ class MainWindow : public QWidget
     QString videoFileName;
 
     QGst::PipelinePtr createPipeline();
+	void releasePipeline();
+
     void onBusMessage(const QGst::MessagePtr & message);
 //    void onTestHandoff(const QGst::BufferPtr&);
     void error(const QGlib::ObjectPtr& obj, const QGlib::Error& ex);
@@ -87,6 +89,7 @@ private slots:
     void onRecordClick();
     void onRecordAllClick();
 	void onUpdateImage();
+    void setProfile();
 };
 
 #endif // MAINWINDOW_H
