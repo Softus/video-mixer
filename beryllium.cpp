@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
 
     // GStreamer
     //
-    QGst::init();
+    QGst::init(&argc, &argv);
 
     // Translations
     //
@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
 #ifdef QT_DEBUG
     wnd.showNormal();
 #else
-    wnd.showFullScreen();
+    wnd.showMaximized();
 #endif
 
     int errCode = app.exec();

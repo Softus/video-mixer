@@ -25,17 +25,17 @@ class MainWindow : public QWidget
 
 	// State machine
 	//
-	bool recordAll;
     bool running;
     bool recording;
 
 	// UI
 	//
 	QBoxLayout*  outputLayout;
-    QPushButton* btnRecordAll;
+    QLabel*      lblRecordAll;
     QPushButton* btnStart;
     QPushButton* btnRecord;
     QPushButton* btnSnapshot;
+    int          iconSize;
 
     QLabel*      imageOut;
 	QTimer*      imageTimer;
@@ -47,6 +47,7 @@ class MainWindow : public QWidget
     QPushButton* createButton(const char *slot);
     void updateStartButton();
     void updateRecordButton();
+    void updateRecordAll();
 
 	// GStreamer pipeline
 	//
@@ -67,7 +68,10 @@ class MainWindow : public QWidget
     QGst::PipelinePtr createPipeline();
 	void releasePipeline();
 
-    void onBusMessage(const QGst::MessagePtr & message);
+    void onBusMessage(const QGst::MessagePtr& message);
+    void onStateChangedMessage(const QGst::StateChangedMessagePtr& message);
+    void onElementMessage(const QGst::ElementMessagePtr& message);
+
 //    void onTestHandoff(const QGst::BufferPtr&);
     void error(const QGlib::ObjectPtr& obj, const QGlib::Error& ex);
     void restartElement(const char* name);
@@ -87,7 +91,6 @@ private slots:
     void onStartClick();
     void onSnapshotClick();
     void onRecordClick();
-    void onRecordAllClick();
 	void onUpdateImage();
     void setProfile();
 };

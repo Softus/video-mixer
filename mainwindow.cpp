@@ -21,6 +21,8 @@
 #include <QGst/Event>
 #include <QGst/Clock>
 
+#define DEFAULT_ICON_SIZE 96
+
 static inline QBoxLayout::Direction bestDirection(const QSize &s)
 {
 	return s.width() >= s.height()? QBoxLayout::LeftToRight: QBoxLayout::TopToBottom;
@@ -59,7 +61,7 @@ static void Dump(QGst::ElementPtr elm)
 			break;
 		case QGlib::Type::Int64:
 		case QGlib::Type::Uint64:
-	        qDebug() << n << " = " << v.get<qint64>();
+            qDebug() << n << " = " << v.get<qint64>();
 			break;
 		default:
 	        qDebug() << n << " = " << v.get<QString>();
@@ -82,11 +84,14 @@ static void Dump(QGst::ElementPtr elm)
 
 MainWindow::MainWindow(QWidget *parent) :
     QWidget(parent),
-    recordAll(false),
     running(false),
-    recording(false)
+    recording(false),
+    iconSize(DEFAULT_ICON_SIZE)
 {
-	imageTimer = new QTimer(this);
+    QSettings settings;
+    iconSize = settings.value("icon-size", iconSize).toInt();
+
+    imageTimer = new QTimer(this);
 	imageTimer->setSingleShot(true);
 	connect(imageTimer, SIGNAL(timeout()), this, SLOT(onUpdateImage()));
 
@@ -103,14 +108,9 @@ MainWindow::MainWindow(QWidget *parent) :
     btnRecord = createButton(SLOT(onRecordClick()));
     buttonsLayout->addWidget(btnRecord);
 
-    //buttonsLayout->addSpacing(200);
-    btnRecordAll = createButton(SLOT(onRecordAllClick()));
-
-    btnRecordAll->setFlat(true);
-    btnRecordAll->setFocusPolicy(Qt::NoFocus);
-    onRecordAllClick();
-    // TODO: implement record all
-    //buttonsLayout->addWidget(btnRecordAll);
+    lblRecordAll = new QLabel();
+    lblRecordAll->setMaximumHeight(iconSize + 8);
+    buttonsLayout->addWidget(lblRecordAll, 0, Qt::AlignRight);
 
 	outputLayout = new QBoxLayout(bestDirection(size()));
 
@@ -118,8 +118,8 @@ MainWindow::MainWindow(QWidget *parent) :
     displayWidget->setMinimumSize(320, 240);
     outputLayout->addWidget(displayWidget);
 
-    imageOut = new QLabel(tr("A bit of useful information shown here.\n"
-		"The end user should see this message and be able to use the app without learning."));
+    imageOut = new QLabel(tr("To start an examination press \"Start\" button.\n\n"
+        "During the examination you can take snapshots and save video clips."));
 	imageOut->setAlignment(Qt::AlignCenter);
     imageOut->setMinimumSize(320, 240);
     outputLayout->addWidget(imageOut);
@@ -130,8 +130,8 @@ MainWindow::MainWindow(QWidget *parent) :
 //    imageList->setViewMode(QListView::IconMode);
 //    imageList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 //    imageList->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-//    imageList->setMinimumHeight(96);
-//    imageList->setMaximumHeight(96);
+//    imageList->setMinimumHeight(iconSize);
+//    imageList->setMaximumHeight(iconSize);
 //    imageList->setMovement(QListView::Static);
 //    imageList->setWrapping(false);
 
@@ -145,6 +145,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     updateStartButton();
     updateRecordButton();
+    updateRecordAll();
+
+    QString profile = settings.value("profile").toString();
+    setWindowTitle(QString().append(qApp->applicationName()).append(" - ").append(profile.isEmpty()? tr("Default"): profile));
 }
 
 MainWindow::~MainWindow()
@@ -168,21 +172,26 @@ QMenuBar* MainWindow::createMenu()
 
     QMenu* mnuSubMenu = new QMenu(tr("&Profiles"), mnu);
     mnu->addMenu(mnuSubMenu);
+    auto profileGroup = new QActionGroup(mnuSubMenu);
+
 	auto defaultProfileAction = mnuSubMenu->addAction(tr("&Default"), this, SLOT(setProfile()), Qt::CTRL | Qt::Key_0);
-	mnuSubMenu->setDefaultAction(defaultProfileAction);
+    defaultProfileAction->setCheckable(true);
+    defaultProfileAction->setChecked(profile.isEmpty());
+    profileGroup->addAction(defaultProfileAction);
 
 	int idx = 0;
 	Q_FOREACH(auto grp, settings.childGroups())
 	{
-		auto shortcut = ++idx < 10? (Qt::CTRL | Qt::Key_0 + idx): idx < 20? (Qt::CTRL | Qt::SHIFT | Qt::Key_0 + idx - 10): 0;
+        auto shortcut = ++idx < 10? (Qt::CTRL + Qt::Key_0 + idx): idx < 20? (Qt::CTRL + Qt::SHIFT + Qt::Key_0 + idx - 10): 0;
 		auto profileAction = mnuSubMenu->addAction(grp, this, SLOT(setProfile()), shortcut);
-		profileAction->setData(grp);
-		if (grp == profile)
-			mnuSubMenu->setDefaultAction(profileAction);
+        profileAction->setCheckable(true);
+        profileAction->setData(grp);
+        profileAction->setChecked(profile == grp);
+        profileGroup->addAction(profileAction);
 	}
 
     mnu->addSeparator();
-	mnu->addAction("&Exit", qApp, SLOT(quit()), Qt::ALT | Qt::Key_F4);
+    mnu->addAction(tr("&Exit"), qApp, SLOT(quit()), Qt::ALT | Qt::Key_F4);
 
     mnuBar->addMenu(mnu);
     mnuBar->show();
@@ -191,10 +200,9 @@ QMenuBar* MainWindow::createMenu()
 
 QPushButton* MainWindow::createButton(const char *slot)
 {
-	const QSize minSize(96,96);
     auto btn = new QPushButton();
-    btn->setMinimumSize(minSize);
-    btn->setIconSize(minSize);
+    btn->setMinimumSize(QSize(iconSize, iconSize + 8));
+    btn->setIconSize(QSize(iconSize, iconSize));
     connect(btn, SIGNAL(clicked()), this, slot);
 
     return btn;
@@ -283,8 +291,6 @@ QGst::PipelinePtr MainWindow::createPipeline()
 
 void MainWindow::releasePipeline()
 {
-	displayWidget->stopPipelineWatch();
-
 	pipeline->setState(QGst::StateNull);
     pipeline->getState(NULL, NULL, -1);
 
@@ -302,6 +308,7 @@ void MainWindow::releasePipeline()
     videoFileName.clear();
 
 	pipeline.clear();
+    displayWidget->stopPipelineWatch();
 }
 
 //void MainWindow::onTestHandoff(const QGst::BufferPtr& buf)
@@ -317,72 +324,17 @@ void MainWindow::error(const QGlib::ObjectPtr& obj, const QGlib::Error& ex)
 	error(str);
 }
 
-void MainWindow::onBusMessage(const QGst::MessagePtr & message)
+void MainWindow::onBusMessage(const QGst::MessagePtr& message)
 {
-    qDebug() << message->typeName() << " " << message->source()->property("name").toString();
+//    qDebug() << message->typeName() << " " << message->source()->property("name").toString();
 
     switch (message->type())
     {
     case QGst::MessageStateChanged:
-        {
-            QGst::StateChangedMessagePtr m = message.staticCast<QGst::StateChangedMessage>();
-            qDebug() << m->oldState() << " => " << m->newState();
-
-            // The pipeline will not start by itself since 2 of 3 renders are in NULL state
-            // We need to kick off the display renderer to start the capture
-            //
-            if (m->oldState() == QGst::StateReady && m->newState() == QGst::StatePaused)
-            {
-                message->source().staticCast<QGst::Element>()->setState(QGst::StatePlaying);
-            }
-            else if (m->newState() == QGst::StateNull && message->source() == pipeline)
-            {
-                // The display area of the main window is filled with some garbage.
-                // We need to redraw the contents.
-                //
-                update();
-            }
-        }
+        onStateChangedMessage(message.staticCast<QGst::StateChangedMessage>());
         break;
     case QGst::MessageElement:
-        {
-            QGst::ElementMessagePtr m = message.staticCast<QGst::ElementMessage>();
-            const QGst::StructurePtr s = m->internalStructure();
-            if (!s)
-            {
-                qDebug() << "Got empty QGst::MessageElement";
-            }
-            else if (s->name() == "GstMultiFileSink" && message->source() == imageSink)
-            {
-                const QString fileName = s->value("filename").toString();
-
-                // We want to get more then one image for the snapshot.
-                // And drop all of them except the last one.
-                //
-                if (!lastImageFile.isEmpty())
-                {
-                    QFile::remove(lastImageFile);
-                    imageValve->setProperty("drop", TRUE);
-                }
-                lastImageFile = fileName;
-                imageTimer->start(500);
-            }
-            else if (s->name() == "prepare-xwindow-id")
-            {
-                // At this time the video output finally has a sink, so set it up now
-                //
-                auto sink = displayWidget->videoSink();
-                if (sink)
-                {
-                    sink->setProperty("force-aspect-ratio", TRUE);
-                    displayWidget->update();
-                }
-            }
-            else
-            {
-                qDebug() << s->name();
-            }
-        }
+        onElementMessage(message.staticCast<QGst::ElementMessage>());
         break;
     case QGst::MessageError:
 		error(message->source(), message.staticCast<QGst::ErrorMessage>()->error());
@@ -410,6 +362,26 @@ void MainWindow::onBusMessage(const QGst::MessagePtr & message)
     }
 }
 
+void MainWindow::onStateChangedMessage(const QGst::StateChangedMessagePtr& message)
+{
+//  qDebug() << message->oldState() << " => " << message->newState();
+
+    // The pipeline will not start by itself since 2 of 3 renders are in NULL state
+    // We need to kick off the display renderer to start the capture
+    //
+    if (message->oldState() == QGst::StateReady && message->newState() == QGst::StatePaused)
+    {
+        message->source().staticCast<QGst::Element>()->setState(QGst::StatePlaying);
+    }
+    else if (message->newState() == QGst::StateNull && message->source() == pipeline)
+    {
+        // The display area of the main window is filled with some garbage.
+        // We need to redraw the contents.
+        //
+        update();
+    }
+}
+
 void MainWindow::restartElement(const char* name)
 {
     auto elm = pipeline->getElementByName(name);
@@ -424,12 +396,51 @@ void MainWindow::restartElement(const char* name)
     elm->setState(QGst::StatePlaying);
 }
 
+void MainWindow::onElementMessage(const QGst::ElementMessagePtr& message)
+{
+    const QGst::StructurePtr s = message->internalStructure();
+    if (!s)
+    {
+        qDebug() << "Got empty QGst::MessageElement";
+        return;
+    }
+
+    if (s->name() == "GstMultiFileSink" && message->source() == imageSink)
+    {
+        const QString fileName = s->value("filename").toString();
+
+        // We want to get more then one image for the snapshot.
+        // And drop all of them except the last one.
+        //
+        if (!lastImageFile.isEmpty())
+        {
+            QFile::remove(lastImageFile);
+            imageValve->setProperty("drop", TRUE);
+        }
+        lastImageFile = fileName;
+        imageTimer->start(500);
+        return;
+    }
+
+    if (s->name() == "prepare-xwindow-id")
+    {
+        // At this time the video output finally has a sink, so set it up now
+        //
+        auto sink = displayWidget->videoSink();
+        if (sink)
+        {
+            sink->setProperty("force-aspect-ratio", TRUE);
+            displayWidget->update();
+        }
+        return;
+    }
+
+    qDebug() << "Got unknown message " << s->name() << " from " << message->source()->property("name").toString();
+}
+
 void MainWindow::onStartClick()
 {
-    running = !running;
-    imageOut->clear();
-
-    if (running)
+    if (!running)
     {
 	    pipeline = createPipeline();
 		if (pipeline)
@@ -469,22 +480,21 @@ void MainWindow::onStartClick()
 			}
 
 			pipeline->setState(QGst::StatePaused);
-		}
-		else
-		{
-			// switch back to false
-			//
-			running = false;
-		}
+            running = true;
+        }
     }
     else
     {
-        recording = false;
+        running = recording = false;
         updateRecordButton();
 		releasePipeline();
     }
 
 	updateStartButton();
+    updateRecordAll();
+
+    imageOut->clear();
+    displayWidget->update();
 }
 
 void MainWindow::onSnapshotClick()
@@ -528,18 +538,6 @@ void MainWindow::onRecordClick()
     }
 }
 
-void MainWindow::onRecordAllClick()
-{
-	const QSize minSize(96,96);
-    QIcon icon(":/buttons/record_on");
-
-    recordAll = !recordAll;
-    QString strOnOff(recordAll? tr("on"): tr("off"));
-    btnRecordAll->setIcon(icon.pixmap(minSize, recordAll? QIcon::Normal: QIcon::Disabled));
-    btnRecordAll->setToolTip(tr("Recording of entire examination is %1").arg(strOnOff));
-    btnRecordAll->setText(tr("Record\nis %1").arg(strOnOff));
-}
-
 void MainWindow::onUpdateImage()
 {
     qDebug() << lastImageFile;
@@ -547,10 +545,10 @@ void MainWindow::onUpdateImage()
     QPixmap pm;
 	if (pm.load(lastImageFile))
 	{
-//        auto mini = pm.scaledToHeight(96);
+//        auto mini = pm.scaledToHeight(iconSize);
 //        auto item = new QListWidgetItem(QIcon(mini), QString());
-//        item->setSizeHint(QSize(mini.width(), 96));
-//        imageList->setIconSize(QSize(mini.width(), 96));
+//        item->setSizeHint(QSize(mini.width(), iconSize));
+//        imageList->setIconSize(QSize(mini.width(), iconSize));
 //        item->setToolTip(lastImageFile);
 //        imageList->addItem(item);
 //        imageList->select(item);
@@ -592,9 +590,28 @@ void MainWindow::updateRecordButton()
     btnRecord->setText(strOnOff);
 }
 
+void MainWindow::updateRecordAll()
+{
+    QString strOnOff(videoSink? tr("on"): tr("off"));
+    lblRecordAll->setEnabled(videoSink);
+    lblRecordAll->setToolTip(tr("Recording of entire examination is %1").arg(strOnOff));
+    if (running)
+    {
+        lblRecordAll->setPixmap(QIcon(":/buttons/record_on").pixmap(QSize(iconSize, iconSize)));
+    }
+    else
+    {
+        lblRecordAll->clear();
+    }
+}
+
 void MainWindow::setProfile()
 {
 	auto action = static_cast<QAction*>(sender());
-	static_cast<QMenu*>(action->parent())->setDefaultAction(action);
-	QSettings().setValue("profile", action->data());
+    auto profile = action->data().toString();
+    static_cast<QMenu*>(action->parent())->setDefaultAction(action);
+
+    QSettings().setValue("profile", profile);
+
+    setWindowTitle(QString().append(qApp->applicationName()).append(" - ").append(profile.isEmpty()? tr("Default"): profile));
 }
