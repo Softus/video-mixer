@@ -20,6 +20,7 @@
 #include <QGst/Parse>
 #include <QGst/Event>
 #include <QGst/Clock>
+#include <gst/gstdebugutils.h>
 
 #define DEFAULT_ICON_SIZE 96
 
@@ -27,6 +28,8 @@ static inline QBoxLayout::Direction bestDirection(const QSize &s)
 {
     return s.width() >= s.height()? QBoxLayout::LeftToRight: QBoxLayout::TopToBottom;
 }
+
+#ifdef QT_DEBUG
 
 static void Dump(QGst::ElementPtr elm)
 {
@@ -81,6 +84,8 @@ static void Dump(QGst::ElementPtr elm)
         }
     }
 }
+
+#endif
 
 MainWindow::MainWindow(QWidget *parent) :
     QWidget(parent),
@@ -258,7 +263,7 @@ QGst::PipelinePtr MainWindow::createPipeline()
         "%1"   // %1 == video src
         " ! tee name=splitter"
             " ! %2 splitter."                                  // %2 == display
-            " ! %3"                                            // %3 == video encoder
+            " ! queue ! %3"                                    // %3 == video encoder
             " ! tee name=videosplitter"
                 " ! valve name=videovalve ! %4 videosplitter." // %4 == video writer
                 " ! valve name=rtpvalve   ! %5 videosplitter." // %5 == rtp streamer
@@ -266,12 +271,12 @@ QGst::PipelinePtr MainWindow::createPipeline()
             " splitter."
             " ! valve name=imagevalve ! %7 ! %8 splitter."     // %7 image encoder; %8 image writer
         ).toString();
-    const QString srcDef = settings.value("src", "autovideosrc").toString();
-    const QString displaySinkDef    = settings.value("display-sink",  "ffmpegcolorspace ! timeoverlay name=displayoverlay ! autovideosink name=displaysink sync=0").toString();
+    const QString srcDef            = settings.value("src", "autovideosrc").toString();
+    const QString displaySinkDef    = settings.value("display-sink",  "ffcs ! timeoverlay name=displayoverlay ! autovideosink name=displaysink sync=0").toString();
     const QString videoEncoderDef   = settings.value("video-encoder", "timeoverlay ! ffmpegcolorspace ! x264enc name=videoencoder tune=zerolatency bitrate=1000 byte-stream=1").toString();
-    const QString videoSinkDef      = settings.value("video-sink",    "queue ! matroskamux ! filesink name=videosink").toString();
+    const QString videoSinkDef      = settings.value("video-sink",    "matroskamux ! filesink name=videosink").toString();
     const QString rtpSinkDef        = settings.value("rtp-sink",      "rtph264pay ! udpsink name=rtpsink clients=127.0.0.1:5000").toString();
-    const QString clipSinkDef       = settings.value("clip-sink",     "queue ! stamp name=clipstamp ! matroskamux name=clipmux ! multifilesink name=clipsink next-file=4 async=0").toString();
+    const QString clipSinkDef       = settings.value("clip-sink",     "stamp name=clipstamp ! matroskamux name=clipmux ! multifilesink name=clipsink next-file=4 async=0").toString();
     const QString imageEncoderDef   = settings.value("image-encoder", "videorate drop-only=1 ! video/x-raw-yuv,framerate=1/1 ! clockoverlay ! ffmpegcolorspace ! pngenc snapshot=0").toString();
     const QString imageSinkDef      = settings.value("image-sink",    "multifilesink name=imagesink post-messages=1 async=0").toString();
 
@@ -360,7 +365,8 @@ QGst::PipelinePtr MainWindow::createPipeline()
 
 //        QGlib::connect(pl->getElementByName("test"), "handoff", this, &MainWindow::onTestHandoff);
 
-        Dump(pl);
+        auto details = GstDebugGraphDetails(GST_DEBUG_GRAPH_SHOW_MEDIA_TYPE | GST_DEBUG_GRAPH_SHOW_NON_DEFAULT_PARAMS | GST_DEBUG_GRAPH_SHOW_STATES);
+        GST_DEBUG_BIN_TO_DOT_FILE_WITH_TS((GstBin*)(QGst::Pipeline::CType*)pl, details, qApp->applicationName().toUtf8());
     }
 
     return pl;
