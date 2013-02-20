@@ -272,7 +272,7 @@ QGst::PipelinePtr MainWindow::createPipeline()
             " ! valve name=imagevalve ! %7 ! %8 splitter."     // %7 image encoder; %8 image writer
         ).toString();
     const QString srcDef            = settings.value("src", "autovideosrc").toString();
-    const QString displaySinkDef    = settings.value("display-sink",  "ffcs ! timeoverlay name=displayoverlay ! autovideosink name=displaysink sync=0").toString();
+    const QString displaySinkDef    = settings.value("display-sink",  "ffmpegcolorspace ! timeoverlay name=displayoverlay ! autovideosink name=displaysink sync=0").toString();
     const QString videoEncoderDef   = settings.value("video-encoder", "timeoverlay ! ffmpegcolorspace ! x264enc name=videoencoder tune=zerolatency bitrate=1000 byte-stream=1").toString();
     const QString videoSinkDef      = settings.value("video-sink",    "matroskamux ! filesink name=videosink").toString();
     const QString rtpSinkDef        = settings.value("rtp-sink",      "rtph264pay ! udpsink name=rtpsink clients=127.0.0.1:5000").toString();
