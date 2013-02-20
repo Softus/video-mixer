@@ -25,7 +25,7 @@
 
 static inline QBoxLayout::Direction bestDirection(const QSize &s)
 {
-	return s.width() >= s.height()? QBoxLayout::LeftToRight: QBoxLayout::TopToBottom;
+    return s.width() >= s.height()? QBoxLayout::LeftToRight: QBoxLayout::TopToBottom;
 }
 
 static void Dump(QGst::ElementPtr elm)
@@ -33,40 +33,40 @@ static void Dump(QGst::ElementPtr elm)
     if (!elm)
     {
         qDebug() << " (null) ";
-		return;
+        return;
     }
 
     foreach (auto prop, elm->listProperties())
     {
         const QString n = prop->name();
         const QGlib::Value v = elm->property(n.toUtf8());
-		switch (v.type().fundamental())
-		{
-		case QGlib::Type::Boolean:
-	        qDebug() << n << " = " << v.get<bool>();
-			break;
-		case QGlib::Type::Float:
-		case QGlib::Type::Double:
-	        qDebug() << n << " = " << v.get<double>();
-			break;
-		case QGlib::Type::Enum:
-		case QGlib::Type::Flags:
-		case QGlib::Type::Int:
-		case QGlib::Type::Uint:
-	        qDebug() << n << " = " << v.get<int>();
-			break;
-		case QGlib::Type::Long:
-		case QGlib::Type::Ulong:
-	        qDebug() << n << " = " << v.get<long>();
-			break;
-		case QGlib::Type::Int64:
-		case QGlib::Type::Uint64:
+        switch (v.type().fundamental())
+        {
+        case QGlib::Type::Boolean:
+            qDebug() << n << " = " << v.get<bool>();
+            break;
+        case QGlib::Type::Float:
+        case QGlib::Type::Double:
+            qDebug() << n << " = " << v.get<double>();
+            break;
+        case QGlib::Type::Enum:
+        case QGlib::Type::Flags:
+        case QGlib::Type::Int:
+        case QGlib::Type::Uint:
+            qDebug() << n << " = " << v.get<int>();
+            break;
+        case QGlib::Type::Long:
+        case QGlib::Type::Ulong:
+            qDebug() << n << " = " << v.get<long>();
+            break;
+        case QGlib::Type::Int64:
+        case QGlib::Type::Uint64:
             qDebug() << n << " = " << v.get<qint64>();
-			break;
-		default:
-	        qDebug() << n << " = " << v.get<QString>();
-			break;
-		}
+            break;
+        default:
+            qDebug() << n << " = " << v.get<QString>();
+            break;
+        }
     }
 
     QGst::ChildProxyPtr childProxy =  elm.dynamicCast<QGst::ChildProxy>();
@@ -92,12 +92,12 @@ MainWindow::MainWindow(QWidget *parent) :
     iconSize = settings.value("icon-size", iconSize).toInt();
 
     imageTimer = new QTimer(this);
-	imageTimer->setSingleShot(true);
-	connect(imageTimer, SIGNAL(timeout()), this, SLOT(onUpdateImage()));
+    imageTimer->setSingleShot(true);
+    connect(imageTimer, SIGNAL(timeout()), this, SLOT(onUpdateImage()));
 
     auto buttonsLayout = new QHBoxLayout();
     btnStart = createButton(SLOT(onStartClick()));
-	btnStart->setAutoDefault(true);
+    btnStart->setAutoDefault(true);
     buttonsLayout->addWidget(btnStart);
 
     btnSnapshot = createButton(SLOT(onSnapshotClick()));
@@ -112,7 +112,7 @@ MainWindow::MainWindow(QWidget *parent) :
     lblRecordAll->setMaximumHeight(iconSize + 8);
     buttonsLayout->addWidget(lblRecordAll, 0, Qt::AlignRight);
 
-	outputLayout = new QBoxLayout(bestDirection(size()));
+    outputLayout = new QBoxLayout(bestDirection(size()));
 
     displayWidget = new QGst::Ui::VideoWidget();
     displayWidget->setMinimumSize(320, 240);
@@ -120,7 +120,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     imageOut = new QLabel(tr("To start an examination press \"Start\" button.\n\n"
         "During the examination you can take snapshots and save video clips."));
-	imageOut->setAlignment(Qt::AlignCenter);
+    imageOut->setAlignment(Qt::AlignCenter);
     imageOut->setMinimumSize(320, 240);
     outputLayout->addWidget(imageOut);
 
@@ -136,7 +136,7 @@ MainWindow::MainWindow(QWidget *parent) :
 //    imageList->setWrapping(false);
 
     auto mainLayout = new QVBoxLayout();
-	mainLayout->setMenuBar(createMenu());
+    mainLayout->setMenuBar(createMenu());
     mainLayout->addLayout(buttonsLayout);
     mainLayout->addLayout(outputLayout);
 //    mainLayout->addWidget(imageList);
@@ -153,49 +153,42 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-	if (pipeline)
-	{
-		releasePipeline();
-	}
+    if (pipeline)
+    {
+        releasePipeline();
+    }
 }
 
 QMenuBar* MainWindow::createMenu()
 {
-    QSettings settings;
-	const QString profile = settings.value("profile").toString();
-
-	QMenuBar* mnuBar = new QMenuBar();
-    QMenu*   mnu   = new QMenu(tr("&Menu"));
+    auto mnuBar = new QMenuBar();
+    auto mnu   = new QMenu(tr("&Menu"));
 
     mnu->addAction(tr("&About Qt"), qApp, SLOT(aboutQt()));
     mnu->addSeparator();
+    auto rtpAction = mnu->addAction(tr("&Enable RTP streaming"), this, SLOT(toggleRtpStream()));
+    rtpAction->setCheckable(true);
+    rtpAction->setData("enable-rtp");
 
-    QMenu* mnuSubMenu = new QMenu(tr("&Profiles"), mnu);
-    mnu->addMenu(mnuSubMenu);
-    auto profileGroup = new QActionGroup(mnuSubMenu);
+    auto fullVideoAction = mnu->addAction(tr("&Record entire examination"), this, SLOT(toggleVideoRecord()));
+    fullVideoAction->setCheckable(true);
+    fullVideoAction->setData("enable-video");
 
-	auto defaultProfileAction = mnuSubMenu->addAction(tr("&Default"), this, SLOT(setProfile()), Qt::CTRL | Qt::Key_0);
-    defaultProfileAction->setCheckable(true);
-    defaultProfileAction->setChecked(profile.isEmpty());
-    profileGroup->addAction(defaultProfileAction);
-
-	int idx = 0;
-	Q_FOREACH(auto grp, settings.childGroups())
-	{
-        auto shortcut = ++idx < 10? (Qt::CTRL + Qt::Key_0 + idx): idx < 20? (Qt::CTRL + Qt::SHIFT + Qt::Key_0 + idx - 10): 0;
-		auto profileAction = mnuSubMenu->addAction(grp, this, SLOT(setProfile()), shortcut);
-        profileAction->setCheckable(true);
-        profileAction->setData(grp);
-        profileAction->setChecked(profile == grp);
-        profileGroup->addAction(profileAction);
-	}
-
-    mnu->addSeparator();
-    mnu->addAction(tr("&Exit"), qApp, SLOT(quit()), Qt::ALT | Qt::Key_F4);
-
+    mnu->addAction(tr("E&xit"), qApp, SLOT(quit()), Qt::ALT | Qt::Key_F4);
+    connect(mnu, SIGNAL(aboutToShow()), this, SLOT(prepareSettingsMenu()));
     mnuBar->addMenu(mnu);
+
+    auto profilesMenu = new QMenu(tr("&Profiles"), mnu);
+    auto profileGroup = new QActionGroup(profilesMenu);
+    auto defaultProfileAction = profilesMenu->addAction(tr("&Default"), this, SLOT(setProfile()));
+    defaultProfileAction->setCheckable(true);
+    defaultProfileAction->setChecked(true);
+    profileGroup->addAction(defaultProfileAction);
+    connect(profilesMenu, SIGNAL(aboutToShow()), this, SLOT(prepareProfileMenu()));
+    mnuBar->addMenu(profilesMenu);
+
     mnuBar->show();
-	return mnuBar;
+    return mnuBar;
 }
 
 QPushButton* MainWindow::createButton(const char *slot)
@@ -210,88 +203,172 @@ QPushButton* MainWindow::createButton(const char *slot)
 
 void MainWindow::error(const QString& msg)
 {
-	qCritical() << msg;
-	QMessageBox msgBox(QMessageBox::Critical, windowTitle(), msg, QMessageBox::Ok, this);
-	msgBox.exec();
+    qCritical() << msg;
+    QMessageBox msgBox(QMessageBox::Critical, windowTitle(), msg, QMessageBox::Ok, this);
+    msgBox.exec();
 }
+
+/*
+
+  Basic pipeline is:
+
+                 [video src]
+                     |
+                     V
+         +----[main splitter]-----+
+         |            |           |
+         V            V           V
+ [image encoder]  [display]  [video encoder]
+        |                         |
+        V                         V
+  [image writer]      +----[video splitter]----+
+                      |           |            |
+                      V           V            V
+           [movie writer]  [clip writer]  [rtp sender]
+*/
+
 
 QGst::PipelinePtr MainWindow::createPipeline()
 {
     QSettings settings;
-	QGst::PipelinePtr pl;
+    QGst::PipelinePtr pl;
 
-	settings.beginGroup(settings.value("profile").toString());
+    // Default values for all profiles
+    //
     imageFileName = settings.value("image-file", "'/video/'yyyy-MM-dd/HH-mm'/image%03d.png'").toString();
      clipFileName = settings.value("clip-file",  "'/video/'yyyy-MM-dd/HH-mm'/clip%03d.mpg'").toString();
     videoFileName = settings.value("video-file", "'/video/'yyyy-MM-dd/HH-mm'/video.mpg'").toString();
 
-    const QString pipeTemplate = settings.value("pipeline", "%1 ! tee name=splitter"
-        " ! %2 splitter."
-        " ! %3 ! tee name=videosplitter"
-            " ! queue ! matroskamux ! filesink name=videosink videosplitter."
-//            " ! rtph264pay ! udpsink clients=127.0.0.1:5000 videosplitter."
-            " ! valve name=clipvalve ! stamp name=clipstamp ! queue ! matroskamux name=clipmux ! multifilesink name=clipsink next-file=4 async=0 videosplitter. splitter."
-        " ! valve name=imagevalve ! %4 ! multifilesink name=imagesink post-messages=1 async=0 splitter."
-		).toString();
-    const QString srcDef = settings.value("src", "autovideosrc").toString();
-    const QString displaySinkDef = settings.value("display-sink", "ffmpegcolorspace ! timeoverlay name=displayoverlay ! autovideosink name=displaysink sync=0").toString();
-    const QString videoEncoderDef   = settings.value("video-encoder",  "timeoverlay ! ffmpegcolorspace ! x264enc tune=zerolatency bitrate=1000 byte-stream=1").toString();
-    const QString imageEncoderDef   = settings.value("image-encoder",  "videorate drop-only=1 ! video/x-raw-yuv,framerate=1/1 ! clockoverlay ! ffmpegcolorspace ! pngenc snapshot=0").toString();
+    // Switch to profile
+    //
+    settings.beginGroup(settings.value("profile").toString());
 
-    const QString pipe = pipeTemplate.arg(srcDef, displaySinkDef, videoEncoderDef, imageEncoderDef);
+    int videoEncoderBitrate = settings.value("bitrate").toInt();
+    bool enableVideo = settings.value("enable-video").toBool();
+    bool enableRtp = settings.value("enable-rtp").toBool();
+    const QString rtpClients = enableRtp? settings.value("rtp-clients").toString(): QString();
+
+    // Override a value with profile-specific one
+    //
+    imageFileName = settings.value("image-file", imageFileName).toString();
+     clipFileName = settings.value("clip-file",   clipFileName).toString();
+    videoFileName = settings.value("video-file", videoFileName).toString();
+
+    const QString pipeTemplate = settings.value("pipeline",
+        "%1"   // %1 == video src
+        " ! tee name=splitter"
+            " ! %2 splitter."                                  // %2 == display
+            " ! %3"                                            // %3 == video encoder
+            " ! tee name=videosplitter"
+                " ! valve name=videovalve ! %4 videosplitter." // %4 == video writer
+                " ! valve name=rtpvalve   ! %5 videosplitter." // %5 == rtp streamer
+                " ! valve name=clipvalve  ! %6 videosplitter." // %6 == clip writer
+            " splitter."
+            " ! valve name=imagevalve ! %7 ! %8 splitter."     // %7 image encoder; %8 image writer
+        ).toString();
+    const QString srcDef = settings.value("src", "autovideosrc").toString();
+    const QString displaySinkDef    = settings.value("display-sink",  "ffmpegcolorspace ! timeoverlay name=displayoverlay ! autovideosink name=displaysink sync=0").toString();
+    const QString videoEncoderDef   = settings.value("video-encoder", "timeoverlay ! ffmpegcolorspace ! x264enc name=videoencoder tune=zerolatency bitrate=1000 byte-stream=1").toString();
+    const QString videoSinkDef      = settings.value("video-sink",    "queue ! matroskamux ! filesink name=videosink").toString();
+    const QString rtpSinkDef        = settings.value("rtp-sink",      "rtph264pay ! udpsink name=rtpsink clients=127.0.0.1:5000").toString();
+    const QString clipSinkDef       = settings.value("clip-sink",     "queue ! stamp name=clipstamp ! matroskamux name=clipmux ! multifilesink name=clipsink next-file=4 async=0").toString();
+    const QString imageEncoderDef   = settings.value("image-encoder", "videorate drop-only=1 ! video/x-raw-yuv,framerate=1/1 ! clockoverlay ! ffmpegcolorspace ! pngenc snapshot=0").toString();
+    const QString imageSinkDef      = settings.value("image-sink",    "multifilesink name=imagesink post-messages=1 async=0").toString();
+
+    const QString pipe = pipeTemplate.arg(srcDef, displaySinkDef, videoEncoderDef, enableVideo? videoSinkDef: "fakesink", rtpSinkDef, clipSinkDef, imageEncoderDef, imageSinkDef);
     qCritical() << pipe;
 
-	settings.endGroup();
+    settings.endGroup();
 
-	try
-	{
-		pl = QGst::Parse::launch(pipe).dynamicCast<QGst::Pipeline>();
-        //Dump(pl);
-	}
-	catch (QGlib::Error ex)
-	{
-		error(pl, ex);
-	}
+    try
+    {
+        pl = QGst::Parse::launch(pipe).dynamicCast<QGst::Pipeline>();
+    }
+    catch (QGlib::Error ex)
+    {
+        error(pl, ex);
+    }
 
     if (pl)
     {
         QGlib::connect(pl->bus(), "message", this, &MainWindow::onBusMessage);
         pl->bus()->addSignalWatch();
-		displayWidget->watchPipeline(pl);
+        displayWidget->watchPipeline(pl);
 
         displaySink = pl->getElementByName("displaysink");
-		if (!displaySink)
-			qCritical() << "Element displaysink not found";
+        if (!displaySink)
+            qCritical() << "Element displaysink not found";
 
         clipValve = pl->getElementByName("clipvalve");
         if (!clipValve)
             qCritical() << "Element clipvalve not found";
 
-		videoSink  = pl->getElementByName("videosink");
-		if (!videoSink)
-			qCritical() << "Element videosink not found";
+        videoSink  = pl->getElementByName("videosink");
+        if (!videoSink)
+            qCritical() << "Element videosink not found";
 
         clipSink  = pl->getElementByName("clipsink");
         if (!clipSink)
             qCritical() << "Element clipsink not found";
 
         imageValve = pl->getElementByName("imagevalve");
-		if (!imageValve)
-			qCritical() << "Element imagevalve not found";
+        if (!imageValve)
+            qCritical() << "Element imagevalve not found";
 
         imageSink  = pl->getElementByName("imagesink");
-		if (!imageSink)
-			qCritical() << "Element imagesink not found";
+        if (!imageSink)
+            qCritical() << "Element imagesink not found";
+
+        rtpSink  = pl->getElementByName("rtpsink");
+        if (!rtpSink)
+            qCritical() << "Element rtpSink not found";
+        else if (!rtpClients.isEmpty())
+        {
+            rtpSink->setProperty("clients", rtpClients);
+        }
+
+        rtpValve  = pl->getElementByName("rtpvalve");
+        if (!rtpValve)
+            qCritical() << "Element rtpvalve not found";
+        else
+        {
+            rtpValve->setProperty("drop", !enableRtp);
+        }
+
+        videoValve  = pl->getElementByName("videovalve");
+        if (!videoValve)
+            qCritical() << "Element videovalve not found";
+        else
+        {
+            videoValve->setProperty("drop", !enableVideo);
+            if (!enableVideo)
+            {
+                // Do not need it this time
+                //
+                videoSink.clear();
+            }
+        }
+
+        if (videoEncoderBitrate > 0)
+        {
+            auto videoEncoder = pl->getElementByName("videoencoder");
+            if (!videoEncoder)
+                qCritical() << "Element videoencoder not found";
+            else
+                videoEncoder->setProperty("bitrate", videoEncoderBitrate);
+        }
 
 //        QGlib::connect(pl->getElementByName("test"), "handoff", this, &MainWindow::onTestHandoff);
+
+        Dump(pl);
     }
 
-	return pl;
+    return pl;
 }
 
 void MainWindow::releasePipeline()
 {
-	pipeline->setState(QGst::StateNull);
+    pipeline->setState(QGst::StateNull);
     pipeline->getState(NULL, NULL, -1);
 
     displaySink.clear();
@@ -304,10 +381,14 @@ void MainWindow::releasePipeline()
     clipSink.clear();
     clipFileName.clear();
 
+    videoValve.clear();
     videoSink.clear();
     videoFileName.clear();
 
-	pipeline.clear();
+    rtpValve.clear();
+    rtpSink.clear();
+
+    pipeline.clear();
     displayWidget->stopPipelineWatch();
 }
 
@@ -318,10 +399,10 @@ void MainWindow::releasePipeline()
 
 void MainWindow::error(const QGlib::ObjectPtr& obj, const QGlib::Error& ex)
 {
-	const QString str = obj?
-		QString().append(obj->property("name").toString()).append(" ").append(ex.message()):
-		ex.message();
-	error(str);
+    const QString str = obj?
+        QString().append(obj->property("name").toString()).append(" ").append(ex.message()):
+        ex.message();
+    error(str);
 }
 
 void MainWindow::onBusMessage(const QGst::MessagePtr& message)
@@ -337,7 +418,7 @@ void MainWindow::onBusMessage(const QGst::MessagePtr& message)
         onElementMessage(message.staticCast<QGst::ElementMessage>());
         break;
     case QGst::MessageError:
-		error(message->source(), message.staticCast<QGst::ErrorMessage>()->error());
+        error(message->source(), message.staticCast<QGst::ErrorMessage>()->error());
         break;
 #ifdef QT_DEBUG
     case QGst::MessageInfo:
@@ -442,44 +523,44 @@ void MainWindow::onStartClick()
 {
     if (!running)
     {
-	    pipeline = createPipeline();
-		if (pipeline)
-		{
-			const QDateTime now = QDateTime::currentDateTime();
-			if (videoSink)
-			{
-				const QString currentVideoFileName(now.toString(videoFileName));
-				QDir::current().mkpath(QFileInfo(currentVideoFileName).absolutePath());
-				videoSink->setProperty("location", currentVideoFileName);
-			}
+        pipeline = createPipeline();
+        if (pipeline)
+        {
+            const QDateTime now = QDateTime::currentDateTime();
+            if (videoSink)
+            {
+                const QString currentVideoFileName(now.toString(videoFileName));
+                QDir::current().mkpath(QFileInfo(currentVideoFileName).absolutePath());
+                videoSink->setProperty("location", currentVideoFileName);
+            }
 
-			if (clipSink)
-			{
-				const QString currentClipFileName(now.toString(clipFileName));
-				QDir::current().mkpath(QFileInfo(currentClipFileName).absolutePath());
-				clipSink->setProperty("location", currentClipFileName);
-				clipSink->setProperty("index", 0);
-			}
+            if (clipSink)
+            {
+                const QString currentClipFileName(now.toString(clipFileName));
+                QDir::current().mkpath(QFileInfo(currentClipFileName).absolutePath());
+                clipSink->setProperty("location", currentClipFileName);
+                clipSink->setProperty("index", 0);
+            }
 
-			if (imageSink)
-			{
-				const QString currentImageFileName(now.toString(imageFileName));
-				QDir::current().mkpath(QFileInfo(currentImageFileName).absolutePath());
-				imageSink->setProperty("location", currentImageFileName);
-				imageSink->setProperty("index", 0);
-			}
+            if (imageSink)
+            {
+                const QString currentImageFileName(now.toString(imageFileName));
+                QDir::current().mkpath(QFileInfo(currentImageFileName).absolutePath());
+                imageSink->setProperty("location", currentImageFileName);
+                imageSink->setProperty("index", 0);
+            }
 
-			if (clipValve)
-			{
-				clipValve->setProperty("drop", TRUE);
-			}
+            if (clipValve)
+            {
+                clipValve->setProperty("drop", TRUE);
+            }
 
-			if (imageValve)
-			{
-				imageValve->setProperty("drop", TRUE);
-			}
+            if (imageValve)
+            {
+                imageValve->setProperty("drop", TRUE);
+            }
 
-			pipeline->setState(QGst::StatePaused);
+            pipeline->setState(QGst::StatePaused);
             running = true;
         }
     }
@@ -487,10 +568,10 @@ void MainWindow::onStartClick()
     {
         running = recording = false;
         updateRecordButton();
-		releasePipeline();
+        releasePipeline();
     }
 
-	updateStartButton();
+    updateStartButton();
     updateRecordAll();
 
     imageOut->clear();
@@ -543,8 +624,8 @@ void MainWindow::onUpdateImage()
     qDebug() << lastImageFile;
 
     QPixmap pm;
-	if (pm.load(lastImageFile))
-	{
+    if (pm.load(lastImageFile))
+    {
 //        auto mini = pm.scaledToHeight(iconSize);
 //        auto item = new QListWidgetItem(QIcon(mini), QString());
 //        item->setSizeHint(QSize(mini.width(), iconSize));
@@ -552,12 +633,12 @@ void MainWindow::onUpdateImage()
 //        item->setToolTip(lastImageFile);
 //        imageList->addItem(item);
 //        imageList->select(item);
-		imageOut->setPixmap(pm);
-	}
-	else
-	{
-		imageOut->setText(tr("Failed to load image %1").arg(lastImageFile));
-	}
+        imageOut->setPixmap(pm);
+    }
+    else
+    {
+        imageOut->setText(tr("Failed to load image %1").arg(lastImageFile));
+    }
 
     imageValve->setProperty("drop", 1);
     lastImageFile.clear();
@@ -566,8 +647,8 @@ void MainWindow::onUpdateImage()
 
 void MainWindow::resizeEvent(QResizeEvent *evt)
 {
-	QWidget::resizeEvent(evt);
-	outputLayout->setDirection(bestDirection(evt->size()));
+    QWidget::resizeEvent(evt);
+    outputLayout->setDirection(bestDirection(evt->size()));
 }
 
 void MainWindow::updateStartButton()
@@ -578,8 +659,8 @@ void MainWindow::updateStartButton()
     btnStart->setText(strOnOff);
 
     btnRecord->setEnabled(running && clipSink);
-	btnSnapshot->setEnabled(running && imageSink);
-	displayWidget->setVisible(running && displaySink);
+    btnSnapshot->setEnabled(running && imageSink);
+    displayWidget->setVisible(running && displaySink);
 }
 
 void MainWindow::updateRecordButton()
@@ -605,13 +686,78 @@ void MainWindow::updateRecordAll()
     }
 }
 
+void MainWindow::prepareProfileMenu()
+{
+    QSettings settings;
+    const QString profile = settings.value("profile").toString();
+    auto profilesMenu = static_cast<QMenu*>(sender());
+    auto actions = profilesMenu->actions();
+    auto defaultProfile = actions.at(0);
+    auto profileGroup = defaultProfile? defaultProfile->actionGroup(): new QActionGroup(profilesMenu);
+
+    for (int  i = actions.size() - 1; i > 0; --i)
+    {
+        profilesMenu->removeAction(actions.at(i));
+    }
+
+    Q_FOREACH(auto grp, settings.childGroups())
+    {
+        auto profileAction = profilesMenu->addAction(grp, this, SLOT(setProfile()));
+        profileAction->setCheckable(true);
+        profileAction->setData(grp);
+        profileAction->setChecked(profile == grp);
+        profileGroup->addAction(profileAction);
+    }
+}
+
 void MainWindow::setProfile()
 {
-	auto action = static_cast<QAction*>(sender());
+    auto action = static_cast<QAction*>(sender());
     auto profile = action->data().toString();
     static_cast<QMenu*>(action->parent())->setDefaultAction(action);
 
     QSettings().setValue("profile", profile);
 
     setWindowTitle(QString().append(qApp->applicationName()).append(" - ").append(profile.isEmpty()? tr("Default"): profile));
+}
+
+void MainWindow::prepareSettingsMenu()
+{
+    QSettings settings;
+    const QString profile = settings.value("profile").toString();
+
+    auto menu = static_cast<QMenu*>(sender());
+    Q_FOREACH(auto action, menu->actions())
+    {
+        if (action->data().toString() == "enable-rtp")
+        {
+            action->setChecked(settings.value("enable-rtp").toBool());
+            continue;
+        }
+
+        if (action->data().toString() == "enable-video")
+        {
+            action->setChecked(settings.value("enable-video").toBool());
+            continue;
+        }
+    }
+}
+
+void MainWindow::toggleRtpStream()
+{
+    QSettings settings;
+    bool enableRtp = !settings.value("enable-rtp").toBool();
+    settings.setValue("enable-rtp", enableRtp);
+
+    if (rtpValve)
+    {
+        rtpValve->setProperty("drop", !enableRtp);
+    }
+}
+
+void MainWindow::toggleVideoRecord()
+{
+    QSettings settings;
+    bool enableVideo = !settings.value("enable-video").toBool();
+    settings.setValue("enable-video", enableVideo);
 }

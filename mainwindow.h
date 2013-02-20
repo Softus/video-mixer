@@ -23,14 +23,14 @@ class MainWindow : public QWidget
 {
     Q_OBJECT
 
-	// State machine
-	//
+    // State machine
+    //
     bool running;
     bool recording;
 
-	// UI
-	//
-	QBoxLayout*  outputLayout;
+    // UI
+    //
+    QBoxLayout*  outputLayout;
     QLabel*      lblRecordAll;
     QPushButton* btnStart;
     QPushButton* btnRecord;
@@ -38,19 +38,19 @@ class MainWindow : public QWidget
     int          iconSize;
 
     QLabel*      imageOut;
-	QTimer*      imageTimer;
-	QString      lastImageFile;
+    QTimer*      imageTimer;
+    QString      lastImageFile;
 //	QListWidget* imageList;
     QGst::Ui::VideoWidget* displayWidget;
 
-	QMenuBar* createMenu();
+    QMenuBar* createMenu();
     QPushButton* createButton(const char *slot);
     void updateStartButton();
     void updateRecordButton();
     void updateRecordAll();
 
-	// GStreamer pipeline
-	//
+    // GStreamer pipeline
+    //
     QGst::PipelinePtr pipeline;
     QGst::ElementPtr displaySink;
 
@@ -62,11 +62,15 @@ class MainWindow : public QWidget
     QGst::ElementPtr clipSink;
     QString clipFileName;
 
+    QGst::ElementPtr videoValve;
     QGst::ElementPtr videoSink;
     QString videoFileName;
 
+    QGst::ElementPtr rtpValve;
+    QGst::ElementPtr rtpSink;
+
     QGst::PipelinePtr createPipeline();
-	void releasePipeline();
+    void releasePipeline();
 
     void onBusMessage(const QGst::MessagePtr& message);
     void onStateChangedMessage(const QGst::StateChangedMessagePtr& message);
@@ -80,19 +84,23 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-	void error(const QString& msg);
+    void error(const QString& msg);
 
 protected:
     // Event handlers
-	//
-	virtual void resizeEvent(QResizeEvent *evt);
+    //
+    virtual void resizeEvent(QResizeEvent *evt);
 
 private slots:
     void onStartClick();
     void onSnapshotClick();
     void onRecordClick();
-	void onUpdateImage();
+    void onUpdateImage();
     void setProfile();
+    void prepareSettingsMenu();
+    void prepareProfileMenu();
+    void toggleRtpStream();
+    void toggleVideoRecord();
 };
 
 #endif // MAINWINDOW_H

@@ -1,4 +1,9 @@
+/*.opensdf
 /*.qm
 /*.sdf
 /*.suo
 /*.user
+/Debug
+/GeneratedFiles
+/Win32
+/ipch

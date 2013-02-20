@@ -15,7 +15,8 @@ int main(int argc, char *argv[])
     app.setApplicationVersion("1.0");
     app.setWindowIcon(QIcon(":/buttons/beryllium"));
 
-    // GStreamer
+    // Pass some arguments to gStreamer.
+    // For example --gst-debug-level=5
     //
     QGst::init(&argc, &argv);
 
