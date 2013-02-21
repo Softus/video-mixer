@@ -62,11 +62,9 @@ class MainWindow : public QWidget
     QGst::ElementPtr clipSink;
     QString clipFileName;
 
-    QGst::ElementPtr videoValve;
     QGst::ElementPtr videoSink;
     QString videoFileName;
 
-    QGst::ElementPtr rtpValve;
     QGst::ElementPtr rtpSink;
 
     QGst::PipelinePtr createPipeline();
@@ -99,8 +97,7 @@ private slots:
     void setProfile();
     void prepareSettingsMenu();
     void prepareProfileMenu();
-    void toggleRtpStream();
-    void toggleVideoRecord();
+    void toggleSetting();
 };
 
 #endif // MAINWINDOW_H

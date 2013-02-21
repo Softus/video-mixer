@@ -171,11 +171,11 @@ QMenuBar* MainWindow::createMenu()
 
     mnu->addAction(tr("&About Qt"), qApp, SLOT(aboutQt()));
     mnu->addSeparator();
-    auto rtpAction = mnu->addAction(tr("&Enable RTP streaming"), this, SLOT(toggleRtpStream()));
+    auto rtpAction = mnu->addAction(tr("&Enable RTP streaming"), this, SLOT(toggleSetting()));
     rtpAction->setCheckable(true);
     rtpAction->setData("enable-rtp");
 
-    auto fullVideoAction = mnu->addAction(tr("&Record entire examination"), this, SLOT(toggleVideoRecord()));
+    auto fullVideoAction = mnu->addAction(tr("&Record entire examination"), this, SLOT(toggleSetting()));
     fullVideoAction->setCheckable(true);
     fullVideoAction->setData("enable-video");
 
@@ -259,28 +259,55 @@ QGst::PipelinePtr MainWindow::createPipeline()
      clipFileName = settings.value("clip-file",   clipFileName).toString();
     videoFileName = settings.value("video-file", videoFileName).toString();
 
-    const QString pipeTemplate = settings.value("pipeline",
-        "%1"   // %1 == video src
-        " ! tee name=splitter"
-            " ! %2 splitter."                                  // %2 == display
-            " ! queue ! %3"                                    // %3 == video encoder
-            " ! tee name=videosplitter"
-                " ! valve name=videovalve ! %4 videosplitter." // %4 == video writer
-                " ! valve name=rtpvalve   ! %5 videosplitter." // %5 == rtp streamer
-                " ! valve name=clipvalve  ! %6 videosplitter." // %6 == clip writer
-            " splitter."
-            " ! valve name=imagevalve ! %7 ! %8 splitter."     // %7 image encoder; %8 image writer
-        ).toString();
     const QString srcDef            = settings.value("src", "autovideosrc").toString();
-    const QString displaySinkDef    = settings.value("display-sink",  "ffmpegcolorspace ! timeoverlay name=displayoverlay ! autovideosink name=displaysink sync=0").toString();
+    const QString displaySinkDef    = settings.value("display-sink",  "ffmpegcolorspace ! timeoverlay name=displayoverlay ! autovideosink name=displaysink async=0").toString();
     const QString videoEncoderDef   = settings.value("video-encoder", "timeoverlay ! ffmpegcolorspace ! x264enc name=videoencoder tune=zerolatency bitrate=1000 byte-stream=1").toString();
-    const QString videoSinkDef      = settings.value("video-sink",    "matroskamux ! filesink name=videosink").toString();
-    const QString rtpSinkDef        = settings.value("rtp-sink",      "rtph264pay ! udpsink name=rtpsink clients=127.0.0.1:5000").toString();
-    const QString clipSinkDef       = settings.value("clip-sink",     "stamp name=clipstamp ! matroskamux name=clipmux ! multifilesink name=clipsink next-file=4 async=0").toString();
+    const QString videoSinkDef      = settings.value("video-sink",    "queue ! matroskamux ! filesink name=videosink sync=0 async=0").toString();
+    const QString rtpSinkDef        = settings.value("rtp-sink",      "queue ! rtph264pay ! udpsink name=rtpsink clients=127.0.0.1:5000 sync=0").toString();
+    const QString clipSinkDef       = settings.value("clip-sink",     "queue ! stamp name=clipstamp ! matroskamux name=clipmux ! multifilesink name=clipsink next-file=4 sync=0 async=0").toString();
     const QString imageEncoderDef   = settings.value("image-encoder", "videorate drop-only=1 ! video/x-raw-yuv,framerate=1/1 ! clockoverlay ! ffmpegcolorspace ! pngenc snapshot=0").toString();
-    const QString imageSinkDef      = settings.value("image-sink",    "multifilesink name=imagesink post-messages=1 async=0").toString();
+    const QString imageSinkDef      = settings.value("image-sink",    "multifilesink name=imagesink post-messages=1 async=0 sync=0 ").toString();
 
-    const QString pipe = pipeTemplate.arg(srcDef, displaySinkDef, videoEncoderDef, enableVideo? videoSinkDef: "fakesink", rtpSinkDef, clipSinkDef, imageEncoderDef, imageSinkDef);
+    if (videoSinkDef.isEmpty())
+    {
+        enableVideo = false;
+    }
+
+    if (rtpSinkDef.isEmpty())
+    {
+        enableRtp = false;
+    }
+
+    QString pipe = QString().append(srcDef).append(" ! tee name=splitter");
+    if (!displaySinkDef.isEmpty())
+    {
+        pipe.append(" ! ").append(displaySinkDef).append(" splitter.");
+    }
+
+    if (!videoEncoderDef.isEmpty() && (enableRtp || enableVideo || !clipSinkDef.isEmpty()))
+    {
+        pipe.append(" ! ").append(videoEncoderDef);
+        if (enableRtp || enableVideo)
+        {
+            pipe.append(" ! tee name=videosplitter");
+            if (enableVideo)
+                pipe.append(" ! ").append(videoSinkDef).append(" videosplitter.");
+            if (enableRtp)
+                pipe.append(" ! ").append(rtpSinkDef).append(" videosplitter.");
+        }
+
+        if (!clipSinkDef.isEmpty())
+        {
+            pipe.append(" ! valve name=clipvalve ! ").append(clipSinkDef);
+            if (enableRtp || enableVideo)
+                pipe.append(" videosplitter.");
+        }
+        pipe.append(" splitter.");
+    }
+
+    if (!imageSinkDef.isEmpty())
+        pipe.append(" ! valve name=imagevalve ! ").append(imageEncoderDef).append(" ! ").append(imageSinkDef).append(" splitter.");
+
     qCritical() << pipe;
 
     settings.endGroup();
@@ -308,9 +335,12 @@ QGst::PipelinePtr MainWindow::createPipeline()
         if (!clipValve)
             qCritical() << "Element clipvalve not found";
 
-        videoSink  = pl->getElementByName("videosink");
-        if (!videoSink)
-            qCritical() << "Element videosink not found";
+        if (enableVideo)
+        {
+            videoSink  = pl->getElementByName("videosink");
+            if (!videoSink)
+                qCritical() << "Element videosink not found";
+        }
 
         clipSink  = pl->getElementByName("clipsink");
         if (!clipSink)
@@ -330,28 +360,6 @@ QGst::PipelinePtr MainWindow::createPipeline()
         else if (!rtpClients.isEmpty())
         {
             rtpSink->setProperty("clients", rtpClients);
-        }
-
-        rtpValve  = pl->getElementByName("rtpvalve");
-        if (!rtpValve)
-            qCritical() << "Element rtpvalve not found";
-        else
-        {
-            rtpValve->setProperty("drop", !enableRtp);
-        }
-
-        videoValve  = pl->getElementByName("videovalve");
-        if (!videoValve)
-            qCritical() << "Element videovalve not found";
-        else
-        {
-            videoValve->setProperty("drop", !enableVideo);
-            if (!enableVideo)
-            {
-                // Do not need it this time
-                //
-                videoSink.clear();
-            }
         }
 
         if (videoEncoderBitrate > 0)
@@ -387,11 +395,9 @@ void MainWindow::releasePipeline()
     clipSink.clear();
     clipFileName.clear();
 
-    videoValve.clear();
     videoSink.clear();
     videoFileName.clear();
 
-    rtpValve.clear();
     rtpSink.clear();
 
     pipeline.clear();
@@ -699,7 +705,8 @@ void MainWindow::prepareProfileMenu()
     auto profilesMenu = static_cast<QMenu*>(sender());
     auto actions = profilesMenu->actions();
     auto defaultProfile = actions.at(0);
-    auto profileGroup = defaultProfile? defaultProfile->actionGroup(): new QActionGroup(profilesMenu);
+    auto profileGroup = defaultProfile->actionGroup();
+    defaultProfile->setDisabled(running);
 
     for (int  i = actions.size() - 1; i > 0; --i)
     {
@@ -712,6 +719,7 @@ void MainWindow::prepareProfileMenu()
         profileAction->setCheckable(true);
         profileAction->setData(grp);
         profileAction->setChecked(profile == grp);
+        profileAction->setDisabled(running);
         profileGroup->addAction(profileAction);
     }
 }
@@ -735,35 +743,20 @@ void MainWindow::prepareSettingsMenu()
     auto menu = static_cast<QMenu*>(sender());
     Q_FOREACH(auto action, menu->actions())
     {
-        if (action->data().toString() == "enable-rtp")
+        const QString propName = action->data().toString();
+        if (!propName.isEmpty())
         {
-            action->setChecked(settings.value("enable-rtp").toBool());
-            continue;
-        }
-
-        if (action->data().toString() == "enable-video")
-        {
-            action->setChecked(settings.value("enable-video").toBool());
+            action->setChecked(settings.value(propName).toBool());
+            action->setDisabled(running);
             continue;
         }
     }
 }
 
-void MainWindow::toggleRtpStream()
+void MainWindow::toggleSetting()
 {
     QSettings settings;
-    bool enableRtp = !settings.value("enable-rtp").toBool();
-    settings.setValue("enable-rtp", enableRtp);
-
-    if (rtpValve)
-    {
-        rtpValve->setProperty("drop", !enableRtp);
-    }
-}
-
-void MainWindow::toggleVideoRecord()
-{
-    QSettings settings;
-    bool enableVideo = !settings.value("enable-video").toBool();
-    settings.setValue("enable-video", enableVideo);
+    const QString propName = static_cast<QAction*>(sender())->data().toString();
+    bool enable = !settings.value(propName).toBool();
+    settings.setValue(propName, enable);
 }

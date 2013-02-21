@@ -4,29 +4,29 @@
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="mainwindow.cpp" line="105"/>
+        <location filename="mainwindow.cpp" line="110"/>
         <source>Take
 snapshot</source>
         <translation>Сделать
 снимок</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="595"/>
+        <location filename="mainwindow.cpp" line="688"/>
         <source>on</source>
         <translation>вкл</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="595"/>
+        <location filename="mainwindow.cpp" line="688"/>
         <source>off</source>
         <translation>выкл</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="597"/>
+        <location filename="mainwindow.cpp" line="690"/>
         <source>Recording of entire examination is %1</source>
         <translation>Запись всего исследования %1</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="121"/>
+        <location filename="mainwindow.cpp" line="126"/>
         <source>To start an examination press &quot;Start&quot; button.
 
 During the examination you can take snapshots and save video clips.</source>
@@ -35,62 +35,72 @@ During the examination you can take snapshots and save video clips.</source>
 Во время исследования вы можете делать снимки и сохранять видео клипы.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="151"/>
-        <location filename="mainwindow.cpp" line="616"/>
+        <location filename="mainwindow.cpp" line="156"/>
+        <location filename="mainwindow.cpp" line="735"/>
         <source>Default</source>
         <translation>По умолчанию</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="168"/>
+        <location filename="mainwindow.cpp" line="170"/>
         <source>&amp;Menu</source>
         <translation>&amp;Меню</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="170"/>
+        <location filename="mainwindow.cpp" line="172"/>
         <source>&amp;About Qt</source>
         <translation>&amp;О библиотеке Qt</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="173"/>
+        <location filename="mainwindow.cpp" line="174"/>
+        <source>&amp;Enable RTP streaming</source>
+        <translation>Включить RTP &amp;поток</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="178"/>
+        <source>&amp;Record entire examination</source>
+        <translation>Записывать исследование &amp;целиком</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="182"/>
+        <source>E&amp;xit</source>
+        <translation>В&amp;ыход</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="186"/>
         <source>&amp;Profiles</source>
         <translation>&amp;Профили</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="177"/>
+        <location filename="mainwindow.cpp" line="188"/>
         <source>&amp;Default</source>
         <translation>&amp;По умолчанию</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="194"/>
-        <source>&amp;Exit</source>
-        <translation>В&amp;ыход</translation>
-    </message>
-    <message>
-        <location filename="mainwindow.cpp" line="559"/>
+        <location filename="mainwindow.cpp" line="652"/>
         <source>Failed to load image %1</source>
         <translation>Не удалось загрузить снимок %1</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="576"/>
+        <location filename="mainwindow.cpp" line="669"/>
         <source>Stop
 examination</source>
         <translation>Закончить
 исследование</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="576"/>
+        <location filename="mainwindow.cpp" line="669"/>
         <source>Start
 examination</source>
         <translation>Начать
 исследование</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="588"/>
+        <location filename="mainwindow.cpp" line="681"/>
         <source>Pause</source>
         <translation>Пауза</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="588"/>
+        <location filename="mainwindow.cpp" line="681"/>
         <source>Record</source>
         <translation>Запись</translation>
     </message>
