@@ -263,8 +263,8 @@ QGst::PipelinePtr MainWindow::createPipeline()
     const QString displaySinkDef    = settings.value("display-sink",  "ffmpegcolorspace ! timeoverlay name=displayoverlay ! autovideosink name=displaysink async=0").toString();
     const QString videoEncoderDef   = settings.value("video-encoder", "timeoverlay ! ffmpegcolorspace ! x264enc name=videoencoder tune=zerolatency bitrate=1000 byte-stream=1").toString();
     const QString videoSinkDef      = settings.value("video-sink",    "queue ! matroskamux ! filesink name=videosink sync=0 async=0").toString();
-    const QString rtpSinkDef        = settings.value("rtp-sink",      "queue ! rtph264pay ! udpsink name=rtpsink clients=127.0.0.1:5000 sync=0").toString();
-    const QString clipSinkDef       = settings.value("clip-sink",     "queue ! stamp name=clipstamp ! matroskamux name=clipmux ! multifilesink name=clipsink next-file=4 sync=0 async=0").toString();
+    const QString rtpSinkDef        = settings.value("rtp-sink",      "queue ! rtph264pay config-interval=4 ! udpsink name=rtpsink clients=127.0.0.1:5000 async=0").toString();
+    const QString clipSinkDef       = settings.value("clip-sink",     "queue ! stamp name=clipstamp ! video/x-h264,framerate=25/1 ! matroskamux name=clipmux ! multifilesink name=clipsink next-file=4 sync=0 async=0").toString();
     const QString imageEncoderDef   = settings.value("image-encoder", "videorate drop-only=1 ! video/x-raw-yuv,framerate=1/1 ! clockoverlay ! ffmpegcolorspace ! pngenc snapshot=0").toString();
     const QString imageSinkDef      = settings.value("image-sink",    "multifilesink name=imagesink post-messages=1 async=0 sync=0 ").toString();
 
