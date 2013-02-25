@@ -187,7 +187,6 @@ QMenuBar* MainWindow::createMenu()
     auto profileGroup = new QActionGroup(profilesMenu);
     auto defaultProfileAction = profilesMenu->addAction(tr("&Default"), this, SLOT(setProfile()));
     defaultProfileAction->setCheckable(true);
-    defaultProfileAction->setChecked(true);
     profileGroup->addAction(defaultProfileAction);
     connect(profilesMenu, SIGNAL(aboutToShow()), this, SLOT(prepareProfileMenu()));
     mnuBar->addMenu(profilesMenu);
@@ -240,18 +239,34 @@ QGst::PipelinePtr MainWindow::createPipeline()
 
     // Default values for all profiles
     //
-    imageFileName = settings.value("image-file", "'/video/'yyyy-MM-dd/HH-mm'/image%03d.png'").toString();
+    imageFileName = settings.value("image-file", "'/video/'yyyy-MM-dd/HH-mm'/image%03d.jpg'").toString();
      clipFileName = settings.value("clip-file",  "'/video/'yyyy-MM-dd/HH-mm'/clip%03d.mpg'").toString();
     videoFileName = settings.value("video-file", "'/video/'yyyy-MM-dd/HH-mm'/video.mpg'").toString();
+
+    bool enableVideo = settings.value("enable-video").toBool();
+    bool enableRtp   = settings.value("enable-rtp").toBool();
+
+    QString srcDef            = settings.value("src", "autovideosrc").toString();
+    QString displaySinkDef    = settings.value("display-sink",  "timeoverlay name=displayoverlay ! autovideosink name=displaysink async=0").toString();
+    QString videoEncoderDef   = settings.value("video-encoder", "queue max-size-bytes=0 ! x264enc name=videoencoder tune=zerolatency speed-preset=fast bitrate=2000 byte-stream=1").toString();
+    QString videoSinkDef      = settings.value("video-sink",    "queue ! mpegtsmux ! filesink name=videosink sync=0 async=0").toString();
+    QString rtpSinkDef        = settings.value("rtp-sink",      "queue ! rtph264pay ! udpsink name=rtpsink clients=127.0.0.1:5000 sync=0").toString();
+    QString clipSinkDef       = settings.value("clip-sink",     "queue ! mpegtsmux name=clipmux ! multifilesink name=clipsink next-file=4 sync=0 async=0").toString();
+    QString imageEncoderDef   = settings.value("image-encoder", "videorate drop-only=1 ! video/x-raw-yuv,framerate=1/1 ! jpegenc").toString();
+    QString imageSinkDef      = settings.value("image-sink",    "multifilesink name=imagesink post-messages=1 async=0 sync=0").toString();
+
+    int videoEncoderBitrate = settings.value("bitrate").toInt();
+    QString rtpClients = enableRtp? settings.value("rtp-clients").toString(): QString();
 
     // Switch to profile
     //
     settings.beginGroup(settings.value("profile").toString());
 
-    int videoEncoderBitrate = settings.value("bitrate").toInt();
-    bool enableVideo = settings.value("enable-video").toBool();
-    bool enableRtp = settings.value("enable-rtp").toBool();
-    const QString rtpClients = enableRtp? settings.value("rtp-clients").toString(): QString();
+    videoEncoderBitrate = settings.value("bitrate", videoEncoderBitrate).toInt();
+    if (enableRtp)
+    {
+        rtpClients = settings.value("rtp-clients", rtpClients).toString();
+    }
 
     // Override a value with profile-specific one
     //
@@ -259,14 +274,16 @@ QGst::PipelinePtr MainWindow::createPipeline()
      clipFileName = settings.value("clip-file",   clipFileName).toString();
     videoFileName = settings.value("video-file", videoFileName).toString();
 
-    const QString srcDef            = settings.value("src", "autovideosrc").toString();
-    const QString displaySinkDef    = settings.value("display-sink",  "ffmpegcolorspace ! timeoverlay name=displayoverlay ! autovideosink name=displaysink async=0").toString();
-    const QString videoEncoderDef   = settings.value("video-encoder", "timeoverlay ! ffmpegcolorspace ! x264enc name=videoencoder tune=zerolatency bitrate=1000 byte-stream=1").toString();
-    const QString videoSinkDef      = settings.value("video-sink",    "queue ! matroskamux ! filesink name=videosink sync=0 async=0").toString();
-    const QString rtpSinkDef        = settings.value("rtp-sink",      "queue ! rtph264pay config-interval=4 ! udpsink name=rtpsink clients=127.0.0.1:5000 async=0").toString();
-    const QString clipSinkDef       = settings.value("clip-sink",     "queue ! stamp name=clipstamp ! video/x-h264,framerate=25/1 ! matroskamux name=clipmux ! multifilesink name=clipsink next-file=4 sync=0 async=0").toString();
-    const QString imageEncoderDef   = settings.value("image-encoder", "videorate drop-only=1 ! video/x-raw-yuv,framerate=1/1 ! clockoverlay ! ffmpegcolorspace ! pngenc snapshot=0").toString();
-    const QString imageSinkDef      = settings.value("image-sink",    "multifilesink name=imagesink post-messages=1 async=0 sync=0 ").toString();
+    srcDef            = settings.value("src", srcDef).toString();
+    displaySinkDef    = settings.value("display-sink",  displaySinkDef).toString();
+    videoEncoderDef   = settings.value("video-encoder", videoEncoderDef).toString();
+    videoSinkDef      = settings.value("video-sink",    videoSinkDef).toString();
+    rtpSinkDef        = settings.value("rtp-sink",      rtpSinkDef).toString();
+    clipSinkDef       = settings.value("clip-sink",     clipSinkDef).toString();
+    imageEncoderDef   = settings.value("image-encoder", imageEncoderDef).toString();
+    imageSinkDef      = settings.value("image-sink",    imageSinkDef).toString();
+
+    settings.endGroup();
 
     if (videoSinkDef.isEmpty())
     {
@@ -310,8 +327,6 @@ QGst::PipelinePtr MainWindow::createPipeline()
 
     qCritical() << pipe;
 
-    settings.endGroup();
-
     try
     {
         pl = QGst::Parse::launch(pipe).dynamicCast<QGst::Pipeline>();
@@ -354,21 +369,30 @@ QGst::PipelinePtr MainWindow::createPipeline()
         if (!imageSink)
             qCritical() << "Element imagesink not found";
 
-        rtpSink  = pl->getElementByName("rtpsink");
-        if (!rtpSink)
-            qCritical() << "Element rtpSink not found";
-        else if (!rtpClients.isEmpty())
+        if (enableRtp)
         {
-            rtpSink->setProperty("clients", rtpClients);
+            rtpSink  = pl->getElementByName("rtpsink");
+            if (!rtpSink)
+            {
+                qCritical() << "Element rtpSink not found";
+            }
+            else if (!rtpClients.isEmpty())
+            {
+                rtpSink->setProperty("clients", rtpClients);
+            }
         }
 
         if (videoEncoderBitrate > 0)
         {
             auto videoEncoder = pl->getElementByName("videoencoder");
             if (!videoEncoder)
+            {
                 qCritical() << "Element videoencoder not found";
+            }
             else
+            {
                 videoEncoder->setProperty("bitrate", videoEncoderBitrate);
+            }
         }
 
 //        QGlib::connect(pl->getElementByName("test"), "handoff", this, &MainWindow::onTestHandoff);
@@ -627,7 +651,7 @@ void MainWindow::onRecordClick()
     auto displayOverlay = pipeline->getElementByName("displayoverlay");
     if (displayOverlay)
     {
-        displayOverlay->setProperty("text", recording? "R": "   ");
+        displayOverlay->setProperty("text", recording? "R": "");
     }
 }
 
@@ -707,6 +731,7 @@ void MainWindow::prepareProfileMenu()
     auto defaultProfile = actions.at(0);
     auto profileGroup = defaultProfile->actionGroup();
     defaultProfile->setDisabled(running);
+    defaultProfile->setChecked(profile.isEmpty());
 
     for (int  i = actions.size() - 1; i > 0; --i)
     {
@@ -728,17 +753,14 @@ void MainWindow::setProfile()
 {
     auto action = static_cast<QAction*>(sender());
     auto profile = action->data().toString();
-    static_cast<QMenu*>(action->parent())->setDefaultAction(action);
 
     QSettings().setValue("profile", profile);
-
     setWindowTitle(QString().append(qApp->applicationName()).append(" - ").append(profile.isEmpty()? tr("Default"): profile));
 }
 
 void MainWindow::prepareSettingsMenu()
 {
     QSettings settings;
-    const QString profile = settings.value("profile").toString();
 
     auto menu = static_cast<QMenu*>(sender());
     Q_FOREACH(auto action, menu->actions())
