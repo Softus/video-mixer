@@ -96,10 +96,6 @@ MainWindow::MainWindow(QWidget *parent) :
     QSettings settings;
     iconSize = settings.value("icon-size", iconSize).toInt();
 
-    imageTimer = new QTimer(this);
-    imageTimer->setSingleShot(true);
-    connect(imageTimer, SIGNAL(timeout()), this, SLOT(onUpdateImage()));
-
     auto buttonsLayout = new QHBoxLayout();
     btnStart = createButton(SLOT(onStartClick()));
     btnStart->setAutoDefault(true);
@@ -248,11 +244,11 @@ QGst::PipelinePtr MainWindow::createPipeline()
 
     QString srcDef            = settings.value("src", "autovideosrc").toString();
     QString displaySinkDef    = settings.value("display-sink",  "timeoverlay name=displayoverlay ! autovideosink name=displaysink async=0").toString();
-    QString videoEncoderDef   = settings.value("video-encoder", "queue max-size-bytes=0 ! x264enc name=videoencoder tune=zerolatency speed-preset=fast bitrate=2000 byte-stream=1").toString();
+    QString videoEncoderDef   = settings.value("video-encoder", "queue max-size-bytes=0 ! ffenc_mpeg2video name=videoencoder bitrate=2000").toString();
     QString videoSinkDef      = settings.value("video-sink",    "queue ! mpegtsmux ! filesink name=videosink sync=0 async=0").toString();
     QString rtpSinkDef        = settings.value("rtp-sink",      "queue ! rtph264pay ! udpsink name=rtpsink clients=127.0.0.1:5000 sync=0").toString();
     QString clipSinkDef       = settings.value("clip-sink",     "queue ! mpegtsmux name=clipmux ! multifilesink name=clipsink next-file=4 sync=0 async=0").toString();
-    QString imageEncoderDef   = settings.value("image-encoder", "videorate drop-only=1 ! video/x-raw-yuv,framerate=1/1 ! jpegenc").toString();
+    QString imageEncoderDef   = settings.value("image-encoder", "jpegenc").toString();
     QString imageSinkDef      = settings.value("image-sink",    "multifilesink name=imagesink post-messages=1 async=0 sync=0").toString();
 
     int videoEncoderBitrate = settings.value("bitrate").toInt();
@@ -323,7 +319,7 @@ QGst::PipelinePtr MainWindow::createPipeline()
     }
 
     if (!imageSinkDef.isEmpty())
-        pipe.append(" ! valve name=imagevalve ! ").append(imageEncoderDef).append(" ! ").append(imageSinkDef).append(" splitter.");
+        pipe.append(" ! identity name=imagevalve ! ").append(imageEncoderDef).append(" ! ").append(imageSinkDef).append(" splitter.");
 
     qCritical() << pipe;
 
@@ -363,7 +359,13 @@ QGst::PipelinePtr MainWindow::createPipeline()
 
         imageValve = pl->getElementByName("imagevalve");
         if (!imageValve)
+        {
             qCritical() << "Element imagevalve not found";
+        }
+        else
+        {
+            QGlib::connect(imageValve, "handoff", this, &MainWindow::onImageReady);
+        }
 
         imageSink  = pl->getElementByName("imagesink");
         if (!imageSink)
@@ -428,10 +430,11 @@ void MainWindow::releasePipeline()
     displayWidget->stopPipelineWatch();
 }
 
-//void MainWindow::onTestHandoff(const QGst::BufferPtr& buf)
-//{
-//    qDebug() << "handoff " << buf->size() << " " << buf->timeStamp() << " " << buf->flags();
-//}
+void MainWindow::onImageReady(const QGst::BufferPtr& buf)
+{
+    qDebug() << "imageValve handoff " << buf->size() << " " << buf->timeStamp() << " " << buf->flags();
+    imageValve->setProperty("drop-probability", 1.0);
+}
 
 void MainWindow::error(const QGlib::ObjectPtr& obj, const QGlib::Error& ex)
 {
@@ -525,17 +528,25 @@ void MainWindow::onElementMessage(const QGst::ElementMessagePtr& message)
     if (s->name() == "GstMultiFileSink" && message->source() == imageSink)
     {
         const QString fileName = s->value("filename").toString();
+        QPixmap pm;
 
-        // We want to get more then one image for the snapshot.
-        // And drop all of them except the last one.
+        auto lastBuffer = message->source()->property("last-buffer").get<QGst::BufferPtr>();
+        bool ok = lastBuffer && pm.loadFromData(lastBuffer->data(), lastBuffer->size());
+
+        // If we can not load from the buffer, try to load from the file
         //
-        if (!lastImageFile.isEmpty())
+        ok = ok || pm.load(fileName);
+
+        if (ok)
         {
-            QFile::remove(lastImageFile);
-            imageValve->setProperty("drop", TRUE);
+            imageOut->setPixmap(pm);
         }
-        lastImageFile = fileName;
-        imageTimer->start(500);
+        else
+        {
+            imageOut->setText(tr("Failed to load image %1").arg(fileName));
+        }
+
+        btnSnapshot->setEnabled(running);
         return;
     }
 
@@ -593,7 +604,7 @@ void MainWindow::onStartClick()
 
             if (imageValve)
             {
-                imageValve->setProperty("drop", TRUE);
+                imageValve->setProperty("drop-probability", 1.0);
             }
 
             pipeline->setState(QGst::StatePaused);
@@ -618,7 +629,7 @@ void MainWindow::onSnapshotClick()
 {
     // Turn the valve on for a while.
     //
-    imageValve->setProperty("drop", FALSE);
+    imageValve->setProperty("drop-probability", 0.0);
     //
     // Once an image will be ready, the valve will be turned off again.
     btnSnapshot->setEnabled(false);
@@ -653,32 +664,6 @@ void MainWindow::onRecordClick()
     {
         displayOverlay->setProperty("text", recording? "R": "");
     }
-}
-
-void MainWindow::onUpdateImage()
-{
-    qDebug() << lastImageFile;
-
-    QPixmap pm;
-    if (pm.load(lastImageFile))
-    {
-//        auto mini = pm.scaledToHeight(iconSize);
-//        auto item = new QListWidgetItem(QIcon(mini), QString());
-//        item->setSizeHint(QSize(mini.width(), iconSize));
-//        imageList->setIconSize(QSize(mini.width(), iconSize));
-//        item->setToolTip(lastImageFile);
-//        imageList->addItem(item);
-//        imageList->select(item);
-        imageOut->setPixmap(pm);
-    }
-    else
-    {
-        imageOut->setText(tr("Failed to load image %1").arg(lastImageFile));
-    }
-
-    imageValve->setProperty("drop", 1);
-    lastImageFile.clear();
-    btnSnapshot->setEnabled(running);
 }
 
 void MainWindow::resizeEvent(QResizeEvent *evt)

@@ -38,8 +38,6 @@ class MainWindow : public QWidget
     int          iconSize;
 
     QLabel*      imageOut;
-    QTimer*      imageTimer;
-    QString      lastImageFile;
 //	QListWidget* imageList;
     QGst::Ui::VideoWidget* displayWidget;
 
@@ -74,7 +72,7 @@ class MainWindow : public QWidget
     void onStateChangedMessage(const QGst::StateChangedMessagePtr& message);
     void onElementMessage(const QGst::ElementMessagePtr& message);
 
-//    void onTestHandoff(const QGst::BufferPtr&);
+    void onImageReady(const QGst::BufferPtr&);
     void error(const QGlib::ObjectPtr& obj, const QGlib::Error& ex);
     void restartElement(const char* name);
 
@@ -93,7 +91,6 @@ private slots:
     void onStartClick();
     void onSnapshotClick();
     void onRecordClick();
-    void onUpdateImage();
     void setProfile();
     void prepareSettingsMenu();
     void prepareProfileMenu();
