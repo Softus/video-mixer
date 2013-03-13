@@ -22,14 +22,14 @@ snapshot</source>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="690"/>
-        <source>Recording of entire examination is %1</source>
+        <source>Recording of entire study is %1</source>
         <translation>Запись всего исследования %1</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="126"/>
-        <source>To start an examination press &quot;Start&quot; button.
+        <source>To start an study press &quot;Start&quot; button.
 
-During the examination you can take snapshots and save video clips.</source>
+During the study you can take snapshots and save video clips.</source>
         <translation>Чтобы начать исследование, нажмите кнопку &quot;начать&quot;.
 
 Во время исследования вы можете делать снимки и сохранять видео клипы.</translation>
@@ -57,7 +57,7 @@ During the examination you can take snapshots and save video clips.</source>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="178"/>
-        <source>&amp;Record entire examination</source>
+        <source>&amp;Record entire study</source>
         <translation>Записывать исследование &amp;целиком</translation>
     </message>
     <message>
@@ -83,14 +83,14 @@ During the examination you can take snapshots and save video clips.</source>
     <message>
         <location filename="mainwindow.cpp" line="669"/>
         <source>Stop
-examination</source>
+study</source>
         <translation>Закончить
 исследование</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="669"/>
         <source>Start
-examination</source>
+study</source>
         <translation>Начать
 исследование</translation>
     </message>

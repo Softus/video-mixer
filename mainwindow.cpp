@@ -119,8 +119,8 @@ MainWindow::MainWindow(QWidget *parent) :
     displayWidget->setMinimumSize(320, 240);
     outputLayout->addWidget(displayWidget);
 
-    imageOut = new QLabel(tr("To start an examination press \"Start\" button.\n\n"
-        "During the examination you can take snapshots and save video clips."));
+    imageOut = new QLabel(tr("To start a study press \"Start\" button.\n\n"
+        "During the study you can take snapshots and save video clips."));
     imageOut->setAlignment(Qt::AlignCenter);
     imageOut->setMinimumSize(320, 240);
     outputLayout->addWidget(imageOut);
@@ -171,7 +171,7 @@ QMenuBar* MainWindow::createMenu()
     rtpAction->setCheckable(true);
     rtpAction->setData("enable-rtp");
 
-    auto fullVideoAction = mnu->addAction(tr("&Record entire examination"), this, SLOT(toggleSetting()));
+    auto fullVideoAction = mnu->addAction(tr("&Record entire study"), this, SLOT(toggleSetting()));
     fullVideoAction->setCheckable(true);
     fullVideoAction->setData("enable-video");
 
@@ -675,7 +675,7 @@ void MainWindow::resizeEvent(QResizeEvent *evt)
 void MainWindow::updateStartButton()
 {
     QIcon icon(running? ":/buttons/stop": ":/buttons/add");
-    QString strOnOff(running? tr("Stop\nexamination"): tr("Start\nexamination"));
+    QString strOnOff(running? tr("Stop\nstudy"): tr("Start\nstudy"));
     btnStart->setIcon(icon);
     btnStart->setText(strOnOff);
 
@@ -696,7 +696,7 @@ void MainWindow::updateRecordAll()
 {
     QString strOnOff(videoSink? tr("on"): tr("off"));
     lblRecordAll->setEnabled(videoSink);
-    lblRecordAll->setToolTip(tr("Recording of entire examination is %1").arg(strOnOff));
+    lblRecordAll->setToolTip(tr("Recording of entire study is %1").arg(strOnOff));
     if (running)
     {
         lblRecordAll->setPixmap(QIcon(":/buttons/record_on").pixmap(QSize(iconSize, iconSize)));
