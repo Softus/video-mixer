@@ -6,7 +6,6 @@
 #include <QPushButton>
 #include <QListWidget>
 #include <QLabel>
-#include <QMessageBox>
 #include <QSettings>
 #include <QDir>
 #include <QFileInfo>
@@ -88,7 +87,7 @@ static void Dump(QGst::ElementPtr elm)
 #endif
 
 MainWindow::MainWindow(QWidget *parent) :
-    QWidget(parent),
+    BaseWidget(parent),
     running(false),
     recording(false),
     iconSize(DEFAULT_ICON_SIZE)
@@ -199,13 +198,6 @@ QPushButton* MainWindow::createButton(const char *slot)
     connect(btn, SIGNAL(clicked()), this, slot);
 
     return btn;
-}
-
-void MainWindow::error(const QString& msg)
-{
-    qCritical() << msg;
-    QMessageBox msgBox(QMessageBox::Critical, windowTitle(), msg, QMessageBox::Ok, this);
-    msgBox.exec();
 }
 
 /*
@@ -329,7 +321,7 @@ QGst::PipelinePtr MainWindow::createPipeline()
     }
     catch (QGlib::Error ex)
     {
-        error(pl, ex);
+        errorGlib(pl, ex);
     }
 
     if (pl)
@@ -436,7 +428,7 @@ void MainWindow::onImageReady(const QGst::BufferPtr& buf)
     imageValve->setProperty("drop-probability", 1.0);
 }
 
-void MainWindow::error(const QGlib::ObjectPtr& obj, const QGlib::Error& ex)
+void MainWindow::errorGlib(const QGlib::ObjectPtr& obj, const QGlib::Error& ex)
 {
     const QString str = obj?
         QString().append(obj->property("name").toString()).append(" ").append(ex.message()):
@@ -457,7 +449,7 @@ void MainWindow::onBusMessage(const QGst::MessagePtr& message)
         onElementMessage(message.staticCast<QGst::ElementMessage>());
         break;
     case QGst::MessageError:
-        error(message->source(), message.staticCast<QGst::ErrorMessage>()->error());
+        errorGlib(message->source(), message.staticCast<QGst::ErrorMessage>()->error());
         break;
 #ifdef QT_DEBUG
     case QGst::MessageInfo:

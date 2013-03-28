@@ -1,8 +1,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QWidget>
-
 #include <QGst/Message>
 #include <QGst/Pipeline>
 #include <QGst/Pad>
@@ -10,6 +8,8 @@
 #include <QGst/Ui/VideoWidget>
 
 #include <QGlib/Error>
+
+#include "basewidget.h"
 
 class QMenuBar;
 class QResizeEvent;
@@ -19,7 +19,7 @@ class QListWidget;
 class QLabel;
 class QTimer;
 
-class MainWindow : public QWidget
+class MainWindow : public BaseWidget
 {
     Q_OBJECT
 
@@ -73,14 +73,12 @@ class MainWindow : public QWidget
     void onElementMessage(const QGst::ElementMessagePtr& message);
 
     void onImageReady(const QGst::BufferPtr&);
-    void error(const QGlib::ObjectPtr& obj, const QGlib::Error& ex);
+    void errorGlib(const QGlib::ObjectPtr& obj, const QGlib::Error& ex);
     void restartElement(const char* name);
 
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-
-    void error(const QString& msg);
 
 protected:
     // Event handlers

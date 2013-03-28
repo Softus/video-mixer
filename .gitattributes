@@ -1,4 +1,6 @@
 * text=auto !eol
+/basewidget.cpp -text
+/basewidget.h -text
 /beryllium.cpp -text
 /beryllium.pro -text
 /beryllium.qrc -text
@@ -15,3 +17,5 @@ pixmaps/pause.png -text
 pixmaps/play.png -text
 pixmaps/record_on.png -text
 pixmaps/stop.png -text
+/worklist.cpp -text
+/worklist.h -text

@@ -1,12 +1,21 @@
 #include <QApplication>
 #include <QLocale>
 #include <QTranslator>
+#include <QSettings>
 #include <QIcon>
 #include <QGst/Init>
 #include "mainwindow.h"
+#include "worklist.h"
 
 int main(int argc, char *argv[])
 {
+    int errCode = 0;
+
+    // Pass some arguments to gStreamer.
+    // For example --gst-debug-level=5
+    //
+    QGst::init(&argc, &argv);
+
     // QT init
     //
     QApplication app(argc, argv);
@@ -15,30 +24,33 @@ int main(int argc, char *argv[])
     app.setApplicationVersion("1.0");
     app.setWindowIcon(QIcon(":/buttons/beryllium"));
 
-    // Pass some arguments to gStreamer.
-    // For example --gst-debug-level=5
-    //
-    QGst::init(&argc, &argv);
-
     // Translations
     //
     QTranslator  translator;
-//    qDebug() << app.applicationFilePath() + "_" + QLocale::system().name();
-    if (translator.load(app.applicationFilePath() + "_" + QLocale::system().name()))
+    QString      locale = QSettings().value("locale").toString();
+    if (locale.isEmpty())
+    {
+        locale = QLocale::system().name();
+    }
+
+    if (translator.load(app.applicationFilePath() + "_" + locale))
     {
         app.installTranslator(&translator);
     }
 
-    // Start the UI
+    // UI scope
     //
-    MainWindow wnd;
+    {
+//    MainWindow wnd;
+        Worklist wnd;
 #ifdef QT_DEBUG
-    wnd.showNormal();
+        wnd.showNormal();
 #else
-    wnd.showMaximized();
+        wnd.showMaximized();
 #endif
+        errCode = app.exec();
+    }
 
-    int errCode = app.exec();
     QGst::cleanup();
     return errCode;
 }
