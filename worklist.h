@@ -26,16 +26,20 @@ class Worklist : public BaseWidget
     //
     QTableWidget*  table;
     QDateTime maxDate;
+    QPushButton* btnLoad;
 
     // DICOM
     //
     T_ASC_Network* net = nullptr;
-    T_ASC_Parameters* params = nullptr;
     T_ASC_Association* assoc = nullptr;
+    QString pendingSOPInstanceUID;
 
-    bool initAssoc();
-    void termAssoc();
-    bool findSCU(DcmDataset* dset);
+    uchar createAssociationAndGetPresentationContextID(const char* abstractSyntax);
+
+    bool findSCU(uchar presId, DcmDataset* dset);
+    bool nCreateRQ(uchar presId, DcmDataset* dset);
+    bool nSetRQ(uchar presId, DcmDataset* dset);
+
     void addRow(DcmDataset* dset);
     static void loadCallback(void *callbackData,
         T_DIMSE_C_FindRQ *request, int responseCount,
@@ -53,6 +57,9 @@ signals:
     
 public slots:
     void onLoadClick();
+    void onStartClick();
+    void onDoneClick();
+    void onAbortClick();
 
 };
 
