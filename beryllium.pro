@@ -23,10 +23,12 @@ TEMPLATE = app
 
 SOURCES += beryllium.cpp mainwindow.cpp \
     worklist.cpp \
-    basewidget.cpp
+    basewidget.cpp \
+    dcmassoc.cpp
 HEADERS += mainwindow.h \
     worklist.h \
-    basewidget.h
+    basewidget.h \
+    dcmassoc.h
 
 FORMS   +=
 

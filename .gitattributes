@@ -8,6 +8,8 @@
 /beryllium.vcxproj -text
 /beryllium.vcxproj.filters -text
 /beryllium_ru.ts -text
+/dcmassoc.cpp -text
+/dcmassoc.h -text
 /mainwindow.cpp -text
 /mainwindow.h -text
 pixmaps/add.png -text
