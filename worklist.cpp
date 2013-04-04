@@ -10,16 +10,30 @@
 #include <QSettings>
 #include <QTableWidget>
 
-#include <dcmtk/dcmnet/assoc.h>
-
+#include <dcmtk/dcmdata/dcdict.h>
+#include <dcmtk/dcmdata/dcdicent.h>
 #include <dcmtk/dcmdata/dcdeftag.h>
 #include <dcmtk/dcmdata/dcfilefo.h>
+#include <dcmtk/dcmnet/assoc.h>
 
 #ifdef QT_DEBUG
 #define DEFAULT_TIMEOUT 3 // 3 seconds for test builds
 #else
 #define DEFAULT_TIMEOUT 30 // 30 seconds for prodaction builds
 #endif
+
+static DcmTagKey columns[] =
+{
+    DCM_PatientID,
+    DCM_PatientName,
+    DCM_PatientBirthDate,
+    DCM_PatientSex,
+    DCM_ScheduledProcedureStepDescription,
+    DCM_ScheduledProcedureStepStartDate,
+    DCM_ScheduledProcedureStepStartTime,
+//    DCM_ScheduledPerformingPhysicianName,
+//    DCM_ScheduledProcedureStepStatus,
+};
 
 Q_DECLARE_METATYPE(DcmDataset)
 static int DcmDatasetMetaType = qRegisterMetaType<DcmDataset>();
@@ -118,6 +132,7 @@ static void BuildCFindDataSet(DcmDataset& ds)
     QSettings settings;
     QString modality = settings.value("modality").toString().toUpper();
     QString aet = settings.value("aet", qApp->applicationName().toUpper()).toString();
+    bool filterByDate = settings.value("filter-by-date", true).toBool();
 
     ds.putAndInsertString(DCM_SpecificCharacterSet, "ISO_IR 192"); // UTF-8
     ds.insertEmptyElement(DCM_AccessionNumber);
@@ -135,7 +150,8 @@ static void BuildCFindDataSet(DcmDataset& ds)
     {
         sps->putAndInsertString(DCM_Modality, modality.toUtf8());
         sps->putAndInsertString(DCM_ScheduledStationAETitle, aet.toUtf8());
-        sps->insertEmptyElement(DCM_ScheduledProcedureStepStartDate);
+        sps->putAndInsertString(DCM_ScheduledProcedureStepStartDate,
+            filterByDate? QDate::currentDate().toString("yyyyMMdd").toAscii(): nullptr);
         sps->insertEmptyElement(DCM_ScheduledProcedureStepStartTime);
         sps->insertEmptyElement(DCM_ScheduledPerformingPhysicianName);
         sps->insertEmptyElement(DCM_ScheduledProcedureStepDescription);
@@ -167,8 +183,15 @@ Worklist::Worklist(QWidget *parent) :
     connect(btnAbort, SIGNAL(clicked()), this, SLOT(onAbortClick()));
     buttonsLayout->addWidget(btnAbort);
 
-    table = new QTableWidget(0, 7);
-    table->setHorizontalHeaderLabels(QStringList() << "PatientID" << "PatientName" << "Date" << "Time" << "Physician" << "Description" << "Status");
+    table = new QTableWidget(0, sizeof(columns)/sizeof(columns[0]));
+    const DcmDataDictionary &globalDataDict = dcmDataDict.rdlock();
+    for (size_t i = 0; i < sizeof(columns)/sizeof(columns[0]); ++i)
+    {
+        auto dicent = globalDataDict.findEntry(columns[i], nullptr);
+        auto tagName = dicent == nullptr? columns[i].toString(): dicent->getTagName();
+        table->setHorizontalHeaderItem(i, new QTableWidgetItem(tagName.c_str()));
+    }
+    dcmDataDict.unlock();
     table->horizontalHeader()->resizeMode(QHeaderView::ResizeToContents);
 
     auto mainLayout = new QVBoxLayout();
@@ -206,29 +229,33 @@ static QTableWidgetItem* addItem(QTableWidget* table, DcmItem* dset, const DcmTa
 
 void Worklist::onAddRow(DcmDataset* dset)
 {
+    int col = 0;
     int row = table->rowCount();
     table->setRowCount(row + 1);
 
-    addItem(table, dset, DCM_PatientID,   row, 0)->
+    addItem(table, dset, DCM_PatientID,   row, col++)->
         setData(Qt::UserRole, QVariant::fromValue(*(DcmDataset*)dset->clone()));
-    addItem(table, dset, DCM_PatientName, row, 1);
+    addItem(table, dset, DCM_PatientName, row, col++);
+    addItem(table, dset, DCM_PatientBirthDate, row, col++);
+    addItem(table, dset, DCM_PatientSex, row, col++);
 
     DcmItem* procedureStepSeq = nullptr;
     dset->findAndGetSequenceItem(DCM_ScheduledProcedureStepSequence, procedureStepSeq);
     if (procedureStepSeq)
     {
-        QString datetime;
-        datetime += addItem(table, procedureStepSeq, DCM_ScheduledProcedureStepStartDate, row, 2)->text();
-        datetime += addItem(table, procedureStepSeq, DCM_ScheduledProcedureStepStartTime, row, 3)->text();
-        QDateTime date = QDateTime::fromString(datetime, "yyyyMMddHHmm");
+        addItem(table, procedureStepSeq, DCM_ScheduledProcedureStepDescription, row, col++);
+
+        QString dateStr;
+        dateStr += addItem(table, procedureStepSeq, DCM_ScheduledProcedureStepStartDate, row, col++)->text();
+        dateStr += addItem(table, procedureStepSeq, DCM_ScheduledProcedureStepStartTime, row, col++)->text();
+        QDateTime date = QDateTime::fromString(dateStr, "yyyyMMddHHmm");
         if (date < QDateTime::currentDateTime() && date > maxDate)
         {
             maxDate = date;
             table->selectRow(row);
         }
-        addItem(table, procedureStepSeq, DCM_ScheduledPerformingPhysicianName, row, 4);
-        addItem(table, procedureStepSeq, DCM_ScheduledProcedureStepDescription, row, 5);
-        addItem(table, procedureStepSeq, DCM_ScheduledProcedureStepStatus, row, 6);
+        addItem(table, procedureStepSeq, DCM_ScheduledPerformingPhysicianName, row, col++);
+        addItem(table, procedureStepSeq, DCM_ScheduledProcedureStepStatus, row, col++);
     }
     qApp->processEvents();
 }
@@ -261,7 +288,6 @@ void Worklist::onLoadClick()
 
     setCursor(Qt::WaitCursor);
     activeAssoc = &assoc;
-    connect(&assoc, SIGNAL(ttt()), this, SLOT(onttt()));
     connect(&assoc, SIGNAL(addRow(DcmDataset*)), this, SLOT(onAddRow(DcmDataset*)));
     bool ok = assoc.findSCU(&ds);
     activeAssoc = nullptr;
@@ -271,8 +297,8 @@ void Worklist::onLoadClick()
         error(assoc.getLastError());
     }
 
-    table->sortItems(3); // By time
-    table->sortItems(2); // By date
+    table->sortItems(6); // By time
+    table->sortItems(5); // By date
     table->setSortingEnabled(true);
     table->scrollToItem(table->currentItem());
     table->setFocus();

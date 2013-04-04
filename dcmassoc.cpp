@@ -109,7 +109,7 @@ bool DcmAssoc::createAssociation()
             {
                 return true;
             }
-            cond = makeOFCondition(0, 0, OF_error, "Accepted presentation context ID not found");
+            cond = OFConditionConst(0, 1, OF_error, "Accepted presentation context ID not found");
         }
     }
 

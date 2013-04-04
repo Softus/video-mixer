@@ -5,7 +5,9 @@
 #include <QIcon>
 #include <QGst/Init>
 #include "mainwindow.h"
+#ifdef WITH_DICOM
 #include "worklist.h"
+#endif
 
 int main(int argc, char *argv[])
 {
@@ -41,8 +43,12 @@ int main(int argc, char *argv[])
     // UI scope
     //
     {
-//    MainWindow wnd;
+#ifdef WITH_DICOM
         Worklist wnd;
+#else
+        MainWindow wnd;
+#endif
+
 #ifdef QT_DEBUG
         wnd.showNormal();
 #else
