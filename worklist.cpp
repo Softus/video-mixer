@@ -189,10 +189,11 @@ Worklist::Worklist(QWidget *parent) :
     {
         auto dicent = globalDataDict.findEntry(columns[i], nullptr);
         auto tagName = dicent == nullptr? columns[i].toString(): dicent->getTagName();
-        table->setHorizontalHeaderItem(i, new QTableWidgetItem(tagName.c_str()));
+        auto columnHeader = new QTableWidgetItem(tagName.c_str());
+        table->setHorizontalHeaderItem(i, columnHeader);
     }
     dcmDataDict.unlock();
-    table->horizontalHeader()->resizeMode(QHeaderView::ResizeToContents);
+    table->setSelectionBehavior(QAbstractItemView::SelectRows);
 
     auto mainLayout = new QVBoxLayout();
 //    mainLayout->setMenuBar(createMenu());
