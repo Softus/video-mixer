@@ -5,9 +5,6 @@
 #include <QIcon>
 #include <QGst/Init>
 #include "mainwindow.h"
-#ifdef WITH_DICOM
-#include "worklist.h"
-#endif
 
 int main(int argc, char *argv[])
 {
@@ -43,17 +40,8 @@ int main(int argc, char *argv[])
     // UI scope
     //
     {
-#ifdef WITH_DICOM
-        Worklist wnd;
-#else
         MainWindow wnd;
-#endif
-
-#ifdef QT_DEBUG
-        wnd.showNormal();
-#else
-        wnd.showMaximized();
-#endif
+        wnd.showMaybeMaximized();
         errCode = app.exec();
     }
 

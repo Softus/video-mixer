@@ -18,6 +18,7 @@ class QPushButton;
 class QListWidget;
 class QLabel;
 class QTimer;
+class Worklist;
 
 class MainWindow : public BaseWidget
 {
@@ -35,14 +36,15 @@ class MainWindow : public BaseWidget
     QPushButton* btnStart;
     QPushButton* btnRecord;
     QPushButton* btnSnapshot;
-    int          iconSize;
 
+#ifdef WITH_DICOM
+    Worklist*     worklist;
+#endif
     QLabel*      imageOut;
 //	QListWidget* imageList;
     QGst::Ui::VideoWidget* displayWidget;
 
     QMenuBar* createMenu();
-    QPushButton* createButton(const char *slot);
     void updateStartButton();
     void updateRecordButton();
     void updateRecordAll();
@@ -86,6 +88,9 @@ protected:
     virtual void resizeEvent(QResizeEvent *evt);
 
 private slots:
+#ifdef WITH_DICOM
+    void onShowWorkListClick();
+#endif
     void onStartClick();
     void onSnapshotClick();
     void onRecordClick();

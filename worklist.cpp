@@ -9,6 +9,7 @@
 #include <QPushButton>
 #include <QSettings>
 #include <QTableWidget>
+#include <QTimer>
 
 #include <dcmtk/dcmdata/dcdict.h>
 #include <dcmtk/dcmdata/dcdicent.h>
@@ -164,13 +165,16 @@ static void BuildCFindDataSet(DcmDataset& ds)
 Worklist::Worklist(QWidget *parent) :
     BaseWidget(parent)
 {
+    QSettings settings;
+    iconSize = settings.value("icon-size", iconSize).toInt();
+
     auto buttonsLayout = new QHBoxLayout();
-    btnLoad = new QPushButton(tr("Load"));
+
+    btnLoad = createButton(":/buttons/load_worklist", tr("&Load"), SLOT(onLoadClick()));
     btnLoad->setAutoDefault(true);
-    connect(btnLoad, SIGNAL(clicked()), this, SLOT(onLoadClick()));
     buttonsLayout->addWidget(btnLoad);
 
-    auto btnDetail = new QPushButton(tr("Details"));
+    auto btnDetail = createButton(":/buttons/details", tr("&Details"), SLOT(onDetailsClick()));
     buttonsLayout->addWidget(btnDetail);
 
     auto btnStart = new QPushButton(tr("Start"));
@@ -202,7 +206,7 @@ Worklist::Worklist(QWidget *parent) :
 
     setLayout(mainLayout);
 
-    int timeout = QSettings().value("timeout", DEFAULT_TIMEOUT).toInt();
+    int timeout = settings.value("timeout", DEFAULT_TIMEOUT).toInt();
     OFCondition cond = ASC_initializeNetwork(NET_REQUESTOR, 0, timeout, &net);
     if (cond.bad())
     {
@@ -212,6 +216,10 @@ Worklist::Worklist(QWidget *parent) :
     {
         btnLoad->setEnabled(true);
     }
+
+    // Start loading of worklist right after the window is shown for the first time
+    //
+    QTimer::singleShot(0, this, SLOT(onLoadClick()));
 }
 
 Worklist::~Worklist()

@@ -1,4 +1,7 @@
 #include "mainwindow.h"
+#ifdef WITH_DICOM
+#include "worklist.h"
+#endif
 #include <QApplication>
 #include <QResizeEvent>
 #include <QFrame>
@@ -20,8 +23,6 @@
 #include <QGst/Event>
 #include <QGst/Clock>
 #include <gst/gstdebugutils.h>
-
-#define DEFAULT_ICON_SIZE 96
 
 static inline QBoxLayout::Direction bestDirection(const QSize &s)
 {
@@ -90,19 +91,23 @@ MainWindow::MainWindow(QWidget *parent) :
     BaseWidget(parent),
     running(false),
     recording(false),
-    iconSize(DEFAULT_ICON_SIZE)
+    worklist(nullptr)
 {
     QSettings settings;
     iconSize = settings.value("icon-size", iconSize).toInt();
 
     auto buttonsLayout = new QHBoxLayout();
+
+#ifdef WITH_DICOM
+    auto btnWorkList = createButton(":/buttons/show_worklist", tr("Show\n&work list"), SLOT(onShowWorkListClick()));
+    buttonsLayout->addWidget(btnWorkList);
+#endif
+
     btnStart = createButton(SLOT(onStartClick()));
     btnStart->setAutoDefault(true);
     buttonsLayout->addWidget(btnStart);
 
-    btnSnapshot = createButton(SLOT(onSnapshotClick()));
-    btnSnapshot->setIcon(QIcon(":/buttons/camera"));
-    btnSnapshot->setText(tr("Take\nsnapshot"));
+    btnSnapshot = createButton(":/buttons/camera", tr("Take\nsnapshot"), SLOT(onSnapshotClick()));
     buttonsLayout->addWidget(btnSnapshot);
 
     btnRecord = createButton(SLOT(onRecordClick()));
@@ -188,16 +193,6 @@ QMenuBar* MainWindow::createMenu()
 
     mnuBar->show();
     return mnuBar;
-}
-
-QPushButton* MainWindow::createButton(const char *slot)
-{
-    auto btn = new QPushButton();
-    btn->setMinimumSize(QSize(iconSize, iconSize + 8));
-    btn->setIconSize(QSize(iconSize, iconSize));
-    connect(btn, SIGNAL(clicked()), this, slot);
-
-    return btn;
 }
 
 /*
@@ -759,3 +754,15 @@ void MainWindow::toggleSetting()
     bool enable = !settings.value(propName).toBool();
     settings.setValue(propName, enable);
 }
+
+#ifdef WITH_DICOM
+void MainWindow::onShowWorkListClick()
+{
+    if (worklist == nullptr)
+    {
+        worklist = new Worklist();
+    }
+    worklist->showMaybeMaximized();
+    worklist->activateWindow();
+}
+#endif

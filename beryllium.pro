@@ -19,7 +19,7 @@ unix {
 
 dicom {
     DEFINES += WITH_DICOM
-    LIBS += -ldcmnet -lwrap  -ldcmdata -ldcmtls -loflog -lofstd
+    LIBS += -ldcmnet -lwrap  -ldcmdata -ldcmtls -loflog -lofstd -lssl
     SOURCES += worklist.cpp dcmassoc.cpp
     HEADERS += worklist.h dcmassoc.h
 }

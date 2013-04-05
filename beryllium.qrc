@@ -7,5 +7,9 @@
         <file alias="pause">pixmaps/pause.png</file>
         <file alias="play">pixmaps/play.png</file>
         <file alias="beryllium">pixmaps/beryllium.png</file>
+        <file alias="details">pixmaps/details.png</file>
+        <file alias="load_worklist">pixmaps/load_download.png</file>
+        <file alias="add_patient">pixmaps/user_add.png</file>
+        <file alias="show_worklist">pixmaps/user_manage.png</file>
     </qresource>
 </RCC>
