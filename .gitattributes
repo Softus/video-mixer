@@ -15,9 +15,13 @@
 pixmaps/add.png -text
 pixmaps/beryllium.png -text
 pixmaps/camera.png -text
+pixmaps/details.png -text
+pixmaps/load_download.png -text
 pixmaps/pause.png -text
 pixmaps/play.png -text
 pixmaps/record_on.png -text
 pixmaps/stop.png -text
+pixmaps/user_add.png -text
+pixmaps/user_manage.png -text
 /worklist.cpp -text
 /worklist.h -text
