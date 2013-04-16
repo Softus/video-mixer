@@ -45,57 +45,70 @@
       <Extensions>ts;xlf</Extensions>
       <ParseFiles>false</ParseFiles>
     </Filter>
-    <Filter Include="Generated Files\Debug">
-      <UniqueIdentifier>{0b3ced24-1da5-432f-a388-796d7f94d9a9}</UniqueIdentifier>
-      <Extensions>cpp;moc</Extensions>
-      <SourceControlFiles>False</SourceControlFiles>
-    </Filter>
-    <Filter Include="Generated Files\Release">
-      <UniqueIdentifier>{c2e965b6-4e87-410f-a141-52db45da1547}</UniqueIdentifier>
-      <Extensions>cpp;moc</Extensions>
-      <SourceControlFiles>False</SourceControlFiles>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="basewidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="beryllium.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="mainwindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_mainwindow.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_mainwindow.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\qrc_beryllium.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <CustomBuild Include="basewidget.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
     <CustomBuild Include="mainwindow.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="debug\moc_basewidget.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_basewidget.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_mainwindow.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_mainwindow.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\qrc_beryllium.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\qrc_beryllium.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
     <None Include="beryllium_ru.ts">
       <Filter>Translation Files</Filter>
-    </None>
-    <None Include="pixmaps\beryllium.png">
-      <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="pixmaps\add.png">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="pixmaps\camera.png">
+    <None Include="pixmaps\beryllium.png">
       <Filter>Resource Files</Filter>
     </None>
     <CustomBuild Include="beryllium.qrc">
       <Filter>Resource Files</Filter>
     </CustomBuild>
+    <None Include="pixmaps\camera.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="pixmaps\details.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="pixmaps\load_download.png">
+      <Filter>Resource Files</Filter>
+    </None>
     <None Include="pixmaps\pause.png">
       <Filter>Resource Files</Filter>
     </None>
@@ -108,5 +121,16 @@
     <None Include="pixmaps\stop.png">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="pixmaps\user_add.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="pixmaps\user_manage.png">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="qwaitcursor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

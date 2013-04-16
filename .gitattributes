@@ -8,8 +8,6 @@
 /beryllium.vcxproj -text
 /beryllium.vcxproj.filters -text
 /beryllium_ru.ts -text
-/dcmassoc.cpp -text
-/dcmassoc.h -text
 /dcmclient.cpp -text
 /dcmclient.h -text
 /detailsdialog.cpp -text
