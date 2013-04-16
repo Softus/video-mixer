@@ -20,15 +20,17 @@ unix {
 dicom {
     DEFINES += WITH_DICOM
     LIBS += -ldcmnet -lwrap  -ldcmdata -ldcmtls -loflog -lofstd -lssl
-    SOURCES += worklist.cpp dcmassoc.cpp
-    HEADERS += worklist.h dcmassoc.h
+    SOURCES += worklist.cpp startstudydialog.cpp dcmclient.cpp detailsdialog.cpp
+    HEADERS += worklist.h startstudydialog.h dcmclient.h detailsdialog.h
 }
 
 TARGET   = beryllium
 TEMPLATE = app
 
 SOURCES += beryllium.cpp mainwindow.cpp basewidget.cpp
-HEADERS += mainwindow.h basewidget.h
+HEADERS += mainwindow.h basewidget.h waitcursor.h
+
+
 
 FORMS   +=
 

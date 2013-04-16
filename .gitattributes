@@ -10,6 +10,10 @@
 /beryllium_ru.ts -text
 /dcmassoc.cpp -text
 /dcmassoc.h -text
+/dcmclient.cpp -text
+/dcmclient.h -text
+/detailsdialog.cpp -text
+/detailsdialog.h -text
 /mainwindow.cpp -text
 /mainwindow.h -text
 pixmaps/add.png -text
@@ -23,5 +27,7 @@ pixmaps/record_on.png -text
 pixmaps/stop.png -text
 pixmaps/user_add.png -text
 pixmaps/user_manage.png -text
+/startstudydialog.cpp -text
+/startstudydialog.h -text
 /worklist.cpp -text
 /worklist.h -text

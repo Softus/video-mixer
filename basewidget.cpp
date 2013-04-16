@@ -15,7 +15,7 @@ BaseWidget::BaseWidget(QWidget *parent) :
 void BaseWidget::error(const QString& msg)
 {
     qCritical() << msg;
-    QMessageBox(QMessageBox::Critical, windowTitle(), msg, QMessageBox::Ok, this).exec();
+    QMessageBox::critical(this, windowTitle(), msg, QMessageBox::Ok);
 }
 
 void BaseWidget::showMaybeMaximized()
@@ -26,7 +26,6 @@ void BaseWidget::showMaybeMaximized()
         showMaximized();
 #endif
 }
-
 
 QPushButton* BaseWidget::createButton(const char *slot)
 {

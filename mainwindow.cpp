@@ -1,6 +1,13 @@
 #include "mainwindow.h"
+#include "qwaitcursor.h"
+
 #ifdef WITH_DICOM
 #include "worklist.h"
+#include "startstudydialog.h"
+#include "dcmclient.h"
+
+#include <dcmtk/dcmdata/dcuid.h>
+#include <dcmtk/dcmdata/dcdatset.h>
 #endif
 #include <QApplication>
 #include <QResizeEvent>
@@ -15,6 +22,7 @@
 #include <QTimer>
 #include <QMenu>
 #include <QMenuBar>
+#include <QMessageBox>
 
 #include <QGlib/Type>
 #include <QGlib/Connect>
@@ -89,9 +97,11 @@ static void Dump(QGst::ElementPtr elm)
 
 MainWindow::MainWindow(QWidget *parent) :
     BaseWidget(parent),
+#ifdef WITH_DICOM
+    worklist(nullptr),
+#endif
     running(false),
-    recording(false),
-    worklist(nullptr)
+    recording(false)
 {
     QSettings settings;
     iconSize = settings.value("icon-size", iconSize).toInt();
@@ -162,12 +172,17 @@ MainWindow::~MainWindow()
     {
         releasePipeline();
     }
+
+#ifdef WITH_DICOM
+    delete worklist;
+    worklist = nullptr;
+#endif
 }
 
 QMenuBar* MainWindow::createMenu()
 {
     auto mnuBar = new QMenuBar();
-    auto mnu   = new QMenu(tr("&Menu"));
+    auto mnu    = new QMenu(tr("&Menu"));
 
     mnu->addAction(tr("&About Qt"), qApp, SLOT(aboutQt()));
     mnu->addSeparator();
@@ -555,8 +570,41 @@ void MainWindow::onElementMessage(const QGst::ElementMessagePtr& message)
 
 void MainWindow::onStartClick()
 {
+    QWaitCursor wait(this);
+
     if (!running)
     {
+#ifdef WITH_DICOM
+        if (worklist == nullptr)
+        {
+            worklist = new Worklist();
+        }
+
+        StartStudyDialog dlg(worklist, this);
+        if (QDialog::Rejected == dlg.exec())
+        {
+            // Cancelled
+            //
+            return;
+        }
+
+        auto patientDs = worklist->getPatientDS();
+        if (patientDs == nullptr)
+        {
+            error(tr("No patient selected"));
+            return;
+        }
+
+        DcmClient client(UID_ModalityPerformedProcedureStepSOPClass);
+        pendingSOPInstanceUID = client.nCreateRQ(patientDs);
+        delete patientDs;
+
+        if (pendingSOPInstanceUID.isNull())
+        {
+            error(client.getLastError());
+            return;
+        }
+#endif
         pipeline = createPipeline();
         if (pipeline)
         {
@@ -600,9 +648,50 @@ void MainWindow::onStartClick()
     }
     else
     {
+        int userChoice;
+#ifdef WITH_DICOM
+        userChoice = QMessageBox::question(this, windowTitle(),
+           tr("Send study results to the server?"), tr("Continue the study"), tr ("Don't sent"), tr("Send"), 2, 0);
+
+        if (userChoice == 0)
+        {
+            // Continue the study
+            //
+            return;
+        }
+#else
+        userChoice = QMessageBox::question(this, windowTitle(),
+           tr("End the study?"), QMessageBox::Yes | QMessageBox::Default, QMessageBox::No);
+
+        if (userChoice == QMessageBox::No)
+        {
+            // Don't end the study
+            //
+            return;
+        }
+#endif
+
         running = recording = false;
         updateRecordButton();
         releasePipeline();
+
+#ifdef WITH_DICOM
+        if (!pendingSOPInstanceUID.isEmpty())
+        {
+            DcmClient client(UID_ModalityPerformedProcedureStepSOPClass);
+            if (!client.nSetRQ(pendingSOPInstanceUID))
+            {
+                error(client.getLastError());
+            }
+        }
+
+        if (userChoice == 2)
+        {
+            // TODO: send
+        }
+
+        pendingSOPInstanceUID.clear();
+#endif
     }
 
     updateStartButton();

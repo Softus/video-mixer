@@ -24,11 +24,6 @@ class MainWindow : public BaseWidget
 {
     Q_OBJECT
 
-    // State machine
-    //
-    bool running;
-    bool recording;
-
     // UI
     //
     QBoxLayout*  outputLayout;
@@ -39,6 +34,7 @@ class MainWindow : public BaseWidget
 
 #ifdef WITH_DICOM
     Worklist*     worklist;
+    QString       pendingSOPInstanceUID;
 #endif
     QLabel*      imageOut;
 //	QListWidget* imageList;
@@ -48,6 +44,11 @@ class MainWindow : public BaseWidget
     void updateStartButton();
     void updateRecordButton();
     void updateRecordAll();
+
+    // State machine
+    //
+    bool running;
+    bool recording;
 
     // GStreamer pipeline
     //

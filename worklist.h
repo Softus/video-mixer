@@ -8,11 +8,8 @@ class QBoxLayout;
 class QPushButton;
 class QTableWidget;
 
-struct T_ASC_Network;
 class DcmDataset;
-class DcmTagKey;
-class OFCondition;
-class DcmAssoc;
+class DcmClient;
 
 class Worklist : public BaseWidget
 {
@@ -20,19 +17,21 @@ class Worklist : public BaseWidget
 
     // UI
     //
-    QTableWidget*  table;
-    QDateTime maxDate;
-    QPushButton* btnLoad;
+    QTableWidget* table;
+    QDateTime     maxDate;
+    QPushButton*  btnLoad;
+    QPushButton*  btnDetail;
 
     // DICOM
     //
-    T_ASC_Network* net = nullptr;
-    DcmAssoc* activeAssoc = nullptr;
+    DcmClient* activeConnection = nullptr;
     QString pendingSOPInstanceUID;
 
 public:
     explicit Worklist(QWidget *parent = 0);
     ~Worklist();
+
+    DcmDataset* getPatientDS();
 
 protected:
     virtual void closeEvent(QCloseEvent *);
@@ -41,9 +40,7 @@ signals:
     
 public slots:
     void onLoadClick();
-    void onStartClick();
-    void onDoneClick();
-    void onAbortClick();
+    void onShowDetailsClick();
     void onAddRow(DcmDataset* responseIdentifiers);
 };
 
