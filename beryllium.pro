@@ -28,7 +28,7 @@ TARGET   = beryllium
 TEMPLATE = app
 
 SOURCES += beryllium.cpp mainwindow.cpp basewidget.cpp
-HEADERS += mainwindow.h basewidget.h waitcursor.h
+HEADERS += mainwindow.h basewidget.h qwaitcursor.h
 
 
 

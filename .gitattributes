@@ -27,6 +27,7 @@ pixmaps/record_on.png -text
 pixmaps/stop.png -text
 pixmaps/user_add.png -text
 pixmaps/user_manage.png -text
+/qwaitcursor.h -text
 /startstudydialog.cpp -text
 /startstudydialog.h -text
 /worklist.cpp -text
