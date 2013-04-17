@@ -6,12 +6,18 @@
 #include <dcmtk/dcmdata/dcdeftag.h>
 #include <dcmtk/dcmdata/dcfilefo.h>
 
+#include <dcmtk/dcmdata/libi2d/i2d.h>
+#include <dcmtk/dcmdata/libi2d/i2djpgs.h>
+#include <dcmtk/dcmdata/libi2d/i2dplnsc.h>
+
 #include <dcmtk/dcmnet/assoc.h>
 #include <dcmtk/dcmnet/dimse.h>
 
 #include <QApplication>
 #include <QDebug>
+#include <QDir>
 #include <QSettings>
+#include <QProgressDialog>
 
 #ifdef QT_DEBUG
 #define DEFAULT_TIMEOUT 3 // 3 seconds for test builds
@@ -53,6 +59,27 @@ static void BuildCFindDataSet(DcmDataset& ds)
     }
 }
 
+static void BuildCStoreDataSet(/*const*/ DcmDataset& patientDs, DcmDataset& cStoreDs)
+{
+    QDateTime now = QDateTime::currentDateTime();
+    QSettings settings;
+    QString modality = settings.value("modality").toString().toUpper();
+    QString aet = settings.value("aet", qApp->applicationName().toUpper()).toString();
+
+    patientDs.findAndInsertCopyOfElement(DCM_SpecificCharacterSet, &cStoreDs);
+    patientDs.findAndInsertCopyOfElement(DCM_PatientName, &cStoreDs);
+    patientDs.findAndInsertCopyOfElement(DCM_PatientID, &cStoreDs);
+    patientDs.findAndInsertCopyOfElement(DCM_PatientBirthDate, &cStoreDs);
+    patientDs.findAndInsertCopyOfElement(DCM_PatientSex, &cStoreDs);
+    patientDs.findAndInsertCopyOfElement(DCM_AccessionNumber, &cStoreDs);
+
+    cStoreDs.putAndInsertString(DCM_StudyDate, now.toString("yyyyMMdd").toAscii());
+    cStoreDs.putAndInsertString(DCM_StudyTime, now.toString("HHmmss").toAscii());
+
+    cStoreDs.putAndInsertString(DCM_Manufacturer, "IRK-DC");
+    cStoreDs.putAndInsertString(DCM_ManufacturerModelName, "Beryllium");
+}
+
 static void BuildNCreateDataSet(/*const*/ DcmDataset& patientDs, DcmDataset& nCreateDs)
 {
     QDateTime now = QDateTime::currentDateTime();
@@ -88,7 +115,7 @@ static void BuildNCreateDataSet(/*const*/ DcmDataset& patientDs, DcmDataset& nCr
     nCreateDs.insertEmptyElement(DCM_PerformedProcedureStepEndTime);
 
     nCreateDs.putAndInsertString(DCM_Modality, modality.toUtf8());
-    nCreateDs.insertEmptyElement(DCM_StudyID);
+    patientDs.findAndInsertCopyOfElement(DCM_StudyID, &nCreateDs);
     nCreateDs.insertEmptyElement(DCM_PerformedProtocolCodeSequence);
     nCreateDs.insertEmptyElement(DCM_PerformedSeriesSequence);
 
@@ -173,7 +200,7 @@ void DcmClient::abort()
     }
 }
 
-T_ASC_Parameters* DcmClient::initAssocParams()
+T_ASC_Parameters* DcmClient::initAssocParams(const char * transferSyntax)
 {
     QSettings settings;
     QString missedParameter = tr("Required settings parameter %1 is missing");
@@ -215,19 +242,31 @@ T_ASC_Parameters* DcmClient::initAssocParams()
             gethostname(localHost, sizeof(localHost) - 1);
             ASC_setPresentationAddresses(params, localHost, calledPeerAddress.toUtf8());
 
-            /* Set the presentation contexts which will be negotiated */
-            /* when the network connection will be established */
+            if (transferSyntax)
+            {
+                const char* arr[] = { transferSyntax };
+                cond = ASC_addPresentationContext(params, 1, abstractSyntax, arr, 1);
+            }
+            else
+            {
+                /* Set the presentation contexts which will be negotiated */
+                /* when the network connection will be established */
+                const char* transferSyntaxes[] =
+                {
 #if __BYTE_ORDER == __LITTLE_ENDIAN
-            const char* transferSyntaxes[] = { UID_LittleEndianExplicitTransferSyntax,
-               UID_BigEndianExplicitTransferSyntax, UID_LittleEndianImplicitTransferSyntax };
+                    UID_LittleEndianExplicitTransferSyntax, UID_BigEndianExplicitTransferSyntax,
 #elif __BYTE_ORDER == __BIG_ENDIAN
-            const char* transferSyntaxes[] = { UID_BigEndianExplicitTransferSyntax,
-               UID_LittleEndianExplicitTransferSyntax, UID_LittleEndianImplicitTransferSyntax };
+                    UID_BigEndianExplicitTransferSyntax, UID_LittleEndianExplicitTransferSyntax,
 #else
 #error "Unsupported byte order"
 #endif
-            cond = ASC_addPresentationContext(params, 1, abstractSyntax,
-                transferSyntaxes, sizeof(transferSyntaxes)/sizeof(transferSyntaxes[0]));
+                    UID_LittleEndianImplicitTransferSyntax
+                };
+
+                cond = ASC_addPresentationContext(params, 1, abstractSyntax,
+                    transferSyntaxes, sizeof(transferSyntaxes)/sizeof(transferSyntaxes[0]));
+            }
+
             if (cond.good())
             {
                 return params;
@@ -241,11 +280,11 @@ T_ASC_Parameters* DcmClient::initAssocParams()
     return nullptr;
 }
 
-bool DcmClient::createAssociation()
+bool DcmClient::createAssociation(const char * transferSyntax)
 {
     /* create DcmAssoc, i.e. try to establish a network connection to another */
     /* DICOM application. This call creates an instance of T_ASC_DcmAssoc*. */
-    T_ASC_Parameters* params = initAssocParams();
+    T_ASC_Parameters* params = initAssocParams(transferSyntax);
     if (params)
     {
         qDebug() << "Requesting DcmAssoc";
@@ -256,7 +295,8 @@ bool DcmClient::createAssociation()
             qDebug() << "DcmAssoc accepted (max send PDV: " << assoc->sendPDVLength << ")";
 
             /* figure out which of the accepted presentation contexts should be used */
-            presId = ASC_findAcceptedPresentationContextID(assoc, abstractSyntax);
+            presId = transferSyntax? ASC_findAcceptedPresentationContextID(assoc, abstractSyntax, transferSyntax):
+                                     ASC_findAcceptedPresentationContextID(assoc, abstractSyntax);
             if (presId != 0)
             {
                 return true;
@@ -359,7 +399,7 @@ QString DcmClient::nCreateRQ(DcmDataset* patientDs)
     return QString::fromAscii(rsp.msg.NCreateRSP.AffectedSOPInstanceUID);
 }
 
-bool DcmClient::nSetRQ(const QString& pendingSOPInstanceUID)
+bool DcmClient::nSetRQ(const QString& sopInstance)
 {
     if (!createAssociation())
     {
@@ -379,7 +419,7 @@ bool DcmClient::nSetRQ(const QString& pendingSOPInstanceUID)
     req.CommandField = DIMSE_N_SET_RQ;
     req.msg.NSetRQ.MessageID = assoc->nextMsgID++;;
     strcpy(req.msg.NSetRQ.RequestedSOPClassUID, abstractSyntax);
-    strcpy(req.msg.NSetRQ.RequestedSOPInstanceUID, pendingSOPInstanceUID.toAscii());
+    strcpy(req.msg.NSetRQ.RequestedSOPInstanceUID, sopInstance.toAscii());
     req.msg.NSetRQ.DataSetType = DIMSE_DATASET_PRESENT;
 
     OFCondition cond = DIMSE_sendMessageUsingMemoryData(assoc, presId, &req, nullptr, &nSetDs, nullptr, nullptr);
@@ -406,3 +446,111 @@ bool DcmClient::nSetRQ(const QString& pendingSOPInstanceUID)
     return true;
 }
 
+static void
+progressCallback(void * /*callbackData*/,
+  T_DIMSE_StoreProgress *progress,
+  T_DIMSE_C_StoreRQ * req)
+{
+    qDebug() << "progress " << progress->state;
+  if (progress->state == DIMSE_StoreBegin)
+  {
+    OFString str;
+    DIMSE_dumpMessage(str, *req, DIMSE_OUTGOING);
+    qDebug() << str.c_str();
+  }
+}
+
+bool DcmClient::cStoreRQ(DcmDataset* ds, int writeXfer, const QString& sopInstance)
+{
+    DcmXfer filexfer((E_TransferSyntax)writeXfer);
+
+    // Request association only at the first time
+    //
+    if (!assoc && !createAssociation(filexfer.getXferID()))
+    {
+        return nullptr;
+    }
+
+    T_DIMSE_C_StoreRQ req;
+    T_DIMSE_C_StoreRSP rsp;
+    bzero((char*)&req, sizeof(req));
+    bzero((char*)&rsp, sizeof(rsp));
+    DcmDataset *statusDetail = nullptr;
+
+    /* prepare the transmission of data */
+    req.MessageID = assoc->nextMsgID++;
+    strcpy(req.AffectedSOPClassUID, abstractSyntax);
+    strcpy(req.AffectedSOPInstanceUID, sopInstance.toAscii());
+    req.DataSetType = DIMSE_DATASET_PRESENT;
+    req.Priority = DIMSE_PRIORITY_LOW;
+
+    /* finally conduct transmission of data */
+    int timeout = QSettings().value("timeout", DEFAULT_TIMEOUT).toInt();
+    cond = DIMSE_storeUser(assoc, presId, &req,
+      nullptr, ds, progressCallback, nullptr,
+      0 == timeout? DIMSE_BLOCKING: DIMSE_NONBLOCKING, timeout,
+      &rsp, &statusDetail);
+
+    delete statusDetail;
+    return cond.good();
+}
+
+bool DcmClient::sendToServer(DcmDataset* dset, const QString& sopInstance,
+                             const QDir* path, QProgressDialog* pdlg)
+{
+    Image2Dcm i2d;
+    I2DJpegSource src;
+    I2DOutputPlugNewSC dst;
+    E_TransferSyntax writeXfer;
+    int instanceNumber = 0;
+
+    char seriesUID[100];
+    char studyUID[100];
+    dcmGenerateUniqueIdentifier(seriesUID, SITE_SERIES_UID_ROOT);
+    dcmGenerateUniqueIdentifier(studyUID,  SITE_STUDY_UID_ROOT);
+
+    for (uint i = 0; !pdlg->wasCanceled() && i < path->count(); ++i)
+    {
+        pdlg->setValue(i);
+        pdlg->setLabelText(tr("Storing '%1'").arg(path->operator[](i)));
+        qApp->processEvents();
+
+        src.setImageFile(path->absoluteFilePath(path->operator[](i)).toLocal8Bit().constBegin());
+
+        DcmDataset *resultObject = nullptr;
+        cond = i2d.convert(&src, &dst, resultObject, writeXfer);
+        qApp->processEvents();
+        if (!pdlg->wasCanceled() && cond.good())
+        {
+          resultObject->putAndInsertString(DCM_SOPInstanceUID, sopInstance.toAscii());
+          resultObject->putAndInsertOFStringArray(DCM_SeriesInstanceUID, seriesUID);
+          resultObject->putAndInsertOFStringArray(DCM_StudyInstanceUID,  studyUID);
+
+          char buf[100];
+          sprintf(buf, "%ld", OFstatic_cast(long, instanceNumber++));
+          cond = resultObject->putAndInsertOFStringArray(DCM_InstanceNumber, buf);
+          if (cond.bad())
+              return false;
+
+          BuildCStoreDataSet(*dset, *resultObject);
+//          DcmFileFormat dcmff(resultObject);
+//          cond = dcmff.saveFile(src.getImageFile().append(".dcm").c_str(), writeXfer);
+          cStoreRQ(dset, writeXfer, sopInstance);
+        }
+        delete resultObject;
+
+        if (cond.bad())
+        {
+            if (0 == strcmp(cond.text(), "Not a JPEG file"))
+            {
+                cond = ECC_Normal;
+            }
+            else
+            {
+                return false;
+            }
+        }
+    }
+
+    return cond.good();
+}

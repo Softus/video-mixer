@@ -8,6 +8,7 @@
 
 #include <dcmtk/dcmdata/dcuid.h>
 #include <dcmtk/dcmdata/dcdatset.h>
+
 #endif
 #include <QApplication>
 #include <QResizeEvent>
@@ -23,6 +24,7 @@
 #include <QMenu>
 #include <QMenuBar>
 #include <QMessageBox>
+#include <QProgressDialog>
 
 #include <QGlib/Type>
 #include <QGlib/Connect>
@@ -237,13 +239,14 @@ QGst::PipelinePtr MainWindow::createPipeline()
 
     // Default values for all profiles
     //
-    imageFileName = settings.value("image-file", "'/video/'yyyy-MM-dd/HH-mm'/image%03d.jpg'").toString();
-     clipFileName = settings.value("clip-file",  "'/video/'yyyy-MM-dd/HH-mm'/clip%03d.mpg'").toString();
-    videoFileName = settings.value("video-file", "'/video/'yyyy-MM-dd/HH-mm'/video.mpg'").toString();
 
     bool enableVideo = settings.value("enable-video").toBool();
     bool enableRtp   = settings.value("enable-rtp").toBool();
 
+    QString outputPathFormat  = settings.value("output-path", "'/video/'yyyy-MM-dd/HH-mm'").toString();
+    QString videoFileName     = settings.value("video-file", "video.mpg").toString();
+    QString clipFileName      = settings.value("clip-file",  "clip%03d.mpg").toString();
+    QString imageFileName     = settings.value("image-file", "image%03d.jpg").toString();
     QString srcDef            = settings.value("src", "autovideosrc").toString();
     QString displaySinkDef    = settings.value("display-sink",  "timeoverlay name=displayoverlay ! autovideosink name=displaysink async=0").toString();
     QString videoEncoderDef   = settings.value("video-encoder", "queue max-size-bytes=0 ! ffenc_mpeg2video name=videoencoder bitrate=2000").toString();
@@ -268,11 +271,11 @@ QGst::PipelinePtr MainWindow::createPipeline()
 
     // Override a value with profile-specific one
     //
-    imageFileName = settings.value("image-file", imageFileName).toString();
-     clipFileName = settings.value("clip-file",   clipFileName).toString();
-    videoFileName = settings.value("video-file", videoFileName).toString();
-
-    srcDef            = settings.value("src", srcDef).toString();
+    outputPathFormat  = settings.value("output-path",   outputPathFormat).toString();
+    videoFileName     = settings.value("video-file",    videoFileName).toString();
+    clipFileName      = settings.value("clip-file",     clipFileName).toString();
+    imageFileName     = settings.value("image-file",    imageFileName).toString();
+    srcDef            = settings.value("src",           srcDef).toString();
     displaySinkDef    = settings.value("display-sink",  displaySinkDef).toString();
     videoEncoderDef   = settings.value("video-encoder", videoEncoderDef).toString();
     videoSinkDef      = settings.value("video-sink",    videoSinkDef).toString();
@@ -282,6 +285,14 @@ QGst::PipelinePtr MainWindow::createPipeline()
     imageSinkDef      = settings.value("image-sink",    imageSinkDef).toString();
 
     settings.endGroup();
+
+    const QString& outputPathStr = QDateTime::currentDateTime().toString(outputPathFormat);
+    outputPath = QDir(outputPathStr);
+    if (!outputPath.mkpath("."))
+    {
+        error(tr("Failed to create '%1'").arg(outputPathStr));
+        return pl;
+    }
 
     if (videoSinkDef.isEmpty())
     {
@@ -352,12 +363,25 @@ QGst::PipelinePtr MainWindow::createPipeline()
         {
             videoSink  = pl->getElementByName("videosink");
             if (!videoSink)
+            {
                 qCritical() << "Element videosink not found";
+            }
+            else
+            {
+                videoSink->setProperty("location", outputPath.absoluteFilePath(videoFileName));
+            }
         }
 
         clipSink  = pl->getElementByName("clipsink");
         if (!clipSink)
+        {
             qCritical() << "Element clipsink not found";
+        }
+        else
+        {
+            clipSink->setProperty("location", outputPath.absoluteFilePath(clipFileName));
+            clipSink->setProperty("index", 0);
+        }
 
         imageValve = pl->getElementByName("imagevalve");
         if (!imageValve)
@@ -371,7 +395,14 @@ QGst::PipelinePtr MainWindow::createPipeline()
 
         imageSink  = pl->getElementByName("imagesink");
         if (!imageSink)
+        {
             qCritical() << "Element imagesink not found";
+        }
+        else
+        {
+            imageSink->setProperty("location", outputPath.absoluteFilePath(imageFileName));
+            imageSink->setProperty("index", 0);
+        }
 
         if (enableRtp)
         {
@@ -414,18 +445,11 @@ void MainWindow::releasePipeline()
     pipeline->getState(NULL, NULL, -1);
 
     displaySink.clear();
-
     imageValve.clear();
     imageSink.clear();
-    imageFileName.clear();
-
     clipValve.clear();
     clipSink.clear();
-    clipFileName.clear();
-
     videoSink.clear();
-    videoFileName.clear();
-
     rtpSink.clear();
 
     pipeline.clear();
@@ -608,30 +632,6 @@ void MainWindow::onStartClick()
         pipeline = createPipeline();
         if (pipeline)
         {
-            const QDateTime now = QDateTime::currentDateTime();
-            if (videoSink)
-            {
-                const QString currentVideoFileName(now.toString(videoFileName));
-                QDir::current().mkpath(QFileInfo(currentVideoFileName).absolutePath());
-                videoSink->setProperty("location", currentVideoFileName);
-            }
-
-            if (clipSink)
-            {
-                const QString currentClipFileName(now.toString(clipFileName));
-                QDir::current().mkpath(QFileInfo(currentClipFileName).absolutePath());
-                clipSink->setProperty("location", currentClipFileName);
-                clipSink->setProperty("index", 0);
-            }
-
-            if (imageSink)
-            {
-                const QString currentImageFileName(now.toString(imageFileName));
-                QDir::current().mkpath(QFileInfo(currentImageFileName).absolutePath());
-                imageSink->setProperty("location", currentImageFileName);
-                imageSink->setProperty("index", 0);
-            }
-
             if (clipValve)
             {
                 clipValve->setProperty("drop", TRUE);
@@ -687,7 +687,7 @@ void MainWindow::onStartClick()
 
         if (userChoice == 2)
         {
-            // TODO: send
+            sendToServer();
         }
 
         pendingSOPInstanceUID.clear();
@@ -853,5 +853,21 @@ void MainWindow::onShowWorkListClick()
     }
     worklist->showMaybeMaximized();
     worklist->activateWindow();
+}
+
+void MainWindow::sendToServer()
+{
+    QWaitCursor wait(this);
+    QProgressDialog pdlg(this);
+    outputPath.setFilter(QDir::Files | QDir::Readable);
+    pdlg.setRange(0, outputPath.count());
+    DcmClient client(UID_MultiframeTrueColorSecondaryCaptureImageStorage);
+
+    auto patientDs = worklist->getPatientDS();
+    if (patientDs && !client.sendToServer(patientDs, pendingSOPInstanceUID, &outputPath, &pdlg))
+    {
+        error(client.getLastError());
+    }
+    delete patientDs;
 }
 #endif

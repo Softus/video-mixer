@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QString>
 
+#define SITE_UID_ROOT                           "9.9.999.0.1" // TODO: request real one
+
 #include <dcmtk/config/cfunix.h>   /* make sure OS specific configuration is included first */
 #include <dcmtk/ofstd/ofcond.h>    /* for class OFCondition */
 
@@ -13,6 +15,9 @@ class T_ASC_Parameters;
 class T_DIMSE_C_FindRQ;
 class T_DIMSE_C_FindRSP;
 class DcmDataset;
+
+class QProgressDialog;
+class QDir;
 
 class DcmClient : public QObject
 {
@@ -33,7 +38,11 @@ public:
 
     bool findSCU();
     QString nCreateRQ(DcmDataset* dset);
-    bool nSetRQ(const QString& pendingSOPInstanceUID);
+    bool nSetRQ(const QString& sopInstance);
+    bool cStoreRQ(DcmDataset* ds, int writeXfer, const QString& sopInstance);
+
+    bool sendToServer(DcmDataset* dset, const QString& pendingSOPInstanceUID,
+                      const QDir* path, QProgressDialog* pdlg = nullptr);
 
     QString getLastError() const
     {
@@ -43,8 +52,8 @@ public:
     void abort();
 
 private:
-    T_ASC_Parameters* initAssocParams();
-    bool createAssociation();
+    T_ASC_Parameters* initAssocParams(const char * transferSyntax = nullptr);
+    bool createAssociation(const char * transferSyntax = nullptr);
     static void loadCallback(void *callbackData,
         T_DIMSE_C_FindRQ* /*request*/, int /*responseCount*/,
         T_DIMSE_C_FindRSP* /*rsp*/, DcmDataset* responseIdentifiers);

@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <QDir>
 #include <QGst/Message>
 #include <QGst/Pipeline>
 #include <QGst/Pad>
@@ -39,6 +40,7 @@ class MainWindow : public BaseWidget
     QLabel*      imageOut;
 //	QListWidget* imageList;
     QGst::Ui::VideoWidget* displayWidget;
+    QDir         outputPath;
 
     QMenuBar* createMenu();
     void updateStartButton();
@@ -54,18 +56,11 @@ class MainWindow : public BaseWidget
     //
     QGst::PipelinePtr pipeline;
     QGst::ElementPtr displaySink;
-
     QGst::ElementPtr imageValve;
     QGst::ElementPtr imageSink;
-    QString imageFileName;
-
     QGst::ElementPtr clipValve;
     QGst::ElementPtr clipSink;
-    QString clipFileName;
-
     QGst::ElementPtr videoSink;
-    QString videoFileName;
-
     QGst::ElementPtr rtpSink;
 
     QGst::PipelinePtr createPipeline();
@@ -78,6 +73,10 @@ class MainWindow : public BaseWidget
     void onImageReady(const QGst::BufferPtr&);
     void errorGlib(const QGlib::ObjectPtr& obj, const QGlib::Error& ex);
     void restartElement(const char* name);
+
+#ifdef WITH_DICOM
+    void sendToServer();
+#endif
 
 public:
     explicit MainWindow(QWidget *parent = 0);

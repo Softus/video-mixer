@@ -6,8 +6,24 @@
 #include <QGst/Init>
 #include "mainwindow.h"
 
+#include <dcmtk/config/cfunix.h>   /* make sure OS specific configuration is included first */
+#include <dcmtk/ofstd/ofcond.h>    /* for class OFCondition */
+#include "dcmtk/config/osconfig.h" /* make sure OS specific configuration is included first */
+#include "dcmtk/ofstd/ofstd.h"
+#include "dcmtk/ofstd/ofconapp.h"
+#include "dcmtk/oflog/oflog.h"
+
+#define OFFIS_CONSOLE_APPLICATION "storescu"
+static char rcsid[] = "$dcmtk: $";
+
 int main(int argc, char *argv[])
 {
+    char *ddd[] = {"--debug", "--debug", nullptr};
+    OFConsoleApplication appa(OFFIS_CONSOLE_APPLICATION , "DICOM storage (C-STORE) SCU", rcsid);
+    OFCommandLine cmd;
+    OFLog::addOptions(cmd);
+    appa.parseCommandLine(cmd, 2, ddd, OFCommandLine::PF_ExpandWildcards);
+
     int errCode = 0;
 
     // Pass some arguments to gStreamer.
