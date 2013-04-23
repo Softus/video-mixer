@@ -41,7 +41,8 @@ Q_DECLARE_METATYPE(DcmDataset)
 static int DcmDatasetMetaType = qRegisterMetaType<DcmDataset>();
 
 Worklist::Worklist(QWidget *parent) :
-    BaseWidget(parent)
+    BaseWidget(parent),
+    activeConnection(nullptr)
 {
     const QString columnNames[] =
     {

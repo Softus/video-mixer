@@ -24,7 +24,7 @@ class Worklist : public BaseWidget
 
     // DICOM
     //
-    DcmClient* activeConnection = nullptr;
+    DcmClient* activeConnection;
     QString pendingSOPInstanceUID;
 
 public:
