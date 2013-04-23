@@ -16,9 +16,6 @@ class T_DIMSE_C_FindRQ;
 class T_DIMSE_C_FindRSP;
 class DcmDataset;
 
-class QProgressDialog;
-class QDir;
-
 class DcmClient : public QObject
 {
     Q_OBJECT
@@ -37,14 +34,19 @@ public:
     ~DcmClient();
 
     bool findSCU();
-    QString nCreateRQ(DcmDataset* dset);
-    bool nSetRQ(const QString& sopInstance);
-    bool cStoreRQ(DcmDataset* ds, int writeXfer, const QString& sopInstance);
 
-    bool sendToServer(DcmDataset* dset, const QString& pendingSOPInstanceUID,
-                      const QDir* path, QProgressDialog* pdlg = nullptr);
+    // Returns UID for nSetRQ
+    //
+    QString nCreateRQ(DcmDataset* patientDs);
 
-    QString getLastError() const
+    // Returns seriesUID for sendToServer
+    //
+    QString nSetRQ(DcmDataset* patientDs, const QString& sopInstance);
+
+    bool sendToServer(DcmDataset* patientDs, const QString& seriesUID, int seriesNumber,
+        const QString file, int instanceNumber);
+
+    QString lastError() const
     {
         return QString::fromLocal8Bit(cond.text());
     }
@@ -52,8 +54,10 @@ public:
     void abort();
 
 private:
+    int timeout() const;
     T_ASC_Parameters* initAssocParams(const char * transferSyntax = nullptr);
     bool createAssociation(const char * transferSyntax = nullptr);
+    bool cStoreRQ(DcmDataset* patientDs, int writeXfer, const char* sopInstance);
     static void loadCallback(void *callbackData,
         T_DIMSE_C_FindRQ* /*request*/, int /*responseCount*/,
         T_DIMSE_C_FindRSP* /*rsp*/, DcmDataset* responseIdentifiers);

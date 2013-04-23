@@ -15,15 +15,22 @@
 
 #include <QApplication>
 #include <QDebug>
-#include <QDir>
 #include <QSettings>
-#include <QProgressDialog>
 
 #ifdef QT_DEBUG
 #define DEFAULT_TIMEOUT 3 // 3 seconds for test builds
 #else
 #define DEFAULT_TIMEOUT 30 // 30 seconds for prodaction builds
 #endif
+
+static void CopyPatientData(/*const*/ DcmDataset* src, DcmDataset* dst)
+{
+    src->findAndInsertCopyOfElement(DCM_AccessionNumber, dst);
+    src->findAndInsertCopyOfElement(DCM_PatientName, dst);
+    src->findAndInsertCopyOfElement(DCM_PatientID, dst);
+    src->findAndInsertCopyOfElement(DCM_PatientBirthDate, dst);
+    src->findAndInsertCopyOfElement(DCM_PatientSex, dst);
+}
 
 static void BuildCFindDataSet(DcmDataset& ds)
 {
@@ -39,6 +46,7 @@ static void BuildCFindDataSet(DcmDataset& ds)
     ds.insertEmptyElement(DCM_PatientBirthDate);
     ds.insertEmptyElement(DCM_PatientSex);
     ds.insertEmptyElement(DCM_StudyInstanceUID);
+    ds.insertEmptyElement(DCM_SeriesInstanceUID);
     ds.insertEmptyElement(DCM_StudyID);
     ds.insertEmptyElement(DCM_RequestedProcedureDescription);
     ds.insertEmptyElement(DCM_RequestedProcedureID);
@@ -49,8 +57,15 @@ static void BuildCFindDataSet(DcmDataset& ds)
     {
         sps->putAndInsertString(DCM_Modality, modality.toUtf8());
         sps->putAndInsertString(DCM_ScheduledStationAETitle, aet.toUtf8());
-        sps->putAndInsertString(DCM_ScheduledProcedureStepStartDate,
-            filterByDate? QDate::currentDate().toString("yyyyMMdd").toAscii(): nullptr);
+        if (filterByDate)
+        {
+            sps->putAndInsertString(DCM_ScheduledProcedureStepStartDate,
+                QDate::currentDate().toString("yyyyMMdd").toAscii());
+        }
+        else
+        {
+            sps->insertEmptyElement(DCM_ScheduledProcedureStepStartDate);
+        }
         sps->insertEmptyElement(DCM_ScheduledProcedureStepStartTime);
         sps->insertEmptyElement(DCM_ScheduledPerformingPhysicianName);
         sps->insertEmptyElement(DCM_ScheduledProcedureStepDescription);
@@ -59,7 +74,7 @@ static void BuildCFindDataSet(DcmDataset& ds)
     }
 }
 
-static void BuildCStoreDataSet(/*const*/ DcmDataset& patientDs, DcmDataset& cStoreDs)
+static void BuildCStoreDataSet(/*const*/ DcmDataset& patientDs, DcmDataset& cStoreDs, const QString& seriesUID)
 {
     QDateTime now = QDateTime::currentDateTime();
     QSettings settings;
@@ -67,17 +82,17 @@ static void BuildCStoreDataSet(/*const*/ DcmDataset& patientDs, DcmDataset& cSto
     QString aet = settings.value("aet", qApp->applicationName().toUpper()).toString();
 
     patientDs.findAndInsertCopyOfElement(DCM_SpecificCharacterSet, &cStoreDs);
-    patientDs.findAndInsertCopyOfElement(DCM_PatientName, &cStoreDs);
-    patientDs.findAndInsertCopyOfElement(DCM_PatientID, &cStoreDs);
-    patientDs.findAndInsertCopyOfElement(DCM_PatientBirthDate, &cStoreDs);
-    patientDs.findAndInsertCopyOfElement(DCM_PatientSex, &cStoreDs);
-    patientDs.findAndInsertCopyOfElement(DCM_AccessionNumber, &cStoreDs);
+    CopyPatientData(&patientDs, &cStoreDs);
+
+    patientDs.findAndInsertCopyOfElement(DCM_StudyInstanceUID, &cStoreDs);
+    cStoreDs.putAndInsertString(DCM_SeriesInstanceUID, seriesUID.toAscii());
 
     cStoreDs.putAndInsertString(DCM_StudyDate, now.toString("yyyyMMdd").toAscii());
     cStoreDs.putAndInsertString(DCM_StudyTime, now.toString("HHmmss").toAscii());
 
     cStoreDs.putAndInsertString(DCM_Manufacturer, "IRK-DC");
     cStoreDs.putAndInsertString(DCM_ManufacturerModelName, "Beryllium");
+    cStoreDs.putAndInsertString(DCM_Modality, modality.toUtf8());
 }
 
 static void BuildNCreateDataSet(/*const*/ DcmDataset& patientDs, DcmDataset& nCreateDs)
@@ -88,10 +103,7 @@ static void BuildNCreateDataSet(/*const*/ DcmDataset& patientDs, DcmDataset& nCr
     QString aet = settings.value("aet", qApp->applicationName().toUpper()).toString();
 
     nCreateDs.putAndInsertString(DCM_SpecificCharacterSet, "ISO_IR 192"); // UTF-8
-    patientDs.findAndInsertCopyOfElement(DCM_PatientName, &nCreateDs);
-    patientDs.findAndInsertCopyOfElement(DCM_PatientID, &nCreateDs);
-    patientDs.findAndInsertCopyOfElement(DCM_PatientBirthDate, &nCreateDs);
-    patientDs.findAndInsertCopyOfElement(DCM_PatientSex, &nCreateDs);
+    CopyPatientData(&patientDs, &nCreateDs);
     patientDs.findAndInsertCopyOfElement(DCM_ReferencedPatientSequence, &nCreateDs);
     // MPPS ID has not logic on it. It can be anything
     // The SCU have to create it but it doesn't have to be unique and the SCP
@@ -141,10 +153,15 @@ static void BuildNCreateDataSet(/*const*/ DcmDataset& patientDs, DcmDataset& nCr
     }
 }
 
-static void BuildNSetDataSet(DcmDataset& nSetDs, bool completed)
+static QString BuildNSetDataSet(/*const*/ DcmDataset& patientDs, DcmDataset& nSetDs, bool completed)
 {
     QDateTime now = QDateTime::currentDateTime();
     nSetDs.putAndInsertString(DCM_SpecificCharacterSet, "ISO_IR 192"); // UTF-8
+    CopyPatientData(&patientDs, &nSetDs);
+
+    char seriesUID[100] = {0};
+    dcmGenerateUniqueIdentifier(seriesUID, SITE_SERIES_UID_ROOT);
+
     nSetDs.putAndInsertString(DCM_PerformedProcedureStepStatus, completed ? "COMPLETED" : "DISCONTINUED");
     nSetDs.putAndInsertString(DCM_PerformedProcedureStepEndDate, now.toString("yyyyMMdd").toAscii());
     nSetDs.putAndInsertString(DCM_PerformedProcedureStepEndTime, now.toString("HHmmss").toAscii());
@@ -161,12 +178,16 @@ static void BuildNSetDataSet(DcmDataset& nSetDs, bool completed)
         pss->insertEmptyElement(DCM_PerformingPhysicianName);
 //      pss->putAndInsertString(DCM_ProtocolName, "SOME PROTOCOL"); // Is it required?
         pss->insertEmptyElement(DCM_OperatorsName);
-//      pss->putAndInsertString(DCM_SeriesInstanceUID, "1.2.3.4.5.6"); // Is it required?
+
+        patientDs.findAndInsertCopyOfElement(DCM_StudyInstanceUID, pss);
+        pss->putAndInsertString(DCM_SeriesInstanceUID, seriesUID);
         pss->insertEmptyElement(DCM_SeriesDescription);
         pss->insertEmptyElement(DCM_RetrieveAETitle);
         pss->insertEmptyElement(DCM_ReferencedImageSequence);
         pss->insertEmptyElement(DCM_ReferencedNonImageCompositeSOPInstanceSequence);
     }
+
+    return QString::fromAscii(seriesUID);
 }
 
 DcmClient::~DcmClient()
@@ -183,12 +204,16 @@ DcmClient::~DcmClient()
     ASC_dropNetwork(&net);
 }
 
+int DcmClient::timeout() const
+{
+    return QSettings().value("timeout", DEFAULT_TIMEOUT).toInt();
+}
+
 void DcmClient::loadCallback(void *callbackData,
     T_DIMSE_C_FindRQ* /*request*/, int /*responseCount*/,
-    T_DIMSE_C_FindRSP* /*rsp*/, DcmDataset* responseIdentifiers)
+    T_DIMSE_C_FindRSP* /*rsp*/, DcmDataset* dset)
 {
-    DcmClient* pThis = static_cast<DcmClient*>(callbackData);
-    pThis->addRow(responseIdentifiers);
+    static_cast<DcmClient*>(callbackData)->addRow(dset);
 }
 
 void DcmClient::abort()
@@ -282,6 +307,13 @@ T_ASC_Parameters* DcmClient::initAssocParams(const char * transferSyntax)
 
 bool DcmClient::createAssociation(const char * transferSyntax)
 {
+    if (assoc)
+    {
+        // Already got a server association
+        //
+        return true;
+    }
+
     /* create DcmAssoc, i.e. try to establish a network connection to another */
     /* DICOM application. This call creates an instance of T_ASC_DcmAssoc*. */
     T_ASC_Parameters* params = initAssocParams(transferSyntax);
@@ -329,18 +361,16 @@ bool DcmClient::findSCU()
     /* complete preparation of C-FIND-RQ message */
     req.MessageID = assoc->nextMsgID++;
 
-    /* if required, dump some more general information */
-    //DCMNET_INFO("Find SCU Request Identifiers:" << OFendl << DcmObject::PrintHelper(*dset));
-
     /* finally conduct transmission of data */
     DcmDataset *statusDetail = nullptr;
-    int timeout = QSettings().value("timeout", DEFAULT_TIMEOUT).toInt();
-    cond = DIMSE_findUser(assoc, presId, &req, &ds, loadCallback, static_cast<void*>(this),
-        0 == timeout? DIMSE_BLOCKING: DIMSE_NONBLOCKING, timeout, &rsp, &statusDetail);
+    int tout = timeout();
+    cond = DIMSE_findUser(assoc, presId, &req, &ds,
+        loadCallback, static_cast<void*>(this),
+        0 == tout? DIMSE_BLOCKING: DIMSE_NONBLOCKING, tout,
+        &rsp, &statusDetail);
 
     if (statusDetail != NULL)
     {
-        //DCMNET_WARN("Status Detail:" << OFendl << DcmObject::PrintHelper(*statusDetail));
         delete statusDetail;
     }
 
@@ -376,8 +406,8 @@ QString DcmClient::nCreateRQ(DcmDataset* patientDs)
     }
 
     /* receive response */
-    int timeout = QSettings().value("timeout", DEFAULT_TIMEOUT).toInt();
-    cond = DIMSE_receiveCommand(assoc, 0 == timeout? DIMSE_BLOCKING: DIMSE_NONBLOCKING, timeout, &presId, &rsp, nullptr);
+    int tout = timeout();
+    cond = DIMSE_receiveCommand(assoc, 0 == tout? DIMSE_BLOCKING: DIMSE_NONBLOCKING, tout, &presId, &rsp, nullptr);
     if (cond.bad())
     {
         return nullptr;
@@ -399,15 +429,15 @@ QString DcmClient::nCreateRQ(DcmDataset* patientDs)
     return QString::fromAscii(rsp.msg.NCreateRSP.AffectedSOPInstanceUID);
 }
 
-bool DcmClient::nSetRQ(const QString& sopInstance)
+QString DcmClient::nSetRQ(DcmDataset* patientDs, const QString& sopInstance)
 {
     if (!createAssociation())
     {
-        return false;
+        return nullptr;
     }
 
     DcmDataset nSetDs;
-    BuildNSetDataSet(nSetDs, true);
+    QString seriesUID = BuildNSetDataSet(*patientDs, nSetDs, true);
 
     nSetDs.writeXML(std::cout << "------N-Set------------" << std::endl);
 
@@ -423,50 +453,36 @@ bool DcmClient::nSetRQ(const QString& sopInstance)
     req.msg.NSetRQ.DataSetType = DIMSE_DATASET_PRESENT;
 
     OFCondition cond = DIMSE_sendMessageUsingMemoryData(assoc, presId, &req, nullptr, &nSetDs, nullptr, nullptr);
-    if (cond.bad()) return false;
+    if (cond.bad()) return nullptr;
 
     /* receive response */
-    int timeout = QSettings().value("timeout", DEFAULT_TIMEOUT).toInt();
-    cond = DIMSE_receiveCommand(assoc, 0 == timeout? DIMSE_BLOCKING: DIMSE_NONBLOCKING, timeout, &presId, &rsp, nullptr);
-    if (cond.bad()) return false;
+    int tout = timeout();
+    cond = DIMSE_receiveCommand(assoc, 0 == tout? DIMSE_BLOCKING: DIMSE_NONBLOCKING, tout, &presId, &rsp, nullptr);
+    if (cond.bad()) return nullptr;
 
     if (rsp.CommandField != DIMSE_N_SET_RSP)
     {
         qDebug() << "DIMSE: Unexpected Response Command Field: "<< rsp.CommandField;
-        return false;
+        return nullptr;
     }
 
     if (rsp.msg.NSetRSP.MessageIDBeingRespondedTo != req.msg.NSetRQ.MessageID)
     {
         qDebug() << "DIMSE: Unexpected Response MsgId: " << rsp.msg.NSetRSP.MessageIDBeingRespondedTo
                  << " (expected: " << req.msg.NSetRQ.MessageID << ")";
-        return false;
+        return nullptr;
     }
 
-    return true;
+    return seriesUID;
 }
 
-static void
-progressCallback(void * /*callbackData*/,
-  T_DIMSE_StoreProgress *progress,
-  T_DIMSE_C_StoreRQ * req)
-{
-    qDebug() << "progress " << progress->state;
-  if (progress->state == DIMSE_StoreBegin)
-  {
-    OFString str;
-    DIMSE_dumpMessage(str, *req, DIMSE_OUTGOING);
-    qDebug() << str.c_str();
-  }
-}
-
-bool DcmClient::cStoreRQ(DcmDataset* ds, int writeXfer, const QString& sopInstance)
+bool DcmClient::cStoreRQ(DcmDataset* dset, int writeXfer, const char* sopInstance)
 {
     DcmXfer filexfer((E_TransferSyntax)writeXfer);
 
     // Request association only at the first time
     //
-    if (!assoc && !createAssociation(filexfer.getXferID()))
+    if (!createAssociation(filexfer.getXferID()))
     {
         return nullptr;
     }
@@ -480,77 +496,59 @@ bool DcmClient::cStoreRQ(DcmDataset* ds, int writeXfer, const QString& sopInstan
     /* prepare the transmission of data */
     req.MessageID = assoc->nextMsgID++;
     strcpy(req.AffectedSOPClassUID, abstractSyntax);
-    strcpy(req.AffectedSOPInstanceUID, sopInstance.toAscii());
+    strcpy(req.AffectedSOPInstanceUID, sopInstance);
     req.DataSetType = DIMSE_DATASET_PRESENT;
     req.Priority = DIMSE_PRIORITY_LOW;
 
     /* finally conduct transmission of data */
-    int timeout = QSettings().value("timeout", DEFAULT_TIMEOUT).toInt();
+    int tout = timeout();
     cond = DIMSE_storeUser(assoc, presId, &req,
-      nullptr, ds, progressCallback, nullptr,
-      0 == timeout? DIMSE_BLOCKING: DIMSE_NONBLOCKING, timeout,
+      nullptr, dset, nullptr, nullptr,
+      0 == tout? DIMSE_BLOCKING: DIMSE_NONBLOCKING, tout,
       &rsp, &statusDetail);
 
     delete statusDetail;
     return cond.good();
 }
 
-bool DcmClient::sendToServer(DcmDataset* dset, const QString& sopInstance,
-                             const QDir* path, QProgressDialog* pdlg)
+bool DcmClient::sendToServer(DcmDataset* patientDs, const QString& seriesUID, int seriesNumber,
+                             const QString file, int instanceNumber)
 {
     Image2Dcm i2d;
     I2DJpegSource src;
     I2DOutputPlugNewSC dst;
     E_TransferSyntax writeXfer;
-    int instanceNumber = 0;
 
-    char seriesUID[100];
-    char studyUID[100];
-    dcmGenerateUniqueIdentifier(seriesUID, SITE_SERIES_UID_ROOT);
-    dcmGenerateUniqueIdentifier(studyUID,  SITE_STUDY_UID_ROOT);
+    char instanceUID[100] = {0};
+    char buf[20] = {0};
+    dcmGenerateUniqueIdentifier(instanceUID,  SITE_INSTANCE_UID_ROOT);
 
-    for (uint i = 0; !pdlg->wasCanceled() && i < path->count(); ++i)
+    src.setImageFile(file.toLocal8Bit().constBegin());
+    qDebug() << src.getImageFile().c_str();
+
+    DcmDataset *dset = nullptr;
+    cond = i2d.convert(&src, &dst, dset, writeXfer);
+    if (cond.bad())
     {
-        pdlg->setValue(i);
-        pdlg->setLabelText(tr("Storing '%1'").arg(path->operator[](i)));
-        qApp->processEvents();
-
-        src.setImageFile(path->absoluteFilePath(path->operator[](i)).toLocal8Bit().constBegin());
-
-        DcmDataset *resultObject = nullptr;
-        cond = i2d.convert(&src, &dst, resultObject, writeXfer);
-        qApp->processEvents();
-        if (!pdlg->wasCanceled() && cond.good())
-        {
-          resultObject->putAndInsertString(DCM_SOPInstanceUID, sopInstance.toAscii());
-          resultObject->putAndInsertOFStringArray(DCM_SeriesInstanceUID, seriesUID);
-          resultObject->putAndInsertOFStringArray(DCM_StudyInstanceUID,  studyUID);
-
-          char buf[100];
-          sprintf(buf, "%ld", OFstatic_cast(long, instanceNumber++));
-          cond = resultObject->putAndInsertOFStringArray(DCM_InstanceNumber, buf);
-          if (cond.bad())
-              return false;
-
-          BuildCStoreDataSet(*dset, *resultObject);
-//          DcmFileFormat dcmff(resultObject);
-//          cond = dcmff.saveFile(src.getImageFile().append(".dcm").c_str(), writeXfer);
-          cStoreRQ(dset, writeXfer, sopInstance);
-        }
-        delete resultObject;
-
-        if (cond.bad())
-        {
-            if (0 == strcmp(cond.text(), "Not a JPEG file"))
-            {
-                cond = ECC_Normal;
-            }
-            else
-            {
-                return false;
-            }
-        }
+        qDebug() << cond.text();
+        // cond.reset()
+        //
+        cond = ECC_Normal;
+        return true;
     }
+
+    dset->putAndInsertString(DCM_SOPInstanceUID, instanceUID);
+
+    sprintf(buf, "%d", instanceNumber);
+    dset->putAndInsertOFStringArray(DCM_InstanceNumber, buf);
+    sprintf(buf, "%d", seriesNumber);
+    dset->putAndInsertOFStringArray(DCM_SeriesNumber, buf);
+
+    BuildCStoreDataSet(*patientDs, *dset, seriesUID);
+    //DcmFileFormat dcmff(dset);
+    //cond = dcmff.saveFile(src.getImageFile().append(".dcm").c_str(), writeXfer);
+    cStoreRQ(dset, writeXfer, instanceUID);
+    delete dset;
 
     return cond.good();
 }

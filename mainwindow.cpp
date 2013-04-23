@@ -599,11 +599,11 @@ void MainWindow::onStartClick()
     if (!running)
     {
 #ifdef WITH_DICOM
+
         if (worklist == nullptr)
         {
             worklist = new Worklist();
         }
-
         StartStudyDialog dlg(worklist, this);
         if (QDialog::Rejected == dlg.exec())
         {
@@ -625,7 +625,7 @@ void MainWindow::onStartClick()
 
         if (pendingSOPInstanceUID.isNull())
         {
-            error(client.getLastError());
+            error(client.lastError());
             return;
         }
 #endif
@@ -676,21 +676,26 @@ void MainWindow::onStartClick()
         releasePipeline();
 
 #ifdef WITH_DICOM
+        auto patientDs = worklist->getPatientDS();
+
+        QString   seriesUID;
         if (!pendingSOPInstanceUID.isEmpty())
         {
             DcmClient client(UID_ModalityPerformedProcedureStepSOPClass);
-            if (!client.nSetRQ(pendingSOPInstanceUID))
+            seriesUID = client.nSetRQ(patientDs, pendingSOPInstanceUID);
+            if (seriesUID.isEmpty())
             {
-                error(client.getLastError());
+                error(client.lastError());
             }
         }
 
         if (userChoice == 2)
         {
-            sendToServer();
+            sendToServer(patientDs, seriesUID);
         }
 
         pendingSOPInstanceUID.clear();
+        delete patientDs;
 #endif
     }
 
@@ -758,6 +763,10 @@ void MainWindow::updateStartButton()
     btnRecord->setEnabled(running && clipSink);
     btnSnapshot->setEnabled(running && imageSink);
     displayWidget->setVisible(running && displaySink);
+    if (worklist)
+    {
+        worklist->setDisabled(running);
+    }
 }
 
 void MainWindow::updateRecordButton()
@@ -855,7 +864,7 @@ void MainWindow::onShowWorkListClick()
     worklist->activateWindow();
 }
 
-void MainWindow::sendToServer()
+void MainWindow::sendToServer(DcmDataset* patientDs, const QString& seriesUID)
 {
     QWaitCursor wait(this);
     QProgressDialog pdlg(this);
@@ -863,11 +872,21 @@ void MainWindow::sendToServer()
     pdlg.setRange(0, outputPath.count());
     DcmClient client(UID_MultiframeTrueColorSecondaryCaptureImageStorage);
 
-    auto patientDs = worklist->getPatientDS();
-    if (patientDs && !client.sendToServer(patientDs, pendingSOPInstanceUID, &outputPath, &pdlg))
+    // Only single series for now
+    //
+    int seriesNo = 1;
+
+    for (uint i = 0; !pdlg.wasCanceled() && i < outputPath.count(); ++i)
     {
-        error(client.getLastError());
+        pdlg.setValue(i);
+        pdlg.setLabelText(tr("Storing '%1'").arg(outputPath[i]));
+        qApp->processEvents();
+
+        const QString& file = outputPath.absoluteFilePath(outputPath[i]);
+        if (!client.sendToServer(patientDs, seriesUID, seriesNo, file, i))
+        {
+            error(client.lastError());
+        }
     }
-    delete patientDs;
 }
 #endif

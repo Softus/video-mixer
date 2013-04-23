@@ -172,7 +172,7 @@ void Worklist::onLoadClick()
 
     if (!ok)
     {
-        error(assoc.getLastError());
+        error(assoc.lastError());
     }
 
     table->sortItems(6); // By time

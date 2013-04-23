@@ -20,6 +20,7 @@ class QListWidget;
 class QLabel;
 class QTimer;
 class Worklist;
+class DcmDataset;
 
 class MainWindow : public BaseWidget
 {
@@ -75,7 +76,7 @@ class MainWindow : public BaseWidget
     void restartElement(const char* name);
 
 #ifdef WITH_DICOM
-    void sendToServer();
+    void sendToServer(DcmDataset* dset, const QString& seriesUID);
 #endif
 
 public:
