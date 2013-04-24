@@ -763,10 +763,12 @@ void MainWindow::updateStartButton()
     btnRecord->setEnabled(running && clipSink);
     btnSnapshot->setEnabled(running && imageSink);
     displayWidget->setVisible(running && displaySink);
+#ifdef WITH_DICOM
     if (worklist)
     {
         worklist->setDisabled(running);
     }
+#endif
 }
 
 void MainWindow::updateRecordButton()
