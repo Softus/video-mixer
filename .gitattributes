@@ -27,6 +27,11 @@ pixmaps/record_on.png -text
 pixmaps/stop.png -text
 pixmaps/user_add.png -text
 pixmaps/user_manage.png -text
+pkg/debian/DEBIAN/control -text
+pkg/debian/usr/share/doc/beryllium/changelog -text
+pkg/debian/usr/share/doc/beryllium/changelog.Debian -text
+pkg/debian/usr/share/doc/beryllium/copyright -text
+pkg/debian/usr/share/man/man1/beryllium.1 -text
 /qwaitcursor.h -text
 /startstudydialog.cpp -text
 /startstudydialog.h -text

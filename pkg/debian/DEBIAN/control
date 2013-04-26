@@ -1,0 +1,11 @@
+Package: beryllium
+Version: 1.0-1
+Section: gnome
+Priority: optional
+Architecture: i386
+Installed-Size: 256000
+Depends: libc6 (>= 2.3.6-6~), libdcmtk2 (>= 3.6.0), libgcc1 (>= 1:4.1.1), libglib2.0-0 (>= 2.12.0), libgstreamer0.10-0 (>= 0.10.15), libqtcore4 (>= 4:4.7.0~beta1), libqtglib-2.0-0 (>= 0.10.1), libqtgstreamer-0.10-0 (>= 0.10.1), libqtgstreamerui-0.10-0 (>= 0.10.1), libqtgui4 (>= 4:4.5.3), libssl1.0.0 (>= 1.0.0), libstdc++6 (>= 4.4.0), libwrap0 (>= 7.6-4~), libxml2 (>= 2.6.27)
+Maintainer: Beryllium team <beryllium@dc.baikal.ru>
+Description: (TODO)
+ More description
+ to be written.
