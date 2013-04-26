@@ -19,8 +19,7 @@ unix {
 
 dicom {
     DEFINES += WITH_DICOM
-#    LIBS += -ldcmnet -lwrap -li2d -ldcmdata -ldcmtls -loflog -lofstd -lssl
-     LIBS += -L/usr/lib/dcmtk -ldcmnet -llibi2d -ldcmdata -ldcmtls -loflog -lofstd -lssl
+    LIBS += -ldcmnet -lwrap -li2d -ldcmdata -ldcmtls -loflog -lofstd -lssl
     SOURCES += worklist.cpp startstudydialog.cpp dcmclient.cpp detailsdialog.cpp
     HEADERS += worklist.h startstudydialog.h dcmclient.h detailsdialog.h
 }

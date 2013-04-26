@@ -26,6 +26,8 @@ replace line
 with line
     LIBS += -L/usr/lib/dcmtk -ldcmnet -llibi2d -ldcmdata -ldcmtls -loflog -lofstd -lssl
 
+(there is fedora.patch for that)
+
 	qmake-qt4 CONFIG+=dicom beryllium.pro
 
 - or -
