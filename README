@@ -1,0 +1,14 @@
+1. Install build dependecies:
+sudo apt-get install build-essential libqtgstreamer-dev libgstreamer-plugins-base0.10-dev libdcmtk2-dev libwrap0-dev libssl-dev
+
+2. Make Makefile:
+qmake CONFIG+=dicom beryllium.pro
+
+- or -
+qmake CONFIG+=debug CONFIG+=declarative_debug CONFIG+=dicom beryllium.pro
+
+for debug.
+
+3. Launch Beryllium:
+./beryllium
+
