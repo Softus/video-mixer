@@ -3,7 +3,8 @@
 #include <QHBoxLayout>
 #include <QTreeWidget>
 
-#include <dcmtk/config/cfunix.h>   /* make sure OS specific configuration is included first */
+#define HAVE_CONFIG_H
+#include <dcmtk/config/osconfig.h>   /* make sure OS specific configuration is included first */
 #include <dcmtk/dcmdata/dcdatset.h>
 #include <dcmtk/dcmdata/dcelem.h>
 #include <dcmtk/dcmdata/dctag.h>

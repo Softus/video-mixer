@@ -1,14 +1,38 @@
-1. Install build dependecies:
-sudo apt-get install build-essential libqtgstreamer-dev libgstreamer-plugins-base0.10-dev libdcmtk2-dev libwrap0-dev libssl-dev
+=== Debian/Ubuntu/Mint ===
+
+1. Install build dependecies
+	sudo apt-get install build-essential libqtgstreamer-dev libgstreamer-plugins-base0.10-dev libdcmtk2-dev libwrap0-dev libssl-dev
 
 2. Make Makefile:
-qmake CONFIG+=dicom beryllium.pro
+	qmake CONFIG+=dicom beryllium.pro
 
 - or -
-qmake CONFIG+=debug CONFIG+=declarative_debug CONFIG+=dicom beryllium.pro
+	qmake CONFIG+=debug CONFIG+=declarative_debug CONFIG+=dicom beryllium.pro
 
 for debug.
 
-3. Launch Beryllium:
-./beryllium
+3. Make Beryllium:
+	make
+
+=== Suse/Fedora/RedHat ===
+
+1. Install build dependecies
+	sudo yum install qt-devel qt-gstreamer-devel dcmtk-devel openssl-devel
+
+2. Make Makefile:
+
+replace line
+    LIBS += -ldcmnet -lwrap -li2d -ldcmdata -ldcmtls -loflog -lofstd -lssl
+with line
+    LIBS += -ldcmnet -llibi2d -ldcmdata -ldcmtls -loflog -lofstd -lssl
+
+	qmake-qt4 CONFIG+=dicom beryllium.pro
+
+- or -
+	qmake-qt4 CONFIG+=debug CONFIG+=declarative_debug CONFIG+=dicom beryllium.pro
+
+for debug.
+
+3. Make Beryllium:
+	make
 
