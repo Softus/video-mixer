@@ -24,7 +24,7 @@ for debug.
 replace line
     LIBS += -ldcmnet -lwrap -li2d -ldcmdata -ldcmtls -loflog -lofstd -lssl
 with line
-    LIBS += -ldcmnet -llibi2d -ldcmdata -ldcmtls -loflog -lofstd -lssl
+    LIBS += -L/usr/lib/dcmtk -ldcmnet -llibi2d -ldcmdata -ldcmtls -loflog -lofstd -lssl
 
 	qmake-qt4 CONFIG+=dicom beryllium.pro
 
