@@ -27,8 +27,10 @@ dicom {
 TARGET   = beryllium
 TEMPLATE = app
 
-SOURCES += beryllium.cpp mainwindow.cpp basewidget.cpp
-HEADERS += mainwindow.h basewidget.h qwaitcursor.h
+SOURCES += beryllium.cpp mainwindow.cpp basewidget.cpp \
+    videosettings.cpp
+HEADERS += mainwindow.h basewidget.h qwaitcursor.h \
+    videosettings.h
 
 
 

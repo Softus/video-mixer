@@ -35,5 +35,7 @@ pkg/debian/usr/share/man/man1/beryllium.1 -text
 /qwaitcursor.h -text
 /startstudydialog.cpp -text
 /startstudydialog.h -text
+/videosettings.cpp -text
+/videosettings.h -text
 /worklist.cpp -text
 /worklist.h -text

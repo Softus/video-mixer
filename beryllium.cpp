@@ -6,6 +6,8 @@
 #include <QGst/Init>
 #include "mainwindow.h"
 
+#include "videosettings.h"
+
 int main(int argc, char *argv[])
 {
     int errCode = 0;
@@ -40,8 +42,10 @@ int main(int argc, char *argv[])
     // UI scope
     //
     {
-        MainWindow wnd;
-        wnd.showMaybeMaximized();
+//        MainWindow wnd;
+//        wnd.showMaybeMaximized();
+        VideoSettings wnd;
+        wnd.show();
         errCode = app.exec();
     }
 
