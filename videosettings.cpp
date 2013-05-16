@@ -116,12 +116,25 @@ void VideoSettings::updatePipeline()
 
     auto size = listSizes->itemData(listSizes->currentIndex()).toSize();
     auto rate = listFramerates->itemData(listFramerates->currentIndex()).toSize();
+    QString str;
 
-    auto str = QString("v4l2src device=%1 ! %2,format=%3,width=%4,height=%5,framerate=%6/%7")
-        .arg(devicePath, mimetype, strFormat)
-        .arg(size.width()).arg(size.height())
-        .arg(rate.width()).arg(rate.height())
-        ;
+    if (!devicePath.isNull())
+    {
+        str.append("v4l2src device=").append(devicePath);
+        if (format)
+        {
+            str.append(" ! ").append(mimetype).append(",format=").append(strFormat);
+            if (size.width() > 0 && size.height() > 0)
+            {
+                str = str.append(",width=%1,height=%2").arg(size.width()).arg(size.height());
+            }
+            if (rate.width() > 0 && rate.height() > 0)
+            {
+                str = str.append(",framerate=%1/%2").arg(rate.width()).arg(rate.height());
+            }
+        }
+    }
+
     pipeline->setPlainText(str);
 }
 
@@ -163,6 +176,8 @@ void VideoSettings::videoDeviceChanged(int index)
     QFile dev(listDevices->itemData(index).toString());
     if (dev.open(QFile::ReadWrite))
     {
+        listFormats->addItem(tr("(default)"), 0);
+
         v4l2_fmtdesc fmt;
         fmt.index = 0;
         fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -172,11 +187,12 @@ void VideoSettings::videoDeviceChanged(int index)
             listFormats->addItem(description, fmt.pixelformat);
             if (fmt.pixelformat == selectedFormat)
             {
-                listDevices->setCurrentIndex(listDevices->count() - 1);
+                listFormats->setCurrentIndex(listFormats->count() - 1);
             }
             ++fmt.index;
         }
     }
+    updatePipeline();
 }
 
 void VideoSettings::formatChanged(int index)
@@ -188,12 +204,12 @@ void VideoSettings::formatChanged(int index)
         return;
     }
 
-    // No default, the first will be selected (usually, biggest)
-    //
     auto selectedSize = QSettings().value("size").toSize();
     QFile dev(listDevices->itemData(listDevices->currentIndex()).toString());
     if (dev.open(QFile::ReadWrite))
     {
+        listSizes->addItem(tr("(default)"), QSize(0, 0));
+
         v4l2_frmsizeenum frmsize;
         frmsize.pixel_format = listFormats->itemData(listFormats->currentIndex()).toUInt();
         frmsize.index = 0;
@@ -214,6 +230,7 @@ void VideoSettings::formatChanged(int index)
             ++frmsize.index;
         }
     }
+    updatePipeline();
 }
 
 void VideoSettings::sizeChanged(int index)
@@ -231,6 +248,8 @@ void VideoSettings::sizeChanged(int index)
     QFile dev(listDevices->itemData(listDevices->currentIndex()).toString());
     if (dev.open(QFile::ReadWrite))
     {
+        listFramerates->addItem(tr("(default)"), QSize(0, 0));
+
         v4l2_frmivalenum frmival;
         auto size = listSizes->itemData(listSizes->currentIndex()).toSize();
 
@@ -255,6 +274,7 @@ void VideoSettings::sizeChanged(int index)
             ++frmival.index;
         }
     }
+    updatePipeline();
 }
 
 void VideoSettings::rateChanged(int /*index*/)
