@@ -20,8 +20,21 @@ unix {
 dicom {
     DEFINES += WITH_DICOM
     LIBS += -ldcmnet -lwrap -li2d -ldcmdata -loflog -lofstd -lssl
-    SOURCES += worklist.cpp startstudydialog.cpp dcmclient.cpp detailsdialog.cpp
-    HEADERS += worklist.h startstudydialog.h dcmclient.h detailsdialog.h
+    SOURCES += worklist.cpp startstudydialog.cpp dcmclient.cpp detailsdialog.cpp \
+    dicomdevicesettings.cpp \
+    dicomserversettings.cpp \
+    dicommwlsettings.cpp \
+    dicommppssettings.cpp \
+    dicomstoragesettings.cpp \
+    dicomserverdetails.cpp
+
+    HEADERS += worklist.h startstudydialog.h dcmclient.h detailsdialog.h \
+    dicomdevicesettings.h \
+    dicomserversettings.h \
+    dicommwlsettings.h \
+    dicommppssettings.h \
+    dicomstoragesettings.h \
+    dicomserverdetails.h
 }
 
 TARGET   = beryllium
@@ -33,30 +46,16 @@ SOURCES += beryllium.cpp mainwindow.cpp basewidget.cpp \
     storagesettings.cpp \
     rtpsettings.cpp \
     studiessettings.cpp \
-    dicomdevicesettings.cpp \
-    dicomserversettings.cpp \
-    dicommwlsettings.cpp \
-    dicommppssettings.cpp \
-    dicomstoragesettings.cpp \
     worklistcolumnsettings.cpp \
-    worklistquerysettings.cpp \
-    dicomserverdetails.cpp
+    worklistquerysettings.cpp
 HEADERS += mainwindow.h basewidget.h qwaitcursor.h \
     videosettings.h \
     settings.h \
     storagesettings.h \
     rtpsettings.h \
     studiessettings.h \
-    dicomdevicesettings.h \
-    dicomserversettings.h \
-    dicommwlsettings.h \
-    dicommppssettings.h \
-    dicomstoragesettings.h \
     worklistcolumnsettings.h \
     worklistquerysettings.h \
-    dicomserverdetails.h
-
-
 
 FORMS   +=
 

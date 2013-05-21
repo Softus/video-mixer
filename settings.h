@@ -46,13 +46,14 @@
 QT_BEGIN_NAMESPACE
 class QListWidget;
 class QListWidgetItem;
+class QPushButton;
 class QStackedWidget;
 QT_END_NAMESPACE
 
 class Settings : public QDialog
 {
     Q_OBJECT
-
+    QPushButton *btnCancel;
 public:
     Settings();
 

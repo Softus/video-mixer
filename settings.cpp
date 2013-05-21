@@ -81,7 +81,7 @@ Settings::Settings()
     QPushButton *btnApply = new QPushButton(tr("Appl&y"));
     connect(btnApply, SIGNAL(clicked()), this, SLOT(onClickApply()));
     layoutBtns->addWidget(btnApply);
-    QPushButton *btnCancel = new QPushButton(tr("Cancel"));
+    btnCancel = new QPushButton(tr("Cancel"));
     connect(btnCancel, SIGNAL(clicked()), this, SLOT(reject()));
     layoutBtns->addWidget(btnCancel);
     QPushButton *btnOk = new QPushButton(tr("Ok"));
@@ -155,6 +155,10 @@ void Settings::changePage(QListWidgetItem *current, QListWidgetItem *previous)
 void Settings::onClickApply()
 {
     save();
+
+    // Replace "Cancel" with "Close" since we can not cancel anymore
+    //
+    btnCancel->setText(tr("Close"));
 }
 
 void Settings::accept()

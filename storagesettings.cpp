@@ -2,7 +2,7 @@
 #include <QHBoxLayout>
 #include <QFileDialog>
 #include <QFormLayout>
-#include <QGroupBox>
+#include <QFrame>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
@@ -29,25 +29,27 @@ StorageSettings::StorageSettings(QWidget *parent) :
     layoutPath->addWidget(browseButton);
     layoutMain->addRow(layoutPath);
 
-    QGroupBox *grpFolder = new QGroupBox;
-    grpFolder->setStyleSheet("QGroupBox{ border:2px solid silver; }");
+    QFrame *frameFolder = new QFrame;
+    frameFolder->setFrameShape(QFrame::Box);
+    frameFolder->setFrameShadow(QFrame::Sunken);
     QFormLayout* layoutFolder = new QFormLayout;
     QLineEdit* textFolderTemplate = new QLineEdit(settings.value("folder-template", "%yyyy%/%mm%/%dd%/").toString());
     layoutFolder->addRow(tr("&Folder template"), textFolderTemplate);
-    grpFolder->setLayout(layoutFolder);
-    layoutMain->addRow(grpFolder);
+    frameFolder->setLayout(layoutFolder);
+    layoutMain->addRow(frameFolder);
 
     QLineEdit* textImageTemplate;
     QLineEdit* textClipTemplate;
     QLineEdit* textVideoTemplate;
-    QGroupBox *fileGroup = new QGroupBox;
-    fileGroup->setStyleSheet("QGroupBox{ border:2px solid silver; }");
+    QFrame *frameFile = new QFrame;
+    frameFile->setFrameShape(QFrame::Box);
+    frameFile->setFrameShadow(QFrame::Sunken);
     QFormLayout* fileLayout = new QFormLayout;
-    fileLayout->addRow(tr("&Picture template"), textImageTemplate = new QLineEdit(settings.value("image-file", "image-%name%-%study%").toString()));
-    fileLayout->addRow(tr("&Clip template"), textClipTemplate = new QLineEdit(settings.value("clip-file", "clip-%name%-%study%").toString()));
+    fileLayout->addRow(tr("&Pictures template"), textImageTemplate = new QLineEdit(settings.value("image-file", "image-%name%-%study%").toString()));
+    fileLayout->addRow(tr("&Clips template"), textClipTemplate = new QLineEdit(settings.value("clip-file", "clip-%name%-%study%").toString()));
     fileLayout->addRow(tr("&Video template"), textVideoTemplate = new QLineEdit(settings.value("video-file", "video-%name%-%study%").toString()));
-    fileGroup->setLayout(fileLayout);
-    layoutMain->addRow(fileGroup);
+    frameFile->setLayout(fileLayout);
+    layoutMain->addRow(frameFile);
     layoutMain->addRow(new QLabel(tr("%yyyy%\t\tyear\n%mm%\t\tmonth\n%dd%\t\tday\n%hh%\t\thour\n%MM%\t\tminute\n"
                                      "%name%\tpatient name, if specified\n%study%\tstudy name")));
 

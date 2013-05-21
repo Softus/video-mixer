@@ -4,7 +4,7 @@
 #include <QComboBox>
 #include <QDateEdit>
 #include <QFormLayout>
-#include <QGroupBox>
+#include <QFrame>
 #include <QLabel>
 #include <QRadioButton>
 #include <QSpinBox>
@@ -13,14 +13,18 @@
 WorklistQuerySettings::WorklistQuerySettings(QWidget *parent) :
     QWidget(parent)
 {
-    QGroupBox *grpDate = new QGroupBox();
-    grpDate->setStyleSheet("QGroupBox{ border:2px solid silver; }");
+    QFrame *frameDate = new QFrame();
+    frameDate->setFrameShape(QFrame::Box);
+    frameDate->setFrameShadow(QFrame::Sunken);
     QVBoxLayout* layoutDate = new QVBoxLayout;
     layoutDate->addWidget(new QRadioButton(tr("&Today")));
 
     QHBoxLayout* layoutToday = new QHBoxLayout;
     layoutToday->addWidget(new QRadioButton(tr("To&day +/-")));
-    layoutToday->addWidget(new QSpinBox);
+    QSpinBox* spinDelta = new QSpinBox;
+    spinDelta->setMaximum(365*10);
+    spinDelta->setSuffix(tr(" day(s)"));
+    layoutToday->addWidget(spinDelta);
     layoutToday->addStretch(1);
     layoutDate->addLayout(layoutToday);
 
@@ -37,10 +41,10 @@ WorklistQuerySettings::WorklistQuerySettings(QWidget *parent) :
     layoutRange->addWidget(dateTo);
     layoutRange->addStretch(1);
     layoutDate->addLayout(layoutRange);
-    grpDate->setLayout(layoutDate);
+    frameDate->setLayout(layoutDate);
 
     QFormLayout* layoutMain = new QFormLayout;
-    layoutMain->addRow(new QCheckBox(tr("&Scheduled date")), grpDate);
+    layoutMain->addRow(new QCheckBox(tr("&Scheduled date")), frameDate);
     QComboBox* cbModality = new QComboBox;
     cbModality->setEditable(true);
     layoutMain->addRow(new QCheckBox(tr("&Modality")), cbModality);
