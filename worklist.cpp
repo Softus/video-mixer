@@ -60,14 +60,14 @@ Worklist::Worklist(QWidget *parent) :
     QSettings settings;
     iconSize = settings.value("icon-size", iconSize).toInt();
 
-    auto buttonsLayout = new QHBoxLayout();
+    auto layoutBtns = new QHBoxLayout();
 
     btnLoad = createButton(":/buttons/load_worklist", tr("&Load"), SLOT(onLoadClick()));
-    buttonsLayout->addWidget(btnLoad);
+    layoutBtns->addWidget(btnLoad);
 
     btnDetail = createButton(":/buttons/details", tr("&Details"), SLOT(onShowDetailsClick()));
     btnDetail->setEnabled(false);
-    buttonsLayout->addWidget(btnDetail);
+    layoutBtns->addWidget(btnDetail);
 
     size_t columns = sizeof(columnNames)/sizeof(columnNames[0]);
     table = new QTableWidget(0, columns);
@@ -79,12 +79,12 @@ Worklist::Worklist(QWidget *parent) :
     table->setSelectionBehavior(QAbstractItemView::SelectRows);
     table->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
-    auto mainLayout = new QVBoxLayout();
+    auto layoutMain = new QVBoxLayout();
 //    mainLayout->setMenuBar(createMenu());
-    mainLayout->addLayout(buttonsLayout);
-    mainLayout->addWidget(table);
+    layoutMain->addLayout(layoutBtns);
+    layoutMain->addWidget(table);
 
-    setLayout(mainLayout);
+    setLayout(layoutMain);
 
     // Start loading of worklist right after the window is shown for the first time
     //

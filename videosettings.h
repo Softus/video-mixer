@@ -3,8 +3,11 @@
 
 #include <QWidget>
 
+QT_BEGIN_NAMESPACE
 class QComboBox;
 class QTextEdit;
+class QCheckBox;
+QT_END_NAMESPACE
 
 class VideoSettings : public QWidget
 {
@@ -16,14 +19,14 @@ class VideoSettings : public QWidget
     QComboBox* listVideoCodecs;
     QComboBox* listVideoMuxers;
     QComboBox* listImageCodecs;
-    QTextEdit* pipeline;
+    QCheckBox* checkRecordAll;
 
     void updateDeviceList();
     void updateGstList(const char* setting, const char* def, unsigned long long type, QComboBox* cb);
-    void updatePipeline();
+    QString updatePipeline();
 
 public:
-    explicit VideoSettings(QWidget *parent = 0);
+    Q_INVOKABLE explicit VideoSettings(QWidget *parent = 0);
     
 protected:
     virtual void showEvent(QShowEvent *);
@@ -34,7 +37,6 @@ public slots:
     void videoDeviceChanged(int index);
     void formatChanged(int index);
     void sizeChanged(int index);
-    void rateChanged(int index);
     void save();
 
 };

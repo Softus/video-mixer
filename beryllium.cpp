@@ -5,8 +5,7 @@
 #include <QIcon>
 #include <QGst/Init>
 #include "mainwindow.h"
-
-#include "videosettings.h"
+#include "settings.h"
 
 int main(int argc, char *argv[])
 {
@@ -44,7 +43,7 @@ int main(int argc, char *argv[])
     {
 //        MainWindow wnd;
 //        wnd.showMaybeMaximized();
-        VideoSettings wnd;
+        Settings wnd;
         wnd.show();
         errCode = app.exec();
     }

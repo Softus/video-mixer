@@ -1,5 +1,6 @@
 #include "videosettings.h"
 #include <QComboBox>
+#include <QCheckBox>
 #include <QDebug>
 #include <QDir>
 #include <QFile>
@@ -21,30 +22,29 @@
 VideoSettings::VideoSettings(QWidget *parent) :
     QWidget(parent)
 {
+    QSettings settings;
     auto layout = new QFormLayout();
 
-    layout->addRow(tr("Video device"), listDevices = new QComboBox());
+    layout->addRow(tr("Video &device"), listDevices = new QComboBox());
     connect(listDevices, SIGNAL(currentIndexChanged(int)), this, SLOT(videoDeviceChanged(int)));
-    layout->addRow(tr("Pixel format"), listFormats = new QComboBox());
+    layout->addRow(tr("Pixel &format"), listFormats = new QComboBox());
     connect(listFormats, SIGNAL(currentIndexChanged(int)), this, SLOT(formatChanged(int)));
-    layout->addRow(tr("Frame size"), listSizes = new QComboBox());
+    layout->addRow(tr("Frame &size"), listSizes = new QComboBox());
     connect(listSizes, SIGNAL(currentIndexChanged(int)), this, SLOT(sizeChanged(int)));
-    layout->addRow(tr("Frame rate"), listFramerates = new QComboBox());
-    connect(listFramerates, SIGNAL(currentIndexChanged(int)), this, SLOT(rateChanged(int)));
-    layout->addRow(tr("Video codec"), listVideoCodecs = new QComboBox());
-    layout->addRow(tr("Video muxer"), listVideoMuxers = new QComboBox());
-    layout->addRow(tr("Image codec"), listImageCodecs = new QComboBox());
-    layout->addRow(tr("Pipeline"), pipeline = new QTextEdit());
-    pipeline->setReadOnly(true);
-    auto apply = new QPushButton(tr("apply"));
-    connect(apply, SIGNAL(released()), this, SLOT(save()));
-    layout->addRow(apply);
+    layout->addRow(tr("Frame &rate"), listFramerates = new QComboBox());
+    layout->addRow(tr("Video &codec"), listVideoCodecs = new QComboBox());
+    layout->addRow(tr("Video &muxer"), listVideoMuxers = new QComboBox());
+    layout->addRow(tr("&Image codec"), listImageCodecs = new QComboBox());
+    layout->addRow(nullptr, checkRecordAll = new QCheckBox(tr("Record entire &video")));
+    checkRecordAll->setChecked(settings.value("enable-video").toBool());
     setLayout(layout);
 }
 
 void VideoSettings::showEvent(QShowEvent *e)
 {
     QWidget::showEvent(e);
+    // Refill the boxes every time the page is shown
+    //
     updateGstList("videocodec", "x264enc", GST_ELEMENT_FACTORY_TYPE_ENCODER | GST_ELEMENT_FACTORY_TYPE_MEDIA_VIDEO, listVideoCodecs);
     updateGstList("videomux", "mpegtsmux", GST_ELEMENT_FACTORY_TYPE_MUXER, listVideoMuxers);
     updateGstList("imagecodec", "jpegenc", GST_ELEMENT_FACTORY_TYPE_ENCODER | GST_ELEMENT_FACTORY_TYPE_MEDIA_IMAGE, listImageCodecs);
@@ -74,7 +74,7 @@ void VideoSettings::updateGstList(const char* setting, const char* def, unsigned
     gst_plugin_feature_list_free(encoders);
 }
 
-void VideoSettings::updatePipeline()
+QString VideoSettings::updatePipeline()
 {
     auto devicePath = listDevices->itemData(listDevices->currentIndex()).toString();
     auto format = listFormats->itemData(listFormats->currentIndex()).toUInt();
@@ -135,7 +135,7 @@ void VideoSettings::updatePipeline()
         }
     }
 
-    pipeline->setPlainText(str);
+    return str;
 }
 
 void VideoSettings::updateDeviceList()
@@ -277,11 +277,6 @@ void VideoSettings::sizeChanged(int index)
     updatePipeline();
 }
 
-void VideoSettings::rateChanged(int /*index*/)
-{
-    updatePipeline();
-}
-
 void VideoSettings::save()
 {
     QSettings settings;
@@ -289,8 +284,9 @@ void VideoSettings::save()
     settings.setValue("size", listFormats->itemData(listFormats->currentIndex()));
     settings.setValue("size", listSizes->itemData(listSizes->currentIndex()));
     settings.setValue("rate", listFramerates->itemData(listFramerates->currentIndex()));
-    settings.setValue("src", pipeline->toPlainText());
+    settings.setValue("src", updatePipeline());
     settings.setValue("videocodec", listVideoCodecs->itemData(listVideoCodecs->currentIndex()));
     settings.setValue("videomux",   listVideoMuxers->itemData(listVideoMuxers->currentIndex()));
     settings.setValue("imagecodec", listImageCodecs->itemData(listImageCodecs->currentIndex()));
+    settings.setValue("enable-video", checkRecordAll->isChecked());
 }

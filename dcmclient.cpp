@@ -196,8 +196,6 @@ DcmClient::~DcmClient()
     {
         qDebug() << "Releasing Association";
         ASC_releaseAssociation(assoc);
-        /* destroy the Association, i.e. free memory of T_ASC_Association* structure. This */
-        /* call is the counterpart of ASC_requestDcmAssoc(...) which was called above. */
         ASC_destroyAssociation(&assoc);
         assoc = nullptr;
     }
@@ -253,7 +251,8 @@ T_ASC_Parameters* DcmClient::initAssocParams(const char * transferSyntax)
     T_ASC_Parameters* params = nullptr;
 
     int timeout = settings.value("timeout", DEFAULT_TIMEOUT).toInt();
-    cond = ASC_initializeNetwork(NET_REQUESTOR, 0, timeout, &net);
+    int port    = settings.value("port", 0).toInt();
+    cond = ASC_initializeNetwork(NET_REQUESTOR, port, timeout, &net);
 
     if (cond.good())
     {

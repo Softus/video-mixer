@@ -28,9 +28,33 @@ TARGET   = beryllium
 TEMPLATE = app
 
 SOURCES += beryllium.cpp mainwindow.cpp basewidget.cpp \
-    videosettings.cpp
+    videosettings.cpp \
+    settings.cpp \
+    storagesettings.cpp \
+    rtpsettings.cpp \
+    studiessettings.cpp \
+    dicomdevicesettings.cpp \
+    dicomserversettings.cpp \
+    dicommwlsettings.cpp \
+    dicommppssettings.cpp \
+    dicomstoragesettings.cpp \
+    worklistcolumnsettings.cpp \
+    worklistquerysettings.cpp \
+    dicomserverdetails.cpp
 HEADERS += mainwindow.h basewidget.h qwaitcursor.h \
-    videosettings.h
+    videosettings.h \
+    settings.h \
+    storagesettings.h \
+    rtpsettings.h \
+    studiessettings.h \
+    dicomdevicesettings.h \
+    dicomserversettings.h \
+    dicommwlsettings.h \
+    dicommppssettings.h \
+    dicomstoragesettings.h \
+    worklistcolumnsettings.h \
+    worklistquerysettings.h \
+    dicomserverdetails.h
 
 
 
