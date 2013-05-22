@@ -26,7 +26,6 @@ DicomServerSettings::DicomServerSettings(QWidget *parent) :
 
 void DicomServerSettings::onClickAdd()
 {
-    QWaitCursor(this);
     DicomServerDetails dlg(this);
     if (dlg.exec())
     {

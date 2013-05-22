@@ -1,20 +1,72 @@
 #include "studiessettings.h"
 #include <QBoxLayout>
-#include <QListView>
+#include <QListWidget>
 #include <QPushButton>
+#include <QSettings>
 
 StudiesSettings::StudiesSettings(QWidget *parent) :
     QWidget(parent)
 {
+    QSettings settings;
     QLayout* mainLayout = new QHBoxLayout;
     mainLayout->setContentsMargins(4,0,4,0);
-    mainLayout->addWidget(new QListView);
-    QBoxLayout* buttonsLayout = new QVBoxLayout;
-    buttonsLayout->addWidget(new QPushButton(tr("&Add")));
-    buttonsLayout->addWidget(new QPushButton(tr("&Edit")));
-    buttonsLayout->addWidget(new QPushButton(tr("&Remove")));
-    buttonsLayout->addStretch(1);
+    listStudies = new QListWidget;
+    listStudies->addItems(settings.value("studies").toStringList());
+    for (int i = 0; i < listStudies->count(); ++i)
+    {
+        QListWidgetItem* item = listStudies->item(i);
+        item->setFlags(Qt::ItemIsEditable | Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+    }
 
+    mainLayout->addWidget(listStudies);
+    QBoxLayout* buttonsLayout = new QVBoxLayout;
+    QPushButton* btnAdd = new QPushButton(tr("&Add"));
+    connect(btnAdd, SIGNAL(clicked()), this, SLOT(onAddClicked()));
+    buttonsLayout->addWidget(btnAdd);
+    btnEdit = new QPushButton(tr("&Edit"));
+    connect(btnEdit, SIGNAL(clicked()), this, SLOT(onEditClicked()));
+    buttonsLayout->addWidget(btnEdit);
+    btnRemove = new QPushButton(tr("&Remove"));
+    connect(btnRemove, SIGNAL(clicked()), this, SLOT(onRemoveClicked()));
+    buttonsLayout->addWidget(btnRemove);
+    buttonsLayout->addStretch(1);
     mainLayout->addItem(buttonsLayout);
     setLayout(mainLayout);
+
+    btnEdit->setEnabled(listStudies->count());
+    btnRemove->setEnabled(listStudies->count());
+}
+
+void StudiesSettings::onAddClicked()
+{
+    QListWidgetItem* item = new QListWidgetItem(tr("(new study)"), listStudies);
+    item->setFlags(Qt::ItemIsEditable | Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+    listStudies->scrollToItem(item);
+    listStudies->setCurrentItem(item, QItemSelectionModel::ClearAndSelect);
+    listStudies->editItem(item);
+    btnEdit->setEnabled(true);
+    btnRemove->setEnabled(true);
+}
+
+void StudiesSettings::onEditClicked()
+{
+    listStudies->editItem(listStudies->currentItem());
+}
+
+void StudiesSettings::onRemoveClicked()
+{
+    delete listStudies->currentItem();
+    btnEdit->setEnabled(listStudies->count());
+    btnRemove->setEnabled(listStudies->count());
+}
+
+void StudiesSettings::save()
+{
+    QSettings settings;
+    QStringList studies;
+    for (int i = 0; i < listStudies->count(); ++i)
+    {
+        studies.append(listStudies->item(i)->text());
+    }
+    settings.setValue("studies", studies);
 }

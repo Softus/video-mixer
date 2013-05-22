@@ -55,7 +55,7 @@ class Settings : public QDialog
     Q_OBJECT
     QPushButton *btnCancel;
 public:
-    Settings();
+    explicit Settings(QWidget *parent = 0, Qt::WindowFlags flags = 0);
 
 signals:
     void save();

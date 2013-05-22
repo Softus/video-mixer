@@ -5,7 +5,6 @@
 #include <QIcon>
 #include <QGst/Init>
 #include "mainwindow.h"
-#include "settings.h"
 
 int main(int argc, char *argv[])
 {
@@ -33,7 +32,11 @@ int main(int argc, char *argv[])
         locale = QLocale::system().name();
     }
 
-    if (translator.load(app.applicationFilePath() + "_" + locale))
+    // First, try to load localization in the current directory, if possible.
+    // If failed, then try to load from app data path
+    //
+    if (translator.load(app.applicationDirPath() + "/beryllium_" + locale) ||
+        translator.load("/usr/share/beryllium/translations/beryllium_" + locale))
     {
         app.installTranslator(&translator);
     }
@@ -41,9 +44,7 @@ int main(int argc, char *argv[])
     // UI scope
     //
     {
-//        MainWindow wnd;
-//        wnd.showMaybeMaximized();
-        Settings wnd;
+        MainWindow wnd;
         wnd.show();
         errCode = app.exec();
     }

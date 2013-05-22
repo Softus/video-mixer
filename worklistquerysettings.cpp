@@ -32,9 +32,11 @@ WorklistQuerySettings::WorklistQuerySettings(QWidget *parent) :
     layoutRange->addWidget(new QRadioButton(tr("&From")));
     QDateEdit* dateFrom = new QDateEdit;
     dateFrom->setCalendarPopup(true);
+    dateFrom->setDisplayFormat(tr("MM/dd/yyyy"));
     layoutRange->addWidget(dateFrom);
     QDateEdit* dateTo = new QDateEdit;
     dateTo->setCalendarPopup(true);
+    dateTo->setDisplayFormat(tr("MM/dd/yyyy"));
     QLabel* lblTo = new QLabel(tr("t&o"));
     lblTo->setBuddy(dateTo);
     layoutRange->addWidget(lblTo);

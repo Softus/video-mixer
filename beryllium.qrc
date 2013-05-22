@@ -2,14 +2,19 @@
     <qresource prefix="/buttons">
         <file alias="record_on">pixmaps/record_on.png</file>
         <file alias="stop">pixmaps/stop.png</file>
-        <file alias="add">pixmaps/add.png</file>
         <file alias="camera">pixmaps/camera.png</file>
         <file alias="pause">pixmaps/pause.png</file>
-        <file alias="play">pixmaps/play.png</file>
         <file alias="beryllium">pixmaps/beryllium.png</file>
         <file alias="details">pixmaps/details.png</file>
-        <file alias="load_worklist">pixmaps/load_download.png</file>
         <file alias="add_patient">pixmaps/user_add.png</file>
         <file alias="show_worklist">pixmaps/user_manage.png</file>
+        <file alias="about">pixmaps/about.png</file>
+        <file alias="archive">pixmaps/archive.png</file>
+        <file alias="folder">pixmaps/folder.png</file>
+        <file alias="record">pixmaps/record.png</file>
+        <file alias="record_off">pixmaps/record_off.png</file>
+        <file alias="refresh">pixmaps/refresh.png</file>
+        <file alias="settings">pixmaps/settings.png</file>
+        <file alias="start">pixmaps/start.png</file>
     </qresource>
 </RCC>

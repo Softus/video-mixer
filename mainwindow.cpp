@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "qwaitcursor.h"
+#include "settings.h"
 
 #ifdef WITH_DICOM
 #include "worklist.h"
@@ -8,19 +9,22 @@
 
 #include <dcmtk/dcmdata/dcuid.h>
 #include <dcmtk/dcmdata/dcdatset.h>
-
+#else
+#include "patientdialog.h"
 #endif
+
 #include <QApplication>
 #include <QResizeEvent>
 #include <QFrame>
 #include <QBoxLayout>
-#include <QPushButton>
 #include <QListWidget>
 #include <QLabel>
 #include <QSettings>
 #include <QDir>
 #include <QFileInfo>
 #include <QTimer>
+#include <QToolBar>
+#include <QToolButton>
 #include <QMenu>
 #include <QMenuBar>
 #include <QMessageBox>
@@ -98,7 +102,7 @@ static void Dump(QGst::ElementPtr elm)
 #endif
 
 MainWindow::MainWindow(QWidget *parent) :
-    BaseWidget(parent),
+    QWidget(parent),
 #ifdef WITH_DICOM
     worklist(nullptr),
 #endif
@@ -106,66 +110,75 @@ MainWindow::MainWindow(QWidget *parent) :
     recording(false)
 {
     QSettings settings;
-    iconSize = settings.value("icon-size", iconSize).toInt();
 
-    auto buttonsLayout = new QHBoxLayout();
+    QToolBar* bar = new QToolBar(tr("main"));
+
+    btnStart = new QToolButton();
+    btnStart->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    btnStart->setFocusPolicy(Qt::NoFocus);
+    connect(btnStart, SIGNAL(clicked()), this, SLOT(onStartClick()));
+    bar->addWidget(btnStart);
+
+    btnSnapshot = new QToolButton();
+    btnSnapshot->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    btnSnapshot->setFocusPolicy(Qt::NoFocus);
+    btnSnapshot->setIcon(QIcon(":/buttons/camera"));
+    btnSnapshot->setText(tr("&Take snapshot"));
+    connect(btnSnapshot, SIGNAL(clicked()), this, SLOT(onSnapshotClick()));
+    bar->addWidget(btnSnapshot);
+
+    btnRecord = new QToolButton();
+    btnRecord->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    btnRecord->setFocusPolicy(Qt::NoFocus);
+    connect(btnRecord, SIGNAL(clicked()), this, SLOT(onRecordClick()));
+    bar->addWidget(btnRecord);
+
+    QWidget* spacer = new QWidget;
+    spacer->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
+    bar->addWidget(spacer);
+
+    lblRecordAll = new QLabel;
+    lblRecordAll->setMaximumSize(bar->iconSize());
+    bar->addWidget(lblRecordAll);
 
 #ifdef WITH_DICOM
-    auto btnWorkList = createButton(":/buttons/show_worklist", tr("Show\n&work list"), SLOT(onShowWorkListClick()));
-    buttonsLayout->addWidget(btnWorkList);
+    QAction* actionWorklist = bar->addAction(QIcon(":/buttons/show_worklist"), nullptr, this, SLOT(onShowWorkListClick()));
+    actionWorklist->setToolTip(tr("Show &work list"));
 #endif
 
-    btnStart = createButton(SLOT(onStartClick()));
-    btnStart->setAutoDefault(true);
-    buttonsLayout->addWidget(btnStart);
-
-    btnSnapshot = createButton(":/buttons/camera", tr("Take\nsnapshot"), SLOT(onSnapshotClick()));
-    buttonsLayout->addWidget(btnSnapshot);
-
-    btnRecord = createButton(SLOT(onRecordClick()));
-    buttonsLayout->addWidget(btnRecord);
-
-    lblRecordAll = new QLabel();
-    lblRecordAll->setMaximumHeight(iconSize + 8);
-    buttonsLayout->addWidget(lblRecordAll, 0, Qt::AlignRight);
-
-    outputLayout = new QBoxLayout(bestDirection(size()));
+    QAction* actionArchive = bar->addAction(QIcon(":/buttons/folder"), nullptr, this, SLOT(onShowArchiveClick()));
+    actionArchive->setToolTip(tr("Show studies archive"));
+    QAction* actionSettings = bar->addAction(QIcon(":/buttons/settings"), nullptr, this, SLOT(onShowSettingsClick()));
+    actionSettings->setToolTip(tr("Edit settings"));
+    QAction* actionAbout = bar->addAction(QIcon(":/buttons/about"), nullptr, this, SLOT(onShowAboutClick()));
+    actionAbout->setToolTip(tr("About berillyum"));
 
     displayWidget = new QGst::Ui::VideoWidget();
-    displayWidget->setMinimumSize(320, 240);
-    outputLayout->addWidget(displayWidget);
+    displayWidget->setMinimumSize(720, 576);
 
-    imageOut = new QLabel(tr("To start a study press \"Start\" button.\n\n"
-        "During the study you can take snapshots and save video clips."));
-    imageOut->setAlignment(Qt::AlignCenter);
-    imageOut->setMinimumSize(320, 240);
-    outputLayout->addWidget(imageOut);
+    imageList = new QListWidget();
+    imageList->setViewMode(QListView::IconMode);
+    imageList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+    imageList->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    imageList->setMinimumHeight(128);
+    imageList->setMaximumHeight(128);
+    imageList->setIconSize(QSize(128,128));
+    imageList->setMovement(QListView::Static);
+    imageList->setWrapping(false);
 
-    // TODO: implement snapshot image list
-    //
-//    imageList = new QListWidget();
-//    imageList->setViewMode(QListView::IconMode);
-//    imageList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-//    imageList->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-//    imageList->setMinimumHeight(iconSize);
-//    imageList->setMaximumHeight(iconSize);
-//    imageList->setMovement(QListView::Static);
-//    imageList->setWrapping(false);
+    QVBoxLayout* layoutMain = new QVBoxLayout();
+    layoutMain->setMenuBar(createMenu());
+    layoutMain->addWidget(bar);
+    layoutMain->addWidget(displayWidget);
+    layoutMain->addWidget(imageList);
 
-    auto mainLayout = new QVBoxLayout();
-    mainLayout->setMenuBar(createMenu());
-    mainLayout->addLayout(buttonsLayout);
-    mainLayout->addLayout(outputLayout);
-//    mainLayout->addWidget(imageList);
-
-    setLayout(mainLayout);
+    setLayout(layoutMain);
 
     updateStartButton();
     updateRecordButton();
     updateRecordAll();
 
-    QString profile = settings.value("profile").toString();
-    setWindowTitle(QString().append(qApp->applicationName()).append(" - ").append(profile.isEmpty()? tr("Default"): profile));
+    restartPipeline();
 }
 
 MainWindow::~MainWindow()
@@ -221,6 +234,8 @@ QMenuBar* MainWindow::createMenu()
                      V
          +----[main splitter]-----+
          |            |           |
+  [image valve]       |     [video valve]
+         |            |           |
          V            V           V
  [image encoder]  [display]  [video encoder]
         |                         |
@@ -228,7 +243,10 @@ QMenuBar* MainWindow::createMenu()
   [image writer]      +----[video splitter]----+
                       |           |            |
                       V           V            V
-           [movie writer]  [clip writer]  [rtp sender]
+           [movie writer]  [clip valve]  [rtp sender]
+                                  |
+                                  V
+                          [clip writer]
 */
 
 
@@ -290,7 +308,9 @@ QGst::PipelinePtr MainWindow::createPipeline()
     outputPath = QDir(outputPathStr);
     if (!outputPath.mkpath("."))
     {
-        error(tr("Failed to create '%1'").arg(outputPathStr));
+        QString msg = tr("Failed to create '%1'").arg(outputPathStr);
+        qCritical() << msg;
+        QMessageBox::critical(this, windowTitle(), msg, QMessageBox::Ok);
         return pl;
     }
 
@@ -312,7 +332,7 @@ QGst::PipelinePtr MainWindow::createPipeline()
 
     if (!videoEncoderDef.isEmpty() && (enableRtp || enableVideo || !clipSinkDef.isEmpty()))
     {
-        pipe.append(" ! ").append(videoEncoderDef);
+        pipe.append(" ! valve name=videovalve ! ").append(videoEncoderDef);
         if (enableRtp || enableVideo)
         {
             pipe.append(" ! tee name=videosplitter");
@@ -353,11 +373,15 @@ QGst::PipelinePtr MainWindow::createPipeline()
 
         displaySink = pl->getElementByName("displaysink");
         if (!displaySink)
+        {
             qCritical() << "Element displaysink not found";
+        }
 
         clipValve = pl->getElementByName("clipvalve");
         if (!clipValve)
+        {
             qCritical() << "Element clipvalve not found";
+        }
 
         if (enableVideo)
         {
@@ -381,6 +405,12 @@ QGst::PipelinePtr MainWindow::createPipeline()
         {
             clipSink->setProperty("location", outputPath.absoluteFilePath(clipFileName));
             clipSink->setProperty("index", 0);
+        }
+
+        videoValve  = pl->getElementByName("videovalve");
+        if (!videoValve)
+        {
+            qCritical() << "Element videovalve not found";
         }
 
         imageValve = pl->getElementByName("imagevalve");
@@ -439,6 +469,30 @@ QGst::PipelinePtr MainWindow::createPipeline()
     return pl;
 }
 
+void MainWindow::restartPipeline()
+{
+    if (pipeline)
+    {
+        releasePipeline();
+    }
+
+    pipeline = createPipeline();
+    if (pipeline)
+    {
+        if (videoValve)
+        {
+            videoValve->setProperty("drop", !running);
+        }
+
+        if (imageValve)
+        {
+            imageValve->setProperty("drop-probability", 1.0);
+        }
+
+        pipeline->setState(QGst::StatePaused);
+    }
+}
+
 void MainWindow::releasePipeline()
 {
     pipeline->setState(QGst::StateNull);
@@ -449,6 +503,7 @@ void MainWindow::releasePipeline()
     imageSink.clear();
     clipValve.clear();
     clipSink.clear();
+    videoValve.clear();
     videoSink.clear();
     rtpSink.clear();
 
@@ -464,10 +519,11 @@ void MainWindow::onImageReady(const QGst::BufferPtr& buf)
 
 void MainWindow::errorGlib(const QGlib::ObjectPtr& obj, const QGlib::Error& ex)
 {
-    const QString str = obj?
+    const QString msg = obj?
         QString().append(obj->property("name").toString()).append(" ").append(ex.message()):
         ex.message();
-    error(str);
+    qCritical() << msg;
+    QMessageBox::critical(this, windowTitle(), msg, QMessageBox::Ok);
 }
 
 void MainWindow::onBusMessage(const QGst::MessagePtr& message)
@@ -554,6 +610,7 @@ void MainWindow::onElementMessage(const QGst::ElementMessagePtr& message)
     if (s->name() == "GstMultiFileSink" && message->source() == imageSink)
     {
         const QString fileName = s->value("filename").toString();
+        const int index = s->value("index").toInt();
         QPixmap pm;
 
         auto lastBuffer = message->source()->property("last-buffer").get<QGst::BufferPtr>();
@@ -565,22 +622,26 @@ void MainWindow::onElementMessage(const QGst::ElementMessagePtr& message)
 
         if (ok)
         {
-            imageOut->setPixmap(pm);
+            QListWidgetItem* item = new QListWidgetItem(QIcon(pm), QString::number(index), imageList);
+            item->setToolTip(fileName);
+            imageList->setItemSelected(item, true);
+            imageList->scrollToItem(item);
         }
         else
         {
-            imageOut->setText(tr("Failed to load image %1").arg(fileName));
+            QListWidgetItem* item = new QListWidgetItem(tr("(error)"), imageList);
+            item->setToolTip(tr("Failed to load image %1").arg(fileName));
         }
 
         btnSnapshot->setEnabled(running);
         return;
     }
 
-    if (s->name() == "prepare-xwindow-id")
+    if (s->name() == "prepare-xwindow-id" || s->name() == "prepare-window-handle")
     {
         // At this time the video output finally has a sink, so set it up now
         //
-        auto sink = displayWidget->videoSink();
+        QGst::ElementPtr sink = displayWidget->videoSink();
         if (sink)
         {
             sink->setProperty("force-aspect-ratio", TRUE);
@@ -594,8 +655,6 @@ void MainWindow::onElementMessage(const QGst::ElementMessagePtr& message)
 
 void MainWindow::onStartClick()
 {
-    QWaitCursor wait(this);
-
     if (!running)
     {
 #ifdef WITH_DICOM
@@ -628,7 +687,16 @@ void MainWindow::onStartClick()
             error(client.lastError());
             return;
         }
+#else
+        PatientDialog dlg(this);
+        if (!dlg.exec())
+        {
+            // User cancelled
+            //
+            return;
+        }
 #endif
+        QWaitCursor wait(this);
         pipeline = createPipeline();
         if (pipeline)
         {
@@ -671,6 +739,7 @@ void MainWindow::onStartClick()
         }
 #endif
 
+        QWaitCursor wait(this);
         running = recording = false;
         updateRecordButton();
         releasePipeline();
@@ -702,7 +771,7 @@ void MainWindow::onStartClick()
     updateStartButton();
     updateRecordAll();
 
-    imageOut->clear();
+    //imageOut->clear();
     displayWidget->update();
 }
 
@@ -747,22 +816,16 @@ void MainWindow::onRecordClick()
     }
 }
 
-void MainWindow::resizeEvent(QResizeEvent *evt)
-{
-    QWidget::resizeEvent(evt);
-    outputLayout->setDirection(bestDirection(evt->size()));
-}
-
 void MainWindow::updateStartButton()
 {
-    QIcon icon(running? ":/buttons/stop": ":/buttons/add");
-    QString strOnOff(running? tr("Stop\nstudy"): tr("Start\nstudy"));
+    QIcon icon(running? ":/buttons/stop": ":/buttons/start");
+    QString strOnOff(running? tr("End &study"): tr("Start &study"));
     btnStart->setIcon(icon);
     btnStart->setText(strOnOff);
 
     btnRecord->setEnabled(running && clipSink);
     btnSnapshot->setEnabled(running && imageSink);
-    displayWidget->setVisible(running && displaySink);
+//    displayWidget->setVisible(running && displaySink);
 #ifdef WITH_DICOM
     if (worklist)
     {
@@ -773,7 +836,7 @@ void MainWindow::updateStartButton()
 
 void MainWindow::updateRecordButton()
 {
-    QIcon icon(recording? ":/buttons/pause": ":/buttons/play");
+    QIcon icon(recording? ":/buttons/pause": ":/buttons/record");
     QString strOnOff(recording? tr("Pause"): tr("Record"));
     btnRecord->setIcon(icon);
     btnRecord->setText(strOnOff);
@@ -782,16 +845,11 @@ void MainWindow::updateRecordButton()
 void MainWindow::updateRecordAll()
 {
     QString strOnOff(videoSink? tr("on"): tr("off"));
-    lblRecordAll->setEnabled(videoSink);
+    const char* icon = videoSink? ":/buttons/record_on": ":/buttons/record_off";
+
+    lblRecordAll->setEnabled(running);
     lblRecordAll->setToolTip(tr("Recording of entire study is %1").arg(strOnOff));
-    if (running)
-    {
-        lblRecordAll->setPixmap(QIcon(":/buttons/record_on").pixmap(QSize(iconSize, iconSize)));
-    }
-    else
-    {
-        lblRecordAll->clear();
-    }
+    lblRecordAll->setPixmap(QIcon(icon).pixmap(lblRecordAll->size()));
 }
 
 void MainWindow::prepareProfileMenu()
@@ -853,6 +911,25 @@ void MainWindow::toggleSetting()
     const QString propName = static_cast<QAction*>(sender())->data().toString();
     bool enable = !settings.value(propName).toBool();
     settings.setValue(propName, enable);
+}
+
+void MainWindow::onShowAboutClick()
+{
+    QMessageBox::information(this, windowTitle(), "Not yet");
+}
+
+void MainWindow::onShowArchiveClick()
+{
+    QMessageBox::information(this, windowTitle(), "Not yet");
+}
+
+void MainWindow::onShowSettingsClick()
+{
+    Settings dlg(this);
+    if (dlg.exec())
+    {
+        restartPipeline();
+    }
 }
 
 #ifdef WITH_DICOM

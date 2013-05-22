@@ -10,36 +10,36 @@
 
 #include <QGlib/Error>
 
-#include "basewidget.h"
+#include <QWidget>
 
+QT_BEGIN_NAMESPACE
 class QMenuBar;
 class QResizeEvent;
 class QBoxLayout;
-class QPushButton;
 class QListWidget;
 class QLabel;
 class QTimer;
+class QToolButton;
 class Worklist;
 class DcmDataset;
+QT_END_NAMESPACE
 
-class MainWindow : public BaseWidget
+class MainWindow : public QWidget
 {
     Q_OBJECT
 
     // UI
     //
-    QBoxLayout*  outputLayout;
     QLabel*      lblRecordAll;
-    QPushButton* btnStart;
-    QPushButton* btnRecord;
-    QPushButton* btnSnapshot;
+    QToolButton* btnStart;
+    QToolButton* btnRecord;
+    QToolButton* btnSnapshot;
 
 #ifdef WITH_DICOM
     Worklist*     worklist;
     QString       pendingSOPInstanceUID;
 #endif
-    QLabel*      imageOut;
-//	QListWidget* imageList;
+    QListWidget* imageList;
     QGst::Ui::VideoWidget* displayWidget;
     QDir         outputPath;
 
@@ -61,11 +61,13 @@ class MainWindow : public BaseWidget
     QGst::ElementPtr imageSink;
     QGst::ElementPtr clipValve;
     QGst::ElementPtr clipSink;
+    QGst::ElementPtr videoValve;
     QGst::ElementPtr videoSink;
     QGst::ElementPtr rtpSink;
 
     QGst::PipelinePtr createPipeline();
     void releasePipeline();
+    void restartPipeline();
 
     void onBusMessage(const QGst::MessagePtr& message);
     void onStateChangedMessage(const QGst::StateChangedMessagePtr& message);
@@ -84,14 +86,14 @@ public:
     ~MainWindow();
 
 protected:
-    // Event handlers
-    //
-    virtual void resizeEvent(QResizeEvent *evt);
 
 private slots:
 #ifdef WITH_DICOM
     void onShowWorkListClick();
 #endif
+    void onShowAboutClick();
+    void onShowArchiveClick();
+    void onShowSettingsClick();
     void onStartClick();
     void onSnapshotClick();
     void onRecordClick();

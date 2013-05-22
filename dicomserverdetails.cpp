@@ -10,20 +10,20 @@
 DicomServerDetails::DicomServerDetails(QWidget *parent) :
     QDialog(parent)
 {
-    QFormLayout* mainLayout = new QFormLayout;
-    mainLayout->addRow(tr("&Name"), new QLineEdit);
-    mainLayout->addRow(tr("&AE title"), new QLineEdit);
-    mainLayout->addRow(tr("&IP address"), new QLineEdit);
-    mainLayout->addRow(tr("&Port"), new QLineEdit);
-    mainLayout->addRow(tr("Time&out"), new QSpinBox);
-    mainLayout->addRow(nullptr, new QCheckBox(tr("&Echo")));
+    QFormLayout* layoutMain = new QFormLayout;
+    layoutMain->addRow(tr("&Name"), new QLineEdit);
+    layoutMain->addRow(tr("&AE title"), new QLineEdit);
+    layoutMain->addRow(tr("&IP address"), new QLineEdit);
+    layoutMain->addRow(tr("&Port"), new QLineEdit);
+    layoutMain->addRow(tr("Time&out"), new QSpinBox);
+    layoutMain->addRow(nullptr, new QCheckBox(tr("&Echo")));
 
     QHBoxLayout* layoutSopClass = new QHBoxLayout;
     layoutSopClass->addWidget(new QRadioButton(tr("Ne&w")));
     layoutSopClass->addWidget(new QRadioButton(tr("&Retire")));
     layoutSopClass->addStretch(1);
-    mainLayout->addRow(tr("SOP class"), layoutSopClass);
-    mainLayout->addItem(new QSpacerItem(30,30));
+    layoutMain->addRow(tr("SOP class"), layoutSopClass);
+    layoutMain->addItem(new QSpacerItem(30,30));
 
     QHBoxLayout *layoutBtns = new QHBoxLayout;
     layoutBtns->addStretch(1);
@@ -37,9 +37,9 @@ DicomServerDetails::DicomServerDetails(QWidget *parent) :
     connect(btnOk, SIGNAL(clicked()), this, SLOT(accept()));
     btnOk->setDefault(true);
     layoutBtns->addWidget(btnOk);
-    mainLayout->addRow(layoutBtns);
+    layoutMain->addRow(layoutBtns);
 
-    setLayout(mainLayout);
+    setLayout(layoutMain);
 }
 
 void DicomServerDetails::onClickTest()

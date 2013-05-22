@@ -29,7 +29,7 @@ void BaseWidget::showMaybeMaximized()
 
 QPushButton* BaseWidget::createButton(const char *slot)
 {
-    auto btn = new QPushButton();
+    QPushButton* btn = new QPushButton();
     btn->setMinimumSize(QSize(iconSize, iconSize + 8));
     btn->setIconSize(QSize(iconSize, iconSize));
     connect(btn, SIGNAL(clicked()), this, slot);
@@ -39,7 +39,7 @@ QPushButton* BaseWidget::createButton(const char *slot)
 
 QPushButton* BaseWidget::createButton(const char *icon, const QString &text, const char *slot)
 {
-    auto btn = new QPushButton(QIcon(icon), text);
+    QPushButton* btn = new QPushButton(QIcon(icon), text);
     btn->setMinimumSize(QSize(iconSize, iconSize + 8));
     btn->setIconSize(QSize(iconSize, iconSize));
     connect(btn, SIGNAL(clicked()), this, slot);

@@ -28,6 +28,8 @@
 /fedora.patch -text
 /mainwindow.cpp -text
 /mainwindow.h -text
+/patientdialog.cpp -text
+/patientdialog.h -text
 pixmaps/about.png -text
 pixmaps/archive.png -text
 pixmaps/beryllium.png -text

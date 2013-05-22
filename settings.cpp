@@ -59,7 +59,8 @@
 Q_DECLARE_METATYPE(QMetaObject)
 static int QMetaObjectMetaType = qRegisterMetaType<QMetaObject>();
 
-Settings::Settings()
+Settings::Settings(QWidget *parent, Qt::WindowFlags flags)
+    : QDialog(parent, flags)
 {
     listWidget = new QListWidget;
     listWidget->setMovement(QListView::Static);
