@@ -2,22 +2,30 @@
 #include <QComboBox>
 #include <QCheckBox>
 #include <QDebug>
-#include <QDir>
-#include <QFile>
 #include <QFormLayout>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QSettings>
+#include <QSpinBox>
 #include <QTextEdit>
-
-// V4l2src
-//
-#include <libv4l2.h>
-#include <linux/videodev2.h>
-#include <sys/ioctl.h>
 
 // Video encoder
 //
+#include <QGlib/Error>
+#include <QGst/ElementFactory>
+#include <QGst/Caps>
+#include <QGst/Pad>
+#include <QGst/Parse>
+#include <QGst/Pipeline>
+#include <QGst/PropertyProbe>
+#include <QGst/Structure>
 #include <gst/gst.h>
+
+#ifdef QT_ARCH_WINDOWS
+#define PLATFORM_SPECIFIC_SOURCE "dshowvideosrc"
+#else
+#define PLATFORM_SPECIFIC_SOURCE "v4l2src"
+#endif
 
 VideoSettings::VideoSettings(QWidget *parent) :
     QWidget(parent)
@@ -31,8 +39,13 @@ VideoSettings::VideoSettings(QWidget *parent) :
     connect(listFormats, SIGNAL(currentIndexChanged(int)), this, SLOT(formatChanged(int)));
     layout->addRow(tr("Frame &size"), listSizes = new QComboBox());
     connect(listSizes, SIGNAL(currentIndexChanged(int)), this, SLOT(sizeChanged(int)));
-    layout->addRow(tr("Frame &rate"), listFramerates = new QComboBox());
     layout->addRow(tr("Video &codec"), listVideoCodecs = new QComboBox());
+    layout->addRow(tr("Video &bitrate"), spinBitrate = new QSpinBox());
+    spinBitrate->setRange(300, 102400);
+    spinBitrate->setSingleStep(100);
+    spinBitrate->setSuffix(tr(" kbit per second"));
+    spinBitrate->setValue(settings.value("bitrate", 4000).toInt());
+
     layout->addRow(tr("Video &muxer"), listVideoMuxers = new QComboBox());
     layout->addRow(tr("&Image codec"), listImageCodecs = new QComboBox());
     layout->addRow(nullptr, checkRecordAll = new QCheckBox(tr("Record entire &video")));
@@ -45,9 +58,9 @@ void VideoSettings::showEvent(QShowEvent *e)
     QWidget::showEvent(e);
     // Refill the boxes every time the page is shown
     //
-    updateGstList("videocodec", "x264enc", GST_ELEMENT_FACTORY_TYPE_ENCODER | GST_ELEMENT_FACTORY_TYPE_MEDIA_VIDEO, listVideoCodecs);
-    updateGstList("videomux", "mpegtsmux", GST_ELEMENT_FACTORY_TYPE_MUXER, listVideoMuxers);
-    updateGstList("imagecodec", "jpegenc", GST_ELEMENT_FACTORY_TYPE_ENCODER | GST_ELEMENT_FACTORY_TYPE_MEDIA_IMAGE, listImageCodecs);
+    updateGstList("video-encoder", "x264enc", GST_ELEMENT_FACTORY_TYPE_ENCODER | GST_ELEMENT_FACTORY_TYPE_MEDIA_VIDEO, listVideoCodecs);
+    updateGstList("video-mux", "mpegtsmux", GST_ELEMENT_FACTORY_TYPE_MUXER, listVideoMuxers);
+    updateGstList("image-encoder", "jpegenc", GST_ELEMENT_FACTORY_TYPE_ENCODER | GST_ELEMENT_FACTORY_TYPE_MEDIA_IMAGE, listImageCodecs);
     updateDeviceList();
 }
 
@@ -56,14 +69,12 @@ void VideoSettings::updateGstList(const char* setting, const char* def, unsigned
     cb->clear();
     auto selectedCodec = QSettings().value(setting, def).toString();
 
-    GList* encoders = gst_element_factory_list_get_elements(
-        type, GST_RANK_NONE);
-
+    GList* encoders = gst_element_factory_list_get_elements(type, GST_RANK_NONE);
     for (GList* curr = encoders; curr; curr = curr->next)
     {
         GstElementFactory *factory = (GstElementFactory *)curr->data;
         QString longName(factory->details.longname);
-        QString codecName(factory->parent.object.name);
+        QString codecName(factory->parent.name);
         cb->addItem(longName, codecName);
         if (selectedCodec == codecName)
         {
@@ -74,90 +85,34 @@ void VideoSettings::updateGstList(const char* setting, const char* def, unsigned
     gst_plugin_feature_list_free(encoders);
 }
 
-QString VideoSettings::updatePipeline()
-{
-    auto devicePath = listDevices->itemData(listDevices->currentIndex()).toString();
-    auto format = listFormats->itemData(listFormats->currentIndex()).toUInt();
-    auto strFormat = QString::fromAscii((const char*)&format, sizeof(int));
-
-    QString mimetype;
-    if (V4L2_PIX_FMT_GREY == format)
-    {
-        mimetype = "video/x-raw-gray";
-    }
-    else
-    {
-        switch (format & 0xFF)
-        {
-        case 'A':
-        case 'R':
-        case 'G':
-        case 'B':
-            mimetype = "video/x-raw-rgb";
-            break;
-        case 'P':
-            mimetype = "video/x-raw-palette"; // Oh yes!
-            break;
-        case 'd':
-            mimetype = "video/x-dv";
-        case 'J':
-            mimetype = "image/jpeg";
-            break;
-        case 'M':
-        case 'H':
-        case 'X':
-            mimetype = "video/mpegts";
-            break;
-        default:
-            mimetype = "video/x-raw-yuv"; // The common case
-            break;
-        }
-    }
-
-    auto size = listSizes->itemData(listSizes->currentIndex()).toSize();
-    auto rate = listFramerates->itemData(listFramerates->currentIndex()).toSize();
-    QString str;
-
-    if (!devicePath.isNull())
-    {
-        str.append("v4l2src device=").append(devicePath);
-        if (format)
-        {
-            str.append(" ! ").append(mimetype).append(",format=").append(strFormat);
-            if (size.width() > 0 && size.height() > 0)
-            {
-                str = str.append(",width=%1,height=%2").arg(size.width()).arg(size.height());
-            }
-            if (rate.width() > 0 && rate.height() > 0)
-            {
-                str = str.append(",framerate=%1/%2").arg(rate.width()).arg(rate.height());
-            }
-        }
-    }
-
-    return str;
-}
-
 void VideoSettings::updateDeviceList()
 {
     listDevices->clear();
     auto selectedDevice = QSettings().value("device").toString();
-    QDir dir("/dev","video*", QDir::Name, QDir::System);
-    foreach (auto entry, dir.entryInfoList())
+
+    QGst::ElementPtr src = QGst::ElementFactory::make(PLATFORM_SPECIFIC_SOURCE);
+    if (!src) {
+        QMessageBox::critical(this, windowTitle(), tr("Failed to create element \"%1\"").arg(PLATFORM_SPECIFIC_SOURCE));
+        return;
+    }
+
+    src->setState(QGst::StateReady);
+    QGst::PropertyProbePtr propertyProbe = src.dynamicCast<QGst::PropertyProbe>();
+
+    // Look for device-name instead of "device" since "device" may be different, thanks to PNP.
+    //
+    if (propertyProbe && propertyProbe->propertySupportsProbe("device-name"))
     {
-        QFile dev(entry.absoluteFilePath());
-        if (dev.open(QFile::ReadWrite))
+        //get a list of devices that the element supports
+        QList<QGlib::Value> devices = propertyProbe->probeAndGetValues("device-name");
+        Q_FOREACH(const QGlib::Value& device, devices)
         {
-            v4l2_capability vcap;
-            if (ioctl(dev.handle(), VIDIOC_QUERYCAP, &vcap) >= 0 && (V4L2_CAP_VIDEO_CAPTURE & vcap.capabilities))
+            QString deviceName = device.toString();
+            QGst::PadPtr srcPad = src->getStaticPad("src");
+            if (srcPad)
             {
-                auto devicePath = entry.absoluteFilePath();
-                auto deviceName = QString::fromLocal8Bit((const char*)vcap.card);
-                listDevices->addItem(deviceName.append(" (").append(devicePath).append(")"), devicePath);
-                if (devicePath == selectedDevice)
-                {
-                    listDevices->setCurrentIndex(listDevices->count() - 1);
-                }
+                //add the device on the combobox
+                listDevices->addItem(device.toString(), srcPad->caps()->toString());
             }
         }
     }
@@ -166,30 +121,28 @@ void VideoSettings::updateDeviceList()
 void VideoSettings::videoDeviceChanged(int index)
 {
     listFormats->clear();
+    QGst::CapsPtr caps = QGst::Caps::fromString(listDevices->itemData(index).toString());
 
-    if (index < 0)
+    if (index < 0 || !caps)
     {
         return;
     }
 
-    auto selectedFormat = QSettings().value("format").toUInt();
-    QFile dev(listDevices->itemData(index).toString());
-    if (dev.open(QFile::ReadWrite))
+    auto selectedFormat = QSettings().value("format").toString();
+    for (uint i = 0; i < caps->size(); ++i)
     {
-        listFormats->addItem(tr("(default)"), 0);
-
-        v4l2_fmtdesc fmt;
-        fmt.index = 0;
-        fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        while (ioctl(dev.handle(), VIDIOC_ENUM_FMT, &fmt) >= 0)
+        QGst::StructurePtr s = caps->internalStructure(i);
+        QString format = s->value("format").toString();
+        QString formatName = s->name().append(",format=(fourcc)").append(format);
+        if (listFormats->findData(formatName) >= 0)
         {
-            auto description = QString::fromLocal8Bit((const char*)fmt.description);
-            listFormats->addItem(description, fmt.pixelformat);
-            if (fmt.pixelformat == selectedFormat)
-            {
-                listFormats->setCurrentIndex(listFormats->count() - 1);
-            }
-            ++fmt.index;
+            continue;
+        }
+        QString displayName = s->name().append(" (").append(format).append(")");
+        listFormats->addItem(displayName, formatName);
+        if (format == selectedFormat)
+        {
+            listFormats->setCurrentIndex(listFormats->count() - 1);
         }
     }
     updatePipeline();
@@ -199,94 +152,72 @@ void VideoSettings::formatChanged(int index)
 {
     listSizes->clear();
 
-    if (index < 0)
+    QGst::CapsPtr caps = QGst::Caps::fromString(listDevices->itemData(listDevices->currentIndex()).toString());
+    if (index < 0 || !caps)
     {
         return;
     }
 
+    auto selectedFormat = listFormats->itemData(index).toString();
     auto selectedSize = QSettings().value("size").toSize();
-    QFile dev(listDevices->itemData(listDevices->currentIndex()).toString());
-    if (dev.open(QFile::ReadWrite))
+    for (uint i = 0; i < caps->size(); ++i)
     {
-        listSizes->addItem(tr("(default)"), QSize(0, 0));
-
-        v4l2_frmsizeenum frmsize;
-        frmsize.pixel_format = listFormats->itemData(listFormats->currentIndex()).toUInt();
-        frmsize.index = 0;
-
-        while (ioctl(dev.handle(), VIDIOC_ENUM_FRAMESIZES, &frmsize) >= 0)
+        QGst::StructurePtr s = caps->internalStructure(i);
+        QString formatName = s->name().append(",format=(fourcc)").append(s->value("format").toString());
+        if (selectedFormat != formatName)
         {
-            if (frmsize.type == V4L2_FRMSIZE_TYPE_DISCRETE)
-            {
-                auto dimensions = QString(tr("%1x%2")).arg(frmsize.discrete.width).arg(frmsize.discrete.height);
-                auto size = QSize(frmsize.discrete.width, frmsize.discrete.height);
-                listSizes->addItem(dimensions, size);
-                if (size == selectedSize)
-                {
-                    listSizes->setCurrentIndex(listSizes->count() - 1);
-                }
-            }
+            continue;
+        }
 
-            ++frmsize.index;
+        QSize size(s->value("width").toInt(), s->value("height").toInt());
+        if (listSizes->findData(size) >= 0)
+        {
+            continue;
+        }
+        QString name = tr("%1x%2").arg(size.width()).arg(size.height());
+        listSizes->addItem(name, size);
+        if (size == selectedSize)
+        {
+            listSizes->setCurrentIndex(listSizes->count() - 1);
         }
     }
     updatePipeline();
 }
 
-void VideoSettings::sizeChanged(int index)
+QString VideoSettings::updatePipeline()
 {
-    listFramerates->clear();
+    auto devicePath = listDevices->itemText(listDevices->currentIndex());
+    auto format = listFormats->itemData(listFormats->currentIndex()).toString();
+    auto size = listSizes->itemData(listSizes->currentIndex()).toSize();
+    QString str(PLATFORM_SPECIFIC_SOURCE);
 
-    if (index < 0)
+    if (!devicePath.isNull())
     {
-        return;
-    }
-
-    // 25 by default, if not present, the first will be selected (usually, 30)
-    //
-    auto selectedRate = QSettings().value("rate", QSize(25, 1)).toSize();
-    QFile dev(listDevices->itemData(listDevices->currentIndex()).toString());
-    if (dev.open(QFile::ReadWrite))
-    {
-        listFramerates->addItem(tr("(default)"), QSize(0, 0));
-
-        v4l2_frmivalenum frmival;
-        auto size = listSizes->itemData(listSizes->currentIndex()).toSize();
-
-        frmival.pixel_format = listFormats->itemData(listFormats->currentIndex()).toUInt();
-        frmival.width = size.width();
-        frmival.height = size.height();
-        frmival.index = 0;
-
-        while (ioctl(dev.handle(), VIDIOC_ENUM_FRAMEINTERVALS, &frmival) >= 0)
+        str.append(" device-name=\"").append(devicePath).append("\"");
+        if (!format.isNull())
         {
-            if (frmival.type == V4L2_FRMIVAL_TYPE_DISCRETE)
+            str.append(" ! ").append(format);
+            if (size.width() > 0 && size.height() > 0)
             {
-                auto rate = QString(tr("%1 fps")).arg((1.0 * frmival.discrete.denominator) / frmival.discrete.numerator);
-                auto ratex = QSize(frmival.discrete.denominator, frmival.discrete.numerator);
-                listFramerates->addItem(rate, ratex);
-                if (ratex == selectedRate)
-                {
-                    listFramerates->setCurrentIndex(listFramerates->count() - 1);
-                }
+                str = str.append(",width=(int)%1,height=(int)%2").arg(size.width()).arg(size.height());
             }
-
-            ++frmival.index;
         }
     }
-    updatePipeline();
+
+    return str;
 }
 
 void VideoSettings::save()
 {
     QSettings settings;
-    settings.setValue("device", listDevices->itemData(listDevices->currentIndex()));
-    settings.setValue("size", listFormats->itemData(listFormats->currentIndex()));
+    settings.setValue("device", listDevices->itemText(listDevices->currentIndex()));
+    settings.setValue("format", listFormats->itemData(listFormats->currentIndex()));
     settings.setValue("size", listSizes->itemData(listSizes->currentIndex()));
-    settings.setValue("rate", listFramerates->itemData(listFramerates->currentIndex()));
-    settings.setValue("src", updatePipeline());
-    settings.setValue("videocodec", listVideoCodecs->itemData(listVideoCodecs->currentIndex()));
-    settings.setValue("videomux",   listVideoMuxers->itemData(listVideoMuxers->currentIndex()));
-    settings.setValue("imagecodec", listImageCodecs->itemData(listImageCodecs->currentIndex()));
+    settings.setValue("video-encoder", listVideoCodecs->itemData(listVideoCodecs->currentIndex()));
+    settings.setValue("video-mux",   listVideoMuxers->itemData(listVideoMuxers->currentIndex()));
+    settings.setValue("image-encoder", listImageCodecs->itemData(listImageCodecs->currentIndex()));
     settings.setValue("enable-video", checkRecordAll->isChecked());
+
+    settings.setValue("src", updatePipeline());
+    settings.setValue("bitrate", spinBitrate->value());
 }

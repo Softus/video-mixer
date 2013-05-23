@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Generated Files">
@@ -56,12 +56,51 @@
     <ClCompile Include="mainwindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="patientdialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rtpsettings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="settings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="storagesettings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="studiessettings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="videosettings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="basewidget.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="mainwindow.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="patientdialog.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <ClInclude Include="qwaitcursor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <CustomBuild Include="rtpsettings.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="settings.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="storagesettings.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="studiessettings.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="videosettings.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>
@@ -78,6 +117,42 @@
     <ClCompile Include="release\moc_mainwindow.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="debug\moc_patientdialog.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_patientdialog.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_rtpsettings.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_rtpsettings.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_settings.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_settings.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_storagesettings.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_storagesettings.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_studiessettings.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_studiessettings.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug\moc_videosettings.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_videosettings.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
     <ClCompile Include="debug\qrc_beryllium.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
@@ -91,7 +166,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="pixmaps\add.png">
+    <None Include="pixmaps\about.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="pixmaps\archive.png">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="pixmaps\beryllium.png">
@@ -106,16 +184,28 @@
     <None Include="pixmaps\details.png">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="pixmaps\load_download.png">
+    <None Include="pixmaps\folder.png">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="pixmaps\pause.png">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="pixmaps\play.png">
+    <None Include="pixmaps\record.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="pixmaps\record_off.png">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="pixmaps\record_on.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="pixmaps\refresh.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="pixmaps\settings.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="pixmaps\start.png">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="pixmaps\stop.png">
@@ -127,10 +217,5 @@
     <None Include="pixmaps\user_manage.png">
       <Filter>Resource Files</Filter>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="qwaitcursor.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>

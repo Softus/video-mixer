@@ -1,4 +1,5 @@
 /*.opensdf
+/*.pdb
 /*.qm
 /*.sdf
 /*.suo
@@ -9,3 +10,4 @@
 /ipch
 pkg/beryllium.deb
 pkg/debian/usr/bin/beryllium
+/release

@@ -7,6 +7,7 @@ QT_BEGIN_NAMESPACE
 class QComboBox;
 class QTextEdit;
 class QCheckBox;
+class QSpinBox;
 QT_END_NAMESPACE
 
 class VideoSettings : public QWidget
@@ -15,11 +16,11 @@ class VideoSettings : public QWidget
     QComboBox* listDevices;
     QComboBox* listFormats;
     QComboBox* listSizes;
-    QComboBox* listFramerates;
     QComboBox* listVideoCodecs;
     QComboBox* listVideoMuxers;
     QComboBox* listImageCodecs;
     QCheckBox* checkRecordAll;
+    QSpinBox* spinBitrate;
 
     void updateDeviceList();
     void updateGstList(const char* setting, const char* def, unsigned long long type, QComboBox* cb);
@@ -36,7 +37,6 @@ signals:
 public slots:
     void videoDeviceChanged(int index);
     void formatChanged(int index);
-    void sizeChanged(int index);
     void save();
 
 };

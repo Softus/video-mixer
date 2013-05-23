@@ -266,43 +266,17 @@ QGst::PipelinePtr MainWindow::createPipeline()
     QString clipFileName      = settings.value("clip-file",  "clip%03d.mpg").toString();
     QString imageFileName     = settings.value("image-file", "image%03d.jpg").toString();
     QString srcDef            = settings.value("src", "autovideosrc").toString();
-    QString displaySinkDef    = settings.value("display-sink",  "timeoverlay name=displayoverlay ! autovideosink name=displaysink async=0").toString();
-    QString videoEncoderDef   = settings.value("video-encoder", "queue max-size-bytes=0 ! ffenc_mpeg2video name=videoencoder bitrate=2000").toString();
-    QString videoSinkDef      = settings.value("video-sink",    "queue ! mpegtsmux ! filesink name=videosink sync=0 async=0").toString();
-    QString rtpSinkDef        = settings.value("rtp-sink",      "queue ! rtph264pay ! udpsink name=rtpsink clients=127.0.0.1:5000 sync=0").toString();
-    QString clipSinkDef       = settings.value("clip-sink",     "queue ! mpegtsmux name=clipmux ! multifilesink name=clipsink next-file=4 sync=0 async=0").toString();
+    QString displaySinkDef    = settings.value("display-sink",  "autovideosink name=displaysink async=0").toString();
+    QString videoEncoderDef   = settings.value("video-encoder", "x264enc").toString();
+    QString videoMuxDef       = settings.value("video-mux",     "mpegtsmux").toString();
+    QString videoSinkDef      = settings.value("video-sink",    "filesink name=videosink sync=0 async=0").toString();
+    QString rtpSinkDef        = settings.value("rtp-sink",      "rtph264pay ! udpsink name=rtpsink clients=127.0.0.1:5000 sync=0").toString();
+    QString clipSinkDef       = settings.value("clip-sink",     "multifilesink name=clipsink next-file=4 sync=0 async=0").toString();
     QString imageEncoderDef   = settings.value("image-encoder", "jpegenc").toString();
     QString imageSinkDef      = settings.value("image-sink",    "multifilesink name=imagesink post-messages=1 async=0 sync=0").toString();
 
-    int videoEncoderBitrate = settings.value("bitrate").toInt();
+    int videoEncoderBitrate = settings.value("bitrate", 4000).toInt();
     QString rtpClients = enableRtp? settings.value("rtp-clients").toString(): QString();
-
-    // Switch to profile
-    //
-    settings.beginGroup(settings.value("profile").toString());
-
-    videoEncoderBitrate = settings.value("bitrate", videoEncoderBitrate).toInt();
-    if (enableRtp)
-    {
-        rtpClients = settings.value("rtp-clients", rtpClients).toString();
-    }
-
-    // Override a value with profile-specific one
-    //
-    outputPathFormat  = settings.value("output-path",   outputPathFormat).toString();
-    videoFileName     = settings.value("video-file",    videoFileName).toString();
-    clipFileName      = settings.value("clip-file",     clipFileName).toString();
-    imageFileName     = settings.value("image-file",    imageFileName).toString();
-    srcDef            = settings.value("src",           srcDef).toString();
-    displaySinkDef    = settings.value("display-sink",  displaySinkDef).toString();
-    videoEncoderDef   = settings.value("video-encoder", videoEncoderDef).toString();
-    videoSinkDef      = settings.value("video-sink",    videoSinkDef).toString();
-    rtpSinkDef        = settings.value("rtp-sink",      rtpSinkDef).toString();
-    clipSinkDef       = settings.value("clip-sink",     clipSinkDef).toString();
-    imageEncoderDef   = settings.value("image-encoder", imageEncoderDef).toString();
-    imageSinkDef      = settings.value("image-sink",    imageSinkDef).toString();
-
-    settings.endGroup();
 
     const QString& outputPathStr = QDateTime::currentDateTime().toString(outputPathFormat);
     outputPath = QDir(outputPathStr);
@@ -324,7 +298,7 @@ QGst::PipelinePtr MainWindow::createPipeline()
         enableRtp = false;
     }
 
-    QString pipe = QString().append(srcDef).append(" ! tee name=splitter");
+    QString pipe = QString().append(srcDef).append(" ! autoconvert ! tee name=splitter");
     if (!displaySinkDef.isEmpty())
     {
         pipe.append(" ! ").append(displaySinkDef).append(" splitter.");
@@ -332,19 +306,19 @@ QGst::PipelinePtr MainWindow::createPipeline()
 
     if (!videoEncoderDef.isEmpty() && (enableRtp || enableVideo || !clipSinkDef.isEmpty()))
     {
-        pipe.append(" ! valve name=videovalve ! ").append(videoEncoderDef);
+        pipe.append(" ! valve name=videovalve ! queue max-size-bytes=0 ! ").append(videoEncoderDef).append(" name=videoencoder");
         if (enableRtp || enableVideo)
         {
             pipe.append(" ! tee name=videosplitter");
             if (enableVideo)
-                pipe.append(" ! ").append(videoSinkDef).append(" videosplitter.");
+                pipe.append(" ! queue ! ").append(videoMuxDef).append(" name=videomux ! ").append(videoSinkDef).append(" videosplitter.");
             if (enableRtp)
-                pipe.append(" ! ").append(rtpSinkDef).append(" videosplitter.");
+                pipe.append(" ! queue ! ").append(rtpSinkDef).append(" videosplitter.");
         }
 
         if (!clipSinkDef.isEmpty())
         {
-            pipe.append(" ! valve name=clipvalve ! ").append(clipSinkDef);
+            pipe.append(" ! valve name=clipvalve ! queue ! ").append(videoMuxDef).append(" name=clipmux ! ").append(clipSinkDef);
             if (enableRtp || enableVideo)
                 pipe.append(" videosplitter.");
         }
@@ -456,6 +430,12 @@ QGst::PipelinePtr MainWindow::createPipeline()
             }
             else
             {
+                int defaultBitrate = videoEncoder->property("bitrate").toInt();
+                if (defaultBitrate > 200000)
+                {
+                    // code uses bits per second instead of kbits
+                    videoEncoderBitrate *= 1024;
+                }
                 videoEncoder->setProperty("bitrate", videoEncoderBitrate);
             }
         }
@@ -496,7 +476,7 @@ void MainWindow::restartPipeline()
 void MainWindow::releasePipeline()
 {
     pipeline->setState(QGst::StateNull);
-    pipeline->getState(NULL, NULL, -1);
+    pipeline->getState(NULL, NULL, 10000000000L); // 10 sec
 
     displaySink.clear();
     imageValve.clear();
@@ -594,8 +574,9 @@ void MainWindow::restartElement(const char* name)
     }
 
     elm->setState(QGst::StateReady);
-    elm->getState(NULL, NULL, -1);
+    elm->getState(NULL, NULL, 1000000000L); // 1 sec
     elm->setState(QGst::StatePlaying);
+    elm->getState(NULL, NULL, 1000000000L); // 1 sec
 }
 
 void MainWindow::onElementMessage(const QGst::ElementMessagePtr& message)
@@ -850,42 +831,6 @@ void MainWindow::updateRecordAll()
     lblRecordAll->setEnabled(running);
     lblRecordAll->setToolTip(tr("Recording of entire study is %1").arg(strOnOff));
     lblRecordAll->setPixmap(QIcon(icon).pixmap(lblRecordAll->size()));
-}
-
-void MainWindow::prepareProfileMenu()
-{
-    QSettings settings;
-    const QString profile = settings.value("profile").toString();
-    auto profilesMenu = static_cast<QMenu*>(sender());
-    auto actions = profilesMenu->actions();
-    auto defaultProfile = actions.at(0);
-    auto profileGroup = defaultProfile->actionGroup();
-    defaultProfile->setDisabled(running);
-    defaultProfile->setChecked(profile.isEmpty());
-
-    for (int  i = actions.size() - 1; i > 0; --i)
-    {
-        profilesMenu->removeAction(actions.at(i));
-    }
-
-    Q_FOREACH(auto grp, settings.childGroups())
-    {
-        auto profileAction = profilesMenu->addAction(grp, this, SLOT(setProfile()));
-        profileAction->setCheckable(true);
-        profileAction->setData(grp);
-        profileAction->setChecked(profile == grp);
-        profileAction->setDisabled(running);
-        profileGroup->addAction(profileAction);
-    }
-}
-
-void MainWindow::setProfile()
-{
-    auto action = static_cast<QAction*>(sender());
-    auto profile = action->data().toString();
-
-    QSettings().setValue("profile", profile);
-    setWindowTitle(QString().append(qApp->applicationName()).append(" - ").append(profile.isEmpty()? tr("Default"): profile));
 }
 
 void MainWindow::prepareSettingsMenu()

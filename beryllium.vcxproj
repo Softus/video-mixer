@@ -138,6 +138,12 @@
     <ClCompile Include="basewidget.cpp" />
     <ClCompile Include="beryllium.cpp" />
     <ClCompile Include="mainwindow.cpp" />
+    <ClCompile Include="patientdialog.cpp" />
+    <ClCompile Include="rtpsettings.cpp" />
+    <ClCompile Include="settings.cpp" />
+    <ClCompile Include="storagesettings.cpp" />
+    <ClCompile Include="studiessettings.cpp" />
+    <ClCompile Include="videosettings.cpp" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="basewidget.h">
@@ -160,6 +166,67 @@
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MOC mainwindow.h</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">release\moc_mainwindow.cpp;%(Outputs)</Outputs>
     </CustomBuild>
+    <CustomBuild Include="patientdialog.h">
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;patientdialog.h;%(AdditionalInputs)</AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_DLL -DQT_GUI_LIB -DQT_CORE_LIB -DQT_HAVE_MMX -DQT_HAVE_3DNOW -DQT_HAVE_SSE -DQT_HAVE_MMXEXT -DQT_HAVE_SSE2 -DQT_THREAD_SUPPORT -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include" -I"c:\usr\include" -I"$(QTDIR)\include\ActiveQt" -I"debug" -Ic:\usr\Qt\4.8.4\mkspecs\default -D_MSC_VER=1600 -DWIN32 patientdialog.h -o debug\moc_patientdialog.cpp</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MOC patientdialog.h</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">debug\moc_patientdialog.cpp;%(Outputs)</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;patientdialog.h;%(AdditionalInputs)</AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_DLL -DQT_NO_DEBUG -DQT_GUI_LIB -DQT_CORE_LIB -DQT_HAVE_MMX -DQT_HAVE_3DNOW -DQT_HAVE_SSE -DQT_HAVE_MMXEXT -DQT_HAVE_SSE2 -DQT_THREAD_SUPPORT -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include" -I"c:\usr\include" -I"$(QTDIR)\include\ActiveQt" -I"release" -Ic:\usr\Qt\4.8.4\mkspecs\default -D_MSC_VER=1600 -DWIN32 patientdialog.h -o release\moc_patientdialog.cpp</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MOC patientdialog.h</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">release\moc_patientdialog.cpp;%(Outputs)</Outputs>
+    </CustomBuild>
+    <ClInclude Include="qwaitcursor.h" />
+    <CustomBuild Include="rtpsettings.h">
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;rtpsettings.h;%(AdditionalInputs)</AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_DLL -DQT_GUI_LIB -DQT_CORE_LIB -DQT_HAVE_MMX -DQT_HAVE_3DNOW -DQT_HAVE_SSE -DQT_HAVE_MMXEXT -DQT_HAVE_SSE2 -DQT_THREAD_SUPPORT -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include" -I"c:\usr\include" -I"$(QTDIR)\include\ActiveQt" -I"debug" -Ic:\usr\Qt\4.8.4\mkspecs\default -D_MSC_VER=1600 -DWIN32 rtpsettings.h -o debug\moc_rtpsettings.cpp</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MOC rtpsettings.h</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">debug\moc_rtpsettings.cpp;%(Outputs)</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;rtpsettings.h;%(AdditionalInputs)</AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_DLL -DQT_NO_DEBUG -DQT_GUI_LIB -DQT_CORE_LIB -DQT_HAVE_MMX -DQT_HAVE_3DNOW -DQT_HAVE_SSE -DQT_HAVE_MMXEXT -DQT_HAVE_SSE2 -DQT_THREAD_SUPPORT -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include" -I"c:\usr\include" -I"$(QTDIR)\include\ActiveQt" -I"release" -Ic:\usr\Qt\4.8.4\mkspecs\default -D_MSC_VER=1600 -DWIN32 rtpsettings.h -o release\moc_rtpsettings.cpp</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MOC rtpsettings.h</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">release\moc_rtpsettings.cpp;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="settings.h">
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;settings.h;%(AdditionalInputs)</AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_DLL -DQT_GUI_LIB -DQT_CORE_LIB -DQT_HAVE_MMX -DQT_HAVE_3DNOW -DQT_HAVE_SSE -DQT_HAVE_MMXEXT -DQT_HAVE_SSE2 -DQT_THREAD_SUPPORT -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include" -I"c:\usr\include" -I"$(QTDIR)\include\ActiveQt" -I"debug" -Ic:\usr\Qt\4.8.4\mkspecs\default -D_MSC_VER=1600 -DWIN32 settings.h -o debug\moc_settings.cpp</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MOC settings.h</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">debug\moc_settings.cpp;%(Outputs)</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;settings.h;%(AdditionalInputs)</AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_DLL -DQT_NO_DEBUG -DQT_GUI_LIB -DQT_CORE_LIB -DQT_HAVE_MMX -DQT_HAVE_3DNOW -DQT_HAVE_SSE -DQT_HAVE_MMXEXT -DQT_HAVE_SSE2 -DQT_THREAD_SUPPORT -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include" -I"c:\usr\include" -I"$(QTDIR)\include\ActiveQt" -I"release" -Ic:\usr\Qt\4.8.4\mkspecs\default -D_MSC_VER=1600 -DWIN32 settings.h -o release\moc_settings.cpp</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MOC settings.h</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">release\moc_settings.cpp;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="storagesettings.h">
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;storagesettings.h;%(AdditionalInputs)</AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_DLL -DQT_GUI_LIB -DQT_CORE_LIB -DQT_HAVE_MMX -DQT_HAVE_3DNOW -DQT_HAVE_SSE -DQT_HAVE_MMXEXT -DQT_HAVE_SSE2 -DQT_THREAD_SUPPORT -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include" -I"c:\usr\include" -I"$(QTDIR)\include\ActiveQt" -I"debug" -Ic:\usr\Qt\4.8.4\mkspecs\default -D_MSC_VER=1600 -DWIN32 storagesettings.h -o debug\moc_storagesettings.cpp</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MOC storagesettings.h</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">debug\moc_storagesettings.cpp;%(Outputs)</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;storagesettings.h;%(AdditionalInputs)</AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_DLL -DQT_NO_DEBUG -DQT_GUI_LIB -DQT_CORE_LIB -DQT_HAVE_MMX -DQT_HAVE_3DNOW -DQT_HAVE_SSE -DQT_HAVE_MMXEXT -DQT_HAVE_SSE2 -DQT_THREAD_SUPPORT -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include" -I"c:\usr\include" -I"$(QTDIR)\include\ActiveQt" -I"release" -Ic:\usr\Qt\4.8.4\mkspecs\default -D_MSC_VER=1600 -DWIN32 storagesettings.h -o release\moc_storagesettings.cpp</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MOC storagesettings.h</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">release\moc_storagesettings.cpp;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="studiessettings.h">
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;studiessettings.h;%(AdditionalInputs)</AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_DLL -DQT_GUI_LIB -DQT_CORE_LIB -DQT_HAVE_MMX -DQT_HAVE_3DNOW -DQT_HAVE_SSE -DQT_HAVE_MMXEXT -DQT_HAVE_SSE2 -DQT_THREAD_SUPPORT -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include" -I"c:\usr\include" -I"$(QTDIR)\include\ActiveQt" -I"debug" -Ic:\usr\Qt\4.8.4\mkspecs\default -D_MSC_VER=1600 -DWIN32 studiessettings.h -o debug\moc_studiessettings.cpp</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MOC studiessettings.h</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">debug\moc_studiessettings.cpp;%(Outputs)</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;studiessettings.h;%(AdditionalInputs)</AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_DLL -DQT_NO_DEBUG -DQT_GUI_LIB -DQT_CORE_LIB -DQT_HAVE_MMX -DQT_HAVE_3DNOW -DQT_HAVE_SSE -DQT_HAVE_MMXEXT -DQT_HAVE_SSE2 -DQT_THREAD_SUPPORT -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include" -I"c:\usr\include" -I"$(QTDIR)\include\ActiveQt" -I"release" -Ic:\usr\Qt\4.8.4\mkspecs\default -D_MSC_VER=1600 -DWIN32 studiessettings.h -o release\moc_studiessettings.cpp</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MOC studiessettings.h</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">release\moc_studiessettings.cpp;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="videosettings.h">
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;videosettings.h;%(AdditionalInputs)</AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_DLL -DQT_GUI_LIB -DQT_CORE_LIB -DQT_HAVE_MMX -DQT_HAVE_3DNOW -DQT_HAVE_SSE -DQT_HAVE_MMXEXT -DQT_HAVE_SSE2 -DQT_THREAD_SUPPORT -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include" -I"c:\usr\include" -I"$(QTDIR)\include\ActiveQt" -I"debug" -Ic:\usr\Qt\4.8.4\mkspecs\default -D_MSC_VER=1600 -DWIN32 videosettings.h -o debug\moc_videosettings.cpp</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MOC videosettings.h</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">debug\moc_videosettings.cpp;%(Outputs)</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;videosettings.h;%(AdditionalInputs)</AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_DLL -DQT_NO_DEBUG -DQT_GUI_LIB -DQT_CORE_LIB -DQT_HAVE_MMX -DQT_HAVE_3DNOW -DQT_HAVE_SSE -DQT_HAVE_MMXEXT -DQT_HAVE_SSE2 -DQT_THREAD_SUPPORT -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include" -I"c:\usr\include" -I"$(QTDIR)\include\ActiveQt" -I"release" -Ic:\usr\Qt\4.8.4\mkspecs\default -D_MSC_VER=1600 -DWIN32 videosettings.h -o release\moc_videosettings.cpp</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MOC videosettings.h</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">release\moc_videosettings.cpp;%(Outputs)</Outputs>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="debug\moc_basewidget.cpp">
@@ -174,6 +241,42 @@
     <ClCompile Include="release\moc_mainwindow.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="debug\moc_patientdialog.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="release\moc_patientdialog.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="debug\moc_rtpsettings.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="release\moc_rtpsettings.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="debug\moc_settings.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="release\moc_settings.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="debug\moc_storagesettings.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="release\moc_storagesettings.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="debug\moc_studiessettings.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="release\moc_studiessettings.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="debug\moc_videosettings.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="release\moc_videosettings.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="debug\qrc_beryllium.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
@@ -185,31 +288,33 @@
     <None Include="beryllium_ru.ts" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="pixmaps\add.png" />
+    <None Include="pixmaps\about.png" />
+    <None Include="pixmaps\archive.png" />
     <None Include="pixmaps\beryllium.png" />
     <CustomBuild Include="beryllium.qrc">
       <FileType>Document</FileType>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\usr\Qt\4.8.4\bin\rcc.exe;beryllium.qrc;pixmaps\add.png;pixmaps\beryllium.png;pixmaps\camera.png;pixmaps\details.png;pixmaps\load_download.png;pixmaps\pause.png;pixmaps\play.png;pixmaps\record_on.png;pixmaps\stop.png;pixmaps\user_add.png;pixmaps\user_manage.png;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\usr\Qt\4.8.4\bin\rcc.exe;beryllium.qrc;pixmaps\about.png;pixmaps\archive.png;pixmaps\beryllium.png;pixmaps\camera.png;pixmaps\details.png;pixmaps\folder.png;pixmaps\pause.png;pixmaps\record.png;pixmaps\record_off.png;pixmaps\record_on.png;pixmaps\refresh.png;pixmaps\settings.png;pixmaps\start.png;pixmaps\stop.png;pixmaps\user_add.png;pixmaps\user_manage.png;%(AdditionalInputs)</AdditionalInputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\usr\Qt\4.8.4\bin\rcc.exe -name beryllium beryllium.qrc -o debug\qrc_beryllium.cpp</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">RCC beryllium.qrc</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">debug\qrc_beryllium.cpp;%(Outputs)</Outputs>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\usr\Qt\4.8.4\bin\rcc.exe;beryllium.qrc;pixmaps\add.png;pixmaps\beryllium.png;pixmaps\camera.png;pixmaps\details.png;pixmaps\load_download.png;pixmaps\pause.png;pixmaps\play.png;pixmaps\record_on.png;pixmaps\stop.png;pixmaps\user_add.png;pixmaps\user_manage.png;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\usr\Qt\4.8.4\bin\rcc.exe;beryllium.qrc;pixmaps\about.png;pixmaps\archive.png;pixmaps\beryllium.png;pixmaps\camera.png;pixmaps\details.png;pixmaps\folder.png;pixmaps\pause.png;pixmaps\record.png;pixmaps\record_off.png;pixmaps\record_on.png;pixmaps\refresh.png;pixmaps\settings.png;pixmaps\start.png;pixmaps\stop.png;pixmaps\user_add.png;pixmaps\user_manage.png;%(AdditionalInputs)</AdditionalInputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\usr\Qt\4.8.4\bin\rcc.exe -name beryllium beryllium.qrc -o release\qrc_beryllium.cpp</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">RCC beryllium.qrc</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">release\qrc_beryllium.cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <None Include="pixmaps\camera.png" />
     <None Include="pixmaps\details.png" />
-    <None Include="pixmaps\load_download.png" />
+    <None Include="pixmaps\folder.png" />
     <None Include="pixmaps\pause.png" />
-    <None Include="pixmaps\play.png" />
+    <None Include="pixmaps\record.png" />
+    <None Include="pixmaps\record_off.png" />
     <None Include="pixmaps\record_on.png" />
+    <None Include="pixmaps\refresh.png" />
+    <None Include="pixmaps\settings.png" />
+    <None Include="pixmaps\start.png" />
     <None Include="pixmaps\stop.png" />
     <None Include="pixmaps\user_add.png" />
     <None Include="pixmaps\user_manage.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="qwaitcursor.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

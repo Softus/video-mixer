@@ -97,9 +97,7 @@ private slots:
     void onStartClick();
     void onSnapshotClick();
     void onRecordClick();
-    void setProfile();
     void prepareSettingsMenu();
-    void prepareProfileMenu();
     void toggleSetting();
 };
 
