@@ -23,8 +23,10 @@
 
 #ifdef QT_ARCH_WINDOWS
 #define PLATFORM_SPECIFIC_SOURCE "dshowvideosrc"
+#define PLATFORM_SPECIFIC_PROTERTY "device-name"
 #else
 #define PLATFORM_SPECIFIC_SOURCE "v4l2src"
+#define PLATFORM_SPECIFIC_PROPERTY "device"
 #endif
 
 VideoSettings::VideoSettings(QWidget *parent) :
@@ -88,6 +90,8 @@ void VideoSettings::updateGstList(const char* setting, const char* def, unsigned
 void VideoSettings::updateDeviceList()
 {
     listDevices->clear();
+    listDevices->addItem(tr("(default)"));
+
     auto selectedDevice = QSettings().value("device").toString();
 
     QGst::ElementPtr src = QGst::ElementFactory::make(PLATFORM_SPECIFIC_SOURCE);
@@ -97,14 +101,15 @@ void VideoSettings::updateDeviceList()
     }
 
     src->setState(QGst::StateReady);
-    QGst::PropertyProbePtr propertyProbe = src.dynamicCast<QGst::PropertyProbe>();
+    src->getState(NULL, NULL, GST_SECOND * 10);
 
-    // Look for device-name instead of "device" since "device" may be different, thanks to PNP.
+    // Look for device-name for windows and "device" for linux/macosx
     //
-    if (propertyProbe && propertyProbe->propertySupportsProbe("device-name"))
+    QGst::PropertyProbePtr propertyProbe = src.dynamicCast<QGst::PropertyProbe>();
+    if (propertyProbe && propertyProbe->propertySupportsProbe(PLATFORM_SPECIFIC_PROPERTY))
     {
         //get a list of devices that the element supports
-        QList<QGlib::Value> devices = propertyProbe->probeAndGetValues("device-name");
+        QList<QGlib::Value> devices = propertyProbe->probeAndGetValues(PLATFORM_SPECIFIC_PROPERTY);
         Q_FOREACH(const QGlib::Value& device, devices)
         {
             QString deviceName = device.toString();
@@ -112,15 +117,23 @@ void VideoSettings::updateDeviceList()
             if (srcPad)
             {
                 //add the device on the combobox
-                listDevices->addItem(device.toString(), srcPad->caps()->toString());
+                listDevices->addItem(deviceName, srcPad->caps()->toString());
+                if (selectedDevice == deviceName)
+                {
+                    listDevices->setCurrentIndex(listDevices->count() - 1);
+                }
             }
         }
     }
+    src->setState(QGst::StateNull);
+    src->getState(NULL, NULL, GST_SECOND * 10);
 }
 
 void VideoSettings::videoDeviceChanged(int index)
 {
     listFormats->clear();
+    listFormats->addItem(tr("(default)"));
+
     QGst::CapsPtr caps = QGst::Caps::fromString(listDevices->itemData(index).toString());
 
     if (index < 0 || !caps)
@@ -133,14 +146,14 @@ void VideoSettings::videoDeviceChanged(int index)
     {
         QGst::StructurePtr s = caps->internalStructure(i);
         QString format = s->value("format").toString();
-        QString formatName = s->name().append(",format=(fourcc)").append(format);
+        QString formatName = format.isEmpty()? s->name(): s->name().append(",format=(fourcc)").append(format);
         if (listFormats->findData(formatName) >= 0)
         {
             continue;
         }
-        QString displayName = s->name().append(" (").append(format).append(")");
+        QString displayName = format.isEmpty()? s->name(): s->name().append(" (").append(format).append(")");
         listFormats->addItem(displayName, formatName);
-        if (format == selectedFormat)
+        if (formatName == selectedFormat)
         {
             listFormats->setCurrentIndex(listFormats->count() - 1);
         }
@@ -151,19 +164,21 @@ void VideoSettings::videoDeviceChanged(int index)
 void VideoSettings::formatChanged(int index)
 {
     listSizes->clear();
+    listSizes->addItem(tr("(default)"));
 
     QGst::CapsPtr caps = QGst::Caps::fromString(listDevices->itemData(listDevices->currentIndex()).toString());
-    if (index < 0 || !caps)
+    QString selectedFormat = listFormats->itemData(index).toString();
+    if (index < 0 || !caps || selectedFormat.isEmpty())
     {
         return;
     }
 
-    auto selectedFormat = listFormats->itemData(index).toString();
     auto selectedSize = QSettings().value("size").toSize();
     for (uint i = 0; i < caps->size(); ++i)
     {
         QGst::StructurePtr s = caps->internalStructure(i);
-        QString formatName = s->name().append(",format=(fourcc)").append(s->value("format").toString());
+        QString format = s->value("format").toString();
+        QString formatName = format.isEmpty()? s->name(): s->name().append(",format=(fourcc)").append(format);
         if (selectedFormat != formatName)
         {
             continue;
@@ -186,14 +201,15 @@ void VideoSettings::formatChanged(int index)
 
 QString VideoSettings::updatePipeline()
 {
-    auto devicePath = listDevices->itemText(listDevices->currentIndex());
+    auto device = listDevices->itemData(listDevices->currentIndex()).isNull()?
+                nullptr: listDevices->itemText(listDevices->currentIndex());
     auto format = listFormats->itemData(listFormats->currentIndex()).toString();
     auto size = listSizes->itemData(listSizes->currentIndex()).toSize();
     QString str(PLATFORM_SPECIFIC_SOURCE);
 
-    if (!devicePath.isNull())
+    if (!device.isNull())
     {
-        str.append(" device-name=\"").append(devicePath).append("\"");
+        str.append(" " PLATFORM_SPECIFIC_PROPERTY "=\"").append(device).append("\"");
         if (!format.isNull())
         {
             str.append(" ! ").append(format);
@@ -210,7 +226,8 @@ QString VideoSettings::updatePipeline()
 void VideoSettings::save()
 {
     QSettings settings;
-    settings.setValue("device", listDevices->itemText(listDevices->currentIndex()));
+    settings.setValue("device", listDevices->itemData(listDevices->currentIndex()).isNull()?
+                        nullptr: listDevices->itemText(listDevices->currentIndex()));
     settings.setValue("format", listFormats->itemData(listFormats->currentIndex()));
     settings.setValue("size", listSizes->itemData(listSizes->currentIndex()));
     settings.setValue("video-encoder", listVideoCodecs->itemData(listVideoCodecs->currentIndex()));

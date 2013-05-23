@@ -213,14 +213,6 @@ QMenuBar* MainWindow::createMenu()
     connect(mnu, SIGNAL(aboutToShow()), this, SLOT(prepareSettingsMenu()));
     mnuBar->addMenu(mnu);
 
-    auto profilesMenu = new QMenu(tr("&Profiles"), mnu);
-    auto profileGroup = new QActionGroup(profilesMenu);
-    auto defaultProfileAction = profilesMenu->addAction(tr("&Default"), this, SLOT(setProfile()));
-    defaultProfileAction->setCheckable(true);
-    profileGroup->addAction(defaultProfileAction);
-    connect(profilesMenu, SIGNAL(aboutToShow()), this, SLOT(prepareProfileMenu()));
-    mnuBar->addMenu(profilesMenu);
-
     mnuBar->show();
     return mnuBar;
 }
@@ -655,7 +647,7 @@ void MainWindow::onStartClick()
         auto patientDs = worklist->getPatientDS();
         if (patientDs == nullptr)
         {
-            error(tr("No patient selected"));
+            QMessageBox::critical(this, windowTitle(), tr("No patient selected"));
             return;
         }
 
@@ -665,7 +657,7 @@ void MainWindow::onStartClick()
 
         if (pendingSOPInstanceUID.isNull())
         {
-            error(client.lastError());
+            QMessageBox::critical(this, windowTitle(), client.lastError());
             return;
         }
 #else
@@ -735,7 +727,7 @@ void MainWindow::onStartClick()
             seriesUID = client.nSetRQ(patientDs, pendingSOPInstanceUID);
             if (seriesUID.isEmpty())
             {
-                error(client.lastError());
+                QMessageBox::critical(this, windowTitle(), client.lastError());
             }
         }
 
@@ -909,7 +901,7 @@ void MainWindow::sendToServer(DcmDataset* patientDs, const QString& seriesUID)
         const QString& file = outputPath.absoluteFilePath(outputPath[i]);
         if (!client.sendToServer(patientDs, seriesUID, seriesNo, file, i))
         {
-            error(client.lastError());
+            QMessageBox::critical(this, windowTitle(), client.lastError());
         }
     }
 }
