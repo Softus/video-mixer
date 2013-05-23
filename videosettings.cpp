@@ -23,7 +23,7 @@
 
 #ifdef QT_ARCH_WINDOWS
 #define PLATFORM_SPECIFIC_SOURCE "dshowvideosrc"
-#define PLATFORM_SPECIFIC_PROTERTY "device-name"
+#define PLATFORM_SPECIFIC_PROPERTY "device-name"
 #else
 #define PLATFORM_SPECIFIC_SOURCE "v4l2src"
 #define PLATFORM_SPECIFIC_PROPERTY "device"
