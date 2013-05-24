@@ -498,6 +498,7 @@ QString MainWindow::replace(QString str, int seqNo)
 
 void MainWindow::updatePipeline()
 {
+    QWaitCursor wait(this);
     QSettings settings;
 
     auto newPipelineDef = buildPipeline();
@@ -966,8 +967,11 @@ void MainWindow::onShowArchiveClick()
 void MainWindow::onShowSettingsClick()
 {
     Settings dlg(this);
-    connect(&dlg, SIGNAL(save()), this, SLOT(updatePipeline()));
-    dlg.exec();
+    connect(&dlg, SIGNAL(apply()), this, SLOT(updatePipeline()));
+    if (dlg.exec())
+    {
+        updatePipeline();
+    }
 }
 
 #ifdef WITH_DICOM

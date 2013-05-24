@@ -2,6 +2,7 @@
 #define WAITCURSOR_H
 
 #include <QWidget>
+#include <QApplication>
 
 class QWaitCursor
 {
@@ -12,10 +13,12 @@ public:
         : parent(parent)
     {
         parent->setCursor(shape);
+        qApp->processEvents();
     }
     ~QWaitCursor()
     {
         parent->unsetCursor();
+        qApp->processEvents();
     }
 #else
     QWaitCursor(QWidget*)
