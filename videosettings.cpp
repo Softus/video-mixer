@@ -32,7 +32,6 @@ VideoSettings::VideoSettings(QWidget *parent) :
     layout->addRow(tr("Pixel &format"), listFormats = new QComboBox());
     connect(listFormats, SIGNAL(currentIndexChanged(int)), this, SLOT(formatChanged(int)));
     layout->addRow(tr("Frame &size"), listSizes = new QComboBox());
-    connect(listSizes, SIGNAL(currentIndexChanged(int)), this, SLOT(sizeChanged(int)));
     layout->addRow(tr("Video &codec"), listVideoCodecs = new QComboBox());
     layout->addRow(tr("Video &bitrate"), spinBitrate = new QSpinBox());
     spinBitrate->setRange(300, 102400);

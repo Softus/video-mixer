@@ -259,10 +259,10 @@ QString MainWindow::buildPipeline()
     auto formatDef = settings.value("format").toString();
     auto sizeDef   = settings.value("size").toSize();
 
-    if (!deviceDef.isNull())
+    if (!deviceDef.isEmpty())
     {
         pipe.append(" " PLATFORM_SPECIFIC_PROPERTY "=\"").append(deviceDef).append("\"");
-        if (!formatDef.isNull())
+        if (!formatDef.isEmpty())
         {
             pipe.append(" ! ").append(formatDef);
             if (!sizeDef.isEmpty())
@@ -445,7 +445,7 @@ void MainWindow::setElementProperty(const char* elmName, const char* prop, const
     }
     else
     {
-        setElementProperty(pipeline->getElementByName(elmName), prop, value);
+        setElementProperty(elm, prop, value);
     }
 }
 
@@ -487,12 +487,12 @@ void MainWindow::updatePipeline()
 
 // mpegtsmux => mpg, jpegenc => jpg, pngenc => png, oggmux => ogg, avimux => avi, matrosskamux => mat
 //
-static QString getExt(QString& str)
+static QString getExt(QString str)
 {
     return QString(".").append(str.remove('e').left(3));
 }
 
-QString MainWindow::replace(QString& str, int seqNo)
+QString MainWindow::replace(QString str, int seqNo)
 {
     const QString nn = seqNo >= 10? QString::number(seqNo): QString("0").append('0' + seqNo);
     const QDateTime ts = QDateTime::currentDateTime();
@@ -515,7 +515,7 @@ void MainWindow::updatePipelinePaths()
 {
     QSettings settings;
     outputPath.setPath(replace(settings.value("output-path", "/video").toString()
-        .append(settings.value("folder-template", "/%yyyy%/%MM%/%dd%/").toString())));
+        .append(settings.value("folder-template", "/%yyyy%/%MM%/%dd%/").toString()), ++studyNo));
 
     if (!outputPath.mkpath("."))
     {
@@ -525,9 +525,23 @@ void MainWindow::updatePipelinePaths()
         return;
     }
 
-    QString videoExt = getExt(settings.value("video-mux", "mpegtsmux").toString());
-    QString videoFileName  = replace(settings.value("video-file", "video-%name%-%study%-%nn%").toString()).append(videoExt);
-    setElementProperty(videoSink, "location", outputPath.absoluteFilePath(videoFileName));
+    if (videoSink)
+    {
+        QString videoExt = getExt(settings.value("video-mux", "mpegtsmux").toString());
+        QString videoFileName  = replace(settings.value("video-file", "video-%name%-%study%").toString(), studyNo).append(videoExt);
+
+        // Video sink must be in null state to change the location
+        //
+        videoSink->setState(QGst::StateNull);
+        videoSink->setProperty("location", outputPath.absoluteFilePath(videoFileName));
+        videoSink->setState(QGst::StatePlaying);
+
+        // Restart some elements
+        //
+        setElementProperty("videostamp", nullptr, nullptr);
+        setElementProperty("videomux", nullptr, nullptr);
+        setElementProperty(videoEncoder, nullptr, nullptr);
+    }
 }
 
 void MainWindow::releasePipeline()
@@ -566,7 +580,7 @@ void MainWindow::errorGlib(const QGlib::ObjectPtr& obj, const QGlib::Error& ex)
 
 void MainWindow::onBusMessage(const QGst::MessagePtr& message)
 {
-    qDebug() << message->typeName() << " " << message->source()->property("name").toString();
+    //qDebug() << message->typeName() << " " << message->source()->property("name").toString();
 
     switch (message->type())
     {
@@ -658,7 +672,6 @@ void MainWindow::onElementMessage(const QGst::ElementMessagePtr& message)
         return;
     }
 
-
     if (s->name() == "prepare-xwindow-id" || s->name() == "prepare-window-handle")
     {
         // At this time the video output finally has a sink, so set it up now
@@ -725,6 +738,7 @@ void MainWindow::onStartClick()
 #endif
         QWaitCursor wait(this);
         updatePipelinePaths();
+        dlg.savePatientFile(outputPath.absoluteFilePath(".patient"));
         running = true;
     }
     else
@@ -820,6 +834,8 @@ void MainWindow::onRecordClick()
         QString imageExt = getExt(settings.value("image-encoder", "jpegenc").toString());
         QString clipFileName = replace(settings.value("clip-file",  "clip-%name%-%study%-%nn%").toString(), ++clipNo).append(videoExt);
 
+        // Clip sink must be in null state to change the location
+        //
         clipSink->setState(QGst::StateNull);
         clipSink->setProperty("location", outputPath.absoluteFilePath(clipFileName));
         clipSink->setState(QGst::StatePlaying);

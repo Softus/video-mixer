@@ -2,6 +2,7 @@
 #include <QBoxLayout>
 #include <QComboBox>
 #include <QDateEdit>
+#include <QDebug>
 #include <QFormLayout>
 #include <QLineEdit>
 #include <QLocale>
@@ -43,4 +44,17 @@ QString PatientDialog::patientName() const
 QString PatientDialog::studyName() const
 {
     return cbStudyType->currentText();
+}
+
+void PatientDialog::savePatientFile(const QString& outputPath)
+{
+    QSettings settings(outputPath, QSettings::IniFormat);
+
+    settings.beginGroup("beryllium");
+    settings.setValue("patient-id", textPatientId->text());
+    settings.setValue("name", textPatientName->text());
+    settings.setValue("sex", cbPatientSex->currentText());
+    settings.setValue("birthday", dateBirthday->text());
+    settings.setValue("study", cbStudyType->currentText());
+    settings.endGroup();
 }

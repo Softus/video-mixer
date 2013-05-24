@@ -22,6 +22,7 @@ public:
     explicit PatientDialog(QWidget *parent = 0);
     QString patientName() const;
     QString studyName() const;
+    void savePatientFile(const QString& outputPath);
 
 signals:
 

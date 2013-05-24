@@ -51,7 +51,7 @@ StorageSettings::StorageSettings(QWidget *parent) :
     frameFile->setLayout(fileLayout);
     layoutMain->addRow(frameFile);
     layoutMain->addRow(new QLabel(tr("%yyyy%\t\tyear\n%MM%\t\tmonth\n%dd%\t\tday\n%hh%\t\thour\n%mm%\t\tminute\n"
-                                     "%name%\tpatient name, if specified\n%study%\tstudy name\n%nn%\t\tsequental number")));
+                                     "%name%\tpatient name, if specified\n%study%\tstudy name\n%nn%\t\tsequential number")));
 
     setLayout(layoutMain);
 }

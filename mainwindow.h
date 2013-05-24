@@ -50,6 +50,7 @@ class MainWindow : public QWidget
     QString       studyName;
     int           imageNo;
     int           clipNo;
+    int           studyNo;
 
     QMenuBar* createMenu();
     void updateStartButton();
@@ -74,7 +75,7 @@ class MainWindow : public QWidget
     QGst::ElementPtr videoSink;
     QGst::ElementPtr rtpSink;
 
-    QString replace(QString& str, int seqNo = 0);
+    QString replace(QString str, int seqNo = 0);
     QString buildPipeline();
     QGst::PipelinePtr createPipeline();
     void updatePipeline();
