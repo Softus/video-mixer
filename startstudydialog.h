@@ -13,6 +13,7 @@ class StartStudyDialog : public QDialog
 
 public:
     explicit StartStudyDialog(Worklist* worklist, QWidget *parent = 0);
+    void savePatientFile(const QString& outputPath);
 
 protected:
     virtual void done(int);

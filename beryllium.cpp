@@ -19,6 +19,7 @@ int main(int argc, char *argv[])
     //
     QApplication app(argc, argv);
     app.setOrganizationName("irk-dc");
+    app.setOrganizationDomain("Irkutsk Diagnostic Centre");
     app.setApplicationName("beryllium");
     app.setApplicationVersion("1.0");
     app.setWindowIcon(QIcon(":/buttons/beryllium"));

@@ -20,6 +20,7 @@
 #include <QResizeEvent>
 #include <QFrame>
 #include <QBoxLayout>
+#include <QDesktopServices>
 #include <QListWidget>
 #include <QLabel>
 #include <QSettings>
@@ -32,6 +33,7 @@
 #include <QMenuBar>
 #include <QMessageBox>
 #include <QProgressDialog>
+#include <QUrl>
 
 #include <QGlib/Type>
 #include <QGlib/Connect>
@@ -184,8 +186,6 @@ MainWindow::MainWindow(QWidget *parent) :
     updateRecordButton();
     updateRecordAll();
 
-    pipelineDef = buildPipeline();
-    pipeline = createPipeline();
     updatePipeline();
 }
 
@@ -470,27 +470,6 @@ void MainWindow::setElementProperty(QGst::ElementPtr& elm, const char* prop, con
     }
 }
 
-void MainWindow::updatePipeline()
-{
-    QSettings settings;
-    setElementProperty(rtpSink, "clients", settings.value("rtp-clients").toString());
-
-    if (videoEncoder)
-    {
-        auto videoEncBitrate = settings.value("bitrate", DEFAULT_VIDEOBITRATE).toInt();
-        // To set correct bitrate we must examine default bitrate first
-        //
-        auto currentBitrate = videoEncoder->property("bitrate").toInt();
-        if (currentBitrate > 200000)
-        {
-            // The codec uses bits per second instead of kbits per second
-            //
-            videoEncBitrate *= 1024;
-        }
-        setElementProperty(videoEncoder, "bitrate", videoEncBitrate);
-    }
-}
-
 // mpegtsmux => mpg, jpegenc => jpg, pngenc => png, oggmux => ogg, avimux => avi, matrosskamux => mat
 //
 static QString getExt(QString str)
@@ -517,9 +496,39 @@ QString MainWindow::replace(QString str, int seqNo)
         ;
 }
 
-void MainWindow::updatePipelinePaths()
+void MainWindow::updatePipeline()
 {
     QSettings settings;
+
+    auto newPipelineDef = buildPipeline();
+    if (newPipelineDef != pipelineDef)
+    {
+        qDebug() << "The pipeline has been changed, restarting";
+        if (pipeline)
+        {
+            releasePipeline();
+        }
+        pipelineDef = newPipelineDef;
+        pipeline = createPipeline();
+    }
+
+    setElementProperty(rtpSink, "clients", settings.value("rtp-clients").toString());
+
+    if (videoEncoder)
+    {
+        auto videoEncBitrate = settings.value("bitrate", DEFAULT_VIDEOBITRATE).toInt();
+        // To set correct bitrate we must examine default bitrate first
+        //
+        auto currentBitrate = videoEncoder->property("bitrate").toInt();
+        if (currentBitrate > 200000)
+        {
+            // The codec uses bits per second instead of kbits per second
+            //
+            videoEncBitrate *= 1024;
+        }
+        setElementProperty(videoEncoder, "bitrate", videoEncBitrate);
+    }
+
     outputPath.setPath(replace(settings.value("output-path", "/video").toString()
         .append(settings.value("folder-template", "/%yyyy%-%MM%/%dd%/%name%/").toString()), ++studyNo));
 
@@ -743,7 +752,9 @@ void MainWindow::onStartClick()
         studyName   = dlg.studyName();
 #endif
         QWaitCursor wait(this);
-        updatePipelinePaths();
+        updatePipeline();
+        // After updatePipeline the outputPath is usable
+        //
         dlg.savePatientFile(outputPath.absoluteFilePath(".patient"));
         running = true;
     }
@@ -941,6 +952,9 @@ void MainWindow::onShowAboutClick()
 
 void MainWindow::onShowArchiveClick()
 {
+    QDesktopServices::openUrl(QUrl(outputPath.absolutePath()));
+    return;
+
     if (archiveWindow == nullptr)
     {
         archiveWindow = new ArchiveWindow();
@@ -952,21 +966,8 @@ void MainWindow::onShowArchiveClick()
 void MainWindow::onShowSettingsClick()
 {
     Settings dlg(this);
-    if (dlg.exec())
-    {
-        auto newPipelineDef = buildPipeline();
-        if (newPipelineDef != pipelineDef)
-        {
-            qDebug() << "The pipeline has been changed, restarting";
-            if (pipeline)
-            {
-                releasePipeline();
-            }
-            pipelineDef = newPipelineDef;
-            pipeline = createPipeline();
-        }
-        updatePipeline();
-    }
+    connect(&dlg, SIGNAL(save()), this, SLOT(updatePipeline()));
+    dlg.exec();
 }
 
 #ifdef WITH_DICOM

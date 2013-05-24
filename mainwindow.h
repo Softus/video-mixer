@@ -79,8 +79,6 @@ class MainWindow : public QWidget
     QString replace(QString str, int seqNo = 0);
     QString buildPipeline();
     QGst::PipelinePtr createPipeline();
-    void updatePipeline();
-    void updatePipelinePaths();
     void releasePipeline();
 
     void onBusMessage(const QGst::MessagePtr& message);
@@ -114,6 +112,7 @@ private slots:
     void onRecordClick();
     void prepareSettingsMenu();
     void toggleSetting();
+    void updatePipeline();
 };
 
 #endif // MAINWINDOW_H

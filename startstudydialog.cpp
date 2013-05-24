@@ -47,3 +47,7 @@ void StartStudyDialog::done(int result)
     worklist->setParent(nullptr);
     QDialog::done(result);
 }
+
+void StartStudyDialog::savePatientFile(const QString& outputPath)
+{
+}

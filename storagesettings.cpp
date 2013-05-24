@@ -33,14 +33,11 @@ StorageSettings::StorageSettings(QWidget *parent) :
     frameFolder->setFrameShape(QFrame::Box);
     frameFolder->setFrameShadow(QFrame::Sunken);
     QFormLayout* layoutFolder = new QFormLayout;
-    QLineEdit* textFolderTemplate = new QLineEdit(settings.value("folder-template", "/%yyyy%-%MM%/%dd%/%name%/").toString());
+    textFolderTemplate = new QLineEdit(settings.value("folder-template", "/%yyyy%-%MM%/%dd%/%name%/").toString());
     layoutFolder->addRow(tr("&Folder template"), textFolderTemplate);
     frameFolder->setLayout(layoutFolder);
     layoutMain->addRow(frameFolder);
 
-    QLineEdit* textImageTemplate;
-    QLineEdit* textClipTemplate;
-    QLineEdit* textVideoTemplate;
     QFrame *frameFile = new QFrame;
     frameFile->setFrameShape(QFrame::Box);
     frameFile->setFrameShadow(QFrame::Sunken);
@@ -56,7 +53,6 @@ StorageSettings::StorageSettings(QWidget *parent) :
     setLayout(layoutMain);
 }
 
-
 void StorageSettings::onClickBrowse()
 {
     QWaitCursor wait(this);
@@ -67,4 +63,14 @@ void StorageSettings::onClickBrowse()
     {
         textOutputPath->setText(dlg.selectedFiles().at(0));
     }
+}
+
+void StorageSettings::save()
+{
+    QSettings settings;
+    settings.setValue("output-path", textOutputPath->text());
+    settings.setValue("folder-template", textFolderTemplate->text());
+    settings.setValue("image-template", textImageTemplate->text());
+    settings.setValue("clip-template", textClipTemplate->text());
+    settings.setValue("video-template", textVideoTemplate->text());
 }
