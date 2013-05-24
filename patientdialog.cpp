@@ -34,3 +34,13 @@ PatientDialog::PatientDialog(QWidget *parent) :
 
     setLayout(layoutMain);
 }
+
+QString PatientDialog::patientName() const
+{
+    return textPatientName->text();
+}
+
+QString PatientDialog::studyName() const
+{
+    return cbStudyType->currentText();
+}

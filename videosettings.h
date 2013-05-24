@@ -10,6 +10,16 @@ class QCheckBox;
 class QSpinBox;
 QT_END_NAMESPACE
 
+#ifdef QT_ARCH_WINDOWS
+#define PLATFORM_SPECIFIC_SOURCE "dshowvideosrc"
+#define PLATFORM_SPECIFIC_PROPERTY "device-name"
+#else
+#define PLATFORM_SPECIFIC_SOURCE "v4l2src"
+#define PLATFORM_SPECIFIC_PROPERTY "device"
+#endif
+
+#define DEFAULT_VIDEOBITRATE 4000
+
 class VideoSettings : public QWidget
 {
     Q_OBJECT
@@ -24,11 +34,10 @@ class VideoSettings : public QWidget
 
     void updateDeviceList();
     void updateGstList(const char* setting, const char* def, unsigned long long type, QComboBox* cb);
-    QString updatePipeline();
 
 public:
     Q_INVOKABLE explicit VideoSettings(QWidget *parent = 0);
-    
+
 protected:
     virtual void showEvent(QShowEvent *);
 
@@ -38,7 +47,6 @@ public slots:
     void videoDeviceChanged(int index);
     void formatChanged(int index);
     void save();
-
 };
 
 #endif // VIDEOSETTINGS_H

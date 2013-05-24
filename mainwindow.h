@@ -4,11 +4,13 @@
 #include <QDir>
 #include <QGst/Message>
 #include <QGst/Pipeline>
+#include <QGst/Element>
 #include <QGst/Pad>
 #include <QGst/Buffer>
 #include <QGst/Ui/VideoWidget>
 
 #include <QGlib/Error>
+#include <QGlib/Value>
 
 #include <QWidget>
 
@@ -34,14 +36,20 @@ class MainWindow : public QWidget
     QToolButton* btnStart;
     QToolButton* btnRecord;
     QToolButton* btnSnapshot;
+    QAction*     actionSettings;
 
 #ifdef WITH_DICOM
     Worklist*     worklist;
     QString       pendingSOPInstanceUID;
 #endif
-    QListWidget* imageList;
     QGst::Ui::VideoWidget* displayWidget;
-    QDir         outputPath;
+    QListWidget*  imageList;
+    QDir          outputPath;
+    QString       pipelineDef;
+    QString       patientName;
+    QString       studyName;
+    int           imageNo;
+    int           clipNo;
 
     QMenuBar* createMenu();
     void updateStartButton();
@@ -61,13 +69,17 @@ class MainWindow : public QWidget
     QGst::ElementPtr imageSink;
     QGst::ElementPtr clipValve;
     QGst::ElementPtr clipSink;
+    QGst::ElementPtr videoEncoder;
     QGst::ElementPtr videoValve;
     QGst::ElementPtr videoSink;
     QGst::ElementPtr rtpSink;
 
+    QString replace(QString& str, int seqNo = 0);
+    QString buildPipeline();
     QGst::PipelinePtr createPipeline();
+    void updatePipeline();
+    void updatePipelinePaths();
     void releasePipeline();
-    void restartPipeline();
 
     void onBusMessage(const QGst::MessagePtr& message);
     void onStateChangedMessage(const QGst::StateChangedMessagePtr& message);
@@ -75,7 +87,8 @@ class MainWindow : public QWidget
 
     void onImageReady(const QGst::BufferPtr&);
     void errorGlib(const QGlib::ObjectPtr& obj, const QGlib::Error& ex);
-    void restartElement(const char* name);
+    void setElementProperty(const char* elm, const char* prop = nullptr, const QGlib::Value& value = nullptr);
+    void setElementProperty(QGst::ElementPtr& elm, const char* prop = nullptr, const QGlib::Value& value = nullptr);
 
 #ifdef WITH_DICOM
     void sendToServer(DcmDataset* dset, const QString& seriesUID);

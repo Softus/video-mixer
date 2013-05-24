@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "qwaitcursor.h"
 #include "settings.h"
+#include "videosettings.h"
 
 #ifdef WITH_DICOM
 #include "worklist.h"
@@ -106,6 +107,8 @@ MainWindow::MainWindow(QWidget *parent) :
 #ifdef WITH_DICOM
     worklist(nullptr),
 #endif
+    imageNo(0),
+    clipNo(0),
     running(false),
     recording(false)
 {
@@ -148,7 +151,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QAction* actionArchive = bar->addAction(QIcon(":/buttons/folder"), nullptr, this, SLOT(onShowArchiveClick()));
     actionArchive->setToolTip(tr("Show studies archive"));
-    QAction* actionSettings = bar->addAction(QIcon(":/buttons/settings"), nullptr, this, SLOT(onShowSettingsClick()));
+    actionSettings = bar->addAction(QIcon(":/buttons/settings"), nullptr, this, SLOT(onShowSettingsClick()));
     actionSettings->setToolTip(tr("Edit settings"));
     QAction* actionAbout = bar->addAction(QIcon(":/buttons/about"), nullptr, this, SLOT(onShowAboutClick()));
     actionAbout->setToolTip(tr("About berillyum"));
@@ -160,8 +163,8 @@ MainWindow::MainWindow(QWidget *parent) :
     imageList->setViewMode(QListView::IconMode);
     imageList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     imageList->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    imageList->setMinimumHeight(128);
-    imageList->setMaximumHeight(128);
+    imageList->setMinimumHeight(140);
+    imageList->setMaximumHeight(140);
     imageList->setIconSize(QSize(128,128));
     imageList->setMovement(QListView::Static);
     imageList->setWrapping(false);
@@ -178,7 +181,9 @@ MainWindow::MainWindow(QWidget *parent) :
     updateRecordButton();
     updateRecordAll();
 
-    restartPipeline();
+    pipelineDef = buildPipeline();
+    pipeline = createPipeline();
+    updatePipeline();
 }
 
 MainWindow::~MainWindow()
@@ -219,14 +224,14 @@ QMenuBar* MainWindow::createMenu()
 
 /*
 
-  Basic pipeline is:
+  The pipeline is:
 
                  [video src]
                      |
                      V
          +----[main splitter]-----+
          |            |           |
-  [image valve]       |     [video valve]
+  [image valve]       |       [video valve]
          |            |           |
          V            V           V
  [image encoder]  [display]  [video encoder]
@@ -239,92 +244,108 @@ QMenuBar* MainWindow::createMenu()
                                   |
                                   V
                           [clip writer]
+
 */
 
-
-QGst::PipelinePtr MainWindow::createPipeline()
+QString MainWindow::buildPipeline()
 {
     QSettings settings;
-    QGst::PipelinePtr pl;
 
-    // Default values for all profiles
+    // v4l2src device=/dev/video1 ! video/x-raw-yuv,format=(fourcc)YUY2,width=(int)720,height=(int)576
     //
+    QString pipe(PLATFORM_SPECIFIC_SOURCE);
 
-    bool enableVideo = settings.value("enable-video").toBool();
-    bool enableRtp   = settings.value("enable-rtp").toBool();
+    auto deviceDef = settings.value("device").toString();
+    auto formatDef = settings.value("format").toString();
+    auto sizeDef   = settings.value("size").toSize();
 
-    QString outputPathFormat  = settings.value("output-path", "'/video/'yyyy-MM-dd/HH-mm'").toString();
-    QString videoFileName     = settings.value("video-file", "video.mpg").toString();
-    QString clipFileName      = settings.value("clip-file",  "clip%03d.mpg").toString();
-    QString imageFileName     = settings.value("image-file", "image%03d.jpg").toString();
-    QString srcDef            = settings.value("src", "autovideosrc").toString();
-    QString displaySinkDef    = settings.value("display-sink",  "autovideosink name=displaysink async=0").toString();
-    QString videoEncoderDef   = settings.value("video-encoder", "x264enc").toString();
-    QString videoMuxDef       = settings.value("video-mux",     "mpegtsmux").toString();
-    QString videoSinkDef      = settings.value("video-sink",    "filesink name=videosink sync=0 async=0").toString();
-    QString rtpSinkDef        = settings.value("rtp-sink",      "rtph264pay ! udpsink name=rtpsink clients=127.0.0.1:5000 sync=0").toString();
-    QString clipSinkDef       = settings.value("clip-sink",     "multifilesink name=clipsink next-file=4 sync=0 async=0").toString();
-    QString imageEncoderDef   = settings.value("image-encoder", "jpegenc").toString();
-    QString imageSinkDef      = settings.value("image-sink",    "multifilesink name=imagesink post-messages=1 async=0 sync=0").toString();
-
-    int videoEncoderBitrate = settings.value("bitrate", 4000).toInt();
-    QString rtpClients = enableRtp? settings.value("rtp-clients").toString(): QString();
-
-    const QString& outputPathStr = QDateTime::currentDateTime().toString(outputPathFormat);
-    outputPath = QDir(outputPathStr);
-    if (!outputPath.mkpath("."))
+    if (!deviceDef.isNull())
     {
-        QString msg = tr("Failed to create '%1'").arg(outputPathStr);
-        qCritical() << msg;
-        QMessageBox::critical(this, windowTitle(), msg, QMessageBox::Ok);
-        return pl;
+        pipe.append(" " PLATFORM_SPECIFIC_PROPERTY "=\"").append(deviceDef).append("\"");
+        if (!formatDef.isNull())
+        {
+            pipe.append(" ! ").append(formatDef);
+            if (!sizeDef.isEmpty())
+            {
+                pipe = pipe.append(",width=(int)%1,height=(int)%2").arg(sizeDef.width()).arg(sizeDef.height());
+            }
+        }
     }
 
-    if (videoSinkDef.isEmpty())
-    {
-        enableVideo = false;
-    }
-
-    if (rtpSinkDef.isEmpty())
-    {
-        enableRtp = false;
-    }
-
-    QString pipe = QString().append(srcDef).append(" ! autoconvert ! tee name=splitter");
+    // v4l2src ... ! autoconvert ! tee name=splitter ! ximagesink splitter.");
+    //
+    auto displaySinkDef = settings.value("display-sink",  "autovideosink name=displaysink async=0").toString();
+    pipe.append(" ! autoconvert ! tee name=splitter");
     if (!displaySinkDef.isEmpty())
     {
         pipe.append(" ! ").append(displaySinkDef).append(" splitter.");
     }
 
+    // ... ! tee name=splitter ! ximagesink splitter. ! valve name=videovalve ! x264enc
+    //           ! tee name=videosplitter
+    //                ! queue ! mpegtsmux ! filesink videosplitter.  ! queue ! x264 videosplitter.
+    //                ! queue ! rtph264pay ! udpsink videosplitter.
+    //                ! valve name=clipvalve ! queue ! mpegtsmux ! filesink videosplitter.
+    //           splitter.
+    //
+    auto outputPathDef   = settings.value("output-path",   "/video").toString();
+    auto videoEncoderDef = settings.value("video-encoder", "x264enc").toString();
+    auto videoMuxDef     = settings.value("video-mux",     "mpegtsmux").toString();
+    auto videoSinkDef    = settings.value("video-sink",    "multifilesink name=videosink next-file=4 sync=0 async=0").toString();
+    auto rtpSinkDef      = settings.value("rtp-sink",      "rtph264pay ! udpsink name=rtpsink clients=127.0.0.1:5000 sync=0").toString();
+    auto clipSinkDef     = settings.value("clip-sink",     "multifilesink name=clipsink next-file=4 post-messages=1 sync=0 async=0").toString();
+    auto enableVideo     = !videoSinkDef.isEmpty() && settings.value("enable-video").toBool();
+    auto enableRtp       = !rtpSinkDef.isEmpty() && settings.value("enable-rtp").toBool();
+
     if (!videoEncoderDef.isEmpty() && (enableRtp || enableVideo || !clipSinkDef.isEmpty()))
     {
-        pipe.append(" ! valve name=videovalve ! queue max-size-bytes=0 ! ").append(videoEncoderDef).append(" name=videoencoder");
+        pipe.append(" ! valve name=videovalve drop=1 ! queue max-size-bytes=0 ! ").append(videoEncoderDef).append(" name=videoencoder");
         if (enableRtp || enableVideo)
         {
             pipe.append(" ! tee name=videosplitter");
             if (enableVideo)
-                pipe.append(" ! queue ! ").append(videoMuxDef).append(" name=videomux ! ").append(videoSinkDef).append(" videosplitter.");
+                pipe.append(" ! queue ! ").append(videoMuxDef).append(" name=videomux ! ")
+                    .append(videoSinkDef).append(" location=").append(outputPathDef).append("/video videosplitter.");
             if (enableRtp)
                 pipe.append(" ! queue ! ").append(rtpSinkDef).append(" videosplitter.");
         }
 
         if (!clipSinkDef.isEmpty())
         {
-            pipe.append(" ! valve name=clipvalve ! queue ! ").append(videoMuxDef).append(" name=clipmux ! ").append(clipSinkDef);
+            pipe.append(" ! valve name=clipvalve drop=1 ! queue ! ").append(videoMuxDef).append(" name=clipmux ! ")
+                .append(clipSinkDef).append(" location=").append(outputPathDef).append("/clip");
             if (enableRtp || enableVideo)
                 pipe.append(" videosplitter.");
         }
         pipe.append(" splitter.");
     }
 
+    // ... ! tee name=splitter ... splitter. ! identity name=imagevalve ! jpegenc ! multifilesink splitter.
+    //
+    auto imageEncoderDef = settings.value("image-encoder", "jpegenc").toString();
+    auto imageSinkDef    = settings.value("image-sink",    "multifilesink name=imagesink post-messages=1 async=0 sync=0").toString();
     if (!imageSinkDef.isEmpty())
-        pipe.append(" ! identity name=imagevalve ! ").append(imageEncoderDef).append(" ! ").append(imageSinkDef).append(" splitter.");
+    {
+        pipe.append(" ! identity name=imagevalve drop-probability=1.0 ! ").append(imageEncoderDef).append(" ! ")
+            .append(imageSinkDef).append(" location=").append(outputPathDef).append("/image splitter.");
+    }
 
-    qCritical() << pipe;
+    return pipe;
+}
+
+QGst::PipelinePtr MainWindow::createPipeline()
+{
+    qCritical() << pipelineDef;
+
+    QSettings settings;
+    QGst::PipelinePtr pl;
+
+    // Default values for all profiles
+    //
 
     try
     {
-        pl = QGst::Parse::launch(pipe).dynamicCast<QGst::Pipeline>();
+        pl = QGst::Parse::launch(pipelineDef).dynamicCast<QGst::Pipeline>();
     }
     catch (QGlib::Error ex)
     {
@@ -349,16 +370,12 @@ QGst::PipelinePtr MainWindow::createPipeline()
             qCritical() << "Element clipvalve not found";
         }
 
-        if (enableVideo)
+        if (settings.value("enable-video").toBool())
         {
             videoSink  = pl->getElementByName("videosink");
             if (!videoSink)
             {
                 qCritical() << "Element videosink not found";
-            }
-            else
-            {
-                videoSink->setProperty("location", outputPath.absoluteFilePath(videoFileName));
             }
         }
 
@@ -366,11 +383,6 @@ QGst::PipelinePtr MainWindow::createPipeline()
         if (!clipSink)
         {
             qCritical() << "Element clipsink not found";
-        }
-        else
-        {
-            clipSink->setProperty("location", outputPath.absoluteFilePath(clipFileName));
-            clipSink->setProperty("index", 0);
         }
 
         videoValve  = pl->getElementByName("videovalve");
@@ -394,75 +406,128 @@ QGst::PipelinePtr MainWindow::createPipeline()
         {
             qCritical() << "Element imagesink not found";
         }
-        else
-        {
-            imageSink->setProperty("location", outputPath.absoluteFilePath(imageFileName));
-            imageSink->setProperty("index", 0);
-        }
 
-        if (enableRtp)
+        if (settings.value("enable-rtp").toBool())
         {
+            auto rtpClientsDef = settings.value("rtp-clients").toString();
             rtpSink  = pl->getElementByName("rtpsink");
             if (!rtpSink)
             {
                 qCritical() << "Element rtpSink not found";
             }
-            else if (!rtpClients.isEmpty())
-            {
-                rtpSink->setProperty("clients", rtpClients);
-            }
         }
 
-        if (videoEncoderBitrate > 0)
+        // To set correct bitrate we must examine default bitrate first
+        //
+        videoEncoder = pl->getElementByName("videoencoder");
+        if (!videoEncoder)
         {
-            auto videoEncoder = pl->getElementByName("videoencoder");
-            if (!videoEncoder)
-            {
-                qCritical() << "Element videoencoder not found";
-            }
-            else
-            {
-                int defaultBitrate = videoEncoder->property("bitrate").toInt();
-                if (defaultBitrate > 200000)
-                {
-                    // code uses bits per second instead of kbits
-                    videoEncoderBitrate *= 1024;
-                }
-                videoEncoder->setProperty("bitrate", videoEncoderBitrate);
-            }
+            qCritical() << "Element videoencoder not found";
         }
 
 //        QGlib::connect(pl->getElementByName("test"), "handoff", this, &MainWindow::onTestHandoff);
 
         auto details = GstDebugGraphDetails(GST_DEBUG_GRAPH_SHOW_MEDIA_TYPE | GST_DEBUG_GRAPH_SHOW_NON_DEFAULT_PARAMS | GST_DEBUG_GRAPH_SHOW_STATES);
         GST_DEBUG_BIN_TO_DOT_FILE_WITH_TS((GstBin*)(QGst::Pipeline::CType*)pl, details, qApp->applicationName().toUtf8());
+
+        pl->setState(QGst::StatePaused);
     }
 
     return pl;
 }
 
-void MainWindow::restartPipeline()
+void MainWindow::setElementProperty(const char* elmName, const char* prop, const QGlib::Value& value)
 {
-    if (pipeline)
+    auto elm = pipeline? pipeline->getElementByName(elmName): QGst::ElementPtr();
+    if (!elm)
     {
-        releasePipeline();
+        qDebug() << "Element " << elmName << " not found";
+    }
+    else
+    {
+        setElementProperty(pipeline->getElementByName(elmName), prop, value);
+    }
+}
+
+void MainWindow::setElementProperty(QGst::ElementPtr& elm, const char* prop, const QGlib::Value& value)
+{
+    if (elm)
+    {
+        elm->setState(QGst::StateReady);
+        elm->getState(NULL, NULL, 1000000000L); // 1 sec
+        if (prop)
+        {
+            elm->setProperty(prop, value);
+        }
+        elm->setState(QGst::StatePlaying);
+        elm->getState(NULL, NULL, 1000000000L); // 1 sec
+    }
+}
+
+void MainWindow::updatePipeline()
+{
+    QSettings settings;
+    setElementProperty(rtpSink, "clients", settings.value("rtp-clients").toString());
+
+    if (videoEncoder)
+    {
+        auto videoEncBitrate = settings.value("bitrate", DEFAULT_VIDEOBITRATE).toInt();
+        // To set correct bitrate we must examine default bitrate first
+        //
+        auto currentBitrate = videoEncoder->property("bitrate").toInt();
+        if (currentBitrate > 200000)
+        {
+            // The codec uses bits per second instead of kbits per second
+            //
+            videoEncBitrate *= 1024;
+        }
+        setElementProperty(videoEncoder, "bitrate", videoEncBitrate);
+    }
+}
+
+// mpegtsmux => mpg, jpegenc => jpg, pngenc => png, oggmux => ogg, avimux => avi, matrosskamux => mat
+//
+static QString getExt(QString& str)
+{
+    return QString(".").append(str.remove('e').left(3));
+}
+
+QString MainWindow::replace(QString& str, int seqNo)
+{
+    const QString nn = seqNo >= 10? QString::number(seqNo): QString("0").append('0' + seqNo);
+    const QDateTime ts = QDateTime::currentDateTime();
+
+    return str
+        .replace("%name%", patientName)
+        .replace("%study%", studyName)
+        .replace("%yyyy%", ts.toString("yyyy"))
+        .replace("%yy%", ts.toString("yy"))
+        .replace("%MM%", ts.toString("MM"))
+        .replace("%MMM%", ts.toString("MMM"))
+        .replace("%MMMM%", ts.toString("MMMM"))
+        .replace("%dd%", ts.toString("dd"))
+        .replace("%mm%", ts.toString("mm"))
+        .replace("%nn%", nn)
+        ;
+}
+
+void MainWindow::updatePipelinePaths()
+{
+    QSettings settings;
+    outputPath.setPath(replace(settings.value("output-path", "/video").toString()
+        .append(settings.value("folder-template", "/%yyyy%/%MM%/%dd%/").toString())));
+
+    if (!outputPath.mkpath("."))
+    {
+        QString msg = tr("Failed to create '%1'").arg(outputPath.absolutePath());
+        qCritical() << msg;
+        QMessageBox::critical(this, windowTitle(), msg, QMessageBox::Ok);
+        return;
     }
 
-    pipeline = createPipeline();
-    if (pipeline)
-    {
-        if (videoValve)
-        {
-            videoValve->setProperty("drop", !running);
-        }
-
-        if (imageValve)
-        {
-            imageValve->setProperty("drop-probability", 1.0);
-        }
-
-        pipeline->setState(QGst::StatePaused);
-    }
+    QString videoExt = getExt(settings.value("video-mux", "mpegtsmux").toString());
+    QString videoFileName  = replace(settings.value("video-file", "video-%name%-%study%-%nn%").toString()).append(videoExt);
+    setElementProperty(videoSink, "location", outputPath.absoluteFilePath(videoFileName));
 }
 
 void MainWindow::releasePipeline()
@@ -478,6 +543,7 @@ void MainWindow::releasePipeline()
     videoValve.clear();
     videoSink.clear();
     rtpSink.clear();
+    videoEncoder.clear();
 
     pipeline.clear();
     displayWidget->stopPipelineWatch();
@@ -500,7 +566,7 @@ void MainWindow::errorGlib(const QGlib::ObjectPtr& obj, const QGlib::Error& ex)
 
 void MainWindow::onBusMessage(const QGst::MessagePtr& message)
 {
-//    qDebug() << message->typeName() << " " << message->source()->property("name").toString();
+    qDebug() << message->typeName() << " " << message->source()->property("name").toString();
 
     switch (message->type())
     {
@@ -556,21 +622,6 @@ void MainWindow::onStateChangedMessage(const QGst::StateChangedMessagePtr& messa
     }
 }
 
-void MainWindow::restartElement(const char* name)
-{
-    auto elm = pipeline->getElementByName(name);
-    if (!elm)
-    {
-        qDebug() << "Element " << name << " not found";
-        return;
-    }
-
-    elm->setState(QGst::StateReady);
-    elm->getState(NULL, NULL, 1000000000L); // 1 sec
-    elm->setState(QGst::StatePlaying);
-    elm->getState(NULL, NULL, 1000000000L); // 1 sec
-}
-
 void MainWindow::onElementMessage(const QGst::ElementMessagePtr& message)
 {
     const QGst::StructurePtr s = message->internalStructure();
@@ -582,8 +633,7 @@ void MainWindow::onElementMessage(const QGst::ElementMessagePtr& message)
 
     if (s->name() == "GstMultiFileSink" && message->source() == imageSink)
     {
-        const QString fileName = s->value("filename").toString();
-        const int index = s->value("index").toInt();
+        QString fileName = s->value("filename").toString();
         QPixmap pm;
 
         auto lastBuffer = message->source()->property("last-buffer").get<QGst::BufferPtr>();
@@ -591,11 +641,9 @@ void MainWindow::onElementMessage(const QGst::ElementMessagePtr& message)
 
         // If we can not load from the buffer, try to load from the file
         //
-        ok = ok || pm.load(fileName);
-
-        if (ok)
+        if (ok || pm.load(fileName))
         {
-            QListWidgetItem* item = new QListWidgetItem(QIcon(pm), QString::number(index), imageList);
+            QListWidgetItem* item = new QListWidgetItem(QIcon(pm), QFileInfo(fileName).baseName(), imageList);
             item->setToolTip(fileName);
             imageList->setItemSelected(item, true);
             imageList->scrollToItem(item);
@@ -609,6 +657,7 @@ void MainWindow::onElementMessage(const QGst::ElementMessagePtr& message)
         btnSnapshot->setEnabled(running);
         return;
     }
+
 
     if (s->name() == "prepare-xwindow-id" || s->name() == "prepare-window-handle")
     {
@@ -630,6 +679,9 @@ void MainWindow::onStartClick()
 {
     if (!running)
     {
+        imageNo = clipNo = 0;
+        imageList->clear();
+
 #ifdef WITH_DICOM
 
         if (worklist == nullptr)
@@ -668,24 +720,12 @@ void MainWindow::onStartClick()
             //
             return;
         }
+        patientName = dlg.patientName();
+        studyName   = dlg.studyName();
 #endif
         QWaitCursor wait(this);
-        pipeline = createPipeline();
-        if (pipeline)
-        {
-            if (clipValve)
-            {
-                clipValve->setProperty("drop", TRUE);
-            }
-
-            if (imageValve)
-            {
-                imageValve->setProperty("drop-probability", 1.0);
-            }
-
-            pipeline->setState(QGst::StatePaused);
-            running = true;
-        }
+        updatePipelinePaths();
+        running = true;
     }
     else
     {
@@ -715,7 +755,6 @@ void MainWindow::onStartClick()
         QWaitCursor wait(this);
         running = recording = false;
         updateRecordButton();
-        releasePipeline();
 
 #ifdef WITH_DICOM
         auto patientDs = worklist->getPatientDS();
@@ -741,6 +780,8 @@ void MainWindow::onStartClick()
 #endif
     }
 
+    setElementProperty(videoValve, "drop", !running);
+
     updateStartButton();
     updateRecordAll();
 
@@ -750,6 +791,12 @@ void MainWindow::onStartClick()
 
 void MainWindow::onSnapshotClick()
 {
+    QSettings settings;
+    QString imageExt = getExt(settings.value("image-encoder", "jpegenc").toString());
+    QString imageFileName = replace(settings.value("image-file", "image-%name%-%study%-%nn%").toString(), ++imageNo).append(imageExt);
+
+    setElementProperty(imageSink, "location", outputPath.absoluteFilePath(imageFileName));
+
     // Turn the valve on for a while.
     //
     imageValve->setProperty("drop-probability", 0.0);
@@ -765,14 +812,33 @@ void MainWindow::onRecordClick()
 
     if (recording)
     {
-        restartElement("clipstamp");
-        restartElement("clipmux");
+        QSettings settings;
 
         // Manually increment video clip file name
         //
+        QString videoExt = getExt(settings.value("video-mux", "mpegtsmux").toString());
+        QString imageExt = getExt(settings.value("image-encoder", "jpegenc").toString());
+        QString clipFileName = replace(settings.value("clip-file",  "clip-%name%-%study%-%nn%").toString(), ++clipNo).append(videoExt);
+
         clipSink->setState(QGst::StateNull);
-        clipSink->setProperty("index", clipSink->property("index").toInt() + 1);
+        clipSink->setProperty("location", outputPath.absoluteFilePath(clipFileName));
         clipSink->setState(QGst::StatePlaying);
+
+        // Restart some elements
+        //
+        setElementProperty("clipstamp", nullptr, nullptr);
+        setElementProperty("clipmux", nullptr, nullptr);
+
+        // Take a picture for thumbnail
+        //
+        setElementProperty(imageSink, "location", outputPath.absoluteFilePath(clipFileName.append(imageExt)));
+
+        // Turn the valve on for a while.
+        //
+        imageValve->setProperty("drop-probability", 0.0);
+        //
+        // Once an image will be ready, the valve will be turned off again.
+        btnSnapshot->setEnabled(false);
     }
     else
     {
@@ -781,12 +847,7 @@ void MainWindow::onRecordClick()
     }
 
     clipValve->setProperty("drop", !recording);
-
-    auto displayOverlay = pipeline->getElementByName("displayoverlay");
-    if (displayOverlay)
-    {
-        displayOverlay->setProperty("text", recording? "R": "");
-    }
+    setElementProperty("displayoverlay", "text", recording? "R": "");
 }
 
 void MainWindow::updateStartButton()
@@ -798,7 +859,8 @@ void MainWindow::updateStartButton()
 
     btnRecord->setEnabled(running && clipSink);
     btnSnapshot->setEnabled(running && imageSink);
-//    displayWidget->setVisible(running && displaySink);
+    actionSettings->setEnabled(!running);
+    //displayWidget->setVisible(running && displaySink);
 #ifdef WITH_DICOM
     if (worklist)
     {
@@ -865,7 +927,18 @@ void MainWindow::onShowSettingsClick()
     Settings dlg(this);
     if (dlg.exec())
     {
-        restartPipeline();
+        auto newPipelineDef = buildPipeline();
+        if (newPipelineDef != pipelineDef)
+        {
+            qDebug() << "The pipeline has been changed, restarting";
+            if (pipeline)
+            {
+                releasePipeline();
+            }
+            pipelineDef = newPipelineDef;
+            pipeline = createPipeline();
+        }
+        updatePipeline();
     }
 }
 

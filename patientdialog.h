@@ -20,11 +20,13 @@ class PatientDialog : public QDialog
 
 public:
     explicit PatientDialog(QWidget *parent = 0);
-    
+    QString patientName() const;
+    QString studyName() const;
+
 signals:
-    
+
 public slots:
-    
+
 };
 
 #endif // PATIENTDIALOG_H

@@ -21,14 +21,6 @@
 #include <QGst/Structure>
 #include <gst/gst.h>
 
-#ifdef QT_ARCH_WINDOWS
-#define PLATFORM_SPECIFIC_SOURCE "dshowvideosrc"
-#define PLATFORM_SPECIFIC_PROPERTY "device-name"
-#else
-#define PLATFORM_SPECIFIC_SOURCE "v4l2src"
-#define PLATFORM_SPECIFIC_PROPERTY "device"
-#endif
-
 VideoSettings::VideoSettings(QWidget *parent) :
     QWidget(parent)
 {
@@ -46,7 +38,7 @@ VideoSettings::VideoSettings(QWidget *parent) :
     spinBitrate->setRange(300, 102400);
     spinBitrate->setSingleStep(100);
     spinBitrate->setSuffix(tr(" kbit per second"));
-    spinBitrate->setValue(settings.value("bitrate", 4000).toInt());
+    spinBitrate->setValue(settings.value("bitrate", DEFAULT_VIDEOBITRATE).toInt());
 
     layout->addRow(tr("Video &muxer"), listVideoMuxers = new QComboBox());
     layout->addRow(tr("&Image codec"), listImageCodecs = new QComboBox());
@@ -158,7 +150,6 @@ void VideoSettings::videoDeviceChanged(int index)
             listFormats->setCurrentIndex(listFormats->count() - 1);
         }
     }
-    updatePipeline();
 }
 
 void VideoSettings::formatChanged(int index)
@@ -196,31 +187,6 @@ void VideoSettings::formatChanged(int index)
             listSizes->setCurrentIndex(listSizes->count() - 1);
         }
     }
-    updatePipeline();
-}
-
-QString VideoSettings::updatePipeline()
-{
-    auto device = listDevices->itemData(listDevices->currentIndex()).isNull()?
-                nullptr: listDevices->itemText(listDevices->currentIndex());
-    auto format = listFormats->itemData(listFormats->currentIndex()).toString();
-    auto size = listSizes->itemData(listSizes->currentIndex()).toSize();
-    QString str(PLATFORM_SPECIFIC_SOURCE);
-
-    if (!device.isNull())
-    {
-        str.append(" " PLATFORM_SPECIFIC_PROPERTY "=\"").append(device).append("\"");
-        if (!format.isNull())
-        {
-            str.append(" ! ").append(format);
-            if (size.width() > 0 && size.height() > 0)
-            {
-                str = str.append(",width=(int)%1,height=(int)%2").arg(size.width()).arg(size.height());
-            }
-        }
-    }
-
-    return str;
 }
 
 void VideoSettings::save()
@@ -235,6 +201,5 @@ void VideoSettings::save()
     settings.setValue("image-encoder", listImageCodecs->itemData(listImageCodecs->currentIndex()));
     settings.setValue("enable-video", checkRecordAll->isChecked());
 
-    settings.setValue("src", updatePipeline());
     settings.setValue("bitrate", spinBitrate->value());
 }
