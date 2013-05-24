@@ -23,6 +23,7 @@ class QLabel;
 class QTimer;
 class QToolButton;
 class Worklist;
+class ArchiveWindow;
 class DcmDataset;
 QT_END_NAMESPACE
 
@@ -37,7 +38,7 @@ class MainWindow : public QWidget
     QToolButton* btnRecord;
     QToolButton* btnSnapshot;
     QAction*     actionSettings;
-
+    ArchiveWindow* archiveWindow;
 #ifdef WITH_DICOM
     Worklist*     worklist;
     QString       pendingSOPInstanceUID;

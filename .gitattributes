@@ -1,5 +1,9 @@
 * text=auto !eol
 /README -text
+/aboutdialog.cpp -text
+/aboutdialog.h -text
+/archivewindow.cpp -text
+/archivewindow.h -text
 /basewidget.cpp -text
 /basewidget.h -text
 /beryllium.cpp -text

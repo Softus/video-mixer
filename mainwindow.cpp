@@ -1,4 +1,6 @@
 #include "mainwindow.h"
+#include "aboutdialog.h"
+#include "archivewindow.h"
 #include "qwaitcursor.h"
 #include "settings.h"
 #include "videosettings.h"
@@ -104,6 +106,7 @@ static void Dump(QGst::ElementPtr elm)
 
 MainWindow::MainWindow(QWidget *parent) :
     QWidget(parent),
+    archiveWindow(nullptr),
 #ifdef WITH_DICOM
     worklist(nullptr),
 #endif
@@ -192,6 +195,9 @@ MainWindow::~MainWindow()
     {
         releasePipeline();
     }
+
+    delete archiveWindow;
+    archiveWindow = nullptr;
 
 #ifdef WITH_DICOM
     delete worklist;
@@ -515,7 +521,7 @@ void MainWindow::updatePipelinePaths()
 {
     QSettings settings;
     outputPath.setPath(replace(settings.value("output-path", "/video").toString()
-        .append(settings.value("folder-template", "/%yyyy%/%MM%/%dd%/").toString()), ++studyNo));
+        .append(settings.value("folder-template", "/%yyyy%-%MM%/%dd%/%name%/").toString()), ++studyNo));
 
     if (!outputPath.mkpath("."))
     {
@@ -528,7 +534,7 @@ void MainWindow::updatePipelinePaths()
     if (videoSink)
     {
         QString videoExt = getExt(settings.value("video-mux", "mpegtsmux").toString());
-        QString videoFileName  = replace(settings.value("video-file", "video-%name%-%study%").toString(), studyNo).append(videoExt);
+        QString videoFileName  = replace(settings.value("video-file", "video-%study%").toString(), studyNo).append(videoExt);
 
         // Video sink must be in null state to change the location
         //
@@ -807,7 +813,7 @@ void MainWindow::onSnapshotClick()
 {
     QSettings settings;
     QString imageExt = getExt(settings.value("image-encoder", "jpegenc").toString());
-    QString imageFileName = replace(settings.value("image-file", "image-%name%-%study%-%nn%").toString(), ++imageNo).append(imageExt);
+    QString imageFileName = replace(settings.value("image-file", "image-%study%-%nn%").toString(), ++imageNo).append(imageExt);
 
     setElementProperty(imageSink, "location", outputPath.absoluteFilePath(imageFileName));
 
@@ -832,7 +838,7 @@ void MainWindow::onRecordClick()
         //
         QString videoExt = getExt(settings.value("video-mux", "mpegtsmux").toString());
         QString imageExt = getExt(settings.value("image-encoder", "jpegenc").toString());
-        QString clipFileName = replace(settings.value("clip-file",  "clip-%name%-%study%-%nn%").toString(), ++clipNo).append(videoExt);
+        QString clipFileName = replace(settings.value("clip-file",  "clip-%study%-%nn%").toString(), ++clipNo).append(videoExt);
 
         // Clip sink must be in null state to change the location
         //
@@ -930,12 +936,17 @@ void MainWindow::toggleSetting()
 
 void MainWindow::onShowAboutClick()
 {
-    QMessageBox::information(this, windowTitle(), "Not yet");
+    AboutDialog(this).exec();
 }
 
 void MainWindow::onShowArchiveClick()
 {
-    QMessageBox::information(this, windowTitle(), "Not yet");
+    if (archiveWindow == nullptr)
+    {
+        archiveWindow = new ArchiveWindow();
+    }
+    archiveWindow->show();
+    archiveWindow->activateWindow();
 }
 
 void MainWindow::onShowSettingsClick()

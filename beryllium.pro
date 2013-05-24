@@ -50,14 +50,18 @@ SOURCES += beryllium.cpp mainwindow.cpp basewidget.cpp \
     storagesettings.cpp \
     rtpsettings.cpp \
     studiessettings.cpp \
-    patientdialog.cpp
+    patientdialog.cpp \
+    aboutdialog.cpp \
+    archivewindow.cpp
 HEADERS += mainwindow.h basewidget.h qwaitcursor.h \
     videosettings.h \
     settings.h \
     storagesettings.h \
     rtpsettings.h \
     studiessettings.h \
-    patientdialog.h
+    patientdialog.h \
+    aboutdialog.h \
+    archivewindow.h
 
 FORMS   +=
 
