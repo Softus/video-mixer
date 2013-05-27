@@ -118,8 +118,81 @@ MainWindow::MainWindow(QWidget *parent) :
     running(false),
     recording(false)
 {
-    QSettings settings;
+    QVBoxLayout* layoutMain = new QVBoxLayout();
+    layoutMain->setMenuBar(createMenuBar());
+    layoutMain->addWidget(createToolBar());
 
+    displayWidget = new QGst::Ui::VideoWidget();
+    displayWidget->setMinimumSize(720, 576);
+    layoutMain->addWidget(displayWidget);
+
+    imageList = new QListWidget();
+    imageList->setViewMode(QListView::IconMode);
+    imageList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+    imageList->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    imageList->setMinimumHeight(140);
+    imageList->setMaximumHeight(140);
+    imageList->setIconSize(QSize(128,128));
+    imageList->setMovement(QListView::Static);
+    imageList->setWrapping(false);
+    layoutMain->addWidget(imageList);
+
+    setLayout(layoutMain);
+
+    updateStartButton();
+    updateRecordButton();
+    updateRecordAll();
+
+    updatePipeline();
+}
+
+MainWindow::~MainWindow()
+{
+    if (pipeline)
+    {
+        releasePipeline();
+    }
+
+    delete archiveWindow;
+    archiveWindow = nullptr;
+
+#ifdef WITH_DICOM
+    delete worklist;
+    worklist = nullptr;
+#endif
+}
+
+QMenuBar* MainWindow::createMenuBar()
+{
+    auto mnuBar = new QMenuBar();
+    auto mnu    = new QMenu(tr("&Menu"));
+
+    auto actionAbout = mnu->addAction(tr("&About Beryllium").append(QString::fromUtf8("\u2026")), this, SLOT(onShowAboutClick()));
+    actionAbout->setMenuRole(QAction::AboutRole);
+    mnu->addSeparator();
+    auto actionRtp = mnu->addAction(tr("&Enable RTP streaming"), this, SLOT(toggleSetting()));
+    actionRtp->setCheckable(true);
+    actionRtp->setData("enable-rtp");
+
+    auto actionFullVideo = mnu->addAction(tr("&Record entire study"), this, SLOT(toggleSetting()));
+    actionFullVideo->setCheckable(true);
+    actionFullVideo->setData("enable-video");
+
+    auto actionPreferences = mnu->addAction(tr("&Preferences").append(QString::fromUtf8("\u2026")), this, SLOT(onShowSettingsClick()));
+    actionPreferences->setMenuRole(QAction::PreferencesRole);
+    mnu->addSeparator();
+    auto actionExit = mnu->addAction(tr("E&xit"), qApp, SLOT(quit()), Qt::ALT | Qt::Key_F4);
+    actionExit->setMenuRole(QAction::QuitRole);
+
+    connect(mnu, SIGNAL(aboutToShow()), this, SLOT(prepareSettingsMenu()));
+    mnuBar->addMenu(mnu);
+
+    mnuBar->show();
+    return mnuBar;
+}
+
+QToolBar* MainWindow::createToolBar()
+{
     QToolBar* bar = new QToolBar(tr("main"));
 
     btnStart = new QToolButton();
@@ -162,77 +235,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QAction* actionAbout = bar->addAction(QIcon(":/buttons/about"), nullptr, this, SLOT(onShowAboutClick()));
     actionAbout->setToolTip(tr("About berillyum"));
 
-    displayWidget = new QGst::Ui::VideoWidget();
-    displayWidget->setMinimumSize(720, 576);
-
-    imageList = new QListWidget();
-    imageList->setViewMode(QListView::IconMode);
-    imageList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-    imageList->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    imageList->setMinimumHeight(140);
-    imageList->setMaximumHeight(140);
-    imageList->setIconSize(QSize(128,128));
-    imageList->setMovement(QListView::Static);
-    imageList->setWrapping(false);
-
-    QVBoxLayout* layoutMain = new QVBoxLayout();
-    layoutMain->setMenuBar(createMenu());
-    layoutMain->addWidget(bar);
-    layoutMain->addWidget(displayWidget);
-    layoutMain->addWidget(imageList);
-
-    setLayout(layoutMain);
-
-    updateStartButton();
-    updateRecordButton();
-    updateRecordAll();
-
-    updatePipeline();
-}
-
-MainWindow::~MainWindow()
-{
-    if (pipeline)
-    {
-        releasePipeline();
-    }
-
-    delete archiveWindow;
-    archiveWindow = nullptr;
-
-#ifdef WITH_DICOM
-    delete worklist;
-    worklist = nullptr;
-#endif
-}
-
-QMenuBar* MainWindow::createMenu()
-{
-    auto mnuBar = new QMenuBar();
-    auto mnu    = new QMenu(tr("&Menu"));
-
-    auto actionAbout = mnu->addAction(tr("&About Beryllium").append(QString::fromUtf8("\u2026")), this, SLOT(onShowAboutClick()));
-    actionAbout->setMenuRole(QAction::AboutRole);
-    mnu->addSeparator();
-    auto actionRtp = mnu->addAction(tr("&Enable RTP streaming"), this, SLOT(toggleSetting()));
-    actionRtp->setCheckable(true);
-    actionRtp->setData("enable-rtp");
-
-    auto actionFullVideo = mnu->addAction(tr("&Record entire study"), this, SLOT(toggleSetting()));
-    actionFullVideo->setCheckable(true);
-    actionFullVideo->setData("enable-video");
-
-    auto actionPreferences = mnu->addAction(tr("&Preferences").append(QString::fromUtf8("\u2026")), this, SLOT(onShowSettingsClick()));
-    actionPreferences->setMenuRole(QAction::PreferencesRole);
-    mnu->addSeparator();
-    QAction* actionExit = mnu->addAction(tr("E&xit"), qApp, SLOT(quit()), Qt::ALT | Qt::Key_F4);
-    actionExit->setMenuRole(QAction::QuitRole);
-
-    connect(mnu, SIGNAL(aboutToShow()), this, SLOT(prepareSettingsMenu()));
-    mnuBar->addMenu(mnu);
-
-    mnuBar->show();
-    return mnuBar;
+    return bar;
 }
 
 /*

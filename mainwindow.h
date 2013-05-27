@@ -15,12 +15,13 @@
 #include <QWidget>
 
 QT_BEGIN_NAMESPACE
+class QBoxLayout;
+class QLabel;
+class QListWidget;
 class QMenuBar;
 class QResizeEvent;
-class QBoxLayout;
-class QListWidget;
-class QLabel;
 class QTimer;
+class QToolBar;
 class QToolButton;
 class Worklist;
 class ArchiveWindow;
@@ -53,7 +54,8 @@ class MainWindow : public QWidget
     int           clipNo;
     int           studyNo;
 
-    QMenuBar* createMenu();
+    QMenuBar* createMenuBar();
+    QToolBar* createToolBar();
     void updateStartButton();
     void updateRecordButton();
     void updateRecordAll();
