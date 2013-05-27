@@ -17,22 +17,23 @@
 #endif
 
 #include <QApplication>
-#include <QResizeEvent>
-#include <QFrame>
 #include <QBoxLayout>
 #include <QDesktopServices>
-#include <QListWidget>
-#include <QLabel>
-#include <QSettings>
 #include <QDir>
 #include <QFileInfo>
-#include <QTimer>
-#include <QToolBar>
-#include <QToolButton>
+#include <QFrame>
+#include <QLabel>
+#include <QListWidget>
 #include <QMenu>
 #include <QMenuBar>
 #include <QMessageBox>
+#include <QTimer>
+#include <QToolBar>
+#include <QToolButton>
+#include <QPainter>
 #include <QProgressDialog>
+#include <QResizeEvent>
+#include <QSettings>
 #include <QUrl>
 
 #include <QGlib/Type>
@@ -673,6 +674,17 @@ void MainWindow::onElementMessage(const QGst::ElementMessagePtr& message)
         //
         if (ok || pm.load(fileName))
         {
+            QFileInfo fi(fileName);
+            if (QFile::exists(fi.absoluteDir().absoluteFilePath(fi.completeBaseName())))
+            {
+                // Got a snapshot for a clip file. Add fency overlay to it
+                //
+                QPixmap pmOverlay(":/buttons/film");
+                QPainter painter(&pm);
+                painter.setOpacity(0.75);
+                painter.drawPixmap(pm.rect(), pmOverlay);
+            }
+
             QListWidgetItem* item = new QListWidgetItem(QIcon(pm), QFileInfo(fileName).baseName(), imageList);
             item->setToolTip(fileName);
             imageList->setItemSelected(item, true);
@@ -680,7 +692,7 @@ void MainWindow::onElementMessage(const QGst::ElementMessagePtr& message)
         }
         else
         {
-            QListWidgetItem* item = new QListWidgetItem(tr("(error)"), imageList);
+            QListWidgetItem* item = new QListWidgetItem(QIcon(":/buttons/stop"), tr("(error)"), imageList);
             item->setToolTip(tr("Failed to load image %1").arg(fileName));
         }
 

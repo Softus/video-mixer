@@ -16,5 +16,6 @@
         <file alias="refresh">pixmaps/refresh.png</file>
         <file alias="settings">pixmaps/settings.png</file>
         <file alias="start">pixmaps/start.png</file>
+        <file alias="film">pixmaps/film.png</file>
     </qresource>
 </RCC>
