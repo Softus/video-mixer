@@ -6,7 +6,8 @@
 #include <QPushButton>
 #include <gst/gst.h>
 #ifdef WITH_DICOM
-#include <dcmtk/dcmdata/dcdict.h>
+#define HAVE_CONFIG_H
+#include <dcmtk/dcmdata/dcuid.h>
 #endif
 
 AboutDialog::AboutDialog(QWidget *parent) :

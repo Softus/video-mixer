@@ -211,17 +211,23 @@ QMenuBar* MainWindow::createMenu()
     auto mnuBar = new QMenuBar();
     auto mnu    = new QMenu(tr("&Menu"));
 
-    mnu->addAction(tr("&About Qt"), qApp, SLOT(aboutQt()));
+    auto actionAbout = mnu->addAction(tr("&About Beryllium").append(QString::fromUtf8("\u2026")), this, SLOT(onShowAboutClick()));
+    actionAbout->setMenuRole(QAction::AboutRole);
     mnu->addSeparator();
-    auto rtpAction = mnu->addAction(tr("&Enable RTP streaming"), this, SLOT(toggleSetting()));
-    rtpAction->setCheckable(true);
-    rtpAction->setData("enable-rtp");
+    auto actionRtp = mnu->addAction(tr("&Enable RTP streaming"), this, SLOT(toggleSetting()));
+    actionRtp->setCheckable(true);
+    actionRtp->setData("enable-rtp");
 
-    auto fullVideoAction = mnu->addAction(tr("&Record entire study"), this, SLOT(toggleSetting()));
-    fullVideoAction->setCheckable(true);
-    fullVideoAction->setData("enable-video");
+    auto actionFullVideo = mnu->addAction(tr("&Record entire study"), this, SLOT(toggleSetting()));
+    actionFullVideo->setCheckable(true);
+    actionFullVideo->setData("enable-video");
 
-    mnu->addAction(tr("E&xit"), qApp, SLOT(quit()), Qt::ALT | Qt::Key_F4);
+    auto actionPreferences = mnu->addAction(tr("&Preferences").append(QString::fromUtf8("\u2026")), this, SLOT(onShowSettingsClick()));
+    actionPreferences->setMenuRole(QAction::PreferencesRole);
+    mnu->addSeparator();
+    QAction* actionExit = mnu->addAction(tr("E&xit"), qApp, SLOT(quit()), Qt::ALT | Qt::Key_F4);
+    actionExit->setMenuRole(QAction::QuitRole);
+
     connect(mnu, SIGNAL(aboutToShow()), this, SLOT(prepareSettingsMenu()));
     mnuBar->addMenu(mnu);
 
