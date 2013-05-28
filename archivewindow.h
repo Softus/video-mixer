@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <QDir>
+#include <QModelIndex>
 
 QT_BEGIN_NAMESPACE
 class QToolBar;
@@ -18,7 +19,7 @@ class ArchiveWindow : public QDialog
     QDir      root;
     QDir      curr;
     void updatePathBar();
-    void updateList(QDir dir);
+    void updateList();
 
 public:
     explicit ArchiveWindow(QWidget *parent = 0);
@@ -26,10 +27,11 @@ public:
 signals:
     
 public slots:
-    void setRoot(const QDir& root);
+    void setRoot(const QString& root);
     void setPath(const QString& path);
     void selectPath(QAction* action);
     void listItemSelected(QString item);
+    void listItemDblClicked(QModelIndex idx);
     void onShowGalleryClick();
     void onShowFolderClick();
 };

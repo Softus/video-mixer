@@ -101,6 +101,7 @@ public:
     ~MainWindow();
 
 protected:
+    virtual void closeEvent(QCloseEvent *);
 
 private slots:
 #ifdef WITH_DICOM

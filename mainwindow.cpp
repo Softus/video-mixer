@@ -163,6 +163,22 @@ MainWindow::~MainWindow()
 #endif
 }
 
+void MainWindow::closeEvent(QCloseEvent *evt)
+{
+    if (archiveWindow)
+    {
+        archiveWindow->close();
+    }
+#ifdef WITH_DICOM
+    if (worklist)
+    {
+        worklist->close();
+    }
+#endif
+    QWidget::closeEvent(evt);
+}
+
+
 QMenuBar* MainWindow::createMenuBar()
 {
     const ushort x2026 = 0x2026;

@@ -1,17 +1,19 @@
 #include "archivewindow.h"
 #include <QAction>
 #include <QBoxLayout>
+#include <QDebug>
 #include <QDesktopServices>
 #include <QDir>
 #include <QFileSystemModel>
 #include <QListWidget>
+#include <QPushButton>
 #include <QToolBar>
 #include <QUrl>
 
 ArchiveWindow::ArchiveWindow(QWidget *parent) :
     QDialog(parent)
 {
-    setMinimumSize(QSize(200, 200));
+    setMinimumSize(QSize(360, 360));
 
     QBoxLayout* layoutMain = new QVBoxLayout;
 
@@ -25,15 +27,20 @@ ArchiveWindow::ArchiveWindow(QWidget *parent) :
     layoutMain->addWidget(barPath);
 
     listFiles = new QListWidget;
-    listFiles->setCurrentRow(-1);
+    listFiles->setFocusPolicy(Qt::NoFocus);
     connect(listFiles, SIGNAL(currentTextChanged(QString)), this, SLOT(listItemSelected(QString)));
+    connect(listFiles, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(listItemDblClicked(QModelIndex)));
     layoutMain->addWidget(listFiles);
+    QPushButton* btnClose = new QPushButton(tr("Close"));
+    connect(btnClose, SIGNAL(clicked()), this, SLOT(close()));
+    layoutMain->addWidget(btnClose, 1, Qt::AlignRight);
     setLayout(layoutMain);
+    setAttribute(Qt::WA_DeleteOnClose, false);
 }
 
-void ArchiveWindow::setRoot(const QDir& path)
+void ArchiveWindow::setRoot(const QString& path)
 {
-    root = path;
+    root.setPath(path);
 }
 
 void ArchiveWindow::setPath(const QString& path)
@@ -60,25 +67,24 @@ void ArchiveWindow::updatePathBar()
         prev = action;
     } while (dir != root && dir.cdUp());
 
-    updateList(curr);
+    updateList();
 }
 
-void ArchiveWindow::updateList(QDir dir)
+void ArchiveWindow::updateList()
 {
+    qDebug() << curr.absolutePath();
     listFiles->clear();
     QFlags<QDir::Filter> filter = QDir::NoDot | QDir::AllEntries;
-    if (dir == root)
+    if (curr == root)
     {
         filter |= QDir::NoDotDot;
     }
-    listFiles->setFocusPolicy(Qt::NoFocus);
-    listFiles->addItems(dir.entryList(filter));
+    listFiles->addItems(curr.entryList(filter));
 }
 
 void ArchiveWindow::selectPath(QAction* action)
 {
-    curr.setPath(action->data().toString());
-    updateList(curr);
+    setPath(action->data().toString());
 }
 
 void ArchiveWindow::listItemSelected(QString item)
@@ -104,4 +110,9 @@ void ArchiveWindow::onShowFolderClick()
 {
     QString url = listFiles->currentItem()? curr.absoluteFilePath(listFiles->currentItem()->text()): curr.absolutePath();
     QDesktopServices::openUrl(QUrl(url));
+}
+
+void ArchiveWindow::listItemDblClicked(QModelIndex)
+{
+    onShowFolderClick();
 }
