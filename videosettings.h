@@ -2,6 +2,7 @@
 #define VIDEOSETTINGS_H
 
 #include <QWidget>
+#include <QtGlobal>
 
 QT_BEGIN_NAMESPACE
 class QComboBox;
@@ -10,12 +11,17 @@ class QCheckBox;
 class QSpinBox;
 QT_END_NAMESPACE
 
-#ifdef QT_ARCH_WINDOWS
+#if defined (Q_WS_WIN)
 #define PLATFORM_SPECIFIC_SOURCE "dshowvideosrc"
 #define PLATFORM_SPECIFIC_PROPERTY "device-name"
-#else
+#elif defined (Q_OS_UNIX)
 #define PLATFORM_SPECIFIC_SOURCE "v4l2src"
 #define PLATFORM_SPECIFIC_PROPERTY "device"
+#elif defined (Q_OS_DARWIN)
+#define PLATFORM_SPECIFIC_SOURCE "osxvideosrc"
+#define PLATFORM_SPECIFIC_PROPERTY "device"
+#else
+#error The platform is not supported.
 #endif
 
 #define DEFAULT_VIDEOBITRATE 4000

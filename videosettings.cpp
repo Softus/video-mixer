@@ -1,6 +1,6 @@
 #include "videosettings.h"
-#include <QComboBox>
 #include <QCheckBox>
+#include <QComboBox>
 #include <QDebug>
 #include <QFormLayout>
 #include <QMessageBox>
@@ -12,8 +12,8 @@
 // Video encoder
 //
 #include <QGlib/Error>
-#include <QGst/ElementFactory>
 #include <QGst/Caps>
+#include <QGst/ElementFactory>
 #include <QGst/Pad>
 #include <QGst/Parse>
 #include <QGst/Pipeline>

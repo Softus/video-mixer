@@ -1,17 +1,19 @@
 #ifndef WORKLIST_H
 #define WORKLIST_H
 
-#include "basewidget.h"
 #include <QDateTime>
+#include <QWidget>
 
+QT_BEGIN_NAMESPACE
 class QBoxLayout;
-class QPushButton;
 class QTableWidget;
+class QToolBar;
+QT_END_NAMESPACE
 
 class DcmDataset;
 class DcmClient;
 
-class Worklist : public BaseWidget
+class Worklist : public QWidget
 {
     Q_OBJECT
 
@@ -19,8 +21,9 @@ class Worklist : public BaseWidget
     //
     QTableWidget* table;
     QDateTime     maxDate;
-    QPushButton*  btnLoad;
-    QPushButton*  btnDetail;
+    QAction*      actionLoad;
+    QAction*      actionDetail;
+    QToolBar*     createToolBar();
 
     // DICOM
     //
@@ -41,6 +44,7 @@ signals:
 public slots:
     void onLoadClick();
     void onShowDetailsClick();
+    void onStartStudyClick();
     void onAddRow(DcmDataset* responseIdentifiers);
 };
 

@@ -2,20 +2,23 @@
 #include "detailsdialog.h"
 #include "dcmclient.h"
 
+#include <QAction>
 #include <QApplication>
 #include <QBoxLayout>
 #include <QDateTime>
 #include <QDebug>
 #include <QHeaderView>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QSettings>
 #include <QTableWidget>
 #include <QTimer>
+#include <QToolBar>
 #include "qwaitcursor.h"
 
+#include <dcmtk/dcmdata/dcdatset.h>
 #include <dcmtk/dcmdata/dcdeftag.h>
 #include <dcmtk/dcmdata/dcitem.h>
-#include <dcmtk/dcmdata/dcdatset.h>
 #include <dcmtk/dcmdata/dcuid.h>
 
 #ifdef QT_DEBUG
@@ -41,7 +44,7 @@ Q_DECLARE_METATYPE(DcmDataset)
 static int DcmDatasetMetaType = qRegisterMetaType<DcmDataset>();
 
 Worklist::Worklist(QWidget *parent) :
-    BaseWidget(parent),
+    QWidget(parent),
     activeConnection(nullptr)
 {
     const QString columnNames[] =
@@ -57,18 +60,6 @@ Worklist::Worklist(QWidget *parent) :
     tr("Status"),
     };
 
-    QSettings settings;
-    iconSize = settings.value("icon-size", iconSize).toInt();
-
-    auto layoutBtns = new QHBoxLayout();
-
-    btnLoad = createButton(":/buttons/load_worklist", tr("&Load"), SLOT(onLoadClick()));
-    layoutBtns->addWidget(btnLoad);
-
-    btnDetail = createButton(":/buttons/details", tr("&Details"), SLOT(onShowDetailsClick()));
-    btnDetail->setEnabled(false);
-    layoutBtns->addWidget(btnDetail);
-
     size_t columns = sizeof(columnNames)/sizeof(columnNames[0]);
     table = new QTableWidget(0, columns);
     for (size_t i = 0; i < columns; ++i)
@@ -80,11 +71,11 @@ Worklist::Worklist(QWidget *parent) :
     table->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
     auto layoutMain = new QVBoxLayout();
-//    mainLayout->setMenuBar(createMenu());
-    layoutMain->addLayout(layoutBtns);
+    layoutMain->addWidget(createToolBar());
     layoutMain->addWidget(table);
-
     setLayout(layoutMain);
+
+    setMinimumSize(640, 480);
 
     // Start loading of worklist right after the window is shown for the first time
     //
@@ -94,6 +85,19 @@ Worklist::Worklist(QWidget *parent) :
 
 Worklist::~Worklist()
 {
+}
+
+QToolBar* Worklist::createToolBar()
+{
+    QToolBar* bar = new QToolBar(tr("worklist"));
+    bar->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+
+    actionLoad   = bar->addAction(QIcon(":/buttons/refresh"), tr("&Refresh"), this, SLOT(onLoadClick()));
+    actionDetail = bar->addAction(QIcon(":/buttons/details"), tr("&Details"), this, SLOT(onShowDetailsClick()));
+    actionDetail->setEnabled(false);
+    /*auto actionStart =*/ bar->addAction(QIcon(":/buttons/start"), tr("Start &study"), this, SLOT(onStartStudyClick()));
+
+    return bar;
 }
 
 static QTableWidgetItem* addItem(QTableWidget* table, DcmItem* dset, int row, int column)
@@ -131,7 +135,7 @@ void Worklist::onAddRow(DcmDataset* dset)
         {
             maxDate = date;
             table->selectRow(row);
-            btnDetail->setEnabled(true);
+            actionDetail->setEnabled(true);
         }
         addItem(table, procedureStepSeq, row, col++);
         addItem(table, procedureStepSeq, row, col++);
@@ -148,14 +152,14 @@ void Worklist::closeEvent(QCloseEvent *evt)
         activeConnection->abort();
         activeConnection = nullptr;
     }
-    BaseWidget::closeEvent(evt);
+    QWidget::closeEvent(evt);
 }
 
 void Worklist::onLoadClick()
 {
     QWaitCursor wait(this);
-    btnLoad->setEnabled(false);
-    btnDetail->setEnabled(false);
+    actionLoad->setEnabled(false);
+    actionDetail->setEnabled(false);
 
     // Clear all data
     //
@@ -173,7 +177,8 @@ void Worklist::onLoadClick()
 
     if (!ok)
     {
-        error(assoc.lastError());
+        qCritical() << assoc.lastError();
+        QMessageBox::critical(this, windowTitle(), assoc.lastError(), QMessageBox::Ok);
     }
 
     table->sortItems(6); // By time
@@ -184,7 +189,7 @@ void Worklist::onLoadClick()
     table->setFocus();
     table->setUpdatesEnabled(true);
 
-    btnLoad->setEnabled(true);
+    actionLoad->setEnabled(true);
 }
 
 void Worklist::onShowDetailsClick()
@@ -194,6 +199,12 @@ void Worklist::onShowDetailsClick()
     auto ds = table->item(row, 0)->data(Qt::UserRole).value<DcmDataset>();
     DetailsDialog dlg(&ds, this);
     dlg.exec();
+}
+
+void Worklist::onStartStudyClick()
+{
+
+
 }
 
 DcmDataset* Worklist::getPatientDS()

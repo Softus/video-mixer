@@ -7,8 +7,8 @@
 #include <dcmtk/config/osconfig.h>   /* make sure OS specific configuration is included first */
 #include <dcmtk/dcmdata/dcdatset.h>
 #include <dcmtk/dcmdata/dcelem.h>
-#include <dcmtk/dcmdata/dctag.h>
 #include <dcmtk/dcmdata/dcsequen.h>
+#include <dcmtk/dcmdata/dctag.h>
 
 static void populateTree(DcmObject* parent, QTreeWidgetItem* parentItem)
 {

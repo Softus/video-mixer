@@ -44,7 +44,7 @@ dicom {
 TARGET   = beryllium
 TEMPLATE = app
 
-SOURCES += beryllium.cpp mainwindow.cpp basewidget.cpp \
+SOURCES += beryllium.cpp mainwindow.cpp \
     videosettings.cpp \
     settings.cpp \
     storagesettings.cpp \
@@ -53,7 +53,7 @@ SOURCES += beryllium.cpp mainwindow.cpp basewidget.cpp \
     patientdialog.cpp \
     aboutdialog.cpp \
     archivewindow.cpp
-HEADERS += mainwindow.h basewidget.h qwaitcursor.h \
+HEADERS += mainwindow.h qwaitcursor.h \
     videosettings.h \
     settings.h \
     storagesettings.h \
@@ -61,7 +61,8 @@ HEADERS += mainwindow.h basewidget.h qwaitcursor.h \
     studiessettings.h \
     patientdialog.h \
     aboutdialog.h \
-    archivewindow.h
+    archivewindow.h \
+    product.h
 
 FORMS   +=
 

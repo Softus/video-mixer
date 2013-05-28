@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "product.h"
 #include "aboutdialog.h"
 #include "archivewindow.h"
 #include "qwaitcursor.h"
@@ -9,9 +10,8 @@
 #include "worklist.h"
 #include "startstudydialog.h"
 #include "dcmclient.h"
-
-#include <dcmtk/dcmdata/dcuid.h>
 #include <dcmtk/dcmdata/dcdatset.h>
+#include <dcmtk/dcmdata/dcuid.h>
 #else
 #include "patientdialog.h"
 #endif
@@ -27,21 +27,21 @@
 #include <QMenu>
 #include <QMenuBar>
 #include <QMessageBox>
-#include <QTimer>
-#include <QToolBar>
-#include <QToolButton>
 #include <QPainter>
 #include <QProgressDialog>
 #include <QResizeEvent>
 #include <QSettings>
+#include <QTimer>
+#include <QToolBar>
+#include <QToolButton>
 #include <QUrl>
 
-#include <QGlib/Type>
 #include <QGlib/Connect>
+#include <QGlib/Type>
 #include <QGst/Bus>
-#include <QGst/Parse>
-#include <QGst/Event>
 #include <QGst/Clock>
+#include <QGst/Event>
+#include <QGst/Parse>
 #include <gst/gstdebugutils.h>
 
 static inline QBoxLayout::Direction bestDirection(const QSize &s)
@@ -115,6 +115,7 @@ MainWindow::MainWindow(QWidget *parent) :
 #endif
     imageNo(0),
     clipNo(0),
+    studyNo(0),
     running(false),
     recording(false)
 {
@@ -167,7 +168,7 @@ QMenuBar* MainWindow::createMenuBar()
     auto mnuBar = new QMenuBar();
     auto mnu    = new QMenu(tr("&Menu"));
 
-    auto actionAbout = mnu->addAction(tr("&About Beryllium").append(QString::fromUtf8("\u2026")), this, SLOT(onShowAboutClick()));
+    auto actionAbout = mnu->addAction(tr("&About " PRODUCT_FULL_NAME).append(QString::fromUtf8("\u2026")), this, SLOT(onShowAboutClick()));
     actionAbout->setMenuRole(QAction::AboutRole);
     mnu->addSeparator();
     auto actionRtp = mnu->addAction(tr("&Enable RTP streaming"), this, SLOT(toggleSetting()));
@@ -228,7 +229,7 @@ QToolBar* MainWindow::createToolBar()
     actionWorklist->setToolTip(tr("Show &work list"));
 #endif
 
-    QAction* actionArchive = bar->addAction(QIcon(":/buttons/folder"), nullptr, this, SLOT(onShowArchiveClick()));
+    QAction* actionArchive = bar->addAction(QIcon(":/buttons/database"), nullptr, this, SLOT(onShowArchiveClick()));
     actionArchive->setToolTip(tr("Show studies archive"));
     actionSettings = bar->addAction(QIcon(":/buttons/settings"), nullptr, this, SLOT(onShowSettingsClick()));
     actionSettings->setToolTip(tr("Edit settings"));
@@ -567,6 +568,11 @@ void MainWindow::updatePipeline()
         setElementProperty("videostamp", nullptr, nullptr);
         setElementProperty("videomux", nullptr, nullptr);
         setElementProperty(videoEncoder, nullptr, nullptr);
+    }
+
+    if (archiveWindow != nullptr)
+    {
+        archiveWindow->setRoot(settings.value("output-path", "/video").toString());
     }
 }
 
@@ -974,13 +980,12 @@ void MainWindow::onShowAboutClick()
 
 void MainWindow::onShowArchiveClick()
 {
-    QDesktopServices::openUrl(QUrl(outputPath.absolutePath()));
-    return;
-
     if (archiveWindow == nullptr)
     {
         archiveWindow = new ArchiveWindow();
+        archiveWindow->setRoot(QSettings().value("output-path", "/video").toString());
     }
+    archiveWindow->setPath(outputPath.absolutePath());
     archiveWindow->show();
     archiveWindow->activateWindow();
 }
@@ -1002,7 +1007,7 @@ void MainWindow::onShowWorkListClick()
     {
         worklist = new Worklist();
     }
-    worklist->showMaybeMaximized();
+    worklist->show();
     worklist->activateWindow();
 }
 

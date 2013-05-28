@@ -1,9 +1,10 @@
 #include "worklist.h"
 #include "dcmclient.h"
+#include "product.h"
 
-#include <dcmtk/dcmdata/dcdict.h>
-#include <dcmtk/dcmdata/dcdicent.h>
 #include <dcmtk/dcmdata/dcdeftag.h>
+#include <dcmtk/dcmdata/dcdicent.h>
+#include <dcmtk/dcmdata/dcdict.h>
 #include <dcmtk/dcmdata/dcfilefo.h>
 
 #include <dcmtk/dcmdata/libi2d/i2d.h>
@@ -90,8 +91,8 @@ static void BuildCStoreDataSet(/*const*/ DcmDataset& patientDs, DcmDataset& cSto
     cStoreDs.putAndInsertString(DCM_StudyDate, now.toString("yyyyMMdd").toAscii());
     cStoreDs.putAndInsertString(DCM_StudyTime, now.toString("HHmmss").toAscii());
 
-    cStoreDs.putAndInsertString(DCM_Manufacturer, "IRK-DC");
-    cStoreDs.putAndInsertString(DCM_ManufacturerModelName, "Beryllium");
+    cStoreDs.putAndInsertString(DCM_Manufacturer, ORGANIZATION_FULL_NAME);
+    cStoreDs.putAndInsertString(DCM_ManufacturerModelName, PRODUCT_FULL_NAME);
     cStoreDs.putAndInsertString(DCM_Modality, modality.toUtf8());
 }
 

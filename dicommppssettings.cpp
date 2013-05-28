@@ -1,7 +1,7 @@
 #include "dicommppssettings.h"
-#include <QFormLayout>
 #include <QCheckBox>
 #include <QComboBox>
+#include <QFormLayout>
 
 DicomMppsSettings::DicomMppsSettings(QWidget *parent) :
     QWidget(parent)

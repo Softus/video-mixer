@@ -1,4 +1,5 @@
 #include "patientdialog.h"
+#include "product.h"
 #include <QBoxLayout>
 #include <QComboBox>
 #include <QDateEdit>
@@ -50,7 +51,7 @@ void PatientDialog::savePatientFile(const QString& outputPath)
 {
     QSettings settings(outputPath, QSettings::IniFormat);
 
-    settings.beginGroup("beryllium");
+    settings.beginGroup(PRODUCT_SHORT_NAME);
     settings.setValue("patient-id", textPatientId->text());
     settings.setValue("name", textPatientName->text());
     settings.setValue("sex", cbPatientSex->currentText());

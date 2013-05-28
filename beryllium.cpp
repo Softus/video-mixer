@@ -1,10 +1,13 @@
 #include <QApplication>
-#include <QLocale>
-#include <QTranslator>
-#include <QSettings>
 #include <QIcon>
+#include <QLocale>
+#include <QSettings>
+#include <QTranslator>
+
 #include <QGst/Init>
+
 #include "mainwindow.h"
+#include "product.h"
 
 int main(int argc, char *argv[])
 {
@@ -18,11 +21,11 @@ int main(int argc, char *argv[])
     // QT init
     //
     QApplication app(argc, argv);
-    app.setOrganizationName("irk-dc");
-    app.setOrganizationDomain("Irkutsk Diagnostic Centre");
-    app.setApplicationName("beryllium");
-    app.setApplicationVersion("1.0");
-    app.setWindowIcon(QIcon(":/buttons/beryllium"));
+    app.setOrganizationName(ORGANIZATION_SHORT_NAME);
+    app.setOrganizationDomain(ORGANIZATION_FULL_NAME);
+    app.setApplicationName(PRODUCT_SHORT_NAME);
+    app.setApplicationVersion(PRODUCT_VERSION_STR);
+    app.setWindowIcon(QIcon(":/app/product"));
 
     // Translations
     //
@@ -36,8 +39,8 @@ int main(int argc, char *argv[])
     // First, try to load localization in the current directory, if possible.
     // If failed, then try to load from app data path
     //
-    if (translator.load(app.applicationDirPath() + "/beryllium_" + locale) ||
-        translator.load("/usr/share/beryllium/translations/beryllium_" + locale))
+    if (translator.load(app.applicationDirPath() + "/" PRODUCT_SHORT_NAME "_" + locale) ||
+            translator.load("/usr/share/" PRODUCT_SHORT_NAME "/translations/" PRODUCT_SHORT_NAME "_" + locale))
     {
         app.installTranslator(&translator);
     }

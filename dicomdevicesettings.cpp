@@ -1,6 +1,6 @@
 #include "dicomdevicesettings.h"
-#include <QFormLayout>
 #include <QCheckBox>
+#include <QFormLayout>
 #include <QLineEdit>
 
 DicomDeviceSettings::DicomDeviceSettings(QWidget *parent) :

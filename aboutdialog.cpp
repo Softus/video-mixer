@@ -1,10 +1,13 @@
 #include "aboutdialog.h"
+#include "product.h"
 
 #include <QApplication>
 #include <QBoxLayout>
 #include <QLabel>
 #include <QPushButton>
+
 #include <gst/gst.h>
+
 #ifdef WITH_DICOM
 #define HAVE_CONFIG_H
 #include <dcmtk/dcmdata/dcuid.h>
@@ -16,12 +19,12 @@ AboutDialog::AboutDialog(QWidget *parent) :
     QBoxLayout* layoutMain = new QHBoxLayout;
     layoutMain->setContentsMargins(16,16,16,16);
     auto icon = new QLabel();
-    icon->setPixmap(qApp->windowIcon().pixmap(128));
+    icon->setPixmap(qApp->windowIcon().pixmap(64));
     layoutMain->addWidget(icon, 1, Qt::AlignTop);
     QBoxLayout* layoutText = new QVBoxLayout;
     layoutText->setContentsMargins(16,16,16,16);
 
-    auto lblTitle = new QLabel(qApp->applicationName().append(" ").append(qApp->applicationVersion()));
+    auto lblTitle = new QLabel(QString(PRODUCT_FULL_NAME).append(" ").append(PRODUCT_VERSION_STR));
     auto titleFont = lblTitle->font();
     titleFont.setBold(true);
     titleFont.setPointSize(titleFont.pointSize() * 2);
@@ -49,12 +52,16 @@ AboutDialog::AboutDialog(QWidget *parent) :
     layoutText->addWidget(lblIconsWin8);
     layoutText->addSpacing(16);
 
-    auto strCopyright = tr("\nCopyright (C) 2013 %1. All rights reserved.\n\n"
-        "The program is provided AS IS with NO WARRANTY OF ANY KIND,\n"
-        "INCLUDING THE WARRANTY OF DESIGN,\nMERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.\n")
-        .arg(qApp->organizationDomain());
+    auto lblCopyright = new QLabel(tr("<p>Copyright (C) 2013 <a href=\"%1\">%2</a>. All rights reserved.</p>")
+       .arg(PRODUCT_SITE_URL, ORGANIZATION_FULL_NAME));
+    lblCopyright->setOpenExternalLinks(true);
+    layoutText->addWidget(lblCopyright);
+    layoutText->addSpacing(16);
 
-    layoutText->addWidget(new QLabel(strCopyright));
+    auto lblWarranty = new QLabel(tr("The program is provided AS IS with NO WARRANTY OF ANY KIND,\n"
+                                     "INCLUDING THE WARRANTY OF DESIGN,\n"
+                                     "MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE."));
+    layoutText->addWidget(lblWarranty);
     layoutText->addSpacing(16);
 
     QPushButton* btnClose = new QPushButton(tr("Close"));

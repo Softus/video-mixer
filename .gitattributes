@@ -4,8 +4,6 @@
 /aboutdialog.h -text
 /archivewindow.cpp -text
 /archivewindow.h -text
-/basewidget.cpp -text
-/basewidget.h -text
 /beryllium.cpp -text
 /beryllium.pro -text
 /beryllium.qrc -text
@@ -58,6 +56,7 @@ pkg/debian/usr/share/doc/beryllium/changelog -text
 pkg/debian/usr/share/doc/beryllium/changelog.Debian -text
 pkg/debian/usr/share/doc/beryllium/copyright -text
 pkg/debian/usr/share/man/man1/beryllium.1 -text
+/product.h -text
 /qwaitcursor.h -text
 /rtpsettings.cpp -text
 /rtpsettings.h -text
