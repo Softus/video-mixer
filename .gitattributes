@@ -35,13 +35,15 @@
 /patientdialog.cpp -text
 /patientdialog.h -text
 pixmaps/about.png -text
-pixmaps/archive.png -text
 pixmaps/beryllium.png -text
 pixmaps/camera.png -text
+pixmaps/database.png -text
 pixmaps/details.png -text
 pixmaps/film.png -text
 pixmaps/folder.png -text
+pixmaps/gallery.png -text
 pixmaps/pause.png -text
+pixmaps/product.png -text
 pixmaps/record.png -text
 pixmaps/record_off.png -text
 pixmaps/record_on.png -text
