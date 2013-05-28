@@ -165,10 +165,13 @@ MainWindow::~MainWindow()
 
 QMenuBar* MainWindow::createMenuBar()
 {
+    const ushort x2026 = 0x2026;
+    auto trippleDot = QString::fromUtf16(&x2026, 1);
+
     auto mnuBar = new QMenuBar();
     auto mnu    = new QMenu(tr("&Menu"));
 
-    auto actionAbout = mnu->addAction(tr("&About " PRODUCT_FULL_NAME).append(QString::fromUtf8("\u2026")), this, SLOT(onShowAboutClick()));
+    auto actionAbout = mnu->addAction(tr("&About " PRODUCT_FULL_NAME).append(trippleDot), this, SLOT(onShowAboutClick()));
     actionAbout->setMenuRole(QAction::AboutRole);
     mnu->addSeparator();
     auto actionRtp = mnu->addAction(tr("&Enable RTP streaming"), this, SLOT(toggleSetting()));
@@ -179,7 +182,7 @@ QMenuBar* MainWindow::createMenuBar()
     actionFullVideo->setCheckable(true);
     actionFullVideo->setData("enable-video");
 
-    auto actionPreferences = mnu->addAction(tr("&Preferences").append(QString::fromUtf8("\u2026")), this, SLOT(onShowSettingsClick()));
+    auto actionPreferences = mnu->addAction(tr("&Preferences").append(trippleDot), this, SLOT(onShowSettingsClick()));
     actionPreferences->setMenuRole(QAction::PreferencesRole);
     mnu->addSeparator();
     auto actionExit = mnu->addAction(tr("E&xit"), qApp, SLOT(quit()), Qt::ALT | Qt::Key_F4);

@@ -16,6 +16,7 @@ ArchiveWindow::ArchiveWindow(QWidget *parent) :
     QBoxLayout* layoutMain = new QVBoxLayout;
 
     QToolBar* barArchive = new QToolBar(tr("archive"));
+    barArchive->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     barArchive->addAction(QIcon(":buttons/gallery"), tr("Gallery"), this, SLOT(onShowGalleryClick()));
     barArchive->addAction(QIcon(":buttons/folder"), tr("File browser"), this, SLOT(onShowFolderClick()));
     layoutMain->addWidget(barArchive);

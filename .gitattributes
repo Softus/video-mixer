@@ -33,7 +33,6 @@
 /patientdialog.cpp -text
 /patientdialog.h -text
 pixmaps/about.png -text
-pixmaps/beryllium.png -text
 pixmaps/camera.png -text
 pixmaps/database.png -text
 pixmaps/details.png -text
