@@ -48,7 +48,6 @@ SOURCES += beryllium.cpp mainwindow.cpp \
     videosettings.cpp \
     settings.cpp \
     storagesettings.cpp \
-    rtpsettings.cpp \
     studiessettings.cpp \
     patientdialog.cpp \
     aboutdialog.cpp \
@@ -57,7 +56,6 @@ HEADERS += mainwindow.h qwaitcursor.h \
     videosettings.h \
     settings.h \
     storagesettings.h \
-    rtpsettings.h \
     studiessettings.h \
     patientdialog.h \
     aboutdialog.h \

@@ -47,6 +47,7 @@ class MainWindow : public QWidget
     QGst::Ui::VideoWidget* displayWidget;
     QListWidget*  imageList;
     QDir          outputPath;
+    QString       clipPreviewFileName;
     QString       pipelineDef;
     QString       patientName;
     QString       studyName;
@@ -71,12 +72,10 @@ class MainWindow : public QWidget
     QGst::ElementPtr displaySink;
     QGst::ElementPtr imageValve;
     QGst::ElementPtr imageSink;
-    QGst::ElementPtr clipValve;
-    QGst::ElementPtr clipSink;
+    QGst::ElementPtr clipInspect;
     QGst::ElementPtr videoEncoder;
     QGst::ElementPtr videoValve;
     QGst::ElementPtr videoSink;
-    QGst::ElementPtr rtpSink;
 
     QString replace(QString str, int seqNo = 0);
     QString buildPipeline();
@@ -88,9 +87,10 @@ class MainWindow : public QWidget
     void onElementMessage(const QGst::ElementMessagePtr& message);
 
     void onImageReady(const QGst::BufferPtr&);
+    void onClipFrame(const QGst::BufferPtr&);
     void errorGlib(const QGlib::ObjectPtr& obj, const QGlib::Error& ex);
-    void setElementProperty(const char* elm, const char* prop = nullptr, const QGlib::Value& value = nullptr);
-    void setElementProperty(QGst::ElementPtr& elm, const char* prop = nullptr, const QGlib::Value& value = nullptr);
+    void setElementProperty(const char* elm, const char* prop = nullptr, const QGlib::Value& value = nullptr, QGst::State minimumState = QGst::StatePlaying);
+    void setElementProperty(QGst::ElementPtr& elm, const char* prop = nullptr, const QGlib::Value& value = nullptr, QGst::State minimumState = QGst::StatePlaying);
 
 #ifdef WITH_DICOM
     void sendToServer(DcmDataset* dset, const QString& seriesUID);

@@ -1,8 +1,8 @@
 #ifndef PRODUCT_H
 #define PRODUCT_H
 
-#define PRODUCT_FULL_NAME    "Berillium"
-#define PRODUCT_SHORT_NAME   "berillium" // lowercase, no spaces
+#define PRODUCT_FULL_NAME    "Beryllium"
+#define PRODUCT_SHORT_NAME   "beryllium" // lowercase, no spaces
 
 #define PRODUCT_SITE_URL     "http://dc.baikal.ru/products/" PRODUCT_SHORT_NAME "/"
 #define PRODUCT_VERSION_STR  "1.0"

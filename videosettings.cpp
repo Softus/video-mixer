@@ -3,6 +3,7 @@
 #include <QComboBox>
 #include <QDebug>
 #include <QFormLayout>
+#include <QLineEdit>
 #include <QMessageBox>
 #include <QPushButton>
 #include <QSettings>
@@ -43,6 +44,12 @@ VideoSettings::VideoSettings(QWidget *parent) :
     layout->addRow(tr("&Image codec"), listImageCodecs = new QComboBox());
     layout->addRow(nullptr, checkRecordAll = new QCheckBox(tr("Record entire &video")));
     checkRecordAll->setChecked(settings.value("enable-video").toBool());
+    layout->addRow(tr("RTP &payloader"), listRtpPayloaders = new QComboBox());
+    textRtpClients = new QLineEdit(settings.value("rtp-clients").toString());
+    layout->addRow(tr("&RTP clients"), textRtpClients);
+    checkEnableRtp = new QCheckBox(tr("&Enable RTP"));
+    checkEnableRtp->setChecked(settings.value("enable-rtp").toBool());
+    layout->addRow(nullptr, checkEnableRtp);
     setLayout(layout);
 }
 
@@ -52,8 +59,10 @@ void VideoSettings::showEvent(QShowEvent *e)
     // Refill the boxes every time the page is shown
     //
     updateGstList("video-encoder", "x264enc", GST_ELEMENT_FACTORY_TYPE_ENCODER | GST_ELEMENT_FACTORY_TYPE_MEDIA_VIDEO, listVideoCodecs);
-    updateGstList("video-mux", "mpegtsmux", GST_ELEMENT_FACTORY_TYPE_MUXER, listVideoMuxers);
+    updateGstList("video-muxer", "mpegtsmux", GST_ELEMENT_FACTORY_TYPE_MUXER, listVideoMuxers);
     updateGstList("image-encoder", "jpegenc", GST_ELEMENT_FACTORY_TYPE_ENCODER | GST_ELEMENT_FACTORY_TYPE_MEDIA_IMAGE, listImageCodecs);
+    updateGstList("rtp-payloader", "rtph264pay", GST_ELEMENT_FACTORY_TYPE_PAYLOADER, listRtpPayloaders);
+
     updateDeviceList();
 }
 
@@ -196,9 +205,12 @@ void VideoSettings::save()
     settings.setValue("format", listFormats->itemData(listFormats->currentIndex()));
     settings.setValue("size", listSizes->itemData(listSizes->currentIndex()));
     settings.setValue("video-encoder", listVideoCodecs->itemData(listVideoCodecs->currentIndex()));
-    settings.setValue("video-mux",   listVideoMuxers->itemData(listVideoMuxers->currentIndex()));
+    settings.setValue("video-muxer",   listVideoMuxers->itemData(listVideoMuxers->currentIndex()));
+    settings.setValue("rtp-payloader",   listRtpPayloaders->itemData(listRtpPayloaders->currentIndex()));
     settings.setValue("image-encoder", listImageCodecs->itemData(listImageCodecs->currentIndex()));
     settings.setValue("enable-video", checkRecordAll->isChecked());
+    settings.setValue("enable-rtp", checkEnableRtp->isChecked());
+    settings.setValue("rtp-clients", textRtpClients->text());
 
     settings.setValue("bitrate", spinBitrate->value());
 }

@@ -57,8 +57,6 @@ pkg/debian/usr/share/doc/beryllium/copyright -text
 pkg/debian/usr/share/man/man1/beryllium.1 -text
 /product.h -text
 /qwaitcursor.h -text
-/rtpsettings.cpp -text
-/rtpsettings.h -text
 /settings.cpp -text
 /settings.h -text
 /startstudydialog.cpp -text

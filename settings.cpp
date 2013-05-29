@@ -2,7 +2,6 @@
 
 #include "qwaitcursor.h"
 #include "settings.h"
-#include "rtpsettings.h"
 #include "storagesettings.h"
 #include "studiessettings.h"
 #include "videosettings.h"
@@ -68,7 +67,6 @@ void Settings::createPage(const QString& title, const QMetaObject& page)
 
 void Settings::createPages()
 {
-    createPage(tr("RTP broadcast"), RtpSettings::staticMetaObject);
     createPage(tr("Video source"), VideoSettings::staticMetaObject);
     createPage(tr("Storage"), StorageSettings::staticMetaObject);
     createPage(tr("Studies"), StudiesSettings::staticMetaObject);

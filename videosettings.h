@@ -5,10 +5,11 @@
 #include <QtGlobal>
 
 QT_BEGIN_NAMESPACE
-class QComboBox;
-class QTextEdit;
 class QCheckBox;
+class QComboBox;
+class QLineEdit;
 class QSpinBox;
+class QTextEdit;
 QT_END_NAMESPACE
 
 #if defined (Q_WS_WIN)
@@ -34,9 +35,12 @@ class VideoSettings : public QWidget
     QComboBox* listSizes;
     QComboBox* listVideoCodecs;
     QComboBox* listVideoMuxers;
+    QComboBox* listRtpPayloaders;
     QComboBox* listImageCodecs;
     QCheckBox* checkRecordAll;
     QSpinBox* spinBitrate;
+    QLineEdit* textRtpClients;
+    QCheckBox* checkEnableRtp;
 
     void updateDeviceList();
     void updateGstList(const char* setting, const char* def, unsigned long long type, QComboBox* cb);

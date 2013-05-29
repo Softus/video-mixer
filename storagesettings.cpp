@@ -9,8 +9,6 @@
 #include <QSettings>
 #include "qwaitcursor.h"
 
-static const ushort trippleDot = 0x2026;
-
 StorageSettings::StorageSettings(QWidget *parent) :
     QWidget(parent)
 {
@@ -19,7 +17,7 @@ StorageSettings::StorageSettings(QWidget *parent) :
 
     QHBoxLayout* layoutPath = new QHBoxLayout;
     textOutputPath = new QLineEdit(settings.value("output-path", "/video").toString());
-    QPushButton* browseButton = new QPushButton(QString::fromUtf16(&trippleDot, 1));
+    QPushButton* browseButton = new QPushButton(QString(0x2026));
     browseButton->setMaximumWidth(32);
     connect(browseButton, SIGNAL(clicked()), this, SLOT(onClickBrowse()));
     QLabel* lblPath = new QLabel(tr("&Output path"));

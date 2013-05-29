@@ -22,7 +22,7 @@ AboutDialog::AboutDialog(QWidget *parent) :
     icon->setPixmap(qApp->windowIcon().pixmap(64));
     layoutMain->addWidget(icon, 1, Qt::AlignTop);
     QBoxLayout* layoutText = new QVBoxLayout;
-    layoutText->setContentsMargins(16,16,16,16);
+    layoutText->setContentsMargins(16,0,16,0);
 
     auto lblTitle = new QLabel(QString(PRODUCT_FULL_NAME).append(" ").append(PRODUCT_VERSION_STR));
     auto titleFont = lblTitle->font();
