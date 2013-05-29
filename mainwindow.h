@@ -102,6 +102,8 @@ public:
 
 protected:
     virtual void closeEvent(QCloseEvent *);
+signals:
+    void enableWidget(QWidget*, bool);
 
 private slots:
 #ifdef WITH_DICOM
@@ -116,6 +118,7 @@ private slots:
     void prepareSettingsMenu();
     void toggleSetting();
     void updatePipeline();
+    void onEnableWidget(QWidget*, bool);
 };
 
 #endif // MAINWINDOW_H

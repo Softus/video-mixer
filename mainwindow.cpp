@@ -119,6 +119,10 @@ MainWindow::MainWindow(QWidget *parent) :
     running(false),
     recording(false)
 {
+    // This magic required for updating widgets from worker threads on windows
+    //
+    connect(this, SIGNAL(enableWidget(QWidget*, bool)), this, SLOT(onEnableWidget(QWidget*, bool)), Qt::QueuedConnection);
+
     QVBoxLayout* layoutMain = new QVBoxLayout();
     layoutMain->setMenuBar(createMenuBar());
     layoutMain->addWidget(createToolBar());
@@ -651,7 +655,7 @@ void MainWindow::onClipFrame(const QGst::BufferPtr& buf)
     //
     if (0 == (buf->flags() & GST_BUFFER_FLAG_DELTA_UNIT))
     {
-        btnRecord->setEnabled(true);
+        enableWidget(btnRecord, true);
 
         // Restart some elements
         //
@@ -665,7 +669,7 @@ void MainWindow::onClipFrame(const QGst::BufferPtr& buf)
         {
             // Once an image will be ready, the valve will be turned off again.
             //
-            btnSnapshot->setEnabled(false);
+            enableWidget(btnSnapshot, false);
 
             // Take a picture for thumbnail
             //
@@ -1072,6 +1076,11 @@ void MainWindow::onShowSettingsClick()
     {
         updatePipeline();
     }
+}
+
+void MainWindow::onEnableWidget(QWidget* widget, bool enable)
+{
+    widget->setEnabled(enable);
 }
 
 #ifdef WITH_DICOM

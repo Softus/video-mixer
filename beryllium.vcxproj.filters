@@ -72,9 +72,6 @@
     <ClCompile Include="patientdialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="rtpsettings.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="settings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -109,12 +106,6 @@
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_patientdialog.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_rtpsettings.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_rtpsettings.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_settings.cpp">
@@ -164,9 +155,6 @@
     <ClInclude Include="qwaitcursor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <CustomBuild Include="rtpsettings.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="settings.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
