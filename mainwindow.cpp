@@ -330,7 +330,7 @@ QString MainWindow::buildPipeline()
         }
     }
 
-    if (!formatDef.isEmpty())
+    if (!formatDef.isEmpty())   
     {
         pipe.append(" ! ").append(formatDef);
         if (!sizeDef.isEmpty())
@@ -363,10 +363,13 @@ QString MainWindow::buildPipeline()
     auto outputPathDef      = settings.value("output-path",   "/video").toString();
     auto videoEncoderDef    = settings.value("video-encoder", "x264enc").toString();
     auto videoFixColor      = settings.value(videoEncoderDef + "-colorspace", false).toBool()? "ffmpegcolorspace ! ": "";
-    auto videoEncoderParams = settings.value(videoEncoderDef + "-params").toString();
+    auto videoEncoderParams = settings.value(videoEncoderDef + "-parameters").toString();
     auto videoMuxDef        = settings.value("video-muxer",     "mpegtsmux").toString();
     auto videoSinkDef       = settings.value("video-sink",    "multifilesink next-file=4 sync=0 async=0").toString();
-    auto rtpSinkDef         = settings.value("rtp-sink",      "rtph264pay ! udpsink name=rtpsink clients=127.0.0.1:5000 sync=0").toString();
+    auto rtpPayDef          = settings.value("rtp-payloader", "rtph264pay").toString();
+    auto rtpPayParams       = settings.value(rtpPayDef + "-parameters").toString();
+    auto rtpSinkDef         = settings.value("rtp-sink",      "udpsink clients=127.0.0.1:5000 sync=0").toString();
+    auto rtpSinkParams      = settings.value(rtpSinkDef + "-parameters").toString();
     auto clipSinkDef        = settings.value("clip-sink",     "multifilesink next-file=4 post-messages=1 sync=0 async=0").toString();
     auto enableVideo        = !videoSinkDef.isEmpty() && settings.value("enable-video").toBool();
     auto enableRtp          = !rtpSinkDef.isEmpty() && settings.value("enable-rtp").toBool();
@@ -379,10 +382,15 @@ QString MainWindow::buildPipeline()
         {
             pipe.append(" ! tee name=videosplitter");
             if (enableVideo)
+            {
                 pipe.append(" ! queue ! ").append(videoMuxDef).append(" name=videomux ! ")
                     .append(videoSinkDef).append(" name=videosink location=").append(outputPathDef).append("/video videosplitter.");
+            }
             if (enableRtp)
-                pipe.append(" ! queue ! ").append(rtpSinkDef).append(" videosplitter.");
+            {
+                pipe.append(" ! queue ! ").append(rtpPayDef).append(" ").append(rtpPayParams)
+                    .append(" ! ").append(rtpSinkDef).append(" ").append(rtpSinkParams).append(" name=rtpsink videosplitter.");
+            }
         }
 
         if (!clipSinkDef.isEmpty())
