@@ -13,20 +13,31 @@
 #include <QPainter>
 #include <QPushButton>
 #include <QSettings>
+#include <QSlider>
 #include <QStackedWidget>
+#include <QTimer>
 #include <QToolBar>
 #include <QUrl>
 
 #include <QGlib/Connect>
 #include <QGlib/Error>
 #include <QGst/Bus>
+#include <QGst/Event>
 #include <QGst/Parse>
+#include <QGst/Query>
+
 #include <gst/gstdebugutils.h>
 
 ArchiveWindow::ArchiveWindow(QWidget *parent) :
     QDialog(parent)
 {
-    setMinimumSize(QSize(1366, 768));
+    //This timer is used to tell the ui to change its position slider & label
+    //every 100 ms, but only when the pipeline is playing.
+    //
+    positionTimer = new QTimer(this);
+    connect(positionTimer, SIGNAL(timeout()), this, SLOT(onPositionChanged()));
+
+    setMinimumSize(QSize(1220, 700));
     QSettings settings;
     settings.beginGroup("archive");
     auto previewVisible = settings.value("preview-pane", true).toBool();
@@ -38,6 +49,16 @@ ArchiveWindow::ArchiveWindow(QWidget *parent) :
     actionDelete = barArchive->addAction(QIcon(":buttons/delete"), tr("Delete"), this, SLOT(onDeleteClick()));
     actionDelete->setEnabled(false);
     barArchive->addAction(QIcon(":buttons/folder"), tr("File browser"), this, SLOT(onShowFolderClick()));
+
+    sliderPosition = new QSlider(Qt::Horizontal);
+    sliderPosition->setTickPosition(QSlider::TicksBelow);
+    sliderPosition->setTickInterval(50);
+    sliderPosition->setMaximum(1000);
+    connect(sliderPosition, SIGNAL(sliderMoved(int)), this, SLOT(setPosition(int)));
+    barArchive->addWidget(sliderPosition);
+
+    lblPosition = new QLabel();
+    barArchive->addWidget(lblPosition);
 
     QWidget* spacer = new QWidget;
     spacer->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
@@ -67,6 +88,7 @@ ArchiveWindow::ArchiveWindow(QWidget *parent) :
     previewPane->setVisible(previewVisible);
     previewPane->setMinimumSize(720, 576);
     previewPane->addWidget(lblImage = new QLabel);
+    lblImage->setScaledContents(true);
     previewPane->addWidget(displayWidget = new QGst::Ui::VideoWidget());
 
     layoutContent->addWidget(previewPane);
@@ -150,6 +172,7 @@ void ArchiveWindow::updateList()
     QFileIconProvider fip;
 
     listFiles->clear();
+    listFiles->setUpdatesEnabled(false);
     QFlags<QDir::Filter> filter = QDir::NoDot | QDir::AllEntries;
     if (curr == root)
     {
@@ -180,8 +203,8 @@ void ArchiveWindow::updateList()
                     painter.drawPixmap(pm.rect(), pmOverlay);
                     icon.addPixmap(pm);
                     clip.at(0)->setIcon(icon);
-                    continue;
                 }
+                continue;
             }
             icon.addPixmap(pm);
         }
@@ -193,6 +216,7 @@ void ArchiveWindow::updateList()
         auto item = new QListWidgetItem(icon, fi.fileName(), listFiles);
         item->setToolTip(fi.absoluteFilePath());
     }
+    listFiles->setUpdatesEnabled(true);
 }
 
 void ArchiveWindow::selectPath(QAction* action)
@@ -276,6 +300,7 @@ void ArchiveWindow::onDeleteClick()
 
     if (QMessageBox::Ok == userChoice)
     {
+        stopMedia();
         removeFileOrFolder(curr.absoluteFilePath(item->text()));
         delete item;
     }
@@ -288,11 +313,16 @@ void ArchiveWindow::stopMedia()
 
     if (pipeline)
     {
-        displayWidget->stopPipelineWatch();
         pipeline->setState(QGst::StateNull);
-        pipeline->getState(nullptr, nullptr, 0);
+        pipeline->getState(nullptr, nullptr, 1000000000L); // 1 sec
+        displayWidget->stopPipelineWatch();
         pipeline.clear();
     }
+    positionTimer->stop();
+    lblPosition->clear();
+    lblPosition->setEnabled(false);
+    sliderPosition->setValue(0);
+    sliderPosition->setEnabled(false);
 }
 
 void ArchiveWindow::playMediaFile(const QString& file)
@@ -328,17 +358,56 @@ void ArchiveWindow::playMediaFile(const QString& file)
         qCritical() << msg;
         QMessageBox::critical(this, windowTitle(), msg, QMessageBox::Ok);
     }
+}
 
+void ArchiveWindow::onPositionChanged()
+{
+    QGst::DurationQueryPtr queryLen = QGst::DurationQuery::create(QGst::FormatTime);
+    pipeline->query(queryLen);
+    QTime length = QGst::ClockTime(queryLen->duration()).toTime();
+
+    if (length > QTime(0,0,1))
+    {
+        QGst::PositionQueryPtr queryPos = QGst::PositionQuery::create(QGst::FormatTime);
+        pipeline->query(queryPos);
+
+        QTime curpos = QGst::ClockTime(queryPos->position()).toTime();
+        sliderPosition->setValue(curpos.msecsTo(QTime()) * 1000 / length.msecsTo(QTime()));
+        lblPosition->setText(tr("%1/%2").arg(curpos.toString("hh:mm:ss"), length.toString("hh:mm:ss")));
+        lblPosition->setEnabled(true);
+        sliderPosition->setEnabled(true);
+    }
+}
+
+void ArchiveWindow::setPosition(int value)
+{
+    QGst::DurationQueryPtr queryLen = QGst::DurationQuery::create(QGst::FormatTime);
+    pipeline->query(queryLen);
+
+    uint length = -QGst::ClockTime(queryLen->duration()).toTime().msecsTo(QTime());
+    if (length != 0 && value > 0)
+    {
+        QTime pos;
+        pos = pos.addMSecs(length * (value / 1000.0));
+
+        QGst::SeekEventPtr evt = QGst::SeekEvent::create(
+             1.0, QGst::FormatTime, QGst::SeekFlagFlush,
+             QGst::SeekTypeSet, QGst::ClockTime::fromTime(pos),
+             QGst::SeekTypeNone, QGst::ClockTime::None
+         );
+
+        pipeline->sendEvent(evt);
+    }
 }
 
 void ArchiveWindow::onBusMessage(const QGst::MessagePtr& message)
 {
-    qDebug() << message->typeName() << " " << message->source()->property("name").toString();
+//    qDebug() << message->typeName() << " " << message->source()->property("name").toString();
 
     switch (message->type())
     {
     case QGst::MessageStateChanged:
-//        onStateChangedMessage(message.staticCast<QGst::StateChangedMessage>());
+        onStateChangedMessage(message.staticCast<QGst::StateChangedMessage>());
         break;
     case QGst::MessageElement:
 //        onElementMessage(message.staticCast<QGst::ElementMessage>());
@@ -380,3 +449,14 @@ void ArchiveWindow::onBusMessage(const QGst::MessagePtr& message)
 #endif
     }
 }
+
+void ArchiveWindow::onStateChangedMessage(const QGst::StateChangedMessagePtr& message)
+{
+//  qDebug() << message->oldState() << " => " << message->newState();
+
+    if (message->source() == pipeline && message->newState() == QGst::StatePlaying)
+    {
+        positionTimer->start(100);
+    }
+}
+
