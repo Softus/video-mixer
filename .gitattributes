@@ -35,10 +35,13 @@
 pixmaps/about.png -text
 pixmaps/camera.png -text
 pixmaps/database.png -text
+pixmaps/delete.png -text
 pixmaps/details.png -text
 pixmaps/film.png -text
 pixmaps/folder.png -text
 pixmaps/gallery.png -text
+pixmaps/grid.png -text
+pixmaps/list.png -text
 pixmaps/pause.png -text
 pixmaps/product.png -text
 pixmaps/record.png -text
@@ -48,6 +51,7 @@ pixmaps/refresh.png -text
 pixmaps/settings.png -text
 pixmaps/start.png -text
 pixmaps/stop.png -text
+pixmaps/up.png -text
 pixmaps/user_add.png -text
 pixmaps/user_manage.png -text
 pkg/debian/DEBIAN/control -text
