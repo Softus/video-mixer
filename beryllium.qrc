@@ -17,6 +17,10 @@
         <file alias="film">pixmaps/film.png</file>
         <file alias="database">pixmaps/database.png</file>
         <file alias="gallery">pixmaps/gallery.png</file>
+        <file alias="delete">pixmaps/delete.png</file>
+        <file alias="icons">pixmaps/grid.png</file>
+        <file alias="list">pixmaps/list.png</file>
+        <file alias="up">pixmaps/up.png</file>
     </qresource>
     <qresource prefix="/app">
         <file alias="product">pixmaps/product.png</file>

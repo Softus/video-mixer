@@ -131,16 +131,16 @@ MainWindow::MainWindow(QWidget *parent) :
     displayWidget->setMinimumSize(720, 576);
     layoutMain->addWidget(displayWidget);
 
-    imageList = new QListWidget();
-    imageList->setViewMode(QListView::IconMode);
-    imageList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-    imageList->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    imageList->setMinimumHeight(140);
-    imageList->setMaximumHeight(140);
-    imageList->setIconSize(QSize(128,128));
-    imageList->setMovement(QListView::Static);
-    imageList->setWrapping(false);
-    layoutMain->addWidget(imageList);
+    listImagesAndClips = new QListWidget();
+    listImagesAndClips->setViewMode(QListView::IconMode);
+    listImagesAndClips->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+    listImagesAndClips->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    listImagesAndClips->setMinimumHeight(144); // 576/4
+    listImagesAndClips->setMaximumHeight(160);
+    listImagesAndClips->setIconSize(QSize(144,144));
+    listImagesAndClips->setMovement(QListView::Static);
+    listImagesAndClips->setWrapping(false);
+    layoutMain->addWidget(listImagesAndClips);
 
     setLayout(layoutMain);
 
@@ -503,7 +503,7 @@ QGst::PipelinePtr MainWindow::createPipeline()
 //        QGlib::connect(pl->getElementByName("test"), "handoff", this, &MainWindow::onTestHandoff);
 
         auto details = GstDebugGraphDetails(GST_DEBUG_GRAPH_SHOW_MEDIA_TYPE | GST_DEBUG_GRAPH_SHOW_NON_DEFAULT_PARAMS | GST_DEBUG_GRAPH_SHOW_STATES);
-        GST_DEBUG_BIN_TO_DOT_FILE_WITH_TS((GstBin*)(QGst::Pipeline::CType*)pl, details, qApp->applicationName().toUtf8());
+        GST_DEBUG_BIN_TO_DOT_FILE_WITH_TS(pl.staticCast<QGst::Bin>(), details, qApp->applicationName().toUtf8());
 
         // The pipeline will start once it reaches paused state without an error
         //
@@ -775,6 +775,7 @@ void MainWindow::onElementMessage(const QGst::ElementMessagePtr& message)
     if (s->name() == "GstMultiFileSink" && message->source() == imageSink)
     {
         QString fileName = s->value("filename").toString();
+        QString toolTip = fileName;
         QPixmap pm;
 
         auto lastBuffer = message->source()->property("last-buffer").get<QGst::BufferPtr>();
@@ -782,32 +783,33 @@ void MainWindow::onElementMessage(const QGst::ElementMessagePtr& message)
 
         // If we can not load from the buffer, try to load from the file
         //
-        if (ok || pm.load(fileName))
+        if (!ok && !pm.load(fileName))
         {
-            if (clipPreviewFileName == fileName)
-            {
-                // Got a snapshot for a clip file. Add a fency overlay to it
-                //
-                QPixmap pmOverlay(":/buttons/film");
-                QPainter painter(&pm);
-                painter.setOpacity(0.75);
-                painter.drawPixmap(pm.rect(), pmOverlay);
-                clipPreviewFileName.clear();
-            }
+            toolTip = tr("Failed to load image %1").arg(fileName);
+            pm.load(":/buttons/stop");
+        }
 
-            QListWidgetItem* item = new QListWidgetItem(QIcon(pm), QFileInfo(fileName).baseName(), imageList);
-            item->setToolTip(fileName);
-            imageList->setItemSelected(item, true);
-            imageList->scrollToItem(item);
-        }
-        else
+        if (clipPreviewFileName == fileName)
         {
-            QListWidgetItem* item = new QListWidgetItem(QIcon(":/buttons/stop"), tr("(error)"), imageList);
-            item->setToolTip(tr("Failed to load image %1").arg(fileName));
+            // Got a snapshot for a clip file. Add a fency overlay to it
+            //
+            QPixmap pmOverlay(":/buttons/film");
+            QPainter painter(&pm);
+            painter.setOpacity(0.75);
+            painter.drawPixmap(pm.rect(), pmOverlay);
+            clipPreviewFileName.clear();
         }
+
+        auto existent = listImagesAndClips->findItems(QFileInfo(fileName).baseName(), Qt::MatchExactly);
+        auto item = !existent.isEmpty()? existent.at(0):
+            new QListWidgetItem(QFileInfo(fileName).baseName(), listImagesAndClips);
+
+        item->setToolTip(toolTip);
+        item->setIcon(QIcon(pm));
+        listImagesAndClips->setItemSelected(item, true);
+        listImagesAndClips->scrollToItem(item);
 
         btnSnapshot->setEnabled(running);
-        return;
     }
 
     if (s->name() == "prepare-xwindow-id" || s->name() == "prepare-window-handle")
@@ -831,7 +833,7 @@ void MainWindow::onStartClick()
     if (!running)
     {
         imageNo = clipNo = 0;
-        imageList->clear();
+        listImagesAndClips->clear();
 
 #ifdef WITH_DICOM
 

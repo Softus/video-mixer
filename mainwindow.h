@@ -45,7 +45,7 @@ class MainWindow : public QWidget
     QString       pendingSOPInstanceUID;
 #endif
     QGst::Ui::VideoWidget* displayWidget;
-    QListWidget*  imageList;
+    QListWidget*  listImagesAndClips;
     QDir          outputPath;
     QString       clipPreviewFileName;
     QString       pipelineDef;
