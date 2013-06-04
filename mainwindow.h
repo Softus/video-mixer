@@ -72,15 +72,15 @@ class MainWindow : public QWidget
     QGst::ElementPtr displaySink;
     QGst::ElementPtr imageValve;
     QGst::ElementPtr imageSink;
-    QGst::ElementPtr clipInspect;
     QGst::ElementPtr videoEncoder;
-    QGst::ElementPtr videoValve;
-    QGst::ElementPtr videoSink;
+    QGst::ElementPtr videoEncoderValve;
 
     QString replace(QString str, int seqNo = 0);
     QString buildPipeline();
     QGst::PipelinePtr createPipeline();
     void releasePipeline();
+    QString appendVideoTail(const QString& prefix, int idx);
+    void removeVideoTail(const QString& prefix);
 
     void onBusMessage(const QGst::MessagePtr& message);
     void onStateChangedMessage(const QGst::StateChangedMessagePtr& message);
@@ -88,6 +88,7 @@ class MainWindow : public QWidget
 
     void onImageReady(const QGst::BufferPtr&);
     void onClipFrame(const QGst::BufferPtr&);
+    void onVideoFrame(const QGst::BufferPtr&);
     void errorGlib(const QGlib::ObjectPtr& obj, const QGlib::Error& ex);
     void setElementProperty(const char* elm, const char* prop = nullptr, const QGlib::Value& value = nullptr, QGst::State minimumState = QGst::StatePlaying);
     void setElementProperty(QGst::ElementPtr& elm, const char* prop = nullptr, const QGlib::Value& value = nullptr, QGst::State minimumState = QGst::StatePlaying);

@@ -10,28 +10,21 @@
 #include <QGst/Ui/VideoWidget>
 
 QT_BEGIN_NAMESPACE
-class QLabel;
 class QListWidget;
 class QListWidgetItem;
-class QStackedWidget;
-class QSlider;
 class QToolBar;
-class QTimer;
 QT_END_NAMESPACE
 
 class ArchiveWindow : public QDialog
 {
     Q_OBJECT
     QToolBar*              barPath;
+    QToolBar*              barMediaControls;
     QAction*               actionDelete;
     QListWidget*           listFiles;
-    QStackedWidget*        previewPane;
-    QLabel*                lblImage;
     QGst::Ui::VideoWidget* displayWidget;
+    QWidget*               player;
     QGst::PipelinePtr      pipeline;
-    QLabel*                lblPosition;
-    QSlider*               sliderPosition;
-    QTimer*                positionTimer;
     QDir                   root;
     QDir                   curr;
 
@@ -42,11 +35,12 @@ class ArchiveWindow : public QDialog
     void onBusMessage(const QGst::MessagePtr& message);
     void onStateChangedMessage(const QGst::StateChangedMessagePtr& message);
     void createSubDirMenu(QAction* parentAction);
-    void setListViewMode(QAction* action, QListView::ViewMode mode);
+    void setPosition(int value);
 
 public:
     explicit ArchiveWindow(QWidget *parent = 0);
-    
+    ~ArchiveWindow();
+
 signals:
     
 public slots:
@@ -55,13 +49,15 @@ public slots:
     void selectPath(QAction* action);
     void selectPath(bool);
     void listItemSelected(QString item);
-    void setPosition(int value);
-    void onPositionChanged();
-    void onToggleListModeClick();
-    void onTogglePreviewClick();
+    void onListClick();
+    void onGalleryClick();
     void onShowFolderClick();
     void onDeleteClick();
-    void preparePopupMenu();
+    void onPrevClick();
+    void onNextClick();
+    void onSeekClick();
+    void onPlayPauseClick();
+    void preparePathPopupMenu();
 };
 
 #endif // ARCHIVEWINDOW_H

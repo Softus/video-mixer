@@ -14,9 +14,9 @@
 #include <QPushButton>
 #include <QSettings>
 #include <QSlider>
-#include <QStackedWidget>
 #include <QTimer>
 #include <QToolBar>
+#include <QToolButton>
 #include <QUrl>
 
 #include <QGlib/Connect>
@@ -28,82 +28,115 @@
 
 #include <gst/gstdebugutils.h>
 
+static QSize videoSize(352, 258);
+
+static QWidget* createSpacer()
+{
+    auto spacer = new QWidget;
+    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    return spacer;
+}
+
 ArchiveWindow::ArchiveWindow(QWidget *parent) :
     QDialog(parent)
 {
-    //This timer is used to tell the ui to change its position slider & label
-    //every 100 ms, but only when the pipeline is playing.
-    //
-    positionTimer = new QTimer(this);
-    connect(positionTimer, SIGNAL(timeout()), this, SLOT(onPositionChanged()));
-
-    setMinimumSize(QSize(1220, 700));
-    QSettings settings;
-    settings.beginGroup("archive");
-    auto previewVisible = settings.value("preview-pane", true).toBool();
-
     QBoxLayout* layoutMain = new QVBoxLayout;
 
     QToolBar* barArchive = new QToolBar(tr("archive"));
     barArchive->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     actionDelete = barArchive->addAction(QIcon(":buttons/delete"), tr("Delete"), this, SLOT(onDeleteClick()));
     actionDelete->setEnabled(false);
+
     barArchive->addAction(QIcon(":buttons/folder"), tr("File browser"), this, SLOT(onShowFolderClick()));
 
-    sliderPosition = new QSlider(Qt::Horizontal);
-    sliderPosition->setTickPosition(QSlider::TicksBelow);
-    sliderPosition->setTickInterval(50);
-    sliderPosition->setMaximum(1000);
-    connect(sliderPosition, SIGNAL(sliderMoved(int)), this, SLOT(setPosition(int)));
-    barArchive->addWidget(sliderPosition);
+    barArchive->addWidget(createSpacer());
 
-    lblPosition = new QLabel();
-    barArchive->addWidget(lblPosition);
-
-    QWidget* spacer = new QWidget;
-    spacer->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
-    barArchive->addWidget(spacer);
-
-    auto actionListMode = barArchive->addAction(nullptr, this, SLOT(onToggleListModeClick()));
-    auto actionShowPreview = barArchive->addAction(QIcon(":buttons/gallery"), tr("Show preview pane"), this, SLOT(onTogglePreviewClick()));
-    actionShowPreview->setCheckable(true);
-    actionShowPreview->setChecked(previewVisible);
+    QActionGroup* group = new QActionGroup(barArchive);
+    auto actionList = barArchive->addAction(QIcon(":buttons/list"), tr("List"), this, SLOT(onListClick()));
+    actionList->setCheckable(true);
+    group->addAction(actionList);
+    auto actionGallery = barArchive->addAction(QIcon(":buttons/gallery"), tr("Gallery"), this, SLOT(onGalleryClick()));
+    actionGallery->setCheckable(true);
+    group->addAction(actionGallery);
     layoutMain->addWidget(barArchive);
 
     barPath = new QToolBar(tr("path"));
     layoutMain->addWidget(barPath);
 
-    QBoxLayout* layoutContent = new QHBoxLayout;
+    player = new QWidget;
+
+    QBoxLayout* playerLayout = new QVBoxLayout();
+    playerLayout->setContentsMargins(0,16,0,16);
+
+    QBoxLayout* playerInnerLayout = new QHBoxLayout();
+    playerInnerLayout->setContentsMargins(0,0,0,0);
+
+    auto barPrev = new QToolBar(tr("prev"));
+    auto btnPrev = new QToolButton;
+    btnPrev->setIcon(QIcon(":buttons/prev"));
+    btnPrev->setMinimumHeight(200);
+    btnPrev->setFocusPolicy(Qt::NoFocus);
+    connect(btnPrev, SIGNAL(clicked()), this, SLOT(onPrevClick()));
+    barPrev->addWidget(btnPrev);
+    playerInnerLayout->addWidget(barPrev);
+
+    displayWidget = new QGst::Ui::VideoWidget();
+    displayWidget->setMinimumSize(videoSize);
+    displayWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    playerInnerLayout->addWidget(displayWidget);
+
+    auto barNext = new QToolBar(tr("next"));
+    auto btnNext = new QToolButton;
+    btnNext->setIcon(QIcon(":buttons/next"));
+    btnNext->setMinimumHeight(200);
+    btnNext->setFocusPolicy(Qt::NoFocus);
+    connect(btnNext, SIGNAL(clicked()), this, SLOT(onNextClick()));
+    barNext->addWidget(btnNext);
+    playerInnerLayout->addWidget(barNext);
+
+    playerLayout->addLayout(playerInnerLayout);
+
+    barMediaControls = new QToolBar(tr("media"));
+    auto actionSeekBack = barMediaControls->addAction(QIcon(":buttons/rewind"), nullptr, this, SLOT(onSeekClick()));
+    actionSeekBack->setVisible(false);
+    actionSeekBack->setData(-500000000);
+    auto actionPlay = barMediaControls->addAction(QIcon(":buttons/record"), nullptr, this, SLOT(onPlayPauseClick()));
+    actionPlay->setVisible(false);
+    auto actionSeekFwd = barMediaControls->addAction(QIcon(":buttons/forward"),  nullptr, this, SLOT(onSeekClick()));
+    actionSeekFwd->setVisible(false);
+    actionSeekFwd->setData(+500000000);
+    barMediaControls->setMinimumSize(48, 48);
+
+    playerLayout->addWidget(barMediaControls, 0, Qt::AlignHCenter);
+
+    player->setLayout(playerLayout);
+    layoutMain->addWidget(player);
 
     listFiles = new QListWidget;
-    listFiles->setFocusPolicy(Qt::NoFocus);
-    setListViewMode(actionListMode, (QListView::ViewMode)settings.value("list-mode", QListView::IconMode).toInt());
-    listFiles->setMinimumHeight(160);
+    listFiles->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+    listFiles->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     listFiles->setMovement(QListView::Static);
-
+    listFiles->setWrapping(false);
     connect(listFiles, SIGNAL(currentTextChanged(QString)), this, SLOT(listItemSelected(QString)));
-    layoutContent->addWidget(listFiles);
-
-    previewPane = new QStackedWidget;
-    previewPane->setVisible(previewVisible);
-    previewPane->setMinimumSize(720, 576);
-    previewPane->addWidget(lblImage = new QLabel);
-    lblImage->setScaledContents(true);
-    previewPane->addWidget(displayWidget = new QGst::Ui::VideoWidget());
-
-    layoutContent->addWidget(previewPane);
-    layoutMain->addLayout(layoutContent);
+    layoutMain->addWidget(listFiles);
 
     setLayout(layoutMain);
     setAttribute(Qt::WA_DeleteOnClose, false);
+    if (QSettings().value("show-gallery").toBool())
+    {
+        actionGallery->setChecked(true);
+        onGalleryClick();
+    }
+    else
+    {
+        actionList->setChecked(true);
+        onListClick();
+    }
 }
 
-void ArchiveWindow::setListViewMode(QAction* action, QListView::ViewMode mode)
+ArchiveWindow::~ArchiveWindow()
 {
-    listFiles->setViewMode(mode);
-    listFiles->setIconSize(mode == QListView::IconMode? QSize(144,144): QSize(32, 32));
-    action->setIcon(QIcon(mode == QListView::IconMode? ":/buttons/list": ":/buttons/icons"));
-    action->setText(mode == QListView::IconMode? tr("View as list"): tr("View as icon"));
+    stopMedia();
 }
 
 void ArchiveWindow::setRoot(const QString& path)
@@ -130,7 +163,7 @@ void ArchiveWindow::createSubDirMenu(QAction* parentAction)
     if (!menu->isEmpty())
     {
         parentAction->setMenu(menu);
-        connect(menu, SIGNAL(aboutToShow()), this, SLOT(preparePopupMenu()));
+        connect(menu, SIGNAL(aboutToShow()), this, SLOT(preparePathPopupMenu()));
     }
 }
 
@@ -158,7 +191,7 @@ void ArchiveWindow::updatePath()
     updateList();
 }
 
-void ArchiveWindow::preparePopupMenu()
+void ArchiveWindow::preparePathPopupMenu()
 {
     auto menu = static_cast<QMenu*>(sender());
     Q_FOREACH(auto action, menu->actions())
@@ -171,10 +204,14 @@ void ArchiveWindow::updateList()
 {
     QFileIconProvider fip;
 
+    listFiles->clearFocus();
     listFiles->clear();
     listFiles->setUpdatesEnabled(false);
     QFlags<QDir::Filter> filter = QDir::NoDot | QDir::AllEntries;
-    if (curr == root)
+
+    // No "parent folder" item in gallery mode and on the root
+    //
+    if (curr == root || player->isVisible())
     {
         filter |= QDir::NoDotDot;
     }
@@ -203,6 +240,7 @@ void ArchiveWindow::updateList()
                     painter.drawPixmap(pm.rect(), pmOverlay);
                     icon.addPixmap(pm);
                     clip.at(0)->setIcon(icon);
+                    clip.at(0)->setData(Qt::UserRole, fi.absoluteFilePath());
                 }
                 continue;
             }
@@ -216,7 +254,13 @@ void ArchiveWindow::updateList()
         auto item = new QListWidgetItem(icon, fi.fileName(), listFiles);
         item->setToolTip(fi.absoluteFilePath());
     }
+
     listFiles->setUpdatesEnabled(true);
+
+    if (player->isVisible())
+    {
+        listFiles->setCurrentRow(0);
+    }
 }
 
 void ArchiveWindow::selectPath(QAction* action)
@@ -250,25 +294,30 @@ void ArchiveWindow::listItemSelected(QString item)
     }
 }
 
-void ArchiveWindow::onToggleListModeClick()
+void ArchiveWindow::onListClick()
 {
-    QSettings settings;
-    settings.beginGroup("archive");
-
-    auto action = static_cast<QAction*>(sender());
-    auto viewMode = listFiles->viewMode() == QListView::ListMode? QListView::IconMode: QListView::ListMode;
-    settings.setValue("list-mode", viewMode);
-    setListViewMode(action, viewMode);
+    QSettings().setValue("show-gallery", false);
+    player->setVisible(false);
+    listFiles->setViewMode(QListView::ListMode);
+    listFiles->setIconSize(QSize(32, 32));
+    listFiles->setMaximumHeight(QWIDGETSIZE_MAX);
+    listFiles->setMinimumSize(videoSize);
+    listFiles->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    barPath->setVisible(true);
+    updateList();
 }
 
-void ArchiveWindow::onTogglePreviewClick()
+void ArchiveWindow::onGalleryClick()
 {
-    QSettings settings;
-    settings.beginGroup("archive");
-
-    auto action = static_cast<QAction*>(sender());
-    settings.setValue("preview-pane", action->isChecked());
-    previewPane->setVisible(action->isChecked());
+    QSettings().setValue("show-gallery", true);
+    barPath->setVisible(false);
+    listFiles->setViewMode(QListView::IconMode);
+    listFiles->setIconSize(QSize(144, 144));
+    listFiles->setMaximumHeight(160);
+    listFiles->setMinimumHeight(144);
+    listFiles->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    player->setVisible(true);
+    updateList();
 }
 
 void ArchiveWindow::onShowFolderClick()
@@ -302,14 +351,73 @@ void ArchiveWindow::onDeleteClick()
     {
         stopMedia();
         removeFileOrFolder(curr.absoluteFilePath(item->text()));
+
+        // Delete both the clip and the thumbnail
+        //
+        auto strPreviewFile = item->data(Qt::UserRole).toString();
+        if (!strPreviewFile.isEmpty())
+        {
+            QFile(strPreviewFile).remove();
+        }
         delete item;
     }
+}
+
+void ArchiveWindow::onPrevClick()
+{
+    if (listFiles->currentRow() > 0)
+    {
+        listFiles->setCurrentRow(listFiles->currentRow() - 1);
+    }
+}
+
+void ArchiveWindow::onNextClick()
+{
+    if (listFiles->currentRow() < listFiles->count() - 1)
+    {
+        listFiles->setCurrentRow(listFiles->currentRow() + 1);
+    }
+}
+
+void ArchiveWindow::onSeekClick()
+{
+    QGst::PositionQueryPtr queryPos = QGst::PositionQuery::create(QGst::FormatTime);
+    pipeline->query(queryPos);
+
+    QGst::DurationQueryPtr queryLen = QGst::DurationQuery::create(QGst::FormatTime);
+    pipeline->query(queryLen);
+
+    QGst::SegmentQueryPtr querySeg = QGst::SegmentQuery::create(QGst::FormatTime);
+    pipeline->query(querySeg);
+
+    qDebug() << "rate " << querySeg->rate() << "type " << querySeg->format()
+             << "start " << querySeg->startValue() << "stop " << querySeg->stopValue();
+
+    auto delta = static_cast<QAction*>(sender())->data().toInt();
+    auto newPos = queryPos->position() + delta;
+
+    qDebug() << "POS " << queryPos->position() << "type " << queryPos->format()
+             << "LEN " << queryLen->duration() << "type " << queryLen->format() << " new " << newPos;
+
+    if (newPos >= 0 && newPos < queryLen->duration())
+    {
+        QGst::SeekEventPtr evt = QGst::SeekEvent::create(
+             1.0, QGst::FormatTime, QGst::SeekFlagFlush,
+             QGst::SeekTypeSet, newPos,
+             QGst::SeekTypeNone, QGst::ClockTime::None
+         );
+
+        pipeline->sendEvent(evt);
+    }
+}
+
+void ArchiveWindow::onPlayPauseClick()
+{
 }
 
 void ArchiveWindow::stopMedia()
 {
     setWindowTitle(tr("Archive"));
-    lblImage->clear();
 
     if (pipeline)
     {
@@ -318,23 +426,14 @@ void ArchiveWindow::stopMedia()
         displayWidget->stopPipelineWatch();
         pipeline.clear();
     }
-    positionTimer->stop();
-    lblPosition->clear();
-    lblPosition->setEnabled(false);
-    sliderPosition->setValue(0);
-    sliderPosition->setEnabled(false);
 }
 
 void ArchiveWindow::playMediaFile(const QString& file)
 {
     stopMedia();
 
-    QPixmap pm;
-    if (pm.load(file))
+    if (!player->isVisible())
     {
-        lblImage->setPixmap(pm);
-        previewPane->setCurrentWidget(lblImage);
-        setWindowTitle(tr("Archive - %1").arg(file));
         return;
     }
 
@@ -348,8 +447,7 @@ void ArchiveWindow::playMediaFile(const QString& file)
         pipeline->getState(nullptr, nullptr, 1000000000L); // 1 sec
         auto details = GstDebugGraphDetails(GST_DEBUG_GRAPH_SHOW_MEDIA_TYPE | GST_DEBUG_GRAPH_SHOW_NON_DEFAULT_PARAMS | GST_DEBUG_GRAPH_SHOW_STATES);
         GST_DEBUG_BIN_TO_DOT_FILE_WITH_TS(pipeline.staticCast<QGst::Bin>(), details, qApp->applicationName().toUtf8());
-        pipeline->setState(QGst::StatePlaying);
-        previewPane->setCurrentWidget(displayWidget);
+        pipeline->setState(QGst::StatePaused);
         setWindowTitle(tr("Archive - %1").arg(file));
     }
     catch (QGlib::Error ex)
@@ -357,25 +455,6 @@ void ArchiveWindow::playMediaFile(const QString& file)
         const QString msg = ex.message();
         qCritical() << msg;
         QMessageBox::critical(this, windowTitle(), msg, QMessageBox::Ok);
-    }
-}
-
-void ArchiveWindow::onPositionChanged()
-{
-    QGst::DurationQueryPtr queryLen = QGst::DurationQuery::create(QGst::FormatTime);
-    pipeline->query(queryLen);
-    QTime length = QGst::ClockTime(queryLen->duration()).toTime();
-
-    if (length > QTime(0,0,1))
-    {
-        QGst::PositionQueryPtr queryPos = QGst::PositionQuery::create(QGst::FormatTime);
-        pipeline->query(queryPos);
-
-        QTime curpos = QGst::ClockTime(queryPos->position()).toTime();
-        sliderPosition->setValue(curpos.msecsTo(QTime()) * 1000 / length.msecsTo(QTime()));
-        lblPosition->setText(tr("%1/%2").arg(curpos.toString("hh:mm:ss"), length.toString("hh:mm:ss")));
-        lblPosition->setEnabled(true);
-        sliderPosition->setEnabled(true);
     }
 }
 
@@ -402,7 +481,7 @@ void ArchiveWindow::setPosition(int value)
 
 void ArchiveWindow::onBusMessage(const QGst::MessagePtr& message)
 {
-//    qDebug() << message->typeName() << " " << message->source()->property("name").toString();
+    qDebug() << message->typeName() << " " << message->source()->property("name").toString();
 
     switch (message->type())
     {
@@ -410,7 +489,6 @@ void ArchiveWindow::onBusMessage(const QGst::MessagePtr& message)
         onStateChangedMessage(message.staticCast<QGst::StateChangedMessage>());
         break;
     case QGst::MessageElement:
-//        onElementMessage(message.staticCast<QGst::ElementMessage>());
         break;
     case QGst::MessageError:
         {
@@ -435,10 +513,23 @@ void ArchiveWindow::onBusMessage(const QGst::MessagePtr& message)
         qDebug() << message->source()->property("name").toString() << " " << message.staticCast<QGst::WarningMessage>()->error();
         break;
     case QGst::MessageEos:
+        qDebug() << "EOS";
+        pipeline->setState(QGst::StateReady);
+        break;
     case QGst::MessageNewClock:
     case QGst::MessageStreamStatus:
     case QGst::MessageQos:
     case QGst::MessageAsyncDone:
+        {
+            QGst::SeekingQueryPtr queryLen = QGst::SeekingQuery::create(QGst::FormatTime);
+            pipeline->query(queryLen);
+            qDebug() << " seekable " << queryLen->seekable() << " format " << queryLen->format();
+            auto isClip = queryLen->seekable();
+            Q_FOREACH(auto action, barMediaControls->actions())
+            {
+                action->setVisible(isClip);
+            }
+        }
         break;
     default:
         qDebug() << message->type();
@@ -452,11 +543,28 @@ void ArchiveWindow::onBusMessage(const QGst::MessagePtr& message)
 
 void ArchiveWindow::onStateChangedMessage(const QGst::StateChangedMessagePtr& message)
 {
-//  qDebug() << message->oldState() << " => " << message->newState();
+//    qDebug() << message->oldState() << " => " << message->newState();
 
-    if (message->source() == pipeline && message->newState() == QGst::StatePlaying)
+    if (message->source() == pipeline && message->oldState() == QGst::StateReady &&  message->newState() == QGst::StatePaused)
     {
-        positionTimer->start(100);
+        {
+            QGst::SeekingQueryPtr queryLen = QGst::SeekingQuery::create(QGst::FormatTime);
+            pipeline->query(queryLen);
+            qDebug() << "FIRST seekable " << queryLen->seekable() << " format " << queryLen->format();
+            auto isClip = queryLen->seekable();
+            Q_FOREACH(auto action, barMediaControls->actions())
+            {
+                action->setVisible(isClip);
+            }
+        }
+        {
+            QGst::SeekEventPtr evt = QGst::SeekEvent::create(
+                 1.0, QGst::FormatTime, QGst::SeekFlagFlush,
+                 QGst::SeekTypeCur, 0,
+                 QGst::SeekTypeNone, QGst::ClockTime::None
+             );
+
+            pipeline->sendEvent(evt);
+        }
     }
 }
-

@@ -59,7 +59,7 @@ void VideoSettings::showEvent(QShowEvent *e)
     // Refill the boxes every time the page is shown
     //
     updateGstList("video-encoder", "x264enc", GST_ELEMENT_FACTORY_TYPE_ENCODER | GST_ELEMENT_FACTORY_TYPE_MEDIA_VIDEO, listVideoCodecs);
-    updateGstList("video-muxer", "mpegtsmux", GST_ELEMENT_FACTORY_TYPE_MUXER, listVideoMuxers);
+    updateGstList("video-muxer", "mpegpsmux", GST_ELEMENT_FACTORY_TYPE_MUXER, listVideoMuxers);
     updateGstList("image-encoder", "jpegenc", GST_ELEMENT_FACTORY_TYPE_ENCODER | GST_ELEMENT_FACTORY_TYPE_MEDIA_IMAGE, listImageCodecs);
     updateGstList("rtp-payloader", "rtph264pay", GST_ELEMENT_FACTORY_TYPE_PAYLOADER, listRtpPayloaders);
 
