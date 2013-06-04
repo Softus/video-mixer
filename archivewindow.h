@@ -21,6 +21,7 @@ class ArchiveWindow : public QDialog
     QToolBar*              barPath;
     QToolBar*              barMediaControls;
     QAction*               actionDelete;
+    QAction*               actionPlay;
     QListWidget*           listFiles;
     QGst::Ui::VideoWidget* displayWidget;
     QWidget*               player;
@@ -35,7 +36,6 @@ class ArchiveWindow : public QDialog
     void onBusMessage(const QGst::MessagePtr& message);
     void onStateChangedMessage(const QGst::StateChangedMessagePtr& message);
     void createSubDirMenu(QAction* parentAction);
-    void setPosition(int value);
 
 public:
     explicit ArchiveWindow(QWidget *parent = 0);

@@ -100,7 +100,7 @@ ArchiveWindow::ArchiveWindow(QWidget *parent) :
     auto actionSeekBack = barMediaControls->addAction(QIcon(":buttons/rewind"), nullptr, this, SLOT(onSeekClick()));
     actionSeekBack->setVisible(false);
     actionSeekBack->setData(-500000000);
-    auto actionPlay = barMediaControls->addAction(QIcon(":buttons/record"), nullptr, this, SLOT(onPlayPauseClick()));
+    actionPlay = barMediaControls->addAction(QIcon(":buttons/record"), nullptr, this, SLOT(onPlayPauseClick()));
     actionPlay->setVisible(false);
     auto actionSeekFwd = barMediaControls->addAction(QIcon(":buttons/forward"),  nullptr, this, SLOT(onSeekClick()));
     actionSeekFwd->setVisible(false);
@@ -413,6 +413,7 @@ void ArchiveWindow::onSeekClick()
 
 void ArchiveWindow::onPlayPauseClick()
 {
+    pipeline->setState(pipeline->currentState() == QGst::StatePlaying? QGst::StatePaused: QGst::StatePlaying);
 }
 
 void ArchiveWindow::stopMedia()
@@ -458,27 +459,6 @@ void ArchiveWindow::playMediaFile(const QString& file)
     }
 }
 
-void ArchiveWindow::setPosition(int value)
-{
-    QGst::DurationQueryPtr queryLen = QGst::DurationQuery::create(QGst::FormatTime);
-    pipeline->query(queryLen);
-
-    uint length = -QGst::ClockTime(queryLen->duration()).toTime().msecsTo(QTime());
-    if (length != 0 && value > 0)
-    {
-        QTime pos;
-        pos = pos.addMSecs(length * (value / 1000.0));
-
-        QGst::SeekEventPtr evt = QGst::SeekEvent::create(
-             1.0, QGst::FormatTime, QGst::SeekFlagFlush,
-             QGst::SeekTypeSet, QGst::ClockTime::fromTime(pos),
-             QGst::SeekTypeNone, QGst::ClockTime::None
-         );
-
-        pipeline->sendEvent(evt);
-    }
-}
-
 void ArchiveWindow::onBusMessage(const QGst::MessagePtr& message)
 {
     qDebug() << message->typeName() << " " << message->source()->property("name").toString();
@@ -513,8 +493,17 @@ void ArchiveWindow::onBusMessage(const QGst::MessagePtr& message)
         qDebug() << message->source()->property("name").toString() << " " << message.staticCast<QGst::WarningMessage>()->error();
         break;
     case QGst::MessageEos:
-        qDebug() << "EOS";
-        pipeline->setState(QGst::StateReady);
+        {
+            qDebug() << "EOS";
+            QGst::SeekEventPtr evt = QGst::SeekEvent::create(
+                 1.0, QGst::FormatTime, QGst::SeekFlagFlush,
+                 QGst::SeekTypeSet, 0,
+                 QGst::SeekTypeNone, QGst::ClockTime::None
+             );
+
+            pipeline->sendEvent(evt);
+            pipeline->setState(QGst::StatePaused);
+        }
         break;
     case QGst::MessageNewClock:
     case QGst::MessageStreamStatus:
@@ -545,18 +534,9 @@ void ArchiveWindow::onStateChangedMessage(const QGst::StateChangedMessagePtr& me
 {
 //    qDebug() << message->oldState() << " => " << message->newState();
 
-    if (message->source() == pipeline && message->oldState() == QGst::StateReady &&  message->newState() == QGst::StatePaused)
+    if (message->source() == pipeline)
     {
-        {
-            QGst::SeekingQueryPtr queryLen = QGst::SeekingQuery::create(QGst::FormatTime);
-            pipeline->query(queryLen);
-            qDebug() << "FIRST seekable " << queryLen->seekable() << " format " << queryLen->format();
-            auto isClip = queryLen->seekable();
-            Q_FOREACH(auto action, barMediaControls->actions())
-            {
-                action->setVisible(isClip);
-            }
-        }
+        if (message->oldState() == QGst::StateReady && message->newState() == QGst::StatePaused)
         {
             QGst::SeekEventPtr evt = QGst::SeekEvent::create(
                  1.0, QGst::FormatTime, QGst::SeekFlagFlush,
@@ -566,5 +546,7 @@ void ArchiveWindow::onStateChangedMessage(const QGst::StateChangedMessagePtr& me
 
             pipeline->sendEvent(evt);
         }
+
+        actionPlay->setIcon(QIcon(message->newState() == QGst::StatePlaying? ":buttons/pause": ":buttons/record"));
     }
 }
