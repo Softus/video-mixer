@@ -16,6 +16,8 @@
 AboutDialog::AboutDialog(QWidget *parent) :
     QDialog(parent)
 {
+    setWindowTitle(tr("About %1").arg(PRODUCT_FULL_NAME));
+
     QBoxLayout* layoutMain = new QHBoxLayout;
     layoutMain->setContentsMargins(16,16,16,16);
     auto icon = new QLabel();
@@ -64,7 +66,7 @@ AboutDialog::AboutDialog(QWidget *parent) :
     layoutText->addWidget(lblWarranty);
     layoutText->addSpacing(16);
 
-    QPushButton* btnClose = new QPushButton(tr("Close"));
+    QPushButton* btnClose = new QPushButton(tr("OK"));
     connect(btnClose, SIGNAL(clicked()), this, SLOT(accept()));
     layoutText->addWidget(btnClose, 1, Qt::AlignRight);
     layoutMain->addLayout(layoutText);

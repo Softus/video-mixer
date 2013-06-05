@@ -120,6 +120,8 @@ MainWindow::MainWindow(QWidget *parent) :
     running(false),
     recording(false)
 {
+    setWindowTitle(PRODUCT_FULL_NAME);
+
     // This magic required for updating widgets from worker threads on windows
     //
     connect(this, SIGNAL(enableWidget(QWidget*, bool)), this, SLOT(onEnableWidget(QWidget*, bool)), Qt::QueuedConnection);
@@ -129,7 +131,7 @@ MainWindow::MainWindow(QWidget *parent) :
     layoutMain->addWidget(createToolBar());
 
     displayWidget = new QGst::Ui::VideoWidget();
-    displayWidget->setMinimumSize(360, 288);
+    displayWidget->setMinimumSize(712, 576);
     displayWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     layoutMain->addWidget(displayWidget);
 
@@ -227,12 +229,12 @@ QMenuBar* MainWindow::createMenuBar()
 
 QToolBar* MainWindow::createToolBar()
 {
-    QToolBar* bar = new QToolBar(tr("main"));
+    QToolBar* bar = new QToolBar(tr("Main"));
 
     btnStart = new QToolButton();
     btnStart->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     btnStart->setFocusPolicy(Qt::NoFocus);
-    btnStart->setMinimumWidth(120);
+    btnStart->setMinimumWidth(180);
     connect(btnStart, SIGNAL(clicked()), this, SLOT(onStartClick()));
     bar->addWidget(btnStart);
 
@@ -241,14 +243,14 @@ QToolBar* MainWindow::createToolBar()
     btnSnapshot->setFocusPolicy(Qt::NoFocus);
     btnSnapshot->setIcon(QIcon(":/buttons/camera"));
     btnSnapshot->setText(tr("&Take snapshot"));
-    btnSnapshot->setMinimumWidth(120);
+    btnSnapshot->setMinimumWidth(180);
     connect(btnSnapshot, SIGNAL(clicked()), this, SLOT(onSnapshotClick()));
     bar->addWidget(btnSnapshot);
 
     btnRecord = new QToolButton();
     btnRecord->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     btnRecord->setFocusPolicy(Qt::NoFocus);
-    btnRecord->setMinimumWidth(120);
+    btnRecord->setMinimumWidth(180);
     connect(btnRecord, SIGNAL(clicked()), this, SLOT(onRecordClick()));
     bar->addWidget(btnRecord);
 
@@ -271,7 +273,7 @@ QToolBar* MainWindow::createToolBar()
     actionSettings = bar->addAction(QIcon(":/buttons/settings"), nullptr, this, SLOT(onShowSettingsClick()));
     actionSettings->setToolTip(tr("Edit settings"));
     QAction* actionAbout = bar->addAction(QIcon(":/buttons/about"), nullptr, this, SLOT(onShowAboutClick()));
-    actionAbout->setToolTip(tr("About berillyum"));
+    actionAbout->setToolTip(tr("About %1").arg(PRODUCT_FULL_NAME));
 
     return bar;
 }

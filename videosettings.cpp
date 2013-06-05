@@ -96,7 +96,7 @@ void VideoSettings::updateDeviceList()
 
     QGst::ElementPtr src = QGst::ElementFactory::make(PLATFORM_SPECIFIC_SOURCE);
     if (!src) {
-        QMessageBox::critical(this, windowTitle(), tr("Failed to create element \"%1\"").arg(PLATFORM_SPECIFIC_SOURCE));
+        QMessageBox::critical(this, windowTitle(), tr("Failed to create element '%1'").arg(PLATFORM_SPECIFIC_SOURCE));
         return;
     }
 

@@ -48,7 +48,7 @@ ArchiveWindow::ArchiveWindow(QWidget *parent) :
 {
     QBoxLayout* layoutMain = new QVBoxLayout;
 
-    QToolBar* barArchive = new QToolBar(tr("archive"));
+    QToolBar* barArchive = new QToolBar(tr("Archive"));
     barArchive->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     actionDelete = barArchive->addAction(QIcon(":buttons/delete"), tr("Delete"), this, SLOT(onDeleteClick()));
     actionDelete->setShortcut(Qt::Key_Delete);
@@ -82,7 +82,7 @@ ArchiveWindow::ArchiveWindow(QWidget *parent) :
 
     layoutMain->addWidget(barArchive);
 
-    barPath = new QToolBar(tr("path"));
+    barPath = new QToolBar(tr("Path"));
     layoutMain->addWidget(barPath);
 
     player = new QWidget;
@@ -93,7 +93,7 @@ ArchiveWindow::ArchiveWindow(QWidget *parent) :
     QBoxLayout* playerInnerLayout = new QHBoxLayout();
     playerInnerLayout->setContentsMargins(0,0,0,0);
 
-    auto barPrev = new QToolBar(tr("prev"));
+    auto barPrev = new QToolBar(tr("Previous"));
     auto btnPrev = new QToolButton;
     btnPrev->setIcon(QIcon(":buttons/prev"));
     btnPrev->setText(tr("Previous"));
@@ -109,7 +109,7 @@ ArchiveWindow::ArchiveWindow(QWidget *parent) :
     displayWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     playerInnerLayout->addWidget(displayWidget);
 
-    auto barNext = new QToolBar(tr("next"));
+    auto barNext = new QToolBar(tr("Next"));
     auto btnNext = new QToolButton;
     btnNext->setIcon(QIcon(":buttons/next"));
     btnNext->setText(tr("Next"));
@@ -122,7 +122,7 @@ ArchiveWindow::ArchiveWindow(QWidget *parent) :
 
     playerLayout->addLayout(playerInnerLayout);
 
-    barMediaControls = new QToolBar(tr("media"));
+    barMediaControls = new QToolBar(tr("Media"));
     auto actionSeekBack = barMediaControls->addAction(QIcon(":buttons/rewind"), tr("Rewing"), this, SLOT(onSeekClick()));
     actionSeekBack->setVisible(false);
     actionSeekBack->setData(-500000000);
@@ -518,7 +518,7 @@ void ArchiveWindow::playMediaFile(const QString& file)
 
 void ArchiveWindow::onBusMessage(const QGst::MessagePtr& message)
 {
-    qDebug() << message->typeName() << " " << message->source()->property("name").toString();
+    //qDebug() << message->typeName() << " " << message->source()->property("name").toString();
 
     switch (message->type())
     {
@@ -551,7 +551,8 @@ void ArchiveWindow::onBusMessage(const QGst::MessagePtr& message)
         break;
     case QGst::MessageEos:
         {
-            qDebug() << "EOS";
+            // Rewind to the start and pause the video
+            //
             QGst::SeekEventPtr evt = QGst::SeekEvent::create(
                  1.0, QGst::FormatTime, QGst::SeekFlagFlush,
                  QGst::SeekTypeSet, 0,
@@ -567,10 +568,12 @@ void ArchiveWindow::onBusMessage(const QGst::MessagePtr& message)
     case QGst::MessageQos:
     case QGst::MessageAsyncDone:
         {
-            QGst::SeekingQueryPtr queryLen = QGst::SeekingQuery::create(QGst::FormatTime);
-            pipeline->query(queryLen);
-            qDebug() << " seekable " << queryLen->seekable() << " format " << queryLen->format();
-            auto isClip = queryLen->seekable();
+            // At this time we finally is able to query is the pipeline seekable or not.
+            //
+            QGst::SeekingQueryPtr querySeek = QGst::SeekingQuery::create(QGst::FormatTime);
+            pipeline->query(querySeek);
+            qDebug() << " seekable " << querySeek->seekable() << " format " << querySeek->format();
+            auto isClip = querySeek->seekable();
             Q_FOREACH(auto action, barMediaControls->actions())
             {
                 action->setVisible(isClip);
@@ -589,7 +592,7 @@ void ArchiveWindow::onBusMessage(const QGst::MessagePtr& message)
 
 void ArchiveWindow::onStateChangedMessage(const QGst::StateChangedMessagePtr& message)
 {
-//    qDebug() << message->oldState() << " => " << message->newState();
+    //qDebug() << message->oldState() << " => " << message->newState();
 
     if (message->source() == pipeline)
     {
