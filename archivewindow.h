@@ -22,6 +22,7 @@ class ArchiveWindow : public QDialog
     QToolBar*              barMediaControls;
     QAction*               actionDelete;
     QAction*               actionPlay;
+    QAction*               actionMode;
     QListWidget*           listFiles;
     QGst::Ui::VideoWidget* displayWidget;
     QWidget*               player;
@@ -36,10 +37,13 @@ class ArchiveWindow : public QDialog
     void onBusMessage(const QGst::MessagePtr& message);
     void onStateChangedMessage(const QGst::StateChangedMessagePtr& message);
     void createSubDirMenu(QAction* parentAction);
+    void switchViewMode(int mode);
 
 public:
     explicit ArchiveWindow(QWidget *parent = 0);
     ~ArchiveWindow();
+protected:
+    virtual void closeEvent(QCloseEvent *);
 
 signals:
     
@@ -48,9 +52,11 @@ public slots:
     void setPath(const QString& path);
     void selectPath(QAction* action);
     void selectPath(bool);
-    void listItemSelected(QString item);
-    void onListClick();
-    void onGalleryClick();
+    void onListItemDoubleClicked(QListWidgetItem* item);
+    void onListRowChanged(int idx);
+    void onListKey();
+    void onSwitchModeClick();
+    void onSwitchModeClick(QAction* action);
     void onShowFolderClick();
     void onDeleteClick();
     void onPrevClick();

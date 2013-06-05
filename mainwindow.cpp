@@ -146,6 +146,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     setLayout(layoutMain);
 
+    QSettings settings;
+    restoreGeometry(settings.value("mainwindow-geometry").toByteArray());
+    setWindowState((Qt::WindowState)settings.value("mainwindow-state").toInt());
+
     updateStartButton();
     updateRecordButton();
     updateRecordAll();
@@ -181,9 +185,12 @@ void MainWindow::closeEvent(QCloseEvent *evt)
         worklist->close();
     }
 #endif
+
+    QSettings settings;
+    settings.setValue("mainwindow-geometry", saveGeometry());
+    settings.setValue("mainwindow-state", (int)windowState() & ~Qt::WindowMinimized);
     QWidget::closeEvent(evt);
 }
-
 
 QMenuBar* MainWindow::createMenuBar()
 {

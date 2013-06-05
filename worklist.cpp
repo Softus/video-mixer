@@ -77,6 +77,10 @@ Worklist::Worklist(QWidget *parent) :
 
     setMinimumSize(640, 480);
 
+    QSettings settings;
+    restoreGeometry(settings.value("worklist-geometry").toByteArray());
+    setWindowState((Qt::WindowState)settings.value("worklist-state").toInt());
+
     // Start loading of worklist right after the window is shown for the first time
     //
     QTimer::singleShot(0, this, SLOT(onLoadClick()));
@@ -152,6 +156,9 @@ void Worklist::closeEvent(QCloseEvent *evt)
         activeConnection->abort();
         activeConnection = nullptr;
     }
+    QSettings settings;
+    settings.setValue("worklist-geometry", saveGeometry());
+    settings.setValue("worklist-state", (int)windowState() & ~Qt::WindowMinimized);
     QWidget::closeEvent(evt);
 }
 

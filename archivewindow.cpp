@@ -30,11 +30,17 @@
 
 static QSize videoSize(352, 258);
 
-static QWidget* createSpacer()
+static void DamnQtMadeMeDoTheSunsetByHands(QToolBar* bar)
 {
-    auto spacer = new QWidget;
-    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    return spacer;
+    Q_FOREACH(auto action, bar->actions())
+    {
+        auto shortcut = action->shortcut();
+        if (!shortcut)
+        {
+            continue;
+        }
+        action->setToolTip(action->text() + " (" + shortcut.toString(QKeySequence::NativeText) + ")");
+    }
 }
 
 ArchiveWindow::ArchiveWindow(QWidget *parent) :
@@ -45,19 +51,35 @@ ArchiveWindow::ArchiveWindow(QWidget *parent) :
     QToolBar* barArchive = new QToolBar(tr("archive"));
     barArchive->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     actionDelete = barArchive->addAction(QIcon(":buttons/delete"), tr("Delete"), this, SLOT(onDeleteClick()));
+    actionDelete->setShortcut(Qt::Key_Delete);
     actionDelete->setEnabled(false);
 
-    barArchive->addAction(QIcon(":buttons/folder"), tr("File browser"), this, SLOT(onShowFolderClick()));
+    auto actionBrowse = barArchive->addAction(QIcon(":buttons/folder"), tr("File browser"), this, SLOT(onShowFolderClick()));
+    actionBrowse->setShortcut(Qt::Key_F2); // Same as the key that open this dialog
 
-    barArchive->addWidget(createSpacer());
+    auto spacer = new QWidget;
+    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    barArchive->addWidget(spacer);
 
-    QActionGroup* group = new QActionGroup(barArchive);
-    auto actionList = barArchive->addAction(QIcon(":buttons/list"), tr("List"), this, SLOT(onListClick()));
-    actionList->setCheckable(true);
-    group->addAction(actionList);
-    auto actionGallery = barArchive->addAction(QIcon(":buttons/gallery"), tr("Gallery"), this, SLOT(onGalleryClick()));
-    actionGallery->setCheckable(true);
-    group->addAction(actionGallery);
+    actionMode = new QAction(barArchive);
+    actionMode->setShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_0));
+    connect(actionMode, SIGNAL(triggered()), this, SLOT(onSwitchModeClick()));
+
+    auto menuMode = new QMenu;
+    connect(menuMode, SIGNAL(triggered(QAction*)), this, SLOT(onSwitchModeClick(QAction*)));
+    auto actionListMode = menuMode->addAction(QIcon(":buttons/list"), tr("List"));
+    actionListMode->setData(QListView::ListMode);
+    actionListMode->setShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_1));
+    auto actionIconMode = menuMode->addAction(QIcon(":buttons/icons"), tr("Icons"));
+    actionIconMode->setData(QListView::IconMode);
+    actionIconMode->setShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_2));
+    auto actionGalleryMode = menuMode->addAction(QIcon(":buttons/gallery"), tr("Gallery"));
+    actionGalleryMode->setData(2);
+    actionGalleryMode->setShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_3));
+
+    actionMode->setMenu(menuMode);
+    barArchive->addAction(actionMode);
+
     layoutMain->addWidget(barArchive);
 
     barPath = new QToolBar(tr("path"));
@@ -74,6 +96,8 @@ ArchiveWindow::ArchiveWindow(QWidget *parent) :
     auto barPrev = new QToolBar(tr("prev"));
     auto btnPrev = new QToolButton;
     btnPrev->setIcon(QIcon(":buttons/prev"));
+    btnPrev->setText(tr("Previous"));
+    btnPrev->setToolTip(btnPrev->text() + " (" + QKeySequence(Qt::Key_Right).toString(QKeySequence::NativeText) + ")");
     btnPrev->setMinimumHeight(200);
     btnPrev->setFocusPolicy(Qt::NoFocus);
     connect(btnPrev, SIGNAL(clicked()), this, SLOT(onPrevClick()));
@@ -88,6 +112,8 @@ ArchiveWindow::ArchiveWindow(QWidget *parent) :
     auto barNext = new QToolBar(tr("next"));
     auto btnNext = new QToolButton;
     btnNext->setIcon(QIcon(":buttons/next"));
+    btnNext->setText(tr("Next"));
+    btnNext->setToolTip(btnNext->text() + " (" + QKeySequence(Qt::Key_Left).toString(QKeySequence::NativeText) + ")");
     btnNext->setMinimumHeight(200);
     btnNext->setFocusPolicy(Qt::NoFocus);
     connect(btnNext, SIGNAL(clicked()), this, SLOT(onNextClick()));
@@ -97,14 +123,17 @@ ArchiveWindow::ArchiveWindow(QWidget *parent) :
     playerLayout->addLayout(playerInnerLayout);
 
     barMediaControls = new QToolBar(tr("media"));
-    auto actionSeekBack = barMediaControls->addAction(QIcon(":buttons/rewind"), nullptr, this, SLOT(onSeekClick()));
+    auto actionSeekBack = barMediaControls->addAction(QIcon(":buttons/rewind"), tr("Rewing"), this, SLOT(onSeekClick()));
     actionSeekBack->setVisible(false);
     actionSeekBack->setData(-500000000);
-    actionPlay = barMediaControls->addAction(QIcon(":buttons/record"), nullptr, this, SLOT(onPlayPauseClick()));
+    actionSeekBack->setShortcut(QKeySequence(Qt::ShiftModifier | Qt::Key_Left));
+    actionPlay = barMediaControls->addAction(QIcon(":buttons/record"), tr("Play"), this, SLOT(onPlayPauseClick()));
     actionPlay->setVisible(false);
-    auto actionSeekFwd = barMediaControls->addAction(QIcon(":buttons/forward"),  nullptr, this, SLOT(onSeekClick()));
+    actionPlay->setShortcut(QKeySequence(Qt::Key_Space));
+    auto actionSeekFwd = barMediaControls->addAction(QIcon(":buttons/forward"),  tr("Forward"), this, SLOT(onSeekClick()));
     actionSeekFwd->setVisible(false);
     actionSeekFwd->setData(+500000000);
+    actionSeekFwd->setShortcut(QKeySequence(Qt::ShiftModifier | Qt::Key_Right));
     barMediaControls->setMinimumSize(48, 48);
 
     playerLayout->addWidget(barMediaControls, 0, Qt::AlignHCenter);
@@ -117,26 +146,38 @@ ArchiveWindow::ArchiveWindow(QWidget *parent) :
     listFiles->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     listFiles->setMovement(QListView::Static);
     listFiles->setWrapping(false);
-    connect(listFiles, SIGNAL(currentTextChanged(QString)), this, SLOT(listItemSelected(QString)));
+    connect(listFiles, SIGNAL(currentRowChanged(int)), this, SLOT(onListRowChanged(int)));
+    connect(listFiles, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(onListItemDoubleClicked(QListWidgetItem*)));
+    auto actionEnter = new QAction(listFiles);
+    actionEnter->setShortcut(Qt::Key_Return);
+    connect(actionEnter, SIGNAL(triggered()), this, SLOT(onListKey()));
+    listFiles->addAction(actionEnter);
     layoutMain->addWidget(listFiles);
 
     setLayout(layoutMain);
+
+    QSettings settings;
+    restoreGeometry(settings.value("archive-geometry").toByteArray());
+    setWindowState((Qt::WindowState)settings.value("archive-state").toInt());
+
     setAttribute(Qt::WA_DeleteOnClose, false);
-    if (QSettings().value("show-gallery").toBool())
-    {
-        actionGallery->setChecked(true);
-        onGalleryClick();
-    }
-    else
-    {
-        actionList->setChecked(true);
-        onListClick();
-    }
+    switchViewMode(settings.value("archive-mode").toInt());
+
+    DamnQtMadeMeDoTheSunsetByHands(barArchive);
+    DamnQtMadeMeDoTheSunsetByHands(barMediaControls);
 }
 
 ArchiveWindow::~ArchiveWindow()
 {
     stopMedia();
+}
+
+void ArchiveWindow::closeEvent(QCloseEvent *evt)
+{
+    QSettings settings;
+    settings.setValue("archive-geometry", saveGeometry());
+    settings.setValue("archive-state", (int)windowState() & ~Qt::WindowMinimized);
+    QWidget::closeEvent(evt);
 }
 
 void ArchiveWindow::setRoot(const QString& path)
@@ -148,6 +189,7 @@ void ArchiveWindow::setPath(const QString& path)
 {
     curr.setPath(path);
     updatePath();
+    listFiles->setCurrentRow(0);
 }
 
 void ArchiveWindow::createSubDirMenu(QAction* parentAction)
@@ -204,14 +246,13 @@ void ArchiveWindow::updateList()
 {
     QFileIconProvider fip;
 
-    listFiles->clearFocus();
-    listFiles->clear();
     listFiles->setUpdatesEnabled(false);
+    listFiles->clear();
     QFlags<QDir::Filter> filter = QDir::NoDot | QDir::AllEntries;
 
     // No "parent folder" item in gallery mode and on the root
     //
-    if (curr == root || player->isVisible())
+    if (curr == root || actionMode->data().toInt() == 2)
     {
         filter |= QDir::NoDotDot;
     }
@@ -256,11 +297,6 @@ void ArchiveWindow::updateList()
     }
 
     listFiles->setUpdatesEnabled(true);
-
-    if (player->isVisible())
-    {
-        listFiles->setCurrentRow(0);
-    }
 }
 
 void ArchiveWindow::selectPath(QAction* action)
@@ -273,51 +309,82 @@ void ArchiveWindow::selectPath(bool)
     selectPath(static_cast<QAction*>(sender()));
 }
 
-void ArchiveWindow::listItemSelected(QString item)
+void ArchiveWindow::onListRowChanged(int idx)
 {
-    if (item.isEmpty())
+    actionDelete->setEnabled(idx >= 0);
+    if (actionMode->data().toInt() == 2 && idx >= 0)
     {
-        actionDelete->setEnabled(false);
-        return;
+        playMediaFile(curr.absoluteFilePath(listFiles->item(idx)->text()));
     }
+}
 
-    QFileInfo fi(curr.absoluteFilePath(item));
+void ArchiveWindow::onListItemDoubleClicked(QListWidgetItem* item)
+{
+    QFileInfo fi(curr.absoluteFilePath(item->text()));
     if (fi.isDir())
     {
-        actionDelete->setEnabled(fi.fileName() != "..");
         setPath(fi.absoluteFilePath());
     }
     else
     {
-        actionDelete->setEnabled(true);
         playMediaFile(fi.absoluteFilePath());
     }
 }
 
-void ArchiveWindow::onListClick()
+void ArchiveWindow::onListKey()
 {
-    QSettings().setValue("show-gallery", false);
-    player->setVisible(false);
-    listFiles->setViewMode(QListView::ListMode);
-    listFiles->setIconSize(QSize(32, 32));
-    listFiles->setMaximumHeight(QWIDGETSIZE_MAX);
-    listFiles->setMinimumSize(videoSize);
-    listFiles->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    barPath->setVisible(true);
+    auto item = listFiles->currentItem();
+    if (item)
+    {
+        onListItemDoubleClicked(item);
+    }
+}
+
+void ArchiveWindow::switchViewMode(int mode)
+{
+    auto action = actionMode->menu()->actions().at(mode);
+
+    actionMode->setIcon(action->icon());
+    actionMode->setText(action->text());
+    actionMode->setData(action->data());
+    actionMode->menu()->setDefaultAction(action);
+
+    QSettings().setValue("archive-mode", mode);
+
+    if (mode == 2)
+    {
+        barPath->setVisible(false);
+        listFiles->setViewMode(QListView::IconMode);
+        listFiles->setMaximumHeight(160);
+        listFiles->setMinimumHeight(144);
+        listFiles->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+        player->setVisible(true);
+    }
+    else
+    {
+        player->setVisible(false);
+        listFiles->setViewMode((QListView::ViewMode)mode);
+        listFiles->setMaximumHeight(QWIDGETSIZE_MAX);
+        listFiles->setMinimumSize(videoSize);
+        listFiles->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        barPath->setVisible(true);
+    }
+
+    listFiles->setIconSize(mode == QListView::ListMode? QSize(32, 32): QSize(144, 144));
+
     updateList();
 }
 
-void ArchiveWindow::onGalleryClick()
+void ArchiveWindow::onSwitchModeClick()
 {
-    QSettings().setValue("show-gallery", true);
-    barPath->setVisible(false);
-    listFiles->setViewMode(QListView::IconMode);
-    listFiles->setIconSize(QSize(144, 144));
-    listFiles->setMaximumHeight(160);
-    listFiles->setMinimumHeight(144);
-    listFiles->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    player->setVisible(true);
-    updateList();
+    auto count = actionMode->menu()->actions().size();
+    auto currMode = actionMode->data().toInt();
+    switchViewMode(++currMode % count);
+}
+
+void ArchiveWindow::onSwitchModeClick(QAction* action)
+{
+    switchViewMode(action->data().toInt());
 }
 
 void ArchiveWindow::onShowFolderClick()
@@ -387,17 +454,7 @@ void ArchiveWindow::onSeekClick()
     QGst::DurationQueryPtr queryLen = QGst::DurationQuery::create(QGst::FormatTime);
     pipeline->query(queryLen);
 
-    QGst::SegmentQueryPtr querySeg = QGst::SegmentQuery::create(QGst::FormatTime);
-    pipeline->query(querySeg);
-
-    qDebug() << "rate " << querySeg->rate() << "type " << querySeg->format()
-             << "start " << querySeg->startValue() << "stop " << querySeg->stopValue();
-
-    auto delta = static_cast<QAction*>(sender())->data().toInt();
-    auto newPos = queryPos->position() + delta;
-
-    qDebug() << "POS " << queryPos->position() << "type " << queryPos->format()
-             << "LEN " << queryLen->duration() << "type " << queryLen->format() << " new " << newPos;
+    auto newPos = queryPos->position() + static_cast<QAction*>(sender())->data().toInt();
 
     if (newPos >= 0 && newPos < queryLen->duration())
     {
@@ -431,12 +488,12 @@ void ArchiveWindow::stopMedia()
 
 void ArchiveWindow::playMediaFile(const QString& file)
 {
-    stopMedia();
-
-    if (!player->isVisible())
+    if (actionMode->data().toInt() != 2)
     {
-        return;
+        switchViewMode(2);
     }
+
+    stopMedia();
 
     try
     {
@@ -538,6 +595,10 @@ void ArchiveWindow::onStateChangedMessage(const QGst::StateChangedMessagePtr& me
     {
         if (message->oldState() == QGst::StateReady && message->newState() == QGst::StatePaused)
         {
+            // The pipeline now in paused state.
+            // At this time we still don't know, is it a clip or a picture.
+            // So, seek a bit forward to figure it out.
+            //
             QGst::SeekEventPtr evt = QGst::SeekEvent::create(
                  1.0, QGst::FormatTime, QGst::SeekFlagFlush,
                  QGst::SeekTypeCur, 0,
@@ -547,6 +608,9 @@ void ArchiveWindow::onStateChangedMessage(const QGst::StateChangedMessagePtr& me
             pipeline->sendEvent(evt);
         }
 
+        // Make sure the play/pause button is in consistent state
+        //
         actionPlay->setIcon(QIcon(message->newState() == QGst::StatePlaying? ":buttons/pause": ":buttons/record"));
+        actionPlay->setText(message->newState() == QGst::StatePlaying? tr("Pause"): tr("Play"));
     }
 }
