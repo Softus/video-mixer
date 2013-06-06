@@ -41,6 +41,7 @@ class MainWindow : public QWidget
     QAction*     actionSettings;
     ArchiveWindow* archiveWindow;
 #ifdef WITH_DICOM
+    QAction*      actionWorklist;
     Worklist*     worklist;
     QString       pendingSOPInstanceUID;
 #endif

@@ -3,24 +3,40 @@
 #include <QCheckBox>
 #include <QFormLayout>
 #include <QLineEdit>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QRadioButton>
+#include <QSettings>
 #include <QSpinBox>
+
+#ifdef QT_DEBUG
+#define DEFAULT_TIMEOUT 3 // 3 seconds for test builds
+#else
+#define DEFAULT_TIMEOUT 30 // 30 seconds for prodaction builds
+#endif
 
 DicomServerDetails::DicomServerDetails(QWidget *parent) :
     QDialog(parent)
 {
     QFormLayout* layoutMain = new QFormLayout;
-    layoutMain->addRow(tr("&Name"), new QLineEdit);
-    layoutMain->addRow(tr("&AE title"), new QLineEdit);
-    layoutMain->addRow(tr("&IP address"), new QLineEdit);
-    layoutMain->addRow(tr("&Port"), new QLineEdit);
-    layoutMain->addRow(tr("Time&out"), new QSpinBox);
-    layoutMain->addRow(nullptr, new QCheckBox(tr("&Echo")));
+    layoutMain->addRow(tr("&Name"), textName = new QLineEdit);
+    layoutMain->addRow(tr("&AE title"), textAet = new QLineEdit);
+    connect(textAet, SIGNAL(editingFinished()), this, SLOT(onAetChanged()));
+    layoutMain->addRow(tr("&IP address"), textIp = new QLineEdit);
+    layoutMain->addRow(tr("&Port"), spinPort = new QSpinBox);
+    spinPort->setRange(0, 65535);
+    layoutMain->addRow(tr("Time&out"), spinTimeout = new QSpinBox);
+    spinTimeout->setValue(DEFAULT_TIMEOUT);
+    spinTimeout->setSuffix(tr(" seconds"));
+    spinTimeout->setRange(0, 600000);
+    spinTimeout->setSingleStep(500);
+    layoutMain->addRow(nullptr, checkEcho = new QCheckBox(tr("&Echo")));
+    checkEcho->setChecked(true);
 
     QHBoxLayout* layoutSopClass = new QHBoxLayout;
-    layoutSopClass->addWidget(new QRadioButton(tr("Ne&w")));
-    layoutSopClass->addWidget(new QRadioButton(tr("&Retire")));
+    layoutSopClass->addWidget(radioNew = new QRadioButton(tr("Ne&w")));
+    radioNew->setChecked(true);
+    layoutSopClass->addWidget(radioRetire = new QRadioButton(tr("&Retire")));
     layoutSopClass->addStretch(1);
     layoutMain->addRow(tr("SOP class"), layoutSopClass);
     layoutMain->addItem(new QSpacerItem(30,30));
@@ -33,16 +49,57 @@ DicomServerDetails::DicomServerDetails(QWidget *parent) :
     QPushButton *btnCancel = new QPushButton(tr("Reject"));
     connect(btnCancel, SIGNAL(clicked()), this, SLOT(reject()));
     layoutBtns->addWidget(btnCancel);
-    QPushButton *btnOk = new QPushButton(tr("Save"));
-    connect(btnOk, SIGNAL(clicked()), this, SLOT(accept()));
-    btnOk->setDefault(true);
-    layoutBtns->addWidget(btnOk);
+    btnSave = new QPushButton(tr("Save"));
+    connect(btnSave, SIGNAL(clicked()), this, SLOT(accept()));
+    btnSave->setEnabled(false);
+    btnSave->setDefault(true);
+    layoutBtns->addWidget(btnSave);
     layoutMain->addRow(layoutBtns);
 
     setLayout(layoutMain);
 }
 
+void DicomServerDetails::setValues(const QString& aet, const QStringList& values)
+{
+    textAet->setText(aet);
+    btnSave->setEnabled(!aet.isEmpty());
+
+    if (values.count() > 0)
+        textName->setText(values.at(0));
+    if (values.count() > 1)
+        textIp->setText(values.at(1));
+    if (values.count() > 2)
+        spinPort->setValue(values.at(2).toInt());
+    if (values.count() > 3)
+        spinTimeout->setValue(values.at(3).toInt());
+    if (values.count() > 4)
+        checkEcho->setChecked(values.at(4) == "Echo");
+    if (values.count() > 5)
+        radioNew->setChecked(values.at(5) == "New");
+
+    radioRetire->setChecked(!radioNew->isChecked());
+}
+
+QString DicomServerDetails::aet() const
+{
+    return textAet->text();
+}
+
+QStringList DicomServerDetails::values() const
+{
+    return QStringList() << textName->text() << textIp->text()
+        << QString::number(spinPort->value()) << QString::number(spinTimeout->value())
+        << QString(checkEcho->isChecked()? "Echo": "No echo")
+        << QString(radioNew->isChecked()? "New": "Retire")
+        ;
+}
+
 void DicomServerDetails::onClickTest()
 {
+    QMessageBox::information(this, windowTitle(), "Not implemented, sorry");
+}
 
+void DicomServerDetails::onAetChanged()
+{
+    btnSave->setEnabled(!textAet->text().isEmpty());
 }

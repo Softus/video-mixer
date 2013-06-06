@@ -41,6 +41,9 @@ static void populateTree(DcmObject* parent, QTreeWidgetItem* parentItem)
 DetailsDialog::DetailsDialog(DcmDataset* ds, QWidget *parent) :
     QDialog(parent)
 {
+    setWindowTitle(tr("Details"));
+    setMinimumSize(720, 480);
+
     QTreeWidget* tree = new QTreeWidget();
     QStringList hdr;
     hdr << tr("Tag name") << tr("Code") << tr("VR") << tr("Value");
@@ -56,7 +59,4 @@ DetailsDialog::DetailsDialog(DcmDataset* ds, QWidget *parent) :
     auto layout = new QVBoxLayout();
     layout->addWidget(tree);
     setLayout(layout);
-#ifndef QT_DEBUG
-    setWindowState(Qt::WindowMaximized);
-#endif
 }

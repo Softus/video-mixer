@@ -28,10 +28,16 @@ PatientDialog::PatientDialog(QWidget *parent) :
 
     QHBoxLayout *layoutBtns = new QHBoxLayout;
     layoutBtns->addStretch(1);
-    QPushButton *btnStart = new QPushButton(tr("Start study"));
+
+    auto *btnReject = new QPushButton(tr("Reject"));
+    connect(btnReject, SIGNAL(clicked()), this, SLOT(reject()));
+    layoutBtns->addWidget(btnReject);
+
+    auto btnStart = new QPushButton(tr("Start study"));
     connect(btnStart, SIGNAL(clicked()), this, SLOT(accept()));
     btnStart->setDefault(true);
     layoutBtns->addWidget(btnStart);
+
     layoutMain->addRow(layoutBtns);
 
     setLayout(layoutMain);

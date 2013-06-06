@@ -35,9 +35,6 @@ StartStudyDialog::StartStudyDialog(Worklist* worklist, QWidget *parent) :
     connect(btnStart, SIGNAL(clicked()), this, SLOT(accept()));
     layout->addWidget(btnStart);
     setLayout(layout);
-#ifndef QT_DEBUG
-    setWindowState(Qt::WindowMaximized);
-#endif
 }
 
 void StartStudyDialog::done(int result)

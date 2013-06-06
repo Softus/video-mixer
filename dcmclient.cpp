@@ -229,38 +229,34 @@ T_ASC_Parameters* DcmClient::initAssocParams(const char * transferSyntax)
     QSettings settings;
     QString missedParameter = tr("Required settings parameter %1 is missing");
 
-    QString calledPeerAddress = settings.value("peer").toString();
-    if (calledPeerAddress.isEmpty())
+    auto mwlServer = settings.value("mwl-server").toString();
+    if (mwlServer.isEmpty())
     {
-        cond = new OFConditionString(0, 2, OF_error, missedParameter.arg("peer").toLocal8Bit());
+        cond = new OFConditionString(0, 2, OF_error, missedParameter.arg("mwl-server").toLocal8Bit());
         return nullptr;
     }
-    QString callingAPTitle = settings.value("aet", qApp->applicationName().toUpper()).toString();
-    if (callingAPTitle.isEmpty())
+
+    auto values = settings.value("servers/" + mwlServer).toStringList();
+    if (values.count() < 6)
     {
-        cond = new OFConditionString(0, 3, OF_error, missedParameter.arg("aet").toLocal8Bit());
+        cond = new OFConditionString(0, 2, OF_error, missedParameter.arg("servers/" + mwlServer).toLocal8Bit());
         return nullptr;
     }
-    QString calledAPTitle = settings.value("peer-aet").toString();
-    if (calledAPTitle.isEmpty())
-    {
-        cond = new OFConditionString(0, 4, OF_error, missedParameter.arg("peer-aet").toLocal8Bit());
-        return nullptr;
-    }
+
 
     DIC_NODENAME localHost;
     T_ASC_Parameters* params = nullptr;
 
-    int timeout = settings.value("timeout", DEFAULT_TIMEOUT).toInt();
-    int port    = settings.value("port", 0).toInt();
-    cond = ASC_initializeNetwork(NET_REQUESTOR, port, timeout, &net);
+    QString calledPeerAddress = QString("%1:%2").arg(values[1], values[2]);
+    int timeout = values[3].toInt();
 
+    cond = ASC_initializeNetwork(NET_REQUESTOR, settings.value("local-port").toInt(), timeout, &net);
     if (cond.good())
     {
         cond = ASC_createAssociationParameters(&params, settings.value("pdu-size", ASC_DEFAULTMAXPDU).toInt());
         if (cond.good())
         {
-            ASC_setAPTitles(params, callingAPTitle.toUtf8(), calledAPTitle.toUtf8(), nullptr);
+            ASC_setAPTitles(params, settings.value("aet").toString().toUtf8(), mwlServer.toUtf8(), nullptr);
 
             /* Figure out the presentation addresses and copy the */
             /* corresponding values into the DcmAssoc parameters.*/

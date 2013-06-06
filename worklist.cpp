@@ -47,21 +47,24 @@ Worklist::Worklist(QWidget *parent) :
     QWidget(parent),
     activeConnection(nullptr)
 {
+    setWindowTitle(tr("Worklist"));
+
     const QString columnNames[] =
     {
-    tr("ID"),
-    tr("Name"),
-    tr("Birth date"),
-    tr("Sex"),
-    tr("Description"),
-    tr("Date"),
-    tr("Time"),
-    tr("Physician"),
-    tr("Status"),
+        tr("ID"),
+        tr("Name"),
+        tr("Birth date"),
+        tr("Sex"),
+        tr("Description"),
+        tr("Date"),
+        tr("Time"),
+        tr("Physician"),
+        tr("Status"),
     };
 
     size_t columns = sizeof(columnNames)/sizeof(columnNames[0]);
     table = new QTableWidget(0, columns);
+    connect(table, SIGNAL(itemDoubleClicked(QTableWidgetItem*)), this, SLOT(onCellDoubleClicked(QTableWidgetItem*)));
     for (size_t i = 0; i < columns; ++i)
     {
         auto columnHeader = new QTableWidgetItem(columnNames[i]);
@@ -206,6 +209,12 @@ void Worklist::onShowDetailsClick()
     auto ds = table->item(row, 0)->data(Qt::UserRole).value<DcmDataset>();
     DetailsDialog dlg(&ds, this);
     dlg.exec();
+}
+
+void Worklist::onCellDoubleClicked(QTableWidgetItem* item)
+{
+    table->setCurrentItem(item);
+    onShowDetailsClick();
 }
 
 void Worklist::onStartStudyClick()

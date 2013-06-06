@@ -203,7 +203,7 @@ QMenuBar* MainWindow::createMenuBar()
     actionAbout->setMenuRole(QAction::AboutRole);
     mnu->addAction(tr("&Archive"), this, SLOT(onShowArchiveClick()), Qt::Key_F2);
 #ifdef WITH_DICOM
-    mnu->addAction(tr("&Worlkist"), this, SLOT(onShowWorklistClick()), Qt::Key_F3);
+    actionWorklist = mnu->addAction(QIcon(":/buttons/show_worklist"), tr("&Worlkist"), this, SLOT(onShowWorkListClick()), Qt::Key_F3);
 #endif
     mnu->addSeparator();
     auto actionRtp = mnu->addAction(tr("&Enable RTP streaming"), this, SLOT(toggleSetting()));
@@ -234,7 +234,7 @@ QToolBar* MainWindow::createToolBar()
     btnStart = new QToolButton();
     btnStart->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     btnStart->setFocusPolicy(Qt::NoFocus);
-    btnStart->setMinimumWidth(180);
+    btnStart->setMinimumWidth(175);
     connect(btnStart, SIGNAL(clicked()), this, SLOT(onStartClick()));
     bar->addWidget(btnStart);
 
@@ -243,18 +243,19 @@ QToolBar* MainWindow::createToolBar()
     btnSnapshot->setFocusPolicy(Qt::NoFocus);
     btnSnapshot->setIcon(QIcon(":/buttons/camera"));
     btnSnapshot->setText(tr("&Take snapshot"));
-    btnSnapshot->setMinimumWidth(180);
+    btnSnapshot->setMinimumWidth(175);
     connect(btnSnapshot, SIGNAL(clicked()), this, SLOT(onSnapshotClick()));
     bar->addWidget(btnSnapshot);
 
     btnRecord = new QToolButton();
     btnRecord->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     btnRecord->setFocusPolicy(Qt::NoFocus);
-    btnRecord->setMinimumWidth(180);
+    btnRecord->setMinimumWidth(175);
     connect(btnRecord, SIGNAL(clicked()), this, SLOT(onRecordClick()));
     bar->addWidget(btnRecord);
 
     QWidget* spacer = new QWidget;
+    spacer->setMinimumWidth(1);
     spacer->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
     bar->addWidget(spacer);
 
@@ -264,15 +265,16 @@ QToolBar* MainWindow::createToolBar()
     bar->addWidget(lblRecordAll);
 
 #ifdef WITH_DICOM
-    QAction* actionWorklist = bar->addAction(QIcon(":/buttons/show_worklist"), nullptr, this, SLOT(onShowWorkListClick()));
-    actionWorklist->setToolTip(tr("Show &work list"));
+//    QAction* actionWorklist = bar->addAction(QIcon(":/buttons/show_worklist"), tr("Worklist"), this, SLOT(onShowWorkListClick()));
+//    actionWorklist->setToolTip(tr("Show work list"));
+    bar->addAction(actionWorklist);
 #endif
 
-    QAction* actionArchive = bar->addAction(QIcon(":/buttons/database"), nullptr, this, SLOT(onShowArchiveClick()));
+    QAction* actionArchive = bar->addAction(QIcon(":/buttons/database"), tr("Archive"), this, SLOT(onShowArchiveClick()));
     actionArchive->setToolTip(tr("Show studies archive"));
-    actionSettings = bar->addAction(QIcon(":/buttons/settings"), nullptr, this, SLOT(onShowSettingsClick()));
+    actionSettings = bar->addAction(QIcon(":/buttons/settings"), tr("Preferences"), this, SLOT(onShowSettingsClick()));
     actionSettings->setToolTip(tr("Edit settings"));
-    QAction* actionAbout = bar->addAction(QIcon(":/buttons/about"), nullptr, this, SLOT(onShowAboutClick()));
+    QAction* actionAbout = bar->addAction(QIcon(":/buttons/about"), tr("About"), this, SLOT(onShowAboutClick()));
     actionAbout->setToolTip(tr("About %1").arg(PRODUCT_FULL_NAME));
 
     return bar;
@@ -609,6 +611,10 @@ void MainWindow::updatePipeline()
     {
         archiveWindow->setRoot(settings.value("output-path", "/video").toString());
     }
+
+#ifdef WITH_DICOM
+    actionWorklist->setEnabled(!settings.value("mwl-server").toString().isEmpty());
+#endif
 }
 
 void MainWindow::releasePipeline()

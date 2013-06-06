@@ -18,9 +18,10 @@ unix {
 }
 
 dicom {
-    DEFINES += WITH_DICOM
-    LIBS += -ldcmnet -lwrap -li2d -ldcmdata -loflog -lofstd -lssl
-    SOURCES += worklist.cpp startstudydialog.cpp dcmclient.cpp detailsdialog.cpp \
+    QT       += network
+    DEFINES  += WITH_DICOM
+    LIBS     += -ldcmnet -lwrap -li2d -ldcmdata -loflog -lofstd -lssl
+    SOURCES  += worklist.cpp startstudydialog.cpp dcmclient.cpp detailsdialog.cpp \
     dicomdevicesettings.cpp \
     dicomserversettings.cpp \
     dicommwlsettings.cpp \

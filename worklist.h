@@ -7,6 +7,7 @@
 QT_BEGIN_NAMESPACE
 class QBoxLayout;
 class QTableWidget;
+class QTableWidgetItem;
 class QToolBar;
 QT_END_NAMESPACE
 
@@ -45,6 +46,7 @@ public slots:
     void onLoadClick();
     void onShowDetailsClick();
     void onStartStudyClick();
+    void onCellDoubleClicked(QTableWidgetItem* item);
     void onAddRow(DcmDataset* responseIdentifiers);
 };
 
