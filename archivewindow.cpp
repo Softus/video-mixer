@@ -125,14 +125,14 @@ ArchiveWindow::ArchiveWindow(QWidget *parent) :
     barMediaControls = new QToolBar(tr("Media"));
     auto actionSeekBack = barMediaControls->addAction(QIcon(":buttons/rewind"), tr("Rewing"), this, SLOT(onSeekClick()));
     actionSeekBack->setVisible(false);
-    actionSeekBack->setData(-500000000);
+    actionSeekBack->setData(-10000000);
     actionSeekBack->setShortcut(QKeySequence(Qt::ShiftModifier | Qt::Key_Left));
     actionPlay = barMediaControls->addAction(QIcon(":buttons/record"), tr("Play"), this, SLOT(onPlayPauseClick()));
     actionPlay->setVisible(false);
     actionPlay->setShortcut(QKeySequence(Qt::Key_Space));
     auto actionSeekFwd = barMediaControls->addAction(QIcon(":buttons/forward"),  tr("Forward"), this, SLOT(onSeekClick()));
     actionSeekFwd->setVisible(false);
-    actionSeekFwd->setData(+500000000);
+    actionSeekFwd->setData(+10000000);
     actionSeekFwd->setShortcut(QKeySequence(Qt::ShiftModifier | Qt::Key_Right));
     barMediaControls->setMinimumSize(48, 48);
 
@@ -542,13 +542,6 @@ void ArchiveWindow::onBusMessage(const QGst::MessagePtr& message)
             QMessageBox::critical(this, windowTitle(), msg, QMessageBox::Ok);
         }
         break;
-#ifdef QT_DEBUG
-    case QGst::MessageInfo:
-        qDebug() << message->source()->property("name").toString() << " " << message.staticCast<QGst::InfoMessage>()->error();
-        break;
-    case QGst::MessageWarning:
-        qDebug() << message->source()->property("name").toString() << " " << message.staticCast<QGst::WarningMessage>()->error();
-        break;
     case QGst::MessageEos:
         {
             // Rewind to the start and pause the video
@@ -563,16 +556,13 @@ void ArchiveWindow::onBusMessage(const QGst::MessagePtr& message)
             pipeline->setState(QGst::StatePaused);
         }
         break;
-    case QGst::MessageNewClock:
-    case QGst::MessageStreamStatus:
-    case QGst::MessageQos:
     case QGst::MessageAsyncDone:
         {
             // At this time we finally is able to query is the pipeline seekable or not.
             //
             QGst::SeekingQueryPtr querySeek = QGst::SeekingQuery::create(QGst::FormatTime);
             pipeline->query(querySeek);
-            qDebug() << " seekable " << querySeek->seekable() << " format " << querySeek->format();
+            //qDebug() << " seekable " << querySeek->seekable() << " format " << querySeek->format();
             auto isClip = querySeek->seekable();
             Q_FOREACH(auto action, barMediaControls->actions())
             {
@@ -580,6 +570,16 @@ void ArchiveWindow::onBusMessage(const QGst::MessagePtr& message)
             }
         }
         break;
+#ifdef QT_DEBUG
+    case QGst::MessageInfo:
+        qDebug() << message->source()->property("name").toString() << " " << message.staticCast<QGst::InfoMessage>()->error();
+        break;
+    case QGst::MessageWarning:
+        qDebug() << message->source()->property("name").toString() << " " << message.staticCast<QGst::WarningMessage>()->error();
+        break;
+    case QGst::MessageNewClock:
+    case QGst::MessageStreamStatus:
+    case QGst::MessageQos:
     default:
         qDebug() << message->type();
         break;
