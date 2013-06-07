@@ -38,7 +38,9 @@ class MainWindow : public QWidget
     QToolButton* btnStart;
     QToolButton* btnRecord;
     QToolButton* btnSnapshot;
+    QAction*     actionAbout;
     QAction*     actionSettings;
+    QAction*     actionArchive;
     ArchiveWindow* archiveWindow;
 #ifdef WITH_DICOM
     QAction*      actionWorklist;

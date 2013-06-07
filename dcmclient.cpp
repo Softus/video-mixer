@@ -36,9 +36,15 @@ static void CopyPatientData(/*const*/ DcmDataset* src, DcmDataset* dst)
 static void BuildCFindDataSet(DcmDataset& ds)
 {
     QSettings settings;
-    QString modality = settings.value("modality").toString().toUpper();
-    QString aet = settings.value("aet", qApp->applicationName().toUpper()).toString();
-    bool filterByDate = settings.value("filter-by-date", true).toBool();
+    QString modality = settings.value("worklist-modality").toString().toUpper();
+    QString aet = settings.value("worklist-aet").toString();
+    if (aet.isEmpty())
+    {
+        aet = settings.value("aet").toString();
+        if (aet.isEmpty())
+            aet = qApp->applicationName().toUpper();
+    }
+    auto scheduledDate = settings.value("worklist-by-date", 1).toInt();
 
     ds.putAndInsertString(DCM_SpecificCharacterSet, "ISO_IR 192"); // UTF-8
     ds.insertEmptyElement(DCM_AccessionNumber);
@@ -58,15 +64,32 @@ static void BuildCFindDataSet(DcmDataset& ds)
     {
         sps->putAndInsertString(DCM_Modality, modality.toUtf8());
         sps->putAndInsertString(DCM_ScheduledStationAETitle, aet.toUtf8());
-        if (filterByDate)
+        switch (scheduledDate)
         {
-            sps->putAndInsertString(DCM_ScheduledProcedureStepStartDate,
-                QDate::currentDate().toString("yyyyMMdd").toAscii());
-        }
-        else
-        {
+        case 0: // Everything
             sps->insertEmptyElement(DCM_ScheduledProcedureStepStartDate);
+            break;
+        case 1: // Today
+            sps->putAndInsertString(DCM_ScheduledProcedureStepStartDate,
+                QDate::currentDate().toString("yyyyMMdd").toUtf8());
+            break;
+        case 2: // Today +- days
+            {
+                auto deltaDays = settings.value("worklist-delta", 30).toInt();
+                auto range = QDate::currentDate().addDays(-deltaDays).toString("yyyyMMdd") + "-" +
+                    QDate::currentDate().addDays(+deltaDays).toString("yyyyMMdd");
+                sps->putAndInsertString(DCM_ScheduledProcedureStepStartDate, range.toUtf8());
+            }
+            break;
+        case 3: // From .. to
+            {
+                auto range = settings.value("worklist-from").toDate().toString("yyyyMMdd") + "-" +
+                    settings.value("worklist-to").toDate().toString("yyyyMMdd");
+                sps->putAndInsertString(DCM_ScheduledProcedureStepStartDate, range.toUtf8());
+            }
+            break;
         }
+
         sps->insertEmptyElement(DCM_ScheduledProcedureStepStartTime);
         sps->insertEmptyElement(DCM_ScheduledPerformingPhysicianName);
         sps->insertEmptyElement(DCM_ScheduledProcedureStepDescription);
@@ -86,10 +109,10 @@ static void BuildCStoreDataSet(/*const*/ DcmDataset& patientDs, DcmDataset& cSto
     CopyPatientData(&patientDs, &cStoreDs);
 
     patientDs.findAndInsertCopyOfElement(DCM_StudyInstanceUID, &cStoreDs);
-    cStoreDs.putAndInsertString(DCM_SeriesInstanceUID, seriesUID.toAscii());
+    cStoreDs.putAndInsertString(DCM_SeriesInstanceUID, seriesUID.toUtf8());
 
-    cStoreDs.putAndInsertString(DCM_StudyDate, now.toString("yyyyMMdd").toAscii());
-    cStoreDs.putAndInsertString(DCM_StudyTime, now.toString("HHmmss").toAscii());
+    cStoreDs.putAndInsertString(DCM_StudyDate, now.toString("yyyyMMdd").toUtf8());
+    cStoreDs.putAndInsertString(DCM_StudyTime, now.toString("HHmmss").toUtf8());
 
     cStoreDs.putAndInsertString(DCM_Manufacturer, ORGANIZATION_FULL_NAME);
     cStoreDs.putAndInsertString(DCM_ManufacturerModelName, PRODUCT_FULL_NAME);
@@ -110,13 +133,13 @@ static void BuildNCreateDataSet(/*const*/ DcmDataset& patientDs, DcmDataset& nCr
     // The SCU have to create it but it doesn't have to be unique and the SCP
     // should not relay on its uniqueness. Here we use a timestamp
     //
-    nCreateDs.putAndInsertString(DCM_PerformedProcedureStepID, now.toString("yyyyMMddHHmmsszzz").toAscii());
+    nCreateDs.putAndInsertString(DCM_PerformedProcedureStepID, now.toString("yyyyMMddHHmmsszzz").toUtf8());
     nCreateDs.putAndInsertString(DCM_PerformedStationAETitle, aet.toUtf8());
 
     nCreateDs.insertEmptyElement(DCM_PerformedStationName);
     nCreateDs.insertEmptyElement(DCM_PerformedLocation);
-    nCreateDs.putAndInsertString(DCM_PerformedProcedureStepStartDate, now.toString("yyyyMMdd").toAscii());
-    nCreateDs.putAndInsertString(DCM_PerformedProcedureStepStartTime, now.toString("HHmmss").toAscii());
+    nCreateDs.putAndInsertString(DCM_PerformedProcedureStepStartDate, now.toString("yyyyMMdd").toUtf8());
+    nCreateDs.putAndInsertString(DCM_PerformedProcedureStepStartTime, now.toString("HHmmss").toUtf8());
     // Initial status must be 'IN PROGRESS'
     //
     nCreateDs.putAndInsertString(DCM_PerformedProcedureStepStatus, "IN PROGRESS");
@@ -164,8 +187,8 @@ static QString BuildNSetDataSet(/*const*/ DcmDataset& patientDs, DcmDataset& nSe
     dcmGenerateUniqueIdentifier(seriesUID, SITE_SERIES_UID_ROOT);
 
     nSetDs.putAndInsertString(DCM_PerformedProcedureStepStatus, completed ? "COMPLETED" : "DISCONTINUED");
-    nSetDs.putAndInsertString(DCM_PerformedProcedureStepEndDate, now.toString("yyyyMMdd").toAscii());
-    nSetDs.putAndInsertString(DCM_PerformedProcedureStepEndTime, now.toString("HHmmss").toAscii());
+    nSetDs.putAndInsertString(DCM_PerformedProcedureStepEndDate, now.toString("yyyyMMdd").toUtf8());
+    nSetDs.putAndInsertString(DCM_PerformedProcedureStepEndTime, now.toString("HHmmss").toUtf8());
 
     nSetDs.insertEmptyElement(DCM_PerformedProcedureStepDescription);
     nSetDs.insertEmptyElement(DCM_PerformedProcedureTypeDescription);
@@ -188,7 +211,7 @@ static QString BuildNSetDataSet(/*const*/ DcmDataset& patientDs, DcmDataset& nSe
         pss->insertEmptyElement(DCM_ReferencedNonImageCompositeSOPInstanceSequence);
     }
 
-    return QString::fromAscii(seriesUID);
+    return QString::fromUtf8(seriesUID);
 }
 
 DcmClient::~DcmClient()
@@ -256,7 +279,7 @@ T_ASC_Parameters* DcmClient::initAssocParams(const char * transferSyntax)
         cond = ASC_createAssociationParameters(&params, settings.value("pdu-size", ASC_DEFAULTMAXPDU).toInt());
         if (cond.good())
         {
-            ASC_setAPTitles(params, settings.value("aet").toString().toUtf8(), mwlServer.toUtf8(), nullptr);
+            ASC_setAPTitles(params, settings.value("aet").toString().toUtf8(), values[0].toUtf8(), nullptr);
 
             /* Figure out the presentation addresses and copy the */
             /* corresponding values into the DcmAssoc parameters.*/
@@ -422,7 +445,7 @@ QString DcmClient::nCreateRQ(DcmDataset* patientDs)
         return nullptr;
     }
 
-    return QString::fromAscii(rsp.msg.NCreateRSP.AffectedSOPInstanceUID);
+    return QString::fromUtf8(rsp.msg.NCreateRSP.AffectedSOPInstanceUID);
 }
 
 QString DcmClient::nSetRQ(DcmDataset* patientDs, const QString& sopInstance)
@@ -445,7 +468,7 @@ QString DcmClient::nSetRQ(DcmDataset* patientDs, const QString& sopInstance)
     req.CommandField = DIMSE_N_SET_RQ;
     req.msg.NSetRQ.MessageID = assoc->nextMsgID++;;
     strcpy(req.msg.NSetRQ.RequestedSOPClassUID, abstractSyntax);
-    strcpy(req.msg.NSetRQ.RequestedSOPInstanceUID, sopInstance.toAscii());
+    strcpy(req.msg.NSetRQ.RequestedSOPInstanceUID, sopInstance.toUtf8());
     req.msg.NSetRQ.DataSetType = DIMSE_DATASET_PRESENT;
 
     OFCondition cond = DIMSE_sendMessageUsingMemoryData(assoc, presId, &req, nullptr, &nSetDs, nullptr, nullptr);

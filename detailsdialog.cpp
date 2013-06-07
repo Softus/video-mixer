@@ -23,7 +23,7 @@ static void populateTree(DcmObject* parent, QTreeWidgetItem* parentItem)
         }
         QStringList text;
         text << QString::fromUtf8(tag.getTagName())
-             << QString().sprintf("(%04X:%04X)", tag.getGTag(), tag.getETag())
+             << QString::fromUtf8(tag.toString().c_str())
              << QString::fromUtf8(tag.getVRName())
              << QString::fromUtf8(val)
              ;

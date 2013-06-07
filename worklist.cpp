@@ -21,25 +21,6 @@
 #include <dcmtk/dcmdata/dcitem.h>
 #include <dcmtk/dcmdata/dcuid.h>
 
-#ifdef QT_DEBUG
-#define DEFAULT_TIMEOUT 3 // 3 seconds for test builds
-#else
-#define DEFAULT_TIMEOUT 30 // 30 seconds for production builds
-#endif
-
-static DcmTagKey columns[] =
-{
-    DCM_PatientID,
-    DCM_PatientName,
-    DCM_PatientBirthDate,
-    DCM_PatientSex,
-    DCM_ScheduledProcedureStepDescription,
-    DCM_ScheduledProcedureStepStartDate,
-    DCM_ScheduledProcedureStepStartTime,
-    DCM_ScheduledPerformingPhysicianName,
-    DCM_ScheduledProcedureStepStatus,
-};
-
 Q_DECLARE_METATYPE(DcmDataset)
 static int DcmDatasetMetaType = qRegisterMetaType<DcmDataset>();
 
@@ -49,26 +30,23 @@ Worklist::Worklist(QWidget *parent) :
 {
     setWindowTitle(tr("Worklist"));
 
-    const QString columnNames[] =
+    QStringList cols = QSettings().value("worklist-columns1").toStringList();
+    if (cols.size() == 0)
     {
-        tr("ID"),
-        tr("Name"),
-        tr("Birth date"),
-        tr("Sex"),
-        tr("Description"),
-        tr("Date"),
-        tr("Time"),
-        tr("Physician"),
-        tr("Status"),
-    };
+        // Defaults are id, name, bithday, procedure description, date, time, physitian, status
+        cols << "0010,0020" << "0010,0010" << "0010,0030" << "0040,0007" << "0040,0002" << "0040,0003" << "0040,0006" << "0040,0020";
+    }
 
-    size_t columns = sizeof(columnNames)/sizeof(columnNames[0]);
-    table = new QTableWidget(0, columns);
+    table = new QTableWidget(0, cols.size());
     connect(table, SIGNAL(itemDoubleClicked(QTableWidgetItem*)), this, SLOT(onCellDoubleClicked(QTableWidgetItem*)));
-    for (size_t i = 0; i < columns; ++i)
+
+    for (auto i = 0; i < cols.size(); ++i)
     {
-        auto columnHeader = new QTableWidgetItem(columnNames[i]);
-        table->setHorizontalHeaderItem(i, columnHeader);
+        DcmTag tag;
+        auto text = DcmTag::findTagFromName(cols[i].toUtf8(), tag).good()? QString::fromUtf8(tag.getTagName()): cols[i];
+        auto item = new QTableWidgetItem(text);
+        item->setData(Qt::UserRole, (tag.getGroup() << 16) | tag.getElement());
+        table->setHorizontalHeaderItem(i, item);
     }
     table->setSelectionBehavior(QAbstractItemView::SelectRows);
     table->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -107,46 +85,21 @@ QToolBar* Worklist::createToolBar()
     return bar;
 }
 
-static QTableWidgetItem* addItem(QTableWidget* table, DcmItem* dset, int row, int column)
-{
-    const char *str = nullptr;
-    OFCondition cond = dset->findAndGetString(columns[column], str);
-    auto item = new QTableWidgetItem(QString::fromUtf8(str? str: cond.text()));
-    table->setItem(row, column, item);
-    return item;
-}
-
 void Worklist::onAddRow(DcmDataset* dset)
 {
-    int col = 0;
     int row = table->rowCount();
     table->setRowCount(row + 1);
 
-    addItem(table, dset, row, col++)->
-        setData(Qt::UserRole, QVariant::fromValue(*(DcmDataset*)dset->clone()));
-    addItem(table, dset, row, col++);
-    addItem(table, dset, row, col++);
-    addItem(table, dset, row, col++);
-
-    DcmItem* procedureStepSeq = nullptr;
-    dset->findAndGetSequenceItem(DCM_ScheduledProcedureStepSequence, procedureStepSeq);
-    if (procedureStepSeq)
+    for (int col = 0; col < table->columnCount(); ++col)
     {
-        addItem(table, procedureStepSeq, row, col++);
+        const char *str = nullptr;
+        auto tag = table->horizontalHeaderItem(col)->data(Qt::UserRole).toInt();
 
-        QString dateStr;
-        dateStr += addItem(table, procedureStepSeq, row, col++)->text();
-        dateStr += addItem(table, procedureStepSeq, row, col++)->text();
-        QDateTime date = QDateTime::fromString(dateStr, "yyyyMMddHHmm");
-        if (date < QDateTime::currentDateTime() && date > maxDate)
-        {
-            maxDate = date;
-            table->selectRow(row);
-            actionDetail->setEnabled(true);
-        }
-        addItem(table, procedureStepSeq, row, col++);
-        addItem(table, procedureStepSeq, row, col++);
+        OFCondition cond = dset->findAndGetString(DcmTagKey(tag >> 16, tag & 0xFFFF), str, true);
+        auto item = new QTableWidgetItem(QString::fromUtf8(str? str: cond.text()));
+        table->setItem(row, col, item);
     }
+    table->item(row, 0)->setData(Qt::UserRole, QVariant::fromValue(*(DcmDataset*)dset->clone()));
     qApp->processEvents();
 }
 
@@ -173,10 +126,9 @@ void Worklist::onLoadClick()
 
     // Clear all data
     //
+    table->setUpdatesEnabled(false);
     table->setSortingEnabled(false);
     table->setRowCount(0);
-    table->setUpdatesEnabled(false);
-    maxDate.setMSecsSinceEpoch(0);
 
     DcmClient assoc(UID_FINDModalityWorklistInformationModel);
 
@@ -191,15 +143,13 @@ void Worklist::onLoadClick()
         QMessageBox::critical(this, windowTitle(), assoc.lastError(), QMessageBox::Ok);
     }
 
-    table->sortItems(6); // By time
-    table->sortItems(5); // By date
     table->setSortingEnabled(true);
     table->scrollToItem(table->currentItem());
-    table->resizeColumnsToContents();
     table->setFocus();
     table->setUpdatesEnabled(true);
 
     actionLoad->setEnabled(true);
+    actionDetail->setEnabled(table->rowCount() > 0);
 }
 
 void Worklist::onShowDetailsClick()

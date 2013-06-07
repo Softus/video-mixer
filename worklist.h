@@ -21,7 +21,6 @@ class Worklist : public QWidget
     // UI
     //
     QTableWidget* table;
-    QDateTime     maxDate;
     QAction*      actionLoad;
     QAction*      actionDetail;
     QToolBar*     createToolBar();

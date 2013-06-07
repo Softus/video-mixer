@@ -199,9 +199,9 @@ QMenuBar* MainWindow::createMenuBar()
     auto mnuBar = new QMenuBar();
     auto mnu    = new QMenu(tr("&Menu"));
 
-    auto actionAbout = mnu->addAction(tr("A&bout " PRODUCT_FULL_NAME).append(0x2026), this, SLOT(onShowAboutClick()));
+    actionAbout = mnu->addAction(QIcon(":/buttons/about"), tr("A&bout " PRODUCT_FULL_NAME).append(0x2026), this, SLOT(onShowAboutClick()));
     actionAbout->setMenuRole(QAction::AboutRole);
-    mnu->addAction(tr("&Archive"), this, SLOT(onShowArchiveClick()), Qt::Key_F2);
+    actionArchive = mnu->addAction(QIcon(":/buttons/database"), tr("&Archive"), this, SLOT(onShowArchiveClick()), Qt::Key_F2);
 #ifdef WITH_DICOM
     actionWorklist = mnu->addAction(QIcon(":/buttons/show_worklist"), tr("&Worlkist"), this, SLOT(onShowWorkListClick()), Qt::Key_F3);
 #endif
@@ -214,8 +214,8 @@ QMenuBar* MainWindow::createMenuBar()
     actionFullVideo->setCheckable(true);
     actionFullVideo->setData("enable-video");
 
-    auto actionPreferences = mnu->addAction(tr("&Preferences").append(0x2026), this, SLOT(onShowSettingsClick()), Qt::Key_F9);
-    actionPreferences->setMenuRole(QAction::PreferencesRole);
+    actionSettings = mnu->addAction(QIcon(":/buttons/settings"), tr("&Preferences").append(0x2026), this, SLOT(onShowSettingsClick()), Qt::Key_F9);
+    actionSettings->setMenuRole(QAction::PreferencesRole);
     mnu->addSeparator();
     auto actionExit = mnu->addAction(tr("E&xit"), qApp, SLOT(quit()), Qt::ALT | Qt::Key_F4);
     actionExit->setMenuRole(QAction::QuitRole);
@@ -270,12 +270,14 @@ QToolBar* MainWindow::createToolBar()
     bar->addAction(actionWorklist);
 #endif
 
-    QAction* actionArchive = bar->addAction(QIcon(":/buttons/database"), tr("Archive"), this, SLOT(onShowArchiveClick()));
+    // These actions are from the main menu
+    //
     actionArchive->setToolTip(tr("Show studies archive"));
-    actionSettings = bar->addAction(QIcon(":/buttons/settings"), tr("Preferences"), this, SLOT(onShowSettingsClick()));
+    bar->addAction(actionArchive);
     actionSettings->setToolTip(tr("Edit settings"));
-    QAction* actionAbout = bar->addAction(QIcon(":/buttons/about"), tr("About"), this, SLOT(onShowAboutClick()));
+    bar->addAction(actionSettings);
     actionAbout->setToolTip(tr("About %1").arg(PRODUCT_FULL_NAME));
+    bar->addAction(actionAbout);
 
     return bar;
 }

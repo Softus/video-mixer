@@ -11,15 +11,18 @@ QT_END_NAMESPACE
 class DicomMwlSettings : public QWidget
 {
     Q_OBJECT
-    QCheckBox* checkStartWithWL;
+    QCheckBox* checkStartWithMwl;
     QCheckBox* checkUseMwl;
     QComboBox* cbMwlServer;
+
 public:
     Q_INVOKABLE explicit DicomMwlSettings(QWidget *parent = 0);
     
 signals:
     
 public slots:
+    void onUpdateServers();
+    void onServerChanged(int idx);
     void save();
 };
 

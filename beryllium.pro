@@ -61,7 +61,8 @@ HEADERS += mainwindow.h qwaitcursor.h \
     patientdialog.h \
     aboutdialog.h \
     archivewindow.h \
-    product.h
+    product.h \
+    comboboxwithpopupsignal.h
 
 FORMS   +=
 

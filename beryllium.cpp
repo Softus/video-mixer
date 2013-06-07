@@ -20,6 +20,7 @@ int main(int argc, char *argv[])
 
     // QT init
     //
+    QApplication::setAttribute(Qt::AA_DontShowIconsInMenus);
     QApplication app(argc, argv);
     app.setOrganizationName(ORGANIZATION_SHORT_NAME);
     app.setOrganizationDomain(ORGANIZATION_FULL_NAME);

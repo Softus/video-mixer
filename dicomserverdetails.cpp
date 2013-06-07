@@ -20,8 +20,8 @@ DicomServerDetails::DicomServerDetails(QWidget *parent) :
 {
     QFormLayout* layoutMain = new QFormLayout;
     layoutMain->addRow(tr("&Name"), textName = new QLineEdit);
+    connect(textName, SIGNAL(editingFinished()), this, SLOT(onNameChanged()));
     layoutMain->addRow(tr("&AE title"), textAet = new QLineEdit);
-    connect(textAet, SIGNAL(editingFinished()), this, SLOT(onAetChanged()));
     layoutMain->addRow(tr("&IP address"), textIp = new QLineEdit);
     layoutMain->addRow(tr("&Port"), spinPort = new QSpinBox);
     spinPort->setRange(0, 65535);
@@ -59,13 +59,13 @@ DicomServerDetails::DicomServerDetails(QWidget *parent) :
     setLayout(layoutMain);
 }
 
-void DicomServerDetails::setValues(const QString& aet, const QStringList& values)
+void DicomServerDetails::setValues(const QString& name, const QStringList& values)
 {
-    textAet->setText(aet);
-    btnSave->setEnabled(!aet.isEmpty());
+    textName->setText(name);
+    btnSave->setEnabled(!name.isEmpty());
 
     if (values.count() > 0)
-        textName->setText(values.at(0));
+        textAet->setText(values.at(0));
     if (values.count() > 1)
         textIp->setText(values.at(1));
     if (values.count() > 2)
@@ -80,14 +80,14 @@ void DicomServerDetails::setValues(const QString& aet, const QStringList& values
     radioRetire->setChecked(!radioNew->isChecked());
 }
 
-QString DicomServerDetails::aet() const
+QString DicomServerDetails::name() const
 {
-    return textAet->text();
+    return textName->text();
 }
 
 QStringList DicomServerDetails::values() const
 {
-    return QStringList() << textName->text() << textIp->text()
+    return QStringList() << textAet->text() << textIp->text()
         << QString::number(spinPort->value()) << QString::number(spinTimeout->value())
         << QString(checkEcho->isChecked()? "Echo": "No echo")
         << QString(radioNew->isChecked()? "New": "Retire")
@@ -99,7 +99,7 @@ void DicomServerDetails::onClickTest()
     QMessageBox::information(this, windowTitle(), "Not implemented, sorry");
 }
 
-void DicomServerDetails::onAetChanged()
+void DicomServerDetails::onNameChanged()
 {
-    btnSave->setEnabled(!textAet->text().isEmpty());
+    btnSave->setEnabled(!textName->text().isEmpty());
 }

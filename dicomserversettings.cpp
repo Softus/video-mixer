@@ -11,10 +11,29 @@ DicomServerSettings::DicomServerSettings(QWidget *parent) :
     QSettings settings;
     QHBoxLayout* mainLayout = new QHBoxLayout;
     mainLayout->setContentsMargins(4,0,4,0);
+
+    const QString columnNames[] =
+    {
+        tr("Name"),
+        tr("AE title"),
+        tr("IP address"),
+        tr("Port"),
+        //tr("Timeout"),
+        //tr("Echo"),
+        //tr("SOP class"),
+    };
+
     mainLayout->addWidget(listServers = new QTableWidget);
     connect(listServers, SIGNAL(currentItemChanged(QTableWidgetItem*,QTableWidgetItem*)), this, SLOT(onCellChanged(QTableWidgetItem*,QTableWidgetItem*)));
     connect(listServers, SIGNAL(itemDoubleClicked(QTableWidgetItem*)), this, SLOT(onCellDoubleClicked(QTableWidgetItem*)));
-    listServers->setColumnCount(2);
+
+    size_t columns = sizeof(columnNames)/sizeof(columnNames[0]);
+    listServers->setColumnCount(columns);
+    for (size_t i = 0; i < columns; ++i)
+    {
+        listServers->setHorizontalHeaderItem(i, new QTableWidgetItem(columnNames[i]));
+    }
+
     listServers->setSelectionBehavior(QAbstractItemView::SelectRows);
     listServers->setEditTriggers(QAbstractItemView::NoEditTriggers);
     listServers->setSortingEnabled(true);
@@ -28,11 +47,8 @@ DicomServerSettings::DicomServerSettings(QWidget *parent) :
         auto item = new QTableWidgetItem(keys[row]);
         auto values = settings.value(keys[row]).toStringList();
         listServers->setItem(row, 0, item);
-        if (values.count() > 0)
-        {
-            listServers->setItem(row, 1, new QTableWidgetItem(values[0]));
-        }
         item->setData(Qt::UserRole, values);
+        updateColumns(row, values);
     }
     settings.endGroup();
     listServers->resizeColumnsToContents();
@@ -58,6 +74,14 @@ DicomServerSettings::DicomServerSettings(QWidget *parent) :
     setLayout(mainLayout);
 }
 
+void DicomServerSettings::updateColumns(int row, const QStringList& values)
+{
+    for (auto i = 1; i < listServers->columnCount() && values.count() >= i; ++i)
+    {
+        listServers->setItem(row, i, new QTableWidgetItem(values[i-1]));
+    }
+}
+
 void DicomServerSettings::onCellChanged(QTableWidgetItem* current, QTableWidgetItem*)
 {
     btnEdit->setEnabled(current != nullptr);
@@ -77,10 +101,12 @@ void DicomServerSettings::onAddClicked()
         auto row = listServers->rowCount();
         listServers->setRowCount(row + 1);
 
-        auto item = new QTableWidgetItem(dlg.aet());
+        auto item = new QTableWidgetItem(dlg.name());
         listServers->setItem(row, 0, item);
-        listServers->setItem(row, 1, new QTableWidgetItem(dlg.aet()));
-        item->setData(Qt::UserRole, dlg.values());
+
+        auto values = dlg.values();
+        item->setData(Qt::UserRole, values);
+        updateColumns(row, values);
     }
 }
 
@@ -93,11 +119,8 @@ void DicomServerSettings::onEditClicked()
     {
         auto values = dlg.values();
         item->setData(Qt::UserRole, values);
-        item->setText(dlg.aet());
-        if (values.count() > 0)
-        {
-            listServers->item(item->row(), 1)->setText(values[0]);
-        }
+        item->setText(dlg.name());
+        updateColumns(item->row(), values);
     }
 }
 

@@ -18,6 +18,7 @@ class DicomServerSettings : public QWidget
 
 public:
     Q_INVOKABLE explicit DicomServerSettings(QWidget *parent = 0);
+    void updateColumns(int row, const QStringList& values);
 
 signals:
 

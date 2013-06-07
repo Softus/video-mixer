@@ -25,15 +25,15 @@ class DicomServerDetails : public QDialog
     QPushButton*  btnSave;
 public:
     explicit DicomServerDetails(QWidget *parent = 0);
-    QString aet() const;
+    QString name() const;
     QStringList values() const;
-    void setValues(const QString& aet, const QStringList& values);
+    void setValues(const QString& name, const QStringList& values);
 
 signals:
     
 public slots:
     void onClickTest();
-    void onAetChanged();
+    void onNameChanged();
 };
 
 #endif // DICOMSERVERDETAILS_H
