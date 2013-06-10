@@ -8,7 +8,7 @@ QT       += core gui
 
 win32 {
     INCLUDEPATH += c:/usr/include
-    LIBS += c:/usr/lib/*.lib
+    LIBS += c:/usr/lib/*.lib advapi32.lib netapi32.lib wsock32.lib
 }
 
 unix {
@@ -21,6 +21,7 @@ dicom {
     QT       += network
     DEFINES  += WITH_DICOM
     LIBS     += -ldcmnet -lwrap -li2d -ldcmdata -loflog -lofstd -lssl
+
     SOURCES  += worklist.cpp startstudydialog.cpp dcmclient.cpp detailsdialog.cpp \
     dicomdevicesettings.cpp \
     dicomserversettings.cpp \

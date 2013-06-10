@@ -10,11 +10,11 @@
 #include <dcmtk/config/osconfig.h>   /* make sure OS specific configuration is included first */
 #include <dcmtk/ofstd/ofcond.h>    /* for class OFCondition */
 
-class T_ASC_Network;
-class T_ASC_Association;
-class T_ASC_Parameters;
-class T_DIMSE_C_FindRQ;
-class T_DIMSE_C_FindRSP;
+struct T_ASC_Network;
+struct T_ASC_Association;
+struct T_ASC_Parameters;
+struct T_DIMSE_C_FindRQ;
+struct T_DIMSE_C_FindRSP;
 class DcmDataset;
 
 class DcmClient : public QObject

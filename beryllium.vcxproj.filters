@@ -46,12 +46,12 @@
       <ParseFiles>false</ParseFiles>
     </Filter>
     <Filter Include="Generated Files\Debug">
-      <UniqueIdentifier>{12ab5eea-e4e8-467c-bcda-1a443e854a1d}</UniqueIdentifier>
+      <UniqueIdentifier>{33fd1bff-83ef-4a3c-b86a-f6031696ab2a}</UniqueIdentifier>
       <Extensions>cpp;moc</Extensions>
       <SourceControlFiles>False</SourceControlFiles>
     </Filter>
     <Filter Include="Generated Files\Release">
-      <UniqueIdentifier>{4965e4d7-3e79-4972-ac35-8d5b90f9e613}</UniqueIdentifier>
+      <UniqueIdentifier>{c1deecae-efad-4ce8-8780-380f1bb295ba}</UniqueIdentifier>
       <Extensions>cpp;moc</Extensions>
       <SourceControlFiles>False</SourceControlFiles>
     </Filter>
@@ -66,6 +66,30 @@
     <ClCompile Include="beryllium.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="dcmclient.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="detailsdialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dicomdevicesettings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dicommppssettings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dicommwlsettings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dicomserverdetails.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dicomserversettings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dicomstoragesettings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="mainwindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -75,6 +99,9 @@
     <ClCompile Include="settings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="startstudydialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="storagesettings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -82,6 +109,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="videosettings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="worklist.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="worklistcolumnsettings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="worklistquerysettings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_aboutdialog.cpp">
@@ -94,6 +130,60 @@
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_archivewindow.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_comboboxwithpopupsignal.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_comboboxwithpopupsignal.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_dcmclient.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_dcmclient.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_detailsdialog.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_detailsdialog.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_dicomdevicesettings.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_dicomdevicesettings.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_dicommppssettings.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_dicommppssettings.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_dicommwlsettings.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_dicommwlsettings.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_dicomserverdetails.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_dicomserverdetails.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_dicomserversettings.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_dicomserversettings.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_dicomstoragesettings.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_dicomstoragesettings.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_mainwindow.cpp">
@@ -114,6 +204,12 @@
     <ClCompile Include="Release\moc_settings.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="Debug\moc_startstudydialog.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_startstudydialog.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
     <ClCompile Include="Debug\moc_storagesettings.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
@@ -132,6 +228,24 @@
     <ClCompile Include="Release\moc_videosettings.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="Debug\moc_worklist.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_worklist.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_worklistcolumnsettings.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_worklistcolumnsettings.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_worklistquerysettings.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_worklistquerysettings.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
     <ClCompile Include="GeneratedFiles\qrc_beryllium.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
@@ -141,6 +255,33 @@
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="archivewindow.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="comboboxwithpopupsignal.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="dcmclient.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="detailsdialog.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="dicomdevicesettings.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="dicommppssettings.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="dicommwlsettings.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="dicomserverdetails.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="dicomserversettings.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="dicomstoragesettings.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="mainwindow.h">
@@ -158,6 +299,9 @@
     <CustomBuild Include="settings.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="startstudydialog.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
     <CustomBuild Include="storagesettings.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
@@ -165,6 +309,15 @@
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="videosettings.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="worklist.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="worklistcolumnsettings.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="worklistquerysettings.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>
@@ -186,6 +339,9 @@
     <None Include="pixmaps\database.png">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="pixmaps\delete.png">
+      <Filter>Resource Files</Filter>
+    </None>
     <None Include="pixmaps\details.png">
       <Filter>Resource Files</Filter>
     </None>
@@ -195,10 +351,25 @@
     <None Include="pixmaps\folder.png">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="pixmaps\forward.png">
+      <Filter>Resource Files</Filter>
+    </None>
     <None Include="pixmaps\gallery.png">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="pixmaps\grid.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="pixmaps\list.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="pixmaps\next.png">
+      <Filter>Resource Files</Filter>
+    </None>
     <None Include="pixmaps\pause.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="pixmaps\prev.png">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="pixmaps\product.png">
@@ -216,6 +387,9 @@
     <None Include="pixmaps\refresh.png">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="pixmaps\rewind.png">
+      <Filter>Resource Files</Filter>
+    </None>
     <None Include="pixmaps\settings.png">
       <Filter>Resource Files</Filter>
     </None>
@@ -223,6 +397,9 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="pixmaps\stop.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="pixmaps\up.png">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="pixmaps\user_add.png">

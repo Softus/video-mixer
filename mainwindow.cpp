@@ -867,17 +867,29 @@ void MainWindow::onStartClick()
 #endif
         QWaitCursor wait(this);
         updatePipeline();
-
-        if (QSettings().value("enable-video").toBool())
-        {
-            appendVideoTail("video", ++studyNo);
-            btnStart->setEnabled(false);
-        }
-
         // After updatePipeline the outputPath is usable
         //
         dlg.savePatientFile(outputPath.absoluteFilePath(".patient"));
-        running = true;
+
+        if (QSettings().value("enable-video").toBool())
+        {
+            auto videoFileName = appendVideoTail("video", ++studyNo);
+            if (!videoFileName.isEmpty())
+            {
+                // Until the real clip recording starts, we should disable this button
+                //
+                btnStart->setEnabled(false);
+                running = true;
+            }
+            else
+            {
+                QMessageBox::critical(this, windowTitle(), tr("Failed to start recording.\nCheck the error log for details."), QMessageBox::Ok);
+            }
+        }
+        else
+        {
+            running = true;
+        }
     }
     else
     {
@@ -969,12 +981,39 @@ QString MainWindow::appendVideoTail(const QString& prefix, int idx)
     auto sinkDef = settings.value(prefix + "-sink",   "filesink").toString();
 
     auto inspect = pipeline->getElementByName((prefix + "inspect").toUtf8());
+    if (!inspect)
+    {
+        qDebug() << "Required element '" << prefix << "inspect'" << " is missing";
+        return nullptr;
+    }
+
     auto valve   = pipeline->getElementByName((prefix + "valve").toUtf8());
+    if (!valve)
+    {
+        qDebug() << "Required element '" << prefix << "valve'" << " is missing";
+        return nullptr;
+    }
+
     auto mux     = QGst::ElementFactory::make(muxDef, (prefix + "mux").toUtf8());
+    if (!mux)
+    {
+        qDebug() << "Failed to create element '" << prefix << "mux'" << " (" << muxDef << ")";
+        return nullptr;
+    }
+
     auto sink    = QGst::ElementFactory::make(sinkDef, (prefix + "sink").toUtf8());
+    if (!sink)
+    {
+        qDebug() << "Failed to create element '" << prefix << "sink'" << " (" << sinkDef << ")";
+        return nullptr;
+    }
 
     pipeline->add(mux, sink);
-    QGst::Element::linkMany(valve, mux, sink);
+    if (!QGst::Element::linkMany(valve, mux, sink))
+    {
+        qDebug() << "Failed to link elements altogether";
+        return nullptr;
+    }
 
     // Manually increment video/clip file name
     //
@@ -1017,24 +1056,33 @@ void MainWindow::removeVideoTail(const QString& prefix)
 
 void MainWindow::onRecordClick()
 {
-    recording = !recording;
-    updateRecordButton();
-
-    if (recording)
+    if (!recording)
     {
-        // Until the real clip recording starts, we should disable this button
-        //
-        btnRecord->setEnabled(false);
-
         QString imageExt = getExt(QSettings().value("image-encoder", "jpegenc").toString());
-        clipPreviewFileName = appendVideoTail("clip", ++clipNo).append(imageExt);
+        auto clipFileName = appendVideoTail("clip", ++clipNo);
+        if (!clipFileName.isEmpty())
+        {
+            clipPreviewFileName = clipFileName.append(imageExt);
+
+            // Until the real clip recording starts, we should disable this button
+            //
+            btnRecord->setEnabled(false);
+            recording = true;
+        }
+        else
+        {
+            QMessageBox::critical(this, windowTitle(), tr("Failed to start recording.\nCheck the error log for details."), QMessageBox::Ok);
+        }
     }
     else
     {
         setElementProperty("displayoverlay", "text", "");
         removeVideoTail("clip");
         clipPreviewFileName.clear();
+        recording = false;
     }
+
+    updateRecordButton();
 }
 
 void MainWindow::updateStartButton()
