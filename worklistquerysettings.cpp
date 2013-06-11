@@ -56,7 +56,7 @@ WorklistQuerySettings::WorklistQuerySettings(QWidget *parent) :
     frameDate->setLayout(layoutDate);
 
     QFormLayout* layoutMain = new QFormLayout;
-    layoutMain->addRow(checkScheduledDate = new QCheckBox(tr("&Scheduled date")), frameDate);
+    layoutMain->addRow(checkScheduledDate = new QCheckBox(tr("&Scheduled\ndate")), frameDate);
     checkScheduledDate->setChecked(scheduledDate > 0);
     cbModality = new QComboBox;
     cbModality->setEditable(true);

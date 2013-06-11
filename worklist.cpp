@@ -74,7 +74,7 @@ Worklist::~Worklist()
 
 QToolBar* Worklist::createToolBar()
 {
-    QToolBar* bar = new QToolBar(tr("worklist"));
+    QToolBar* bar = new QToolBar(tr("Worklist"));
     bar->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 
     actionLoad   = bar->addAction(QIcon(":/buttons/refresh"), tr("&Refresh"), this, SLOT(onLoadClick()));

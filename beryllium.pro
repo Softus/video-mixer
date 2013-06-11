@@ -24,7 +24,7 @@ dicom {
     DEFINES  += WITH_DICOM
     LIBS     += -ldcmnet -lwrap -li2d -ldcmdata -loflog -lofstd -lssl
 
-    SOURCES  += worklist.cpp startstudydialog.cpp dcmclient.cpp detailsdialog.cpp \
+    SOURCES  += worklist.cpp dcmclient.cpp detailsdialog.cpp \
     dicomdevicesettings.cpp \
     dicomserversettings.cpp \
     dicommwlsettings.cpp \
@@ -34,7 +34,7 @@ dicom {
     worklistcolumnsettings.cpp \
     worklistquerysettings.cpp
 
-    HEADERS += worklist.h startstudydialog.h dcmclient.h detailsdialog.h \
+    HEADERS += worklist.h dcmclient.h detailsdialog.h \
     dicomdevicesettings.h \
     dicomserversettings.h \
     dicommwlsettings.h \

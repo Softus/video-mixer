@@ -9,7 +9,6 @@
 
 #ifdef WITH_DICOM
 #include "worklist.h"
-#include "startstudydialog.h"
 #include "dcmclient.h"
 #include <dcmtk/dcmdata/dcdatset.h>
 #include <dcmtk/dcmdata/dcuid.h>
@@ -199,7 +198,7 @@ QMenuBar* MainWindow::createMenuBar()
     auto mnuBar = new QMenuBar();
     auto mnu    = new QMenu(tr("&Menu"));
 
-    actionAbout = mnu->addAction(QIcon(":/buttons/about"), tr("A&bout " PRODUCT_FULL_NAME).append(0x2026), this, SLOT(onShowAboutClick()));
+    actionAbout = mnu->addAction(QIcon(":/buttons/about"), tr("A&bout ").arg(PRODUCT_FULL_NAME).append(0x2026), this, SLOT(onShowAboutClick()));
     actionAbout->setMenuRole(QAction::AboutRole);
     actionArchive = mnu->addAction(QIcon(":/buttons/database"), tr("&Archive"), this, SLOT(onShowArchiveClick()), Qt::Key_F2);
 #ifdef WITH_DICOM
@@ -638,7 +637,7 @@ void MainWindow::updateOutputPath(const QString patientName, const QString study
     this->patientName = fixFileName(patientName);
     this->studyName   = fixFileName(studyName);
 
-    QString windowTitle(tr(PRODUCT_FULL_NAME));
+    QString windowTitle(PRODUCT_FULL_NAME);
     if (!patientName.isEmpty())
     {
         windowTitle.append(tr(" - ")).append(patientName);

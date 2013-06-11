@@ -23,7 +23,6 @@ int main(int argc, char *argv[])
     QApplication::setAttribute(Qt::AA_DontShowIconsInMenus);
     QApplication app(argc, argv);
     app.setOrganizationName(ORGANIZATION_SHORT_NAME);
-    app.setOrganizationDomain(ORGANIZATION_FULL_NAME);
     app.setApplicationName(PRODUCT_SHORT_NAME);
     app.setApplicationVersion(PRODUCT_VERSION_STR);
     app.setWindowIcon(QIcon(":/app/product"));

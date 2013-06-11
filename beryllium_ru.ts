@@ -6,7 +6,8 @@
     <message>
         <location filename="aboutdialog.cpp" line="19"/>
         <source>About %1</source>
-        <translation type="unfinished">О %1</translation>
+        <oldsource>About </oldsource>
+        <translation>О %1</translation>
     </message>
     <message>
         <location filename="aboutdialog.cpp" line="37"/>
@@ -60,91 +61,100 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
 <context>
     <name>ArchiveWindow</name>
     <message>
-        <location filename="archivewindow.cpp" line="51"/>
-        <location filename="archivewindow.cpp" line="478"/>
+        <location filename="archivewindow.cpp" line="55"/>
+        <location filename="archivewindow.cpp" line="498"/>
         <source>Archive</source>
         <oldsource>archive</oldsource>
         <translation>Архив</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="53"/>
+        <location filename="archivewindow.cpp" line="57"/>
         <source>Delete</source>
         <translation>Удалить</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="57"/>
+        <location filename="archivewindow.cpp" line="65"/>
         <source>File browser</source>
         <translation>Проводник</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="70"/>
+        <location filename="archivewindow.cpp" line="74"/>
         <source>List</source>
         <translation>Список</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="73"/>
+        <location filename="archivewindow.cpp" line="77"/>
         <source>Icons</source>
         <translation>Значки</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="76"/>
+        <location filename="archivewindow.cpp" line="80"/>
         <source>Gallery</source>
         <translation>Галерея</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="85"/>
+        <location filename="archivewindow.cpp" line="89"/>
         <source>Path</source>
         <oldsource>path</oldsource>
         <translation>Путь</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="96"/>
-        <location filename="archivewindow.cpp" line="99"/>
+        <location filename="archivewindow.cpp" line="100"/>
+        <location filename="archivewindow.cpp" line="103"/>
         <source>Previous</source>
         <oldsource>Prev</oldsource>
         <translation>Предыдущий</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="112"/>
-        <location filename="archivewindow.cpp" line="115"/>
+        <location filename="archivewindow.cpp" line="116"/>
+        <location filename="archivewindow.cpp" line="119"/>
         <source>Next</source>
         <oldsource>next</oldsource>
         <translation>Следующий</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="125"/>
+        <location filename="archivewindow.cpp" line="129"/>
         <source>Media</source>
         <oldsource>media</oldsource>
         <translation>Медия</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="126"/>
+        <location filename="archivewindow.cpp" line="130"/>
         <source>Rewing</source>
         <translation>Отмотать назад</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="130"/>
-        <location filename="archivewindow.cpp" line="617"/>
+        <location filename="archivewindow.cpp" line="134"/>
+        <location filename="archivewindow.cpp" line="661"/>
         <source>Play</source>
         <translation>Воспроизвести</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="133"/>
+        <location filename="archivewindow.cpp" line="137"/>
         <source>Forward</source>
         <translation>Перемотать вперёд</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="414"/>
-        <source>Are you sure to delete %1?</source>
-        <translation>Вы действительно хотите удалить файл %1?</translation>
+        <location filename="archivewindow.cpp" line="423"/>
+        <source>Are you sure to delete &apos;%1&apos;?</source>
+        <translation>Вы действительно хотите удалить файл &apos;%1&apos;?</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="509"/>
+        <location filename="archivewindow.cpp" line="423"/>
+        <source>Are you sure to delete selected files?</source>
+        <translation>Вы действительно хотите удалить выбранные файлы?</translation>
+    </message>
+    <message>
+        <source>Are you sure to delete %1?</source>
+        <translation type="obsolete">Вы действительно хотите удалить файл %1?</translation>
+    </message>
+    <message>
+        <location filename="archivewindow.cpp" line="530"/>
         <source>Archive - %1</source>
         <translation>Архив - %1</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="617"/>
+        <location filename="archivewindow.cpp" line="661"/>
         <source>Pause</source>
         <translation>Пауза</translation>
     </message>
@@ -152,65 +162,70 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
 <context>
     <name>DcmClient</name>
     <message>
-        <location filename="dcmclient.cpp" line="230"/>
+        <location filename="dcmclient.cpp" line="253"/>
         <source>Required settings parameter %1 is missing</source>
-        <translation type="unfinished"></translation>
+        <translation>Необходимый параметр %1 не задан в настройках.</translation>
     </message>
     <message>
-        <location filename="dcmclient.cpp" line="336"/>
+        <location filename="dcmclient.cpp" line="355"/>
         <source>Accepted presentation context ID not found</source>
-        <translation type="unfinished"></translation>
+        <translation>Принятый ID контекста представления не найден</translation>
     </message>
 </context>
 <context>
     <name>DetailsDialog</name>
     <message>
-        <location filename="detailsdialog.cpp" line="46"/>
+        <location filename="detailsdialog.cpp" line="44"/>
+        <source>Details</source>
+        <translation>Детали</translation>
+    </message>
+    <message>
+        <location filename="detailsdialog.cpp" line="49"/>
         <source>Tag name</source>
-        <translation type="unfinished"></translation>
+        <translation>Имя тега</translation>
     </message>
     <message>
-        <location filename="detailsdialog.cpp" line="46"/>
+        <location filename="detailsdialog.cpp" line="49"/>
         <source>Code</source>
-        <translation type="unfinished"></translation>
+        <translation>Код</translation>
     </message>
     <message>
-        <location filename="detailsdialog.cpp" line="46"/>
+        <location filename="detailsdialog.cpp" line="49"/>
         <source>VR</source>
-        <translation type="unfinished"></translation>
+        <translation>Тип</translation>
     </message>
     <message>
-        <location filename="detailsdialog.cpp" line="46"/>
+        <location filename="detailsdialog.cpp" line="49"/>
         <source>Value</source>
-        <translation type="unfinished"></translation>
+        <translation>Значение</translation>
     </message>
 </context>
 <context>
     <name>DicomDeviceSettings</name>
     <message>
-        <location filename="dicomdevicesettings.cpp" line="10"/>
+        <location filename="dicomdevicesettings.cpp" line="20"/>
         <source>&amp;Name</source>
-        <translation type="unfinished">&amp;ФИО</translation>
+        <translation>&amp;Имя</translation>
     </message>
     <message>
-        <location filename="dicomdevicesettings.cpp" line="11"/>
+        <location filename="dicomdevicesettings.cpp" line="44"/>
         <source>AE &amp;title</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
-        <location filename="dicomdevicesettings.cpp" line="12"/>
+        <location filename="dicomdevicesettings.cpp" line="42"/>
         <source>&amp;IP address</source>
-        <translation type="unfinished"></translation>
+        <translation>IP &amp;адрес</translation>
     </message>
     <message>
-        <location filename="dicomdevicesettings.cpp" line="13"/>
+        <location filename="dicomdevicesettings.cpp" line="45"/>
         <source>&amp;Port</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Порт</translation>
     </message>
     <message>
-        <location filename="dicomdevicesettings.cpp" line="14"/>
+        <location filename="dicomdevicesettings.cpp" line="49"/>
         <source>&amp;Export video to DICOM</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp; Экспорт видео в DICOM</translation>
     </message>
 </context>
 <context>
@@ -218,109 +233,134 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
     <message>
         <location filename="dicommppssettings.cpp" line="12"/>
         <source>MPPS &amp;Function</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Функция MPPS</translation>
     </message>
     <message>
         <location filename="dicommppssettings.cpp" line="13"/>
         <source>&amp;In progress is automatically sent when an examitaion has been started</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;При запуске исследования автоматически отправлять In Progress</translation>
     </message>
     <message>
         <location filename="dicommppssettings.cpp" line="14"/>
         <source>&amp;Completed is automatically sent when an examitaion has been ended</source>
-        <translation type="unfinished"></translation>
+        <translation>При &amp;завершении исследования автоматически отправлять Completed </translation>
     </message>
 </context>
 <context>
     <name>DicomMwlSettings</name>
     <message>
-        <location filename="dicommwlsettings.cpp" line="12"/>
+        <location filename="dicommwlsettings.cpp" line="11"/>
         <source>MWL &amp;Function</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Функция MWL</translation>
     </message>
     <message>
-        <location filename="dicommwlsettings.cpp" line="13"/>
+        <location filename="dicommwlsettings.cpp" line="12"/>
         <source>&amp;Start examination based on the worklist</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Начинать исследование на основе данных из рабочего листа</translation>
     </message>
 </context>
 <context>
     <name>DicomServerDetails</name>
     <message>
-        <location filename="dicomserverdetails.cpp" line="14"/>
-        <source>&amp;Name</source>
-        <translation type="unfinished">&amp;ФИО</translation>
-    </message>
-    <message>
-        <location filename="dicomserverdetails.cpp" line="15"/>
-        <source>&amp;AE title</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="dicomserverdetails.cpp" line="16"/>
-        <source>&amp;IP address</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="dicomserverdetails.cpp" line="17"/>
-        <source>&amp;Port</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="dicomserverdetails.cpp" line="18"/>
-        <source>Time&amp;out</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="dicomserverdetails.cpp" line="19"/>
-        <source>&amp;Echo</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="dicomserverdetails.cpp" line="22"/>
-        <source>Ne&amp;w</source>
-        <translation type="unfinished"></translation>
+        <source>&amp;Name</source>
+        <translation>&amp;Имя</translation>
     </message>
     <message>
-        <location filename="dicomserverdetails.cpp" line="23"/>
-        <source>&amp;Retire</source>
-        <translation type="unfinished"></translation>
+        <location filename="dicomserverdetails.cpp" line="24"/>
+        <source>&amp;AE title</source>
+        <translation></translation>
     </message>
     <message>
         <location filename="dicomserverdetails.cpp" line="25"/>
-        <source>SOP class</source>
-        <translation type="unfinished"></translation>
+        <source>&amp;IP address</source>
+        <translation>IP &amp;адрес</translation>
+    </message>
+    <message>
+        <location filename="dicomserverdetails.cpp" line="26"/>
+        <source>&amp;Port</source>
+        <translation>&amp;Порт</translation>
+    </message>
+    <message>
+        <location filename="dicomserverdetails.cpp" line="28"/>
+        <source>Time&amp;out</source>
+        <translation>Та&amp;ймаут</translation>
     </message>
     <message>
         <location filename="dicomserverdetails.cpp" line="30"/>
-        <source>&amp;Test</source>
-        <translation type="unfinished"></translation>
+        <source> seconds</source>
+        <translation> секунд</translation>
     </message>
     <message>
         <location filename="dicomserverdetails.cpp" line="33"/>
-        <source>Reject</source>
-        <translation type="unfinished"></translation>
+        <source>&amp;Echo</source>
+        <translation>&amp;Эхо</translation>
     </message>
     <message>
-        <location filename="dicomserverdetails.cpp" line="36"/>
+        <location filename="dicomserverdetails.cpp" line="37"/>
+        <source>Ne&amp;w</source>
+        <translation>Нов&amp;ый</translation>
+    </message>
+    <message>
+        <location filename="dicomserverdetails.cpp" line="39"/>
+        <source>&amp;Retire</source>
+        <translation>&amp;Старый</translation>
+    </message>
+    <message>
+        <location filename="dicomserverdetails.cpp" line="41"/>
+        <source>SOP class</source>
+        <translation>SOP класс</translation>
+    </message>
+    <message>
+        <location filename="dicomserverdetails.cpp" line="46"/>
+        <source>&amp;Test</source>
+        <translation>&amp;Проверить</translation>
+    </message>
+    <message>
+        <location filename="dicomserverdetails.cpp" line="49"/>
+        <source>Reject</source>
+        <translation>Отменить</translation>
+    </message>
+    <message>
+        <location filename="dicomserverdetails.cpp" line="52"/>
         <source>Save</source>
-        <translation type="unfinished"></translation>
+        <translation>Сохранить</translation>
     </message>
 </context>
 <context>
     <name>DicomServerSettings</name>
     <message>
-        <location filename="dicomserversettings.cpp" line="16"/>
+        <location filename="dicomserversettings.cpp" line="17"/>
+        <source>Name</source>
+        <translation>Имя</translation>
+    </message>
+    <message>
+        <location filename="dicomserversettings.cpp" line="18"/>
+        <source>AE title</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="dicomserversettings.cpp" line="19"/>
+        <source>IP address</source>
+        <translation>IP адрес</translation>
+    </message>
+    <message>
+        <location filename="dicomserversettings.cpp" line="20"/>
+        <source>Port</source>
+        <translation>Порт</translation>
+    </message>
+    <message>
+        <location filename="dicomserversettings.cpp" line="58"/>
         <source>&amp;Add</source>
         <translation>Д&amp;обавить</translation>
     </message>
     <message>
-        <location filename="dicomserversettings.cpp" line="19"/>
+        <location filename="dicomserversettings.cpp" line="62"/>
         <source>&amp;Edit</source>
         <translation>&amp;Правка</translation>
     </message>
     <message>
-        <location filename="dicomserversettings.cpp" line="20"/>
+        <location filename="dicomserversettings.cpp" line="67"/>
         <source>&amp;Remove</source>
         <translation>&amp;Удалить</translation>
     </message>
@@ -328,154 +368,163 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="mainwindow.cpp" line="202"/>
+        <location filename="mainwindow.cpp" line="201"/>
         <source>A&amp;bout </source>
         <translation>О &amp;программе</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="204"/>
+        <location filename="mainwindow.cpp" line="203"/>
         <source>&amp;Archive</source>
         <translation>&amp;Архив</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="206"/>
+        <location filename="mainwindow.cpp" line="205"/>
         <source>&amp;Worlkist</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Рабочий лист</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="217"/>
+        <location filename="mainwindow.cpp" line="216"/>
         <source>&amp;Preferences</source>
         <translation>&amp;Настройки</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="232"/>
+        <location filename="mainwindow.cpp" line="231"/>
         <source>Main</source>
         <oldsource>main</oldsource>
         <translation>Главная</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="245"/>
+        <location filename="mainwindow.cpp" line="244"/>
         <source>&amp;Take snapshot</source>
         <translation>Сделать &amp;снимок</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="268"/>
-        <source>Show &amp;work list</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="mainwindow.cpp" line="272"/>
+        <location filename="mainwindow.cpp" line="274"/>
         <source>Show studies archive</source>
         <translation>Открыть архив исследований</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="274"/>
+        <location filename="mainwindow.cpp" line="276"/>
         <source>Edit settings</source>
         <translation>Открыть окно настроек</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="276"/>
+        <location filename="mainwindow.cpp" line="278"/>
         <source>About %1</source>
         <oldsource>About berillyum</oldsource>
         <translation>О %1</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="602"/>
+        <location filename="mainwindow.cpp" line="643"/>
+        <location filename="mainwindow.cpp" line="648"/>
+        <source> - </source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="658"/>
         <source>Failed to create &apos;%1&apos;</source>
         <translation>Не удалось создать &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="836"/>
+        <location filename="mainwindow.cpp" line="871"/>
+        <location filename="mainwindow.cpp" line="1123"/>
+        <source>Failed to start recording.
+Check the error log for details.</source>
+        <translation>Невозможно начать запись.
+Проверьте журнал ожибок.</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="899"/>
         <source>No patient selected</source>
-        <translation type="unfinished"></translation>
+        <translation>Пациент не задан</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="879"/>
+        <location filename="mainwindow.cpp" line="947"/>
         <source>Send study results to the server?</source>
-        <translation type="unfinished"></translation>
+        <translation>Отправить результат на сервер?</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="879"/>
+        <location filename="mainwindow.cpp" line="947"/>
         <source>Continue the study</source>
-        <translation type="unfinished"></translation>
+        <translation>Продолжить</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="879"/>
+        <location filename="mainwindow.cpp" line="947"/>
         <source>Don&apos;t sent</source>
-        <translation type="unfinished"></translation>
+        <translation>Не отправлять</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="879"/>
+        <location filename="mainwindow.cpp" line="947"/>
         <source>Send</source>
-        <translation type="unfinished"></translation>
+        <translation>Отправить</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="889"/>
+        <location filename="mainwindow.cpp" line="957"/>
         <source>End the study?</source>
         <translation>Завершить исследование?</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1035"/>
+        <location filename="mainwindow.cpp" line="1140"/>
         <source>End &amp;study</source>
         <translation>Завершить &amp;исследование</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1035"/>
+        <location filename="mainwindow.cpp" line="1140"/>
         <source>Start &amp;study</source>
         <translation>Начать &amp;исследование</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1054"/>
+        <location filename="mainwindow.cpp" line="1159"/>
         <source>Paus&amp;e</source>
         <translation>П&amp;ауза</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1054"/>
+        <location filename="mainwindow.cpp" line="1159"/>
         <source>R&amp;ecord</source>
         <translation>З&amp;апись</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1062"/>
+        <location filename="mainwindow.cpp" line="1167"/>
         <source>on</source>
         <translation>вкл</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1062"/>
+        <location filename="mainwindow.cpp" line="1167"/>
         <source>off</source>
         <translation>выкл</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1066"/>
+        <location filename="mainwindow.cpp" line="1171"/>
         <source>Recording of entire study is %1</source>
         <translation>Запись всего исследования %1</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1154"/>
+        <location filename="mainwindow.cpp" line="1290"/>
         <source>Storing &apos;%1&apos;</source>
-        <translation type="unfinished"></translation>
+        <translation>Отправка &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="200"/>
+        <location filename="mainwindow.cpp" line="199"/>
         <source>&amp;Menu</source>
         <translation>&amp;Меню</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="209"/>
+        <location filename="mainwindow.cpp" line="208"/>
         <source>&amp;Enable RTP streaming</source>
         <translation>Включить RTP &amp;поток</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="213"/>
+        <location filename="mainwindow.cpp" line="212"/>
         <source>&amp;Record entire study</source>
         <translation>Записывать исследование &amp;целиком</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="220"/>
+        <location filename="mainwindow.cpp" line="219"/>
         <source>E&amp;xit</source>
         <translation>В&amp;ыход</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="768"/>
+        <location filename="mainwindow.cpp" line="820"/>
         <source>Failed to load image %1</source>
         <translation>Не удалось загрузить снимок %1</translation>
     </message>
@@ -483,57 +532,72 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
 <context>
     <name>PatientDialog</name>
     <message>
-        <location filename="patientdialog.cpp" line="17"/>
+        <location filename="patientdialog.cpp" line="16"/>
+        <source>New patient</source>
+        <translation>Новый пациент</translation>
+    </message>
+    <message>
+        <location filename="patientdialog.cpp" line="20"/>
         <source>&amp;Patient id</source>
         <translation>&amp;Карта пициента</translation>
     </message>
     <message>
-        <location filename="patientdialog.cpp" line="18"/>
+        <location filename="patientdialog.cpp" line="21"/>
         <source>&amp;Name</source>
         <translation>&amp;ФИО</translation>
     </message>
     <message>
-        <location filename="patientdialog.cpp" line="19"/>
+        <location filename="patientdialog.cpp" line="22"/>
         <source>&amp;Sex</source>
         <translation>&amp;Пол</translation>
     </message>
     <message>
-        <location filename="patientdialog.cpp" line="21"/>
+        <location filename="patientdialog.cpp" line="24"/>
         <source>female</source>
         <translation>женский</translation>
     </message>
     <message>
-        <location filename="patientdialog.cpp" line="21"/>
+        <location filename="patientdialog.cpp" line="24"/>
         <source>male</source>
         <translation>мужской</translation>
     </message>
     <message>
-        <location filename="patientdialog.cpp" line="21"/>
+        <location filename="patientdialog.cpp" line="24"/>
         <source>other</source>
         <translation>прочий</translation>
     </message>
     <message>
-        <location filename="patientdialog.cpp" line="21"/>
+        <location filename="patientdialog.cpp" line="24"/>
         <source>unspecified</source>
         <translation>не указан</translation>
     </message>
     <message>
-        <location filename="patientdialog.cpp" line="23"/>
+        <location filename="patientdialog.cpp" line="26"/>
         <source>&amp;Birthday</source>
         <translation>&amp;Дата рождения</translation>
     </message>
     <message>
-        <location filename="patientdialog.cpp" line="25"/>
+        <location filename="patientdialog.cpp" line="28"/>
         <source>MM/dd/yyyy</source>
         <translation>dd/MM/yyyy</translation>
     </message>
     <message>
-        <location filename="patientdialog.cpp" line="26"/>
+        <location filename="patientdialog.cpp" line="29"/>
         <source>Study &amp;type</source>
         <translation>&amp;Исследование</translation>
     </message>
     <message>
-        <location filename="patientdialog.cpp" line="31"/>
+        <location filename="patientdialog.cpp" line="36"/>
+        <source>Show work list</source>
+        <translation>Открыть рабочий лист</translation>
+    </message>
+    <message>
+        <location filename="patientdialog.cpp" line="43"/>
+        <source>Reject</source>
+        <translation>Отменить</translation>
+    </message>
+    <message>
+        <location filename="patientdialog.cpp" line="47"/>
         <source>Start study</source>
         <translation>Начать исследование</translation>
     </message>
@@ -578,80 +642,42 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
     <message>
         <location filename="settings.cpp" line="75"/>
         <source>DICOM device</source>
-        <translation type="unfinished"></translation>
+        <translation>DICOM устройство</translation>
     </message>
     <message>
         <location filename="settings.cpp" line="76"/>
         <source>DICOM MPPS</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="settings.cpp" line="77"/>
         <source>DICOM MWL</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="settings.cpp" line="78"/>
         <source>DICOM servers</source>
-        <translation type="unfinished"></translation>
+        <translation>DICOM сервера</translation>
     </message>
     <message>
         <location filename="settings.cpp" line="79"/>
         <source>DICOM storage</source>
-        <translation type="unfinished"></translation>
+        <translation>DICOM хранилище</translation>
     </message>
     <message>
         <location filename="settings.cpp" line="80"/>
         <source>Worklist column display</source>
-        <translation type="unfinished"></translation>
+        <translation>Колонки рабочего листа</translation>
     </message>
     <message>
         <location filename="settings.cpp" line="81"/>
         <source>Worklist query settings</source>
-        <translation type="unfinished"></translation>
+        <translation>Настройки рабочего листа</translation>
     </message>
     <message>
         <location filename="settings.cpp" line="130"/>
         <source>Close</source>
         <translation>Закрыть</translation>
-    </message>
-</context>
-<context>
-    <name>StartStudyDialog</name>
-    <message>
-        <location filename="startstudydialog.cpp" line="19"/>
-        <source>Worklist</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="startstudydialog.cpp" line="22"/>
-        <source>ID</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="startstudydialog.cpp" line="23"/>
-        <source>Name</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="startstudydialog.cpp" line="24"/>
-        <source>Sex</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="startstudydialog.cpp" line="25"/>
-        <source>Birthdate</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="startstudydialog.cpp" line="28"/>
-        <source>New patient</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="startstudydialog.cpp" line="33"/>
-        <source>Start</source>
-        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -788,19 +814,19 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
     </message>
     <message>
         <location filename="videosettings.cpp" line="93"/>
-        <location filename="videosettings.cpp" line="135"/>
-        <location filename="videosettings.cpp" line="166"/>
+        <location filename="videosettings.cpp" line="134"/>
+        <location filename="videosettings.cpp" line="165"/>
         <source>(default)</source>
         <translation>(по умолчанию)</translation>
     </message>
     <message>
-        <location filename="videosettings.cpp" line="99"/>
+        <location filename="videosettings.cpp" line="98"/>
         <source>Failed to create element &apos;%1&apos;</source>
         <oldsource>Failed to create element &quot;%1&quot;</oldsource>
         <translation>Не удалось создать элемент &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="videosettings.cpp" line="191"/>
+        <location filename="videosettings.cpp" line="190"/>
         <source>%1x%2</source>
         <translation>%1х%2</translation>
     </message>
@@ -808,118 +834,95 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
 <context>
     <name>Worklist</name>
     <message>
-        <location filename="worklist.cpp" line="52"/>
-        <source>ID</source>
-        <translation type="unfinished"></translation>
+        <location filename="worklist.cpp" line="31"/>
+        <location filename="worklist.cpp" line="77"/>
+        <source>Worklist</source>
+        <translation>Рабочий лист</translation>
     </message>
     <message>
-        <location filename="worklist.cpp" line="53"/>
-        <source>Name</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="worklist.cpp" line="54"/>
-        <source>Birth date</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="worklist.cpp" line="55"/>
-        <source>Sex</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="worklist.cpp" line="56"/>
-        <source>Description</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="worklist.cpp" line="57"/>
-        <source>Date</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="worklist.cpp" line="58"/>
-        <source>Time</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="worklist.cpp" line="59"/>
-        <source>Physician</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="worklist.cpp" line="60"/>
-        <source>Status</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="worklist.cpp" line="96"/>
-        <source>worklist</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="worklist.cpp" line="99"/>
+        <location filename="worklist.cpp" line="80"/>
         <source>&amp;Refresh</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Обновить</translation>
     </message>
     <message>
-        <location filename="worklist.cpp" line="100"/>
+        <location filename="worklist.cpp" line="81"/>
         <source>&amp;Details</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Детали</translation>
     </message>
     <message>
-        <location filename="worklist.cpp" line="102"/>
+        <location filename="worklist.cpp" line="83"/>
         <source>Start &amp;study</source>
         <translation>Начать &amp;исследование</translation>
     </message>
 </context>
 <context>
+    <name>WorklistColumnSettings</name>
+    <message>
+        <location filename="worklistcolumnsettings.cpp" line="32"/>
+        <source>Code</source>
+        <translation>Код</translation>
+    </message>
+    <message>
+        <location filename="worklistcolumnsettings.cpp" line="33"/>
+        <source>Tag name</source>
+        <translation>Имя тега</translation>
+    </message>
+    <message>
+        <location filename="worklistcolumnsettings.cpp" line="34"/>
+        <source>VR</source>
+        <translation>Тип</translation>
+    </message>
+</context>
+<context>
     <name>WorklistQuerySettings</name>
     <message>
-        <location filename="worklistquerysettings.cpp" line="20"/>
+        <location filename="worklistquerysettings.cpp" line="24"/>
         <source>&amp;Today</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Сегодня</translation>
     </message>
     <message>
-        <location filename="worklistquerysettings.cpp" line="23"/>
+        <location filename="worklistquerysettings.cpp" line="28"/>
         <source>To&amp;day +/-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="worklistquerysettings.cpp" line="26"/>
-        <source> day(s)</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Сегодня +/-</translation>
     </message>
     <message>
         <location filename="worklistquerysettings.cpp" line="32"/>
-        <source>&amp;From</source>
-        <translation type="unfinished"></translation>
+        <source> day(s)</source>
+        <translation> дней</translation>
     </message>
     <message>
-        <location filename="worklistquerysettings.cpp" line="35"/>
         <location filename="worklistquerysettings.cpp" line="39"/>
+        <source>&amp;From</source>
+        <translation>&amp;От</translation>
+    </message>
+    <message>
+        <location filename="worklistquerysettings.cpp" line="43"/>
+        <location filename="worklistquerysettings.cpp" line="48"/>
         <source>MM/dd/yyyy</source>
-        <translation type="unfinished">dd/MM/yyyy</translation>
+        <translation>dd/MM/yyyy</translation>
     </message>
     <message>
-        <location filename="worklistquerysettings.cpp" line="40"/>
+        <location filename="worklistquerysettings.cpp" line="50"/>
         <source>t&amp;o</source>
-        <translation type="unfinished"></translation>
+        <translation>д&amp;о</translation>
     </message>
     <message>
-        <location filename="worklistquerysettings.cpp" line="49"/>
-        <source>&amp;Scheduled date</source>
-        <translation type="unfinished"></translation>
+        <location filename="worklistquerysettings.cpp" line="59"/>
+        <source>&amp;Scheduled
+date</source>
+        <oldsource>&amp;Scheduled date</oldsource>
+        <translation type="unfinished">&amp;Запланированная
+дата</translation>
     </message>
     <message>
-        <location filename="worklistquerysettings.cpp" line="52"/>
+        <location filename="worklistquerysettings.cpp" line="63"/>
         <source>&amp;Modality</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Методика</translation>
     </message>
     <message>
-        <location filename="worklistquerysettings.cpp" line="55"/>
+        <location filename="worklistquerysettings.cpp" line="75"/>
         <source>&amp;AE title</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
 </context>
 </TS>
