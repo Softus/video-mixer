@@ -6,6 +6,9 @@
 
 QT       += core gui
 
+# GCC tuning
+*-g++*:QMAKE_CXXFLAGS += -std=c++0x -Wno-multichar
+
 win32 {
     INCLUDEPATH += c:/usr/include
     LIBS += c:/usr/lib/*.lib advapi32.lib netapi32.lib wsock32.lib
@@ -14,7 +17,6 @@ win32 {
 unix {
     CONFIG += link_pkgconfig
     PKGCONFIG += QtGLib-2.0 QtGStreamer-0.10 QtGStreamerUi-0.10 gstreamer-0.10 gstreamer-base-0.10
-    QMAKE_CXXFLAGS += -std=c++0x -Wno-multichar
 }
 
 dicom {
