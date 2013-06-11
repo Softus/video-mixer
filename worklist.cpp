@@ -80,7 +80,8 @@ QToolBar* Worklist::createToolBar()
     actionLoad   = bar->addAction(QIcon(":/buttons/refresh"), tr("&Refresh"), this, SLOT(onLoadClick()));
     actionDetail = bar->addAction(QIcon(":/buttons/details"), tr("&Details"), this, SLOT(onShowDetailsClick()));
     actionDetail->setEnabled(false);
-    /*auto actionStart =*/ bar->addAction(QIcon(":/buttons/start"), tr("Start &study"), this, SLOT(onStartStudyClick()));
+    actionStartStudy = bar->addAction(QIcon(":/buttons/start"), tr("Start &study"), this, SLOT(onStartStudyClick()));
+    actionStartStudy->setEnabled(false);
 
     return bar;
 }
@@ -150,6 +151,7 @@ void Worklist::onLoadClick()
 
     actionLoad->setEnabled(true);
     actionDetail->setEnabled(table->rowCount() > 0);
+    actionStartStudy->setEnabled(table->rowCount() > 0);
 }
 
 void Worklist::onShowDetailsClick()
@@ -169,8 +171,11 @@ void Worklist::onCellDoubleClicked(QTableWidgetItem* item)
 
 void Worklist::onStartStudyClick()
 {
-
-
+    auto ds = getPatientDS();
+    if (ds)
+    {
+        startStudy(ds);
+    }
 }
 
 DcmDataset* Worklist::getPatientDS()

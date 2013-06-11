@@ -82,6 +82,7 @@ class MainWindow : public QWidget
     QString buildPipeline();
     QGst::PipelinePtr createPipeline();
     void releasePipeline();
+    void updateOutputPath(const QString patient, const QString study);
     QString appendVideoTail(const QString& prefix, int idx);
     void removeVideoTail(const QString& prefix);
 
@@ -95,6 +96,7 @@ class MainWindow : public QWidget
     void errorGlib(const QGlib::ObjectPtr& obj, const QGlib::Error& ex);
     void setElementProperty(const char* elm, const char* prop = nullptr, const QGlib::Value& value = nullptr, QGst::State minimumState = QGst::StatePlaying);
     void setElementProperty(QGst::ElementPtr& elm, const char* prop = nullptr, const QGlib::Value& value = nullptr, QGst::State minimumState = QGst::StatePlaying);
+    bool startVideoRecord();
 
 #ifdef WITH_DICOM
     void sendToServer(DcmDataset* dset, const QString& seriesUID);
@@ -112,6 +114,7 @@ signals:
 private slots:
 #ifdef WITH_DICOM
     void onShowWorkListClick();
+    void onStartStudy(DcmDataset* patient);
 #endif
     void onShowAboutClick();
     void onShowArchiveClick();

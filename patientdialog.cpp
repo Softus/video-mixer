@@ -13,7 +13,10 @@
 PatientDialog::PatientDialog(QWidget *parent) :
     QDialog(parent)
 {
-    QFormLayout* layoutMain = new QFormLayout;
+    setWindowTitle(tr("New patient"));
+    setMinimumSize(480, 200);
+
+    auto layoutMain = new QFormLayout;
     layoutMain->addRow(tr("&Patient id"), textPatientId = new QLineEdit);
     layoutMain->addRow(tr("&Name"), textPatientName = new QLineEdit);
     layoutMain->addRow(tr("&Sex"), cbPatientSex = new QComboBox);
@@ -26,7 +29,15 @@ PatientDialog::PatientDialog(QWidget *parent) :
     layoutMain->addRow(tr("Study &type"), cbStudyType = new QComboBox);
     cbStudyType->addItems(QSettings().value("studies").toStringList());
 
-    QHBoxLayout *layoutBtns = new QHBoxLayout;
+    auto layoutBtns = new QHBoxLayout;
+
+#ifdef WITH_DICOM
+    auto *btnWorklist = new QPushButton(QIcon(":buttons/show_worklist"), nullptr);
+    btnWorklist->setToolTip(tr("Show work list"));
+    connect(btnWorklist, SIGNAL(clicked()), this, SLOT(onShowWorklist()));
+    layoutBtns->addWidget(btnWorklist);
+#endif
+
     layoutBtns->addStretch(1);
 
     auto *btnReject = new QPushButton(tr("Reject"));
@@ -41,6 +52,17 @@ PatientDialog::PatientDialog(QWidget *parent) :
     layoutMain->addRow(layoutBtns);
 
     setLayout(layoutMain);
+    QSettings settings;
+    restoreGeometry(settings.value("new-patient-geometry").toByteArray());
+    setWindowState((Qt::WindowState)settings.value("new-patient-state").toInt());
+}
+
+void PatientDialog::closeEvent(QCloseEvent *evt)
+{
+    QSettings settings;
+    settings.setValue("new-patient-geometry", saveGeometry());
+    settings.setValue("new-patient-state", (int)windowState() & ~Qt::WindowMinimized);
+    QWidget::closeEvent(evt);
 }
 
 QString PatientDialog::patientName() const
@@ -64,4 +86,9 @@ void PatientDialog::savePatientFile(const QString& outputPath)
     settings.setValue("birthday", dateBirthday->text());
     settings.setValue("study", cbStudyType->currentText());
     settings.endGroup();
+}
+
+void PatientDialog::onShowWorklist()
+{
+    done(SHOW_WORKLIST_RESULT);
 }

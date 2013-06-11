@@ -58,12 +58,12 @@ ArchiveWindow::ArchiveWindow(QWidget *parent) :
     actionDelete->setShortcut(Qt::Key_Delete);
     actionDelete->setEnabled(false);
 
-    auto actionBrowse = barArchive->addAction(QIcon(":buttons/folder"), tr("File browser"), this, SLOT(onShowFolderClick()));
-    actionBrowse->setShortcut(Qt::Key_F2); // Same as the key that open this dialog
-
     auto spacer = new QWidget;
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     barArchive->addWidget(spacer);
+
+    auto actionBrowse = barArchive->addAction(QIcon(":buttons/folder"), tr("File browser"), this, SLOT(onShowFolderClick()));
+    actionBrowse->setShortcut(Qt::Key_F2); // Same as the key that open this dialog
 
     actionMode = new QAction(barArchive);
     actionMode->setShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_0));
@@ -398,7 +398,7 @@ void ArchiveWindow::onSwitchModeClick(QAction* action)
 
 void ArchiveWindow::onShowFolderClick()
 {
-    QDesktopServices::openUrl(QUrl(curr.absolutePath()));
+    QDesktopServices::openUrl(QUrl::fromLocalFile(curr.absolutePath()));
 }
 
 void static removeFileOrFolder(const QString& path)

@@ -3,6 +3,8 @@
 
 #include <QDialog>
 
+#define SHOW_WORKLIST_RESULT 100
+
 QT_BEGIN_NAMESPACE
 class QComboBox;
 class QDateEdit;
@@ -23,10 +25,14 @@ public:
     QString patientName() const;
     QString studyName() const;
     void savePatientFile(const QString& outputPath);
-    void test();
+
+protected:
+    void closeEvent(QCloseEvent *evt);
+
 signals:
 
 public slots:
+    void onShowWorklist();
 
 };
 

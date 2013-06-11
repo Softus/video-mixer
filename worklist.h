@@ -23,6 +23,7 @@ class Worklist : public QWidget
     QTableWidget* table;
     QAction*      actionLoad;
     QAction*      actionDetail;
+    QAction*      actionStartStudy;
     QToolBar*     createToolBar();
 
     // DICOM
@@ -40,7 +41,8 @@ protected:
     virtual void closeEvent(QCloseEvent *);
 
 signals:
-    
+    void startStudy(DcmDataset* patient);
+
 public slots:
     void onLoadClick();
     void onShowDetailsClick();

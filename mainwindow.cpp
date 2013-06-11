@@ -5,6 +5,7 @@
 #include "qwaitcursor.h"
 #include "settings.h"
 #include "videosettings.h"
+#include "patientdialog.h"
 
 #ifdef WITH_DICOM
 #include "worklist.h"
@@ -12,8 +13,7 @@
 #include "dcmclient.h"
 #include <dcmtk/dcmdata/dcdatset.h>
 #include <dcmtk/dcmdata/dcuid.h>
-#else
-#include "patientdialog.h"
+#include <dcmtk/dcmdata/dcdeftag.h>
 #endif
 
 #include <QApplication>
@@ -545,6 +545,31 @@ static QString getExt(QString str)
     return QString(".").append(str.remove('e').left(3));
 }
 
+static QString fixFileName(QString str)
+{
+    if (!str.isNull())
+    {
+        for (int i = 0; i < str.length(); ++i)
+        {
+            switch (str[i].unicode())
+            {
+            case '<':
+            case '>':
+            case ':':
+            case '\"':
+            case '/':
+            case '\\':
+            case '|':
+            case '?':
+            case '*':
+                str[i] = '_';
+                break;
+            }
+        }
+    }
+    return str;
+}
+
 QString MainWindow::replace(QString str, int seqNo)
 {
     const QString nn = seqNo >= 10? QString::number(seqNo): QString("0").append('0' + seqNo);
@@ -598,17 +623,6 @@ void MainWindow::updatePipeline()
         setElementProperty(videoEncoder, "bitrate", videoEncBitrate);
     }
 
-    outputPath.setPath(replace(settings.value("output-path", "/video").toString()
-        .append(settings.value("folder-template", "/%yyyy%-%MM%/%dd%/%name%/").toString()), ++studyNo));
-
-    if (!outputPath.mkpath("."))
-    {
-        QString msg = tr("Failed to create '%1'").arg(outputPath.absolutePath());
-        qCritical() << msg;
-        QMessageBox::critical(this, windowTitle(), msg, QMessageBox::Ok);
-        return;
-    }
-
     if (archiveWindow != nullptr)
     {
         archiveWindow->setRoot(settings.value("output-path", "/video").toString());
@@ -617,6 +631,37 @@ void MainWindow::updatePipeline()
 #ifdef WITH_DICOM
     actionWorklist->setEnabled(!settings.value("mwl-server").toString().isEmpty());
 #endif
+}
+
+void MainWindow::updateOutputPath(const QString patientName, const QString studyName)
+{
+    this->patientName = fixFileName(patientName);
+    this->studyName   = fixFileName(studyName);
+
+    QString windowTitle(tr(PRODUCT_FULL_NAME));
+    if (!patientName.isEmpty())
+    {
+        windowTitle.append(tr(" - ")).append(patientName);
+    }
+
+    if (!studyName.isEmpty())
+    {
+        windowTitle.append(tr(" - ")).append(studyName);
+    }
+
+    QSettings settings;
+
+    outputPath.setPath(replace(settings.value("output-path", "/video").toString()
+        .append(settings.value("folder-template", "/%yyyy%-%MM%/%dd%/%name%/").toString()), ++studyNo));
+
+    if (!outputPath.mkpath("."))
+    {
+        QString msg = tr("Failed to create '%1'").arg(outputPath.absolutePath());
+        qCritical() << msg;
+        QMessageBox::critical(this, windowTitle, msg, QMessageBox::Ok);
+    }
+
+    setWindowTitle(windowTitle);
 }
 
 void MainWindow::releasePipeline()
@@ -817,25 +862,36 @@ void MainWindow::onElementMessage(const QGst::ElementMessagePtr& message)
     qDebug() << "Got unknown message " << s->name() << " from " << message->source()->property("name").toString();
 }
 
+bool MainWindow::startVideoRecord()
+{
+    if (QSettings().value("enable-video").toBool())
+    {
+        auto videoFileName = appendVideoTail("video", ++studyNo);
+        if (videoFileName.isEmpty())
+        {
+            QMessageBox::critical(this, windowTitle(), tr("Failed to start recording.\nCheck the error log for details."), QMessageBox::Ok);
+            return false;
+        }
+
+        // Until the real clip recording starts, we should disable this button
+        //
+        btnStart->setEnabled(false);
+    }
+
+    return true;
+}
+
 void MainWindow::onStartClick()
 {
     if (!running)
     {
         imageNo = clipNo = 0;
-        listImagesAndClips->clear();
 
-#ifdef WITH_DICOM
+#if 0
 
         if (worklist == nullptr)
         {
             worklist = new Worklist();
-        }
-        StartStudyDialog dlg(worklist, this);
-        if (QDialog::Rejected == dlg.exec())
-        {
-            // Cancelled
-            //
-            return;
         }
 
         auto patientDs = worklist->getPatientDS();
@@ -854,47 +910,39 @@ void MainWindow::onStartClick()
             QMessageBox::critical(this, windowTitle(), client.lastError());
             return;
         }
-#else
+#endif
+
         PatientDialog dlg(this);
-        if (!dlg.exec())
+        auto result = dlg.exec();
+        if (result == QDialog::Rejected)
         {
             // User cancelled
             //
             return;
         }
-        patientName = dlg.patientName();
-        studyName   = dlg.studyName();
-#endif
+
+        if (result == SHOW_WORKLIST_RESULT)
+        {
+            // User want to switch to the Worklist
+            //
+            onShowWorkListClick();
+            return;
+        }
+
         QWaitCursor wait(this);
-        updatePipeline();
-        // After updatePipeline the outputPath is usable
+        listImagesAndClips->clear();
+        updateOutputPath(dlg.patientName(), dlg.studyName());
+
+        // After updateOutputPath the outputPath is usable
         //
         dlg.savePatientFile(outputPath.absoluteFilePath(".patient"));
 
-        if (QSettings().value("enable-video").toBool())
-        {
-            auto videoFileName = appendVideoTail("video", ++studyNo);
-            if (!videoFileName.isEmpty())
-            {
-                // Until the real clip recording starts, we should disable this button
-                //
-                btnStart->setEnabled(false);
-                running = true;
-            }
-            else
-            {
-                QMessageBox::critical(this, windowTitle(), tr("Failed to start recording.\nCheck the error log for details."), QMessageBox::Ok);
-            }
-        }
-        else
-        {
-            running = true;
-        }
+        running = startVideoRecord();
     }
     else
     {
         int userChoice;
-#ifdef WITH_DICOM
+#if 0
         userChoice = QMessageBox::question(this, windowTitle(),
            tr("Send study results to the server?"), tr("Continue the study"), tr ("Don't sent"), tr("Send"), 2, 0);
 
@@ -924,8 +972,10 @@ void MainWindow::onStartClick()
         running = recording = false;
         updateRecordButton();
         removeVideoTail("video");
+        setWindowTitle(PRODUCT_FULL_NAME);
 
-#ifdef WITH_DICOM
+
+#if 0
         auto patientDs = worklist->getPatientDS();
 
         QString   seriesUID;
@@ -954,7 +1004,6 @@ void MainWindow::onStartClick()
     updateStartButton();
     updateRecordAll();
 
-    //imageOut->clear();
     displayWidget->update();
 }
 
@@ -1161,6 +1210,8 @@ void MainWindow::onShowArchiveClick()
         archiveWindow = new ArchiveWindow();
         archiveWindow->setRoot(QSettings().value("output-path", "/video").toString());
     }
+
+    updateOutputPath(patientName, studyName);
     archiveWindow->setPath(outputPath.absolutePath());
     archiveWindow->show();
     archiveWindow->activateWindow();
@@ -1187,9 +1238,38 @@ void MainWindow::onShowWorkListClick()
     if (worklist == nullptr)
     {
         worklist = new Worklist();
+        connect(worklist, SIGNAL(startStudy(DcmDataset*)), this, SLOT(onStartStudy(DcmDataset*)));
     }
     worklist->show();
     worklist->activateWindow();
+}
+
+void MainWindow::onStartStudy(DcmDataset* patient)
+{
+    // Switch focus to the main window
+    //
+    show();
+    activateWindow();
+
+    QWaitCursor wait(this);
+    listImagesAndClips->clear();
+
+    const char *strName = nullptr;
+    const char *strStudy = nullptr;
+
+    updateOutputPath(patient->findAndGetString(DCM_PatientName, strName, true).good()? QString::fromUtf8(strName): nullptr,
+        patient->findAndGetString(DCM_ScheduledProcedureStepDescription, strStudy, true).good()? QString::fromUtf8(strStudy): nullptr);
+
+    patient->saveFile(outputPath.absoluteFilePath(".patient.dcm").toLocal8Bit());
+
+    running = startVideoRecord();
+
+    setElementProperty(videoEncoderValve, "drop", !running);
+
+    updateStartButton();
+    updateRecordAll();
+
+    displayWidget->update();
 }
 
 void MainWindow::sendToServer(DcmDataset* patientDs, const QString& seriesUID)
