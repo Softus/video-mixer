@@ -93,15 +93,14 @@ void VideoSettings::updateDeviceList()
     listDevices->addItem(tr("(default)"));
 
     auto selectedDevice = QSettings().value("device").toString();
-
-    QGst::ElementPtr src = QGst::ElementFactory::make(PLATFORM_SPECIFIC_SOURCE);
+    auto src = QGst::ElementFactory::make(PLATFORM_SPECIFIC_SOURCE);
     if (!src) {
         QMessageBox::critical(this, windowTitle(), tr("Failed to create element '%1'").arg(PLATFORM_SPECIFIC_SOURCE));
         return;
     }
 
     src->setState(QGst::StateReady);
-    src->getState(NULL, NULL, GST_SECOND * 10);
+    src->getState(nullptr, nullptr, GST_SECOND * 10);
 
     // Look for device-name for windows and "device" for linux/macosx
     //
@@ -109,10 +108,10 @@ void VideoSettings::updateDeviceList()
     if (propertyProbe && propertyProbe->propertySupportsProbe(PLATFORM_SPECIFIC_PROPERTY))
     {
         //get a list of devices that the element supports
-        QList<QGlib::Value> devices = propertyProbe->probeAndGetValues(PLATFORM_SPECIFIC_PROPERTY);
-        Q_FOREACH(const QGlib::Value& device, devices)
+        auto devices = propertyProbe->probeAndGetValues(PLATFORM_SPECIFIC_PROPERTY);
+        foreach (const QGlib::Value& device, devices)
         {
-            QString deviceName = device.toString();
+            auto deviceName = device.toString();
             QGst::PadPtr srcPad = src->getStaticPad("src");
             if (srcPad)
             {
@@ -126,7 +125,7 @@ void VideoSettings::updateDeviceList()
         }
     }
     src->setState(QGst::StateNull);
-    src->getState(NULL, NULL, GST_SECOND * 10);
+    src->getState(nullptr, nullptr, GST_SECOND * 10);
 }
 
 void VideoSettings::videoDeviceChanged(int index)

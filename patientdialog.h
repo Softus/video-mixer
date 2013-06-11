@@ -23,7 +23,7 @@ public:
     QString patientName() const;
     QString studyName() const;
     void savePatientFile(const QString& outputPath);
-
+    void test();
 signals:
 
 public slots:

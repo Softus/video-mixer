@@ -23,6 +23,8 @@ class ArchiveWindow : public QDialog
     QAction*               actionDelete;
     QAction*               actionPlay;
     QAction*               actionMode;
+    QAction*               actionSeekBack;
+    QAction*               actionSeekFwd;
     QListWidget*           listFiles;
     QGst::Ui::VideoWidget* displayWidget;
     QWidget*               player;

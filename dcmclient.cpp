@@ -388,7 +388,7 @@ bool DcmClient::findSCU()
         0 == tout? DIMSE_BLOCKING: DIMSE_NONBLOCKING, tout,
         &rsp, &statusDetail);
 
-    if (statusDetail != NULL)
+    if (statusDetail != nullptr)
     {
         delete statusDetail;
     }

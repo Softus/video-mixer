@@ -96,7 +96,7 @@ static void Dump(QGst::ElementPtr elm)
     QGst::ChildProxyPtr childProxy =  elm.dynamicCast<QGst::ChildProxy>();
     if (childProxy)
     {
-        childProxy->data(NULL);
+        childProxy->data(nullptr);
         auto cnt = childProxy->childrenCount();
         for (uint i = 0; i < cnt; ++i)
         {
@@ -1128,9 +1128,9 @@ void MainWindow::prepareSettingsMenu()
     QSettings settings;
 
     auto menu = static_cast<QMenu*>(sender());
-    Q_FOREACH(auto action, menu->actions())
+    foreach (auto action, menu->actions())
     {
-        const QString propName = action->data().toString();
+        auto propName = action->data().toString();
         if (!propName.isEmpty())
         {
             action->setChecked(settings.value(propName).toBool());
@@ -1143,7 +1143,7 @@ void MainWindow::prepareSettingsMenu()
 void MainWindow::toggleSetting()
 {
     QSettings settings;
-    const QString propName = static_cast<QAction*>(sender())->data().toString();
+    auto propName = static_cast<QAction*>(sender())->data().toString();
     bool enable = !settings.value(propName).toBool();
     settings.setValue(propName, enable);
     updatePipeline();

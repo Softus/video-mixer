@@ -22,7 +22,7 @@ DicomDeviceSettings::DicomDeviceSettings(QWidget *parent) :
     auto textIp = new QLineEdit;
     textIp->setReadOnly(true);
     QString strIps;
-    Q_FOREACH(auto addr, QHostInfo::fromName(localHost).addresses())
+    foreach (auto addr, QHostInfo::fromName(localHost).addresses())
     {
         if (addr.scopeId() == "Node-local" || addr.isInSubnet(QHostAddress(0x7F000000), 8))
         {
