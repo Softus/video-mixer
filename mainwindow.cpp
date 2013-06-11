@@ -921,6 +921,7 @@ void MainWindow::onStartClick()
             return;
         }
 
+#ifdef WITH_DICOM
         if (result == SHOW_WORKLIST_RESULT)
         {
             // User want to switch to the Worklist
@@ -928,8 +929,8 @@ void MainWindow::onStartClick()
             onShowWorkListClick();
             return;
         }
+#endif
 
-        QWaitCursor wait(this);
         listImagesAndClips->clear();
         updateOutputPath(dlg.patientName(), dlg.studyName());
 
