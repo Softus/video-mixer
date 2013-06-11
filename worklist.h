@@ -21,6 +21,9 @@ class Worklist : public QWidget
     // UI
     //
     QTableWidget* table;
+    QDateTime     maxDate;
+    int           timeColumn;
+    int           dateColumn;
     QAction*      actionLoad;
     QAction*      actionDetail;
     QAction*      actionStartStudy;
@@ -33,7 +36,6 @@ class Worklist : public QWidget
 
 public:
     explicit Worklist(QWidget *parent = 0);
-    ~Worklist();
 
     DcmDataset* getPatientDS();
 

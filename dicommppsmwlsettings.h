@@ -1,5 +1,5 @@
-#ifndef DICOMMPPSSETTINGS_H
-#define DICOMMPPSSETTINGS_H
+#ifndef DICOMMPPSMWLSETTINGS_H
+#define DICOMMPPSMWLSETTINGS_H
 
 #include <QWidget>
 
@@ -8,16 +8,19 @@ class QCheckBox;
 class QComboBox;
 QT_END_NAMESPACE
 
-class DicomMppsSettings : public QWidget
+class DicomMppsMwlSettings : public QWidget
 {
     Q_OBJECT
+    QCheckBox* checkUseMwl;
+    QComboBox* cbMwlServer;
+
     QCheckBox* checkStartWithMpps;
     QCheckBox* checkCompleteWithMpps;
     QCheckBox* checkUseMpps;
     QComboBox* cbMppsServer;
 
 public:
-    Q_INVOKABLE explicit DicomMppsSettings(QWidget *parent = 0);
+    Q_INVOKABLE explicit DicomMppsMwlSettings(QWidget *parent = 0);
     
 signals:
     
@@ -27,4 +30,4 @@ public slots:
     void save();
 };
 
-#endif // DICOMMPPSSETTINGS_H
+#endif // DICOMMPPSMWLSETTINGS_H

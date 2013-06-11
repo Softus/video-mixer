@@ -9,8 +9,7 @@
 #ifdef WITH_DICOM
 #include "dicomdevicesettings.h"
 #include "dicomserversettings.h"
-#include "dicommwlsettings.h"
-#include "dicommppssettings.h"
+#include "dicommppsmwlsettings.h"
 #include "dicomstoragesettings.h"
 #include "worklistcolumnsettings.h"
 #include "worklistquerysettings.h"
@@ -67,23 +66,22 @@ void Settings::createPage(const QString& title, const QMetaObject& page)
 
 void Settings::createPages()
 {
-    createPage(tr("Video source"), VideoSettings::staticMetaObject);
-    createPage(tr("Storage"), StorageSettings::staticMetaObject);
-    createPage(tr("Studies"), StudiesSettings::staticMetaObject);
-
 #ifdef WITH_DICOM
     createPage(tr("DICOM device"), DicomDeviceSettings::staticMetaObject);
-    createPage(tr("DICOM MPPS"), DicomMppsSettings::staticMetaObject);
-    createPage(tr("DICOM MWL"), DicomMwlSettings::staticMetaObject);
     createPage(tr("DICOM servers"), DicomServerSettings::staticMetaObject);
+    createPage(tr("DICOM MWL/MPPS"), DicomMppsMwlSettings::staticMetaObject);
     createPage(tr("DICOM storage"), DicomStorageSettings::staticMetaObject);
     createPage(tr("Worklist column display"), WorklistColumnSettings::staticMetaObject);
     createPage(tr("Worklist query settings"), WorklistQuerySettings::staticMetaObject);
 #endif
 
+    createPage(tr("Video source"), VideoSettings::staticMetaObject);
+    createPage(tr("Storage"), StorageSettings::staticMetaObject);
+    createPage(tr("Studies"), StudiesSettings::staticMetaObject);
+
     // Sort pages using current locale
     //
-    listWidget->sortItems();
+    //listWidget->sortItems();
 
     connect(listWidget,
         SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)),

@@ -18,10 +18,8 @@
 /detailsdialog.h -text
 /dicomdevicesettings.cpp -text
 /dicomdevicesettings.h -text
-/dicommppssettings.cpp -text
-/dicommppssettings.h -text
-/dicommwlsettings.cpp -text
-/dicommwlsettings.h -text
+/dicommppsmwlsettings.cpp -text
+/dicommppsmwlsettings.h -text
 /dicomserverdetails.cpp -text
 /dicomserverdetails.h -text
 /dicomserversettings.cpp -text

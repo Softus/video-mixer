@@ -20,14 +20,13 @@ PatientDialog::PatientDialog(QWidget *parent) :
     layoutMain->addRow(tr("&Patient id"), textPatientId = new QLineEdit);
     layoutMain->addRow(tr("&Name"), textPatientName = new QLineEdit);
     layoutMain->addRow(tr("&Sex"), cbPatientSex = new QComboBox);
-    QStringList sexes;
-    (sexes << tr("female") << tr("male") << tr("other") << tr("unspecified")).sort();
-    cbPatientSex->addItems(sexes);
+    cbPatientSex->addItems(QStringList() << tr("unspecified") << tr("female") << tr("male") << tr("other"));
     layoutMain->addRow(tr("&Birthday"), dateBirthday = new QDateEdit);
     dateBirthday->setCalendarPopup(true);
     dateBirthday->setDisplayFormat(tr("MM/dd/yyyy"));
     layoutMain->addRow(tr("Study &type"), cbStudyType = new QComboBox);
     cbStudyType->addItems(QSettings().value("studies").toStringList());
+    cbStudyType->setEditable(true);
 
     auto layoutBtns = new QHBoxLayout;
 
@@ -57,12 +56,12 @@ PatientDialog::PatientDialog(QWidget *parent) :
     setWindowState((Qt::WindowState)settings.value("new-patient-state").toInt());
 }
 
-void PatientDialog::closeEvent(QCloseEvent *evt)
+void PatientDialog::done(int result)
 {
     QSettings settings;
     settings.setValue("new-patient-geometry", saveGeometry());
     settings.setValue("new-patient-state", (int)windowState() & ~Qt::WindowMinimized);
-    QWidget::closeEvent(evt);
+    QDialog::done(result);
 }
 
 QString PatientDialog::patientName() const
@@ -73,6 +72,65 @@ QString PatientDialog::patientName() const
 QString PatientDialog::studyName() const
 {
     return cbStudyType->currentText();
+}
+
+void PatientDialog::setPatientId(const QString& id)
+{
+    textPatientId->setText(id);
+}
+
+void PatientDialog::setPatientName(const QString& name)
+{
+    textPatientName->setText(name);
+}
+
+void PatientDialog::setPatientSex(const QString& sex)
+{
+    QString real;
+
+    if (sex.length() != 1)
+    {
+        real = sex;
+    }
+    else
+    {
+        switch (sex[0].unicode())
+        {
+        case 'f':
+        case 'F':
+            real = tr("female");
+            break;
+        case 'm':
+        case 'M':
+            real = tr("male");
+            break;
+        case 'o':
+        case 'O':
+            real = tr("other");
+            break;
+        default:
+            real = tr("unspecified");
+            break;
+        }
+    }
+
+    auto idx = cbPatientSex->findText(real);
+    cbPatientSex->setCurrentIndex(idx);
+    if (idx < 0)
+    {
+        cbPatientSex->setEditable(true);
+        cbPatientSex->setEditText(real);
+    }
+}
+
+void PatientDialog::setPatientBirthDate(const QDate& date)
+{
+    dateBirthday->setDate(date);
+}
+
+void PatientDialog::setStudyName(const QString& name)
+{
+    cbStudyType->setEditText(name);
 }
 
 void PatientDialog::savePatientFile(const QString& outputPath)

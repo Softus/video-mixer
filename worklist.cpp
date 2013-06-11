@@ -26,15 +26,17 @@ static int DcmDatasetMetaType = qRegisterMetaType<DcmDataset>();
 
 Worklist::Worklist(QWidget *parent) :
     QWidget(parent),
+    timeColumn(-1),
+    dateColumn(-1),
     activeConnection(nullptr)
 {
     setWindowTitle(tr("Worklist"));
 
-    QStringList cols = QSettings().value("worklist-columns1").toStringList();
+    QStringList cols = QSettings().value("worklist-columns").toStringList();
     if (cols.size() == 0)
     {
-        // Defaults are id, name, bithday, procedure description, date, time, physitian, status
-        cols << "0010,0020" << "0010,0010" << "0010,0030" << "0040,0007" << "0040,0002" << "0040,0003" << "0040,0006" << "0040,0020";
+        // Defaults are id, name, bithday, sex, procedure description, date, time
+        cols << "0010,0020" << "0010,0010" << "0010,0030" << "0010,0040" << "0040,0007" << "0040,0002" << "0040,0003";
     }
 
     table = new QTableWidget(0, cols.size());
@@ -47,6 +49,16 @@ Worklist::Worklist(QWidget *parent) :
         auto item = new QTableWidgetItem(text);
         item->setData(Qt::UserRole, (tag.getGroup() << 16) | tag.getElement());
         table->setHorizontalHeaderItem(i, item);
+
+        if (tag == DCM_ScheduledProcedureStepStartDate)
+        {
+            dateColumn = i;
+        }
+        else if (tag == DCM_ScheduledProcedureStepStartTime)
+        {
+            timeColumn = i;
+        }
+
     }
     table->setSelectionBehavior(QAbstractItemView::SelectRows);
     table->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -61,15 +73,12 @@ Worklist::Worklist(QWidget *parent) :
     QSettings settings;
     restoreGeometry(settings.value("worklist-geometry").toByteArray());
     setWindowState((Qt::WindowState)settings.value("worklist-state").toInt());
+    table->horizontalHeader()->restoreState(settings.value("worklist-columns-width").toByteArray());
 
     // Start loading of worklist right after the window is shown for the first time
     //
     QTimer::singleShot(0, this, SLOT(onLoadClick()));
     setAttribute(Qt::WA_DeleteOnClose, false);
-}
-
-Worklist::~Worklist()
-{
 }
 
 QToolBar* Worklist::createToolBar()
@@ -88,6 +97,7 @@ QToolBar* Worklist::createToolBar()
 
 void Worklist::onAddRow(DcmDataset* dset)
 {
+    QDateTime date;
     int row = table->rowCount();
     table->setRowCount(row + 1);
 
@@ -95,12 +105,31 @@ void Worklist::onAddRow(DcmDataset* dset)
     {
         const char *str = nullptr;
         auto tag = table->horizontalHeaderItem(col)->data(Qt::UserRole).toInt();
-
-        OFCondition cond = dset->findAndGetString(DcmTagKey(tag >> 16, tag & 0xFFFF), str, true);
-        auto item = new QTableWidgetItem(QString::fromUtf8(str? str: cond.text()));
+        DcmTagKey tagKey(tag >> 16, tag & 0xFFFF);
+        OFCondition cond = dset->findAndGetString(tagKey, str, true);
+        auto text = QString::fromUtf8(str? str: cond.text());
+        auto item = new QTableWidgetItem(text);
         table->setItem(row, col, item);
+        if (col == dateColumn)
+        {
+            date.setDate(QDate::fromString(text, "yyyyMMdd"));
+        }
+        else if (col == timeColumn)
+        {
+            date.setTime(QTime::fromString(text, "HHmm"));
+        }
     }
+
     table->item(row, 0)->setData(Qt::UserRole, QVariant::fromValue(*(DcmDataset*)dset->clone()));
+
+    if (date < QDateTime::currentDateTime() && date > maxDate)
+    {
+       maxDate = date;
+       table->selectRow(row);
+       actionDetail->setEnabled(true);
+       actionStartStudy->setEnabled(true);
+    }
+
     qApp->processEvents();
 }
 
@@ -116,6 +145,7 @@ void Worklist::closeEvent(QCloseEvent *evt)
     QSettings settings;
     settings.setValue("worklist-geometry", saveGeometry());
     settings.setValue("worklist-state", (int)windowState() & ~Qt::WindowMinimized);
+    settings.setValue("worklist-columns-width", table->horizontalHeader()->saveState());
     QWidget::closeEvent(evt);
 }
 
@@ -129,6 +159,7 @@ void Worklist::onLoadClick()
     //
     table->setUpdatesEnabled(false);
     table->setSortingEnabled(false);
+    maxDate.setMSecsSinceEpoch(0);
     table->setRowCount(0);
 
     DcmClient assoc(UID_FINDModalityWorklistInformationModel);
@@ -144,14 +175,21 @@ void Worklist::onLoadClick()
         QMessageBox::critical(this, windowTitle(), assoc.lastError(), QMessageBox::Ok);
     }
 
+    if (timeColumn >= 0)
+    {
+        table->sortItems(timeColumn);
+        if (dateColumn >= 0)
+        {
+            table->sortItems(dateColumn);
+        }
+    }
+
     table->setSortingEnabled(true);
     table->scrollToItem(table->currentItem());
     table->setFocus();
     table->setUpdatesEnabled(true);
 
     actionLoad->setEnabled(true);
-    actionDetail->setEnabled(table->rowCount() > 0);
-    actionStartStudy->setEnabled(table->rowCount() > 0);
 }
 
 void Worklist::onShowDetailsClick()
@@ -166,7 +204,8 @@ void Worklist::onShowDetailsClick()
 void Worklist::onCellDoubleClicked(QTableWidgetItem* item)
 {
     table->setCurrentItem(item);
-    onShowDetailsClick();
+    //onShowDetailsClick();
+    onStartStudyClick();
 }
 
 void Worklist::onStartStudyClick()

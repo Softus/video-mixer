@@ -27,8 +27,6 @@ dicom {
     SOURCES  += worklist.cpp dcmclient.cpp detailsdialog.cpp \
     dicomdevicesettings.cpp \
     dicomserversettings.cpp \
-    dicommwlsettings.cpp \
-    dicommppssettings.cpp \
     dicomstoragesettings.cpp \
     dicomserverdetails.cpp \
     worklistcolumnsettings.cpp \
@@ -37,8 +35,6 @@ dicom {
     HEADERS += worklist.h dcmclient.h detailsdialog.h \
     dicomdevicesettings.h \
     dicomserversettings.h \
-    dicommwlsettings.h \
-    dicommppssettings.h \
     dicomstoragesettings.h \
     dicomserverdetails.h \
     worklistcolumnsettings.h \
@@ -55,7 +51,8 @@ SOURCES += beryllium.cpp mainwindow.cpp \
     studiessettings.cpp \
     patientdialog.cpp \
     aboutdialog.cpp \
-    archivewindow.cpp
+    archivewindow.cpp \
+    dicommppsmwlsettings.cpp
 HEADERS += mainwindow.h qwaitcursor.h \
     videosettings.h \
     settings.h \
@@ -65,7 +62,8 @@ HEADERS += mainwindow.h qwaitcursor.h \
     aboutdialog.h \
     archivewindow.h \
     product.h \
-    comboboxwithpopupsignal.h
+    comboboxwithpopupsignal.h \
+    dicommppsmwlsettings.h
 
 FORMS   +=
 

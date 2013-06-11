@@ -337,10 +337,14 @@ QString MainWindow::buildPipeline()
     }
     else
     {
-        pipe.append(PLATFORM_SPECIFIC_SOURCE).append(" ").append(srcParams);
+        pipe.append(PLATFORM_SPECIFIC_SOURCE);
         if (!deviceDef.isEmpty())
         {
             pipe.append(" " PLATFORM_SPECIFIC_PROPERTY "=\"").append(deviceDef).append("\"");
+        }
+        if (!srcParams.isEmpty())
+        {
+            pipe.append(" ").append(srcParams);
         }
     }
 
@@ -397,7 +401,7 @@ QString MainWindow::buildPipeline()
         if (enableRtp)
         {
             pipe.append(" ! queue ! ").append(rtpPayDef).append(" ").append(rtpPayParams)
-                .append(" ! ").append(rtpSinkDef).append(" ").append(rtpSinkParams).append(" name=rtpsink videosplitter.");
+                .append(" ! ").append(rtpSinkDef).append(" name=rtpsink videosplitter.").append(" ").append(rtpSinkParams);
         }
     }
 
@@ -884,22 +888,7 @@ void MainWindow::onStartClick()
 {
     if (!running)
     {
-        imageNo = clipNo = 0;
-
 #if 0
-
-        if (worklist == nullptr)
-        {
-            worklist = new Worklist();
-        }
-
-        auto patientDs = worklist->getPatientDS();
-        if (patientDs == nullptr)
-        {
-            QMessageBox::critical(this, windowTitle(), tr("No patient selected"));
-            return;
-        }
-
         DcmClient client(UID_ModalityPerformedProcedureStepSOPClass);
         pendingSOPInstanceUID = client.nCreateRQ(patientDs);
         delete patientDs;
@@ -910,94 +899,65 @@ void MainWindow::onStartClick()
             return;
         }
 #endif
-
-        PatientDialog dlg(this);
-        auto result = dlg.exec();
-        if (result == QDialog::Rejected)
-        {
-            // User cancelled
-            //
-            return;
-        }
-
-#ifdef WITH_DICOM
-        if (result == SHOW_WORKLIST_RESULT)
-        {
-            // User want to switch to the Worklist
-            //
-            onShowWorkListClick();
-            return;
-        }
-#endif
-
-        listImagesAndClips->clear();
-        updateOutputPath(dlg.patientName(), dlg.studyName());
-
-        // After updateOutputPath the outputPath is usable
-        //
-        dlg.savePatientFile(outputPath.absoluteFilePath(".patient"));
-
-        running = startVideoRecord();
+        onStartStudy();
+        return;
     }
-    else
+
+    int userChoice;
+#if 0
+    userChoice = QMessageBox::question(this, windowTitle(),
+       tr("Send study results to the server?"), tr("Continue the study"), tr ("Don't sent"), tr("Send"), 2, 0);
+
+    if (userChoice == 0)
     {
-        int userChoice;
-#if 0
-        userChoice = QMessageBox::question(this, windowTitle(),
-           tr("Send study results to the server?"), tr("Continue the study"), tr ("Don't sent"), tr("Send"), 2, 0);
-
-        if (userChoice == 0)
-        {
-            // Continue the study
-            //
-            return;
-        }
-#else
-        userChoice = QMessageBox::question(this, windowTitle(),
-           tr("End the study?"), QMessageBox::Yes | QMessageBox::Default, QMessageBox::No);
-
-        if (userChoice == QMessageBox::No)
-        {
-            // Don't end the study
-            //
-            return;
-        }
-#endif
-
-        QWaitCursor wait(this);
-        if (recording)
-        {
-            onRecordClick();
-        }
-        running = recording = false;
-        updateRecordButton();
-        removeVideoTail("video");
-        setWindowTitle(PRODUCT_FULL_NAME);
-
-
-#if 0
-        auto patientDs = worklist->getPatientDS();
-
-        QString   seriesUID;
-        if (!pendingSOPInstanceUID.isEmpty())
-        {
-            DcmClient client(UID_ModalityPerformedProcedureStepSOPClass);
-            seriesUID = client.nSetRQ(patientDs, pendingSOPInstanceUID);
-            if (seriesUID.isEmpty())
-            {
-                QMessageBox::critical(this, windowTitle(), client.lastError());
-            }
-        }
-
-        if (userChoice == 2)
-        {
-            sendToServer(patientDs, seriesUID);
-        }
-
-        pendingSOPInstanceUID.clear();
-        delete patientDs;
-#endif
+        // Continue the study
+        //
+        return;
     }
+#else
+    userChoice = QMessageBox::question(this, windowTitle(),
+       tr("End the study?"), QMessageBox::Yes | QMessageBox::Default, QMessageBox::No);
+
+    if (userChoice == QMessageBox::No)
+    {
+        // Don't end the study
+        //
+        return;
+    }
+#endif
+
+    QWaitCursor wait(this);
+    if (recording)
+    {
+        onRecordClick();
+    }
+    running = recording = false;
+    updateRecordButton();
+    removeVideoTail("video");
+    setWindowTitle(PRODUCT_FULL_NAME);
+
+#if 0
+    auto patientDs = worklist->getPatientDS();
+
+    QString   seriesUID;
+    if (!pendingSOPInstanceUID.isEmpty())
+    {
+        DcmClient client(UID_ModalityPerformedProcedureStepSOPClass);
+        seriesUID = client.nSetRQ(patientDs, pendingSOPInstanceUID);
+        if (seriesUID.isEmpty())
+        {
+            QMessageBox::critical(this, windowTitle(), client.lastError());
+        }
+    }
+
+    if (userChoice == 2)
+    {
+        sendToServer(patientDs, seriesUID);
+    }
+
+    pendingSOPInstanceUID.clear();
+    delete patientDs;
+#endif
 
     setElementProperty(videoEncoderValve, "drop", !running);
 
@@ -1232,6 +1192,90 @@ void MainWindow::onEnableWidget(QWidget* widget, bool enable)
     widget->setEnabled(enable);
 }
 
+void MainWindow::onStartStudy(
+#ifdef WITH_DICOM
+        DcmDataset* patient
+#endif
+        )
+{
+    // Switch focus to the main window
+    //
+    show();
+    activateWindow();
+
+    QWaitCursor wait(this);
+    listImagesAndClips->clear();
+    imageNo = clipNo = 0;
+
+    PatientDialog dlg(this);
+
+#ifdef WITH_DICOM
+    if (patient)
+    {
+        const char *str = nullptr;
+        if (patient->findAndGetString(DCM_PatientID, str, true).good())
+        {
+            dlg.setPatientId(QString::fromUtf8(str));
+        }
+
+        if (patient->findAndGetString(DCM_PatientName, str, true).good())
+        {
+            dlg.setPatientName(QString::fromUtf8(str));
+        }
+
+        if (patient->findAndGetString(DCM_PatientBirthDate, str, true).good())
+        {
+            dlg.setPatientBirthDate(QDate::fromString(QString::fromUtf8(str), "yyyyMMdd"));
+        }
+
+        if (patient->findAndGetString(DCM_PatientSex, str, true).good())
+        {
+            dlg.setPatientSex(QString::fromUtf8(str));
+        }
+
+        if (patient->findAndGetString(DCM_ScheduledProcedureStepDescription, str, true).good())
+        {
+            dlg.setStudyName(QString::fromUtf8(str));
+        }
+    }
+#endif
+
+    switch (dlg.exec())
+    {
+#ifdef WITH_DICOM
+    case SHOW_WORKLIST_RESULT:
+        onShowWorkListClick();
+        // passthrouht
+#endif
+    case QDialog::Rejected:
+        return;
+    }
+
+    updateOutputPath(dlg.patientName(), dlg.studyName());
+
+    // After updateOutputPath the outputPath is usable
+    //
+#ifdef WITH_DICOM
+    if (patient)
+    {
+        patient->saveFile(outputPath.absoluteFilePath(".patient.dcm").toLocal8Bit());
+    }
+    else
+#endif
+    {
+        dlg.savePatientFile(outputPath.absoluteFilePath(".patient"));
+    }
+
+    running = startVideoRecord();
+
+    setElementProperty(videoEncoderValve, "drop", !running);
+
+    updateStartButton();
+    updateRecordAll();
+
+    displayWidget->update();
+}
+
 #ifdef WITH_DICOM
 void MainWindow::onShowWorkListClick()
 {
@@ -1242,34 +1286,6 @@ void MainWindow::onShowWorkListClick()
     }
     worklist->show();
     worklist->activateWindow();
-}
-
-void MainWindow::onStartStudy(DcmDataset* patient)
-{
-    // Switch focus to the main window
-    //
-    show();
-    activateWindow();
-
-    QWaitCursor wait(this);
-    listImagesAndClips->clear();
-
-    const char *strName = nullptr;
-    const char *strStudy = nullptr;
-
-    updateOutputPath(patient->findAndGetString(DCM_PatientName, strName, true).good()? QString::fromUtf8(strName): nullptr,
-        patient->findAndGetString(DCM_ScheduledProcedureStepDescription, strStudy, true).good()? QString::fromUtf8(strStudy): nullptr);
-
-    patient->saveFile(outputPath.absoluteFilePath(".patient.dcm").toLocal8Bit());
-
-    running = startVideoRecord();
-
-    setElementProperty(videoEncoderValve, "drop", !running);
-
-    updateStartButton();
-    updateRecordAll();
-
-    displayWidget->update();
 }
 
 void MainWindow::sendToServer(DcmDataset* patientDs, const QString& seriesUID)
