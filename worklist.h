@@ -37,8 +37,6 @@ class Worklist : public QWidget
 public:
     explicit Worklist(QWidget *parent = 0);
 
-    DcmDataset* getPatientDS();
-
 protected:
     virtual void closeEvent(QCloseEvent *);
 

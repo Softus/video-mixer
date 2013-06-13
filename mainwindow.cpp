@@ -111,6 +111,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QWidget(parent),
     archiveWindow(nullptr),
 #ifdef WITH_DICOM
+    pendingPatient(nullptr),
     worklist(nullptr),
 #endif
     imageNo(0),
@@ -888,23 +889,12 @@ void MainWindow::onStartClick()
 {
     if (!running)
     {
-#if 0
-        DcmClient client(UID_ModalityPerformedProcedureStepSOPClass);
-        pendingSOPInstanceUID = client.nCreateRQ(patientDs);
-        delete patientDs;
-
-        if (pendingSOPInstanceUID.isNull())
-        {
-            QMessageBox::critical(this, windowTitle(), client.lastError());
-            return;
-        }
-#endif
         onStartStudy();
         return;
     }
 
     int userChoice;
-#if 0
+#ifdef WITH_DICOM
     userChoice = QMessageBox::question(this, windowTitle(),
        tr("Send study results to the server?"), tr("Continue the study"), tr ("Don't sent"), tr("Send"), 2, 0);
 
@@ -936,27 +926,31 @@ void MainWindow::onStartClick()
     removeVideoTail("video");
     setWindowTitle(PRODUCT_FULL_NAME);
 
-#if 0
-    auto patientDs = worklist->getPatientDS();
+#ifdef WITH_DICOM
 
-    QString   seriesUID;
-    if (!pendingSOPInstanceUID.isEmpty())
+    if (pendingPatient && QSettings().value("complete-with-mpps", true).toBool())
     {
-        DcmClient client(UID_ModalityPerformedProcedureStepSOPClass);
-        seriesUID = client.nSetRQ(patientDs, pendingSOPInstanceUID);
-        if (seriesUID.isEmpty())
+        QString   seriesUID;
+        if (!pendingSOPInstanceUID.isEmpty())
         {
-            QMessageBox::critical(this, windowTitle(), client.lastError());
+            DcmClient client(UID_ModalityPerformedProcedureStepSOPClass);
+            seriesUID = client.nSetRQ(pendingPatient, pendingSOPInstanceUID);
+            if (seriesUID.isEmpty())
+            {
+                QMessageBox::critical(this, windowTitle(), client.lastError());
+            }
+
+            if (userChoice == 2)
+            {
+                sendToServer(pendingPatient, seriesUID);
+            }
         }
     }
 
-    if (userChoice == 2)
-    {
-        sendToServer(patientDs, seriesUID);
-    }
-
+    delete pendingPatient;
+    pendingPatient = nullptr;
     pendingSOPInstanceUID.clear();
-    delete patientDs;
+
 #endif
 
     setElementProperty(videoEncoderValve, "drop", !running);
@@ -1259,6 +1253,19 @@ void MainWindow::onStartStudy(
     if (patient)
     {
         patient->saveFile(outputPath.absoluteFilePath(".patient.dcm").toLocal8Bit());
+
+        if (QSettings().value("start-with-mpps", true).toBool())
+        {
+            DcmClient client(UID_ModalityPerformedProcedureStepSOPClass);
+            pendingSOPInstanceUID = client.nCreateRQ(patient);
+            if (pendingSOPInstanceUID.isNull())
+            {
+                QMessageBox::critical(this, windowTitle(), client.lastError());
+                return;
+            }
+
+            pendingPatient = new DcmDataset(*patient);
+        }
     }
     else
 #endif
@@ -1294,22 +1301,31 @@ void MainWindow::sendToServer(DcmDataset* patientDs, const QString& seriesUID)
     QProgressDialog pdlg(this);
     outputPath.setFilter(QDir::Files | QDir::Readable);
     pdlg.setRange(0, outputPath.count());
-    DcmClient client(UID_MultiframeTrueColorSecondaryCaptureImageStorage);
 
     // Only single series for now
     //
     int seriesNo = 1;
 
-    for (uint i = 0; !pdlg.wasCanceled() && i < outputPath.count(); ++i)
+    foreach (auto server, QSettings().value("storage-servers").toStringList())
     {
-        pdlg.setValue(i);
-        pdlg.setLabelText(tr("Storing '%1'").arg(outputPath[i]));
-        qApp->processEvents();
+        DcmClient client(UID_MultiframeTrueColorSecondaryCaptureImageStorage);
 
-        const QString& file = outputPath.absoluteFilePath(outputPath[i]);
-        if (!client.sendToServer(patientDs, seriesUID, seriesNo, file, i))
+        for (uint i = 0; !pdlg.wasCanceled() && i < outputPath.count(); ++i)
         {
-            QMessageBox::critical(this, windowTitle(), client.lastError());
+            pdlg.setValue(i);
+            pdlg.setLabelText(tr("Storing '%1' to '%2'").arg(outputPath[i], server));
+            qApp->processEvents();
+
+            const QString& file = outputPath.absoluteFilePath(outputPath[i]);
+            if (!client.sendToServer(server, patientDs, seriesUID, seriesNo, file, i))
+            {
+                if (QMessageBox::Yes != QMessageBox::critical(this, windowTitle(),
+                      tr("Faild to send '%1' to '%2':\n%3\nContinue?").arg(outputPath[i], server, client.lastError()),
+                      QMessageBox::Yes, QMessageBox::No))
+                {
+                    break;
+                }
+            }
         }
     }
 }

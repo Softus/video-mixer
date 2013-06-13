@@ -210,16 +210,10 @@ void Worklist::onCellDoubleClicked(QTableWidgetItem* item)
 
 void Worklist::onStartStudyClick()
 {
-    auto ds = getPatientDS();
-    if (ds)
-    {
-        startStudy(ds);
-    }
-}
-
-DcmDataset* Worklist::getPatientDS()
-{
     int row = table->currentRow();
-    return row < 0? nullptr:
-        new DcmDataset(table->item(row, 0)->data(Qt::UserRole).value<DcmDataset>());
+    if (row >= 0)
+    {
+        auto ds = table->item(row, 0)->data(Qt::UserRole).value<DcmDataset>();
+        startStudy(&ds);
+    }
 }

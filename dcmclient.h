@@ -44,8 +44,8 @@ public:
     //
     QString nSetRQ(DcmDataset* patientDs, const QString& sopInstance);
 
-    bool sendToServer(DcmDataset* patientDs, const QString& seriesUID, int seriesNumber,
-        const QString file, int instanceNumber);
+    bool sendToServer(const QString& server, DcmDataset* patientDs, const QString& seriesUID,
+        int seriesNumber, const QString& file, int instanceNumber);
 
     QString lastError() const
     {
@@ -56,9 +56,9 @@ public:
 
 private:
     int timeout() const;
-    T_ASC_Parameters* initAssocParams(const char * transferSyntax = nullptr);
-    bool createAssociation(const char * transferSyntax = nullptr);
-    bool cStoreRQ(DcmDataset* patientDs, int writeXfer, const char* sopInstance);
+    T_ASC_Parameters* initAssocParams(const QString &server, const char* transferSyntax = nullptr);
+    bool createAssociation(const QString &server, const char* transferSyntax = nullptr);
+    bool cStoreRQ(DcmDataset* patientDs, const char* sopInstance);
     static void loadCallback(void *callbackData,
         T_DIMSE_C_FindRQ* /*request*/, int /*responseCount*/,
         T_DIMSE_C_FindRSP* /*rsp*/, DcmDataset* responseIdentifiers);

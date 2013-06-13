@@ -52,6 +52,8 @@ static void BuildCFindDataSet(DcmDataset& ds)
     ds.insertEmptyElement(DCM_PatientID);
     ds.insertEmptyElement(DCM_PatientBirthDate);
     ds.insertEmptyElement(DCM_PatientSex);
+    ds.insertEmptyElement(DCM_PatientSize),
+    ds.insertEmptyElement(DCM_PatientWeight),
     ds.insertEmptyElement(DCM_StudyInstanceUID);
     ds.insertEmptyElement(DCM_SeriesInstanceUID);
     ds.insertEmptyElement(DCM_StudyID);
@@ -247,25 +249,18 @@ void DcmClient::abort()
     }
 }
 
-T_ASC_Parameters* DcmClient::initAssocParams(const char * transferSyntax)
+T_ASC_Parameters* DcmClient::initAssocParams(const QString& server, const char* transferSyntax)
 {
+    auto srvName = QString("servers/").append(server);
     QSettings settings;
     QString missedParameter = tr("Required settings parameter %1 is missing");
 
-    auto mwlServer = settings.value("mwl-server").toString();
-    if (mwlServer.isEmpty())
-    {
-        cond = new OFConditionString(0, 2, OF_error, missedParameter.arg("mwl-server").toLocal8Bit());
-        return nullptr;
-    }
-
-    auto values = settings.value("servers/" + mwlServer).toStringList();
+    auto values = settings.value(srvName).toStringList();
     if (values.count() < 6)
     {
-        cond = new OFConditionString(0, 2, OF_error, missedParameter.arg("servers/" + mwlServer).toLocal8Bit());
+        cond = new OFConditionString(0, 2, OF_error, missedParameter.arg(srvName).toLocal8Bit());
         return nullptr;
     }
-
 
     DIC_NODENAME localHost;
     T_ASC_Parameters* params = nullptr;
@@ -324,7 +319,7 @@ T_ASC_Parameters* DcmClient::initAssocParams(const char * transferSyntax)
     return nullptr;
 }
 
-bool DcmClient::createAssociation(const char * transferSyntax)
+bool DcmClient::createAssociation(const QString& server, const char* transferSyntax)
 {
     if (assoc)
     {
@@ -335,7 +330,7 @@ bool DcmClient::createAssociation(const char * transferSyntax)
 
     /* create DcmAssoc, i.e. try to establish a network connection to another */
     /* DICOM application. This call creates an instance of T_ASC_DcmAssoc*. */
-    T_ASC_Parameters* params = initAssocParams(transferSyntax);
+    T_ASC_Parameters* params = initAssocParams(server, transferSyntax);
     if (params)
     {
         qDebug() << "Requesting DcmAssoc";
@@ -362,7 +357,7 @@ bool DcmClient::createAssociation(const char * transferSyntax)
 
 bool DcmClient::findSCU()
 {
-    if (!createAssociation())
+    if (!createAssociation(QSettings().value("mwl-server").toString()))
     {
         return false;
     }
@@ -398,7 +393,7 @@ bool DcmClient::findSCU()
 
 QString DcmClient::nCreateRQ(DcmDataset* patientDs)
 {
-    if (!createAssociation())
+    if (!createAssociation(QSettings().value("mpps-server").toString()))
     {
         return nullptr;
     }
@@ -450,7 +445,7 @@ QString DcmClient::nCreateRQ(DcmDataset* patientDs)
 
 QString DcmClient::nSetRQ(DcmDataset* patientDs, const QString& sopInstance)
 {
-    if (!createAssociation())
+    if (!createAssociation(QSettings().value("mpps-server").toString()))
     {
         return nullptr;
     }
@@ -495,17 +490,8 @@ QString DcmClient::nSetRQ(DcmDataset* patientDs, const QString& sopInstance)
     return seriesUID;
 }
 
-bool DcmClient::cStoreRQ(DcmDataset* dset, int writeXfer, const char* sopInstance)
+bool DcmClient::cStoreRQ(DcmDataset* dset, const char* sopInstance)
 {
-    DcmXfer filexfer((E_TransferSyntax)writeXfer);
-
-    // Request association only at the first time
-    //
-    if (!createAssociation(filexfer.getXferID()))
-    {
-        return nullptr;
-    }
-
     T_DIMSE_C_StoreRQ req;
     T_DIMSE_C_StoreRSP rsp;
     bzero((char*)&req, sizeof(req));
@@ -530,8 +516,8 @@ bool DcmClient::cStoreRQ(DcmDataset* dset, int writeXfer, const char* sopInstanc
     return cond.good();
 }
 
-bool DcmClient::sendToServer(DcmDataset* patientDs, const QString& seriesUID, int seriesNumber,
-                             const QString file, int instanceNumber)
+bool DcmClient::sendToServer(const QString& server, DcmDataset* patientDs, const QString& seriesUID,
+                             int seriesNumber, const QString& file, int instanceNumber)
 {
     Image2Dcm i2d;
     I2DJpegSource src;
@@ -566,8 +552,18 @@ bool DcmClient::sendToServer(DcmDataset* patientDs, const QString& seriesUID, in
     BuildCStoreDataSet(*patientDs, *dset, seriesUID);
     //DcmFileFormat dcmff(dset);
     //cond = dcmff.saveFile(src.getImageFile().append(".dcm").c_str(), writeXfer);
-    cStoreRQ(dset, writeXfer, instanceUID);
-    delete dset;
 
+    DcmXfer filexfer((E_TransferSyntax)writeXfer);
+
+    // Request association only at the first time
+    //
+    if (!createAssociation(server.toUtf8(), filexfer.getXferID()))
+    {
+        return false;
+    }
+
+    cStoreRQ(dset, instanceUID);
+
+    delete dset;
     return cond.good();
 }

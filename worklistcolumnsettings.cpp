@@ -14,7 +14,6 @@ static DcmTagKey rowTags[] =
     DCM_PatientName,
     DCM_PatientBirthDate,
     DCM_PatientSex,
-    DCM_PatientAge,
     DCM_PatientSize,
     DCM_PatientWeight,
     DCM_ScheduledProcedureStepDescription,
