@@ -113,7 +113,9 @@ signals:
     void enableWidget(QWidget*, bool);
 
 private slots:
+#ifdef WITH_DICOM
     void onShowWorkListClick();
+#endif
     void onStartStudy(
         #ifdef WITH_DICOM
             DcmDataset* patient = nullptr
