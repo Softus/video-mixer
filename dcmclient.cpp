@@ -13,6 +13,7 @@
 
 #include <dcmtk/dcmnet/assoc.h>
 #include <dcmtk/dcmnet/dimse.h>
+#include <dcmtk/dcmnet/diutil.h>
 
 #include <QApplication>
 #include <QDebug>
@@ -262,11 +263,18 @@ T_ASC_Parameters* DcmClient::initAssocParams(const QString& server, const char* 
         return nullptr;
     }
 
+    auto peerAet = values[0].toUtf8();
+    auto peerAddress = QString("%1:%2").arg(values[1], values[2]);
+    auto timeout = values[3].toInt();
+
+    return initAssocParams(peerAet, peerAddress, timeout, transferSyntax);
+}
+
+T_ASC_Parameters* DcmClient::initAssocParams(const QString& peerAet, const QString& peerAddress, int timeout, const char* transferSyntax)
+{
+    QSettings settings;
     DIC_NODENAME localHost;
     T_ASC_Parameters* params = nullptr;
-
-    QString calledPeerAddress = QString("%1:%2").arg(values[1], values[2]);
-    int timeout = values[3].toInt();
 
     cond = ASC_initializeNetwork(NET_REQUESTOR, settings.value("local-port").toInt(), timeout, &net);
     if (cond.good())
@@ -274,12 +282,12 @@ T_ASC_Parameters* DcmClient::initAssocParams(const QString& server, const char* 
         cond = ASC_createAssociationParameters(&params, settings.value("pdu-size", ASC_DEFAULTMAXPDU).toInt());
         if (cond.good())
         {
-            ASC_setAPTitles(params, settings.value("aet").toString().toUtf8(), values[0].toUtf8(), nullptr);
+            ASC_setAPTitles(params, settings.value("aet").toString().toUtf8(), peerAet.toUtf8(), nullptr);
 
             /* Figure out the presentation addresses and copy the */
             /* corresponding values into the DcmAssoc parameters.*/
             gethostname(localHost, sizeof(localHost) - 1);
-            ASC_setPresentationAddresses(params, localHost, calledPeerAddress.toUtf8());
+            ASC_setPresentationAddresses(params, localHost, peerAddress.toUtf8());
 
             if (transferSyntax)
             {
@@ -353,6 +361,31 @@ bool DcmClient::createAssociation(const QString& server, const char* transferSyn
 
     qDebug() << cond.text();
     return false;
+}
+
+QString DcmClient::cEcho(const QString &peerAet, const QString &peerAddress, int timeout)
+{
+    T_ASC_Association *assoc = nullptr;
+    cond = ASC_requestAssociation(net, initAssocParams(peerAet, peerAddress, timeout), &assoc);
+
+    if (cond.good())
+    {
+        DIC_US msgId = assoc->nextMsgID++;
+        DIC_US status = -1;
+
+        /* send C-ECHO-RQ and handle response */
+        cond = DIMSE_echoUser(assoc, msgId, 0 == timeout? DIMSE_BLOCKING: DIMSE_NONBLOCKING, timeout, &status, nullptr);
+
+        ASC_releaseAssociation(assoc);
+        ASC_destroyAssociation(&assoc);
+
+        if (cond.good())
+        {
+            return QString::fromUtf8(DU_cstoreStatusString(status));
+        }
+    }
+
+    return cond.text();
 }
 
 bool DcmClient::findSCU()

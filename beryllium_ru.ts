@@ -162,12 +162,12 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
 <context>
     <name>DcmClient</name>
     <message>
-        <location filename="dcmclient.cpp" line="256"/>
+        <location filename="dcmclient.cpp" line="257"/>
         <source>Required settings parameter %1 is missing</source>
         <translation>Необходимый параметр %1 не задан в настройках.</translation>
     </message>
     <message>
-        <location filename="dcmclient.cpp" line="350"/>
+        <location filename="dcmclient.cpp" line="358"/>
         <source>Accepted presentation context ID not found</source>
         <translation>Принятый ID контекста представления не найден</translation>
     </message>
@@ -280,69 +280,80 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
 <context>
     <name>DicomServerDetails</name>
     <message>
-        <location filename="dicomserverdetails.cpp" line="22"/>
+        <location filename="dicomserverdetails.cpp" line="25"/>
         <source>&amp;Name</source>
         <translation>&amp;Имя</translation>
     </message>
     <message>
-        <location filename="dicomserverdetails.cpp" line="24"/>
+        <location filename="dicomserverdetails.cpp" line="27"/>
         <source>&amp;AE title</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="dicomserverdetails.cpp" line="25"/>
+        <location filename="dicomserverdetails.cpp" line="28"/>
         <source>&amp;IP address</source>
         <translation>IP &amp;адрес</translation>
     </message>
     <message>
-        <location filename="dicomserverdetails.cpp" line="26"/>
+        <location filename="dicomserverdetails.cpp" line="29"/>
         <source>&amp;Port</source>
         <translation>&amp;Порт</translation>
     </message>
     <message>
-        <location filename="dicomserverdetails.cpp" line="28"/>
+        <location filename="dicomserverdetails.cpp" line="31"/>
         <source>Time&amp;out</source>
         <translation>Та&amp;ймаут</translation>
     </message>
     <message>
-        <location filename="dicomserverdetails.cpp" line="30"/>
+        <location filename="dicomserverdetails.cpp" line="33"/>
         <source> seconds</source>
         <translation> секунд</translation>
     </message>
     <message>
-        <location filename="dicomserverdetails.cpp" line="33"/>
+        <location filename="dicomserverdetails.cpp" line="36"/>
         <source>&amp;Echo</source>
         <translation>&amp;Эхо</translation>
     </message>
     <message>
-        <location filename="dicomserverdetails.cpp" line="37"/>
+        <location filename="dicomserverdetails.cpp" line="40"/>
         <source>Ne&amp;w</source>
         <translation>Нов&amp;ый</translation>
     </message>
     <message>
-        <location filename="dicomserverdetails.cpp" line="39"/>
+        <location filename="dicomserverdetails.cpp" line="42"/>
         <source>&amp;Retire</source>
         <translation>&amp;Старый</translation>
     </message>
     <message>
-        <location filename="dicomserverdetails.cpp" line="41"/>
+        <location filename="dicomserverdetails.cpp" line="44"/>
         <source>SOP class</source>
         <translation>SOP класс</translation>
     </message>
     <message>
-        <location filename="dicomserverdetails.cpp" line="46"/>
+        <location filename="dicomserverdetails.cpp" line="49"/>
         <source>&amp;Test</source>
         <translation>&amp;Проверить</translation>
     </message>
     <message>
-        <location filename="dicomserverdetails.cpp" line="49"/>
+        <location filename="dicomserverdetails.cpp" line="52"/>
         <source>Reject</source>
         <translation>Отменить</translation>
     </message>
     <message>
-        <location filename="dicomserverdetails.cpp" line="52"/>
+        <location filename="dicomserverdetails.cpp" line="55"/>
         <source>Save</source>
         <translation>Сохранить</translation>
+    </message>
+    <message>
+        <location filename="dicomserverdetails.cpp" line="104"/>
+        <source>Server check result:
+
+%1
+</source>
+        <translation>Результат проверки сервера:
+
+%1
+</translation>
     </message>
 </context>
 <context>

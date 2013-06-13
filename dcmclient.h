@@ -34,6 +34,8 @@ public:
     }
     ~DcmClient();
 
+    QString cEcho(const QString& peerAet, const QString& peerAddress, int timeout);
+
     bool findSCU();
 
     // Returns UID for nSetRQ
@@ -57,6 +59,7 @@ public:
 private:
     int timeout() const;
     T_ASC_Parameters* initAssocParams(const QString &server, const char* transferSyntax = nullptr);
+    T_ASC_Parameters* initAssocParams(const QString& peerAet, const QString& peerAddress, int timeout, const char* transferSyntax = nullptr);
     bool createAssociation(const QString &server, const char* transferSyntax = nullptr);
     bool cStoreRQ(DcmDataset* patientDs, const char* sopInstance);
     static void loadCallback(void *callbackData,

@@ -1,4 +1,7 @@
 #include "dicomserverdetails.h"
+#include "dcmclient.h"
+#include <dcmtk/dcmdata/dcuid.h>
+
 #include <QBoxLayout>
 #include <QCheckBox>
 #include <QFormLayout>
@@ -96,7 +99,9 @@ QStringList DicomServerDetails::values() const
 
 void DicomServerDetails::onClickTest()
 {
-    QMessageBox::information(this, windowTitle(), "Not implemented, sorry");
+    DcmClient client(UID_VerificationSOPClass);
+    auto status = client.cEcho(textAet->text(), textIp->text().append(':').append(QString::number(spinPort->value())), spinTimeout->value());
+    QMessageBox::information(this, windowTitle(), tr("Server check result:\n\n%1\n").arg(status));
 }
 
 void DicomServerDetails::onNameChanged()
