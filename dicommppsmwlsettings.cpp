@@ -45,12 +45,19 @@ DicomMppsMwlSettings::DicomMppsMwlSettings(QWidget *parent) :
 void DicomMppsMwlSettings::onUpdateServers()
 {
     auto cb = static_cast<QComboBox*>(sender());
-    QSettings settings;
-    settings.beginGroup("servers");
+    QStringList serverNames = parent()->property("DICOM servers").toStringList();
+
+    if (serverNames.isEmpty())
+    {
+        QSettings settings;
+        settings.beginGroup("servers");
+        serverNames = settings.allKeys();
+        settings.endGroup();
+    }
+
     auto server = cb->currentText();
     cb->clear();
-    cb->addItems(settings.allKeys());
-    settings.endGroup();
+    cb->addItems(serverNames);
     cb->setCurrentIndex(cb->findText(server));
 }
 

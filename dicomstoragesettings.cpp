@@ -33,11 +33,17 @@ void DicomStorageSettings::showEvent(QShowEvent *e)
 
     QSettings settings;
     QStringList listChecked = (listServers->count() == 0)? settings.value("storage-servers").toStringList(): checkedServers();
+    QStringList serverNames = parent()->property("DICOM servers").toStringList();
 
-    settings.beginGroup("servers");
+    if (serverNames.isEmpty())
+    {
+        settings.beginGroup("servers");
+        serverNames = settings.allKeys();
+        settings.endGroup();
+    }
+
     listServers->clear();
-    listServers->addItems(settings.allKeys());
-    settings.endGroup();
+    listServers->addItems(serverNames);
 
     for (auto i = 0; i < listServers->count(); ++i)
     {

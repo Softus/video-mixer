@@ -82,6 +82,18 @@ void DicomServerSettings::updateColumns(int row, const QStringList& values)
     }
 }
 
+void DicomServerSettings::updateServerList()
+{
+    QStringList serverNames;
+
+    for (auto i = 0; i < listServers->rowCount(); ++i)
+    {
+        serverNames << listServers->item(i, 0)->text();
+    }
+
+    parent()->setProperty("DICOM servers", serverNames);
+}
+
 void DicomServerSettings::onCellChanged(QTableWidgetItem* current, QTableWidgetItem*)
 {
     btnEdit->setEnabled(current != nullptr);
@@ -107,6 +119,7 @@ void DicomServerSettings::onAddClicked()
         auto values = dlg.values();
         item->setData(Qt::UserRole, values);
         updateColumns(row, values);
+        updateServerList();
     }
 }
 
@@ -121,6 +134,7 @@ void DicomServerSettings::onEditClicked()
         item->setData(Qt::UserRole, values);
         item->setText(dlg.name());
         updateColumns(item->row(), values);
+        updateServerList();
     }
 }
 
@@ -129,6 +143,7 @@ void DicomServerSettings::onRemoveClicked()
     listServers->removeRow(listServers->currentRow());
     btnEdit->setEnabled(listServers->rowCount());
     btnRemove->setEnabled(listServers->rowCount());
+    updateServerList();
 }
 
 void DicomServerSettings::save()
