@@ -31,8 +31,8 @@ DicomServerDetails::DicomServerDetails(QWidget *parent) :
     layoutMain->addRow(tr("Time&out"), spinTimeout = new QSpinBox);
     spinTimeout->setValue(DEFAULT_TIMEOUT);
     spinTimeout->setSuffix(tr(" seconds"));
-    spinTimeout->setRange(0, 600000);
-    spinTimeout->setSingleStep(500);
+    spinTimeout->setRange(0, 60000);
+    spinTimeout->setSingleStep(10);
     layoutMain->addRow(nullptr, checkEcho = new QCheckBox(tr("&Echo")));
     checkEcho->setChecked(true);
 
