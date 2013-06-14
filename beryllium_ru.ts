@@ -162,12 +162,12 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
 <context>
     <name>DcmClient</name>
     <message>
-        <location filename="dcmclient.cpp" line="255"/>
+        <location filename="dcmclient.cpp" line="252"/>
         <source>Required settings parameter %1 is missing</source>
         <translation>Необходимый параметр %1 не задан в настройках.</translation>
     </message>
     <message>
-        <location filename="dcmclient.cpp" line="356"/>
+        <location filename="dcmclient.cpp" line="353"/>
         <source>Accepted presentation context ID not found</source>
         <translation>Принятый ID контекста представления не найден</translation>
     </message>
@@ -237,16 +237,21 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
     </message>
     <message>
         <location filename="dicommppsmwlsettings.cpp" line="25"/>
+        <source>&amp;Translate latin letters back to cyrillic</source>
+        <translation>&amp;Переводить транслит обратно</translation>
+    </message>
+    <message>
+        <location filename="dicommppsmwlsettings.cpp" line="28"/>
         <source>MPPS F&amp;unction</source>
         <translation>Ф&amp;ункция MPPS</translation>
     </message>
     <message>
-        <location filename="dicommppsmwlsettings.cpp" line="26"/>
+        <location filename="dicommppsmwlsettings.cpp" line="29"/>
         <source>&amp;In progress is automatically sent when an examitaion has been started</source>
         <translation>&amp;При запуске исследования автоматически отправлять In Progress</translation>
     </message>
     <message>
-        <location filename="dicommppsmwlsettings.cpp" line="27"/>
+        <location filename="dicommppsmwlsettings.cpp" line="30"/>
         <source>&amp;Completed is automatically sent when an examitaion has been ended</source>
         <translation>При &amp;завершении исследования автоматически отправлять Completed </translation>
     </message>
@@ -458,19 +463,19 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="897"/>
-        <location filename="mainwindow.cpp" line="1105"/>
+        <location filename="mainwindow.cpp" line="1106"/>
         <source>Failed to start recording.
 Check the error log for details.</source>
         <translation>Невозможно начать запись.
 Проверьте журнал ожибок.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1363"/>
+        <location filename="mainwindow.cpp" line="1364"/>
         <source>Storing &apos;%1&apos; to &apos;%2&apos;</source>
         <translation>Отправка &apos;%1&apos; на &apos;%2&apos; </translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1370"/>
+        <location filename="mainwindow.cpp" line="1371"/>
         <source>Faild to send &apos;%1&apos; to &apos;%2&apos;:
 %3
 Continue?</source>
@@ -507,37 +512,37 @@ Continue?</source>
         <translation>Завершить исследование?</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1122"/>
+        <location filename="mainwindow.cpp" line="1123"/>
         <source>End &amp;study</source>
         <translation>Завершить &amp;исследование</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1122"/>
+        <location filename="mainwindow.cpp" line="1123"/>
         <source>Start &amp;study</source>
         <translation>Начать &amp;исследование</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1141"/>
+        <location filename="mainwindow.cpp" line="1142"/>
         <source>Paus&amp;e</source>
         <translation>П&amp;ауза</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1141"/>
+        <location filename="mainwindow.cpp" line="1142"/>
         <source>R&amp;ecord</source>
         <translation>З&amp;апись</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1149"/>
+        <location filename="mainwindow.cpp" line="1150"/>
         <source>on</source>
         <translation>вкл</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1149"/>
+        <location filename="mainwindow.cpp" line="1150"/>
         <source>off</source>
         <translation>выкл</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1153"/>
+        <location filename="mainwindow.cpp" line="1154"/>
         <source>Recording of entire study is %1</source>
         <translation>Запись всего исследования %1</translation>
     </message>
@@ -920,23 +925,23 @@ Continue?</source>
 <context>
     <name>Worklist</name>
     <message>
-        <location filename="worklist.cpp" line="33"/>
-        <location filename="worklist.cpp" line="86"/>
+        <location filename="worklist.cpp" line="270"/>
+        <location filename="worklist.cpp" line="327"/>
         <source>Worklist</source>
         <translation>Рабочий лист</translation>
     </message>
     <message>
-        <location filename="worklist.cpp" line="89"/>
+        <location filename="worklist.cpp" line="330"/>
         <source>&amp;Refresh</source>
         <translation>&amp;Обновить</translation>
     </message>
     <message>
-        <location filename="worklist.cpp" line="90"/>
+        <location filename="worklist.cpp" line="331"/>
         <source>&amp;Details</source>
         <translation>&amp;Детали</translation>
     </message>
     <message>
-        <location filename="worklist.cpp" line="92"/>
+        <location filename="worklist.cpp" line="333"/>
         <source>Start &amp;study</source>
         <translation>Начать &amp;исследование</translation>
     </message>

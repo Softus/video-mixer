@@ -956,22 +956,23 @@ void MainWindow::onStartClick()
 
 #ifdef WITH_DICOM
 
-    if (pendingPatient && settings.value("complete-with-mpps", true).toBool())
+    if (pendingPatient)
     {
-        QString   seriesUID;
-        if (!pendingSOPInstanceUID.isEmpty())
+        char seriesUID[100] = {0};
+        dcmGenerateUniqueIdentifier(seriesUID, SITE_SERIES_UID_ROOT);
+
+        if (!pendingSOPInstanceUID.isEmpty() && settings.value("complete-with-mpps", true).toBool())
         {
             DcmClient client(UID_ModalityPerformedProcedureStepSOPClass);
-            seriesUID = client.nSetRQ(pendingPatient, pendingSOPInstanceUID);
-            if (seriesUID.isEmpty())
+            if (!client.nSetRQ(seriesUID, pendingPatient, pendingSOPInstanceUID))
             {
                 QMessageBox::critical(this, windowTitle(), client.lastError());
             }
+        }
 
-            if (userChoice == 2)
-            {
-                sendToServer(pendingPatient, seriesUID);
-            }
+        if (userChoice == 2)
+        {
+            sendToServer(pendingPatient, seriesUID);
         }
     }
 

@@ -178,14 +178,11 @@ static void BuildNCreateDataSet(/*const*/ DcmDataset& patientDs, DcmDataset& nCr
     }
 }
 
-static QString BuildNSetDataSet(/*const*/ DcmDataset& patientDs, DcmDataset& nSetDs, bool completed)
+static QString BuildNSetDataSet(/*const*/ DcmDataset& patientDs, DcmDataset& nSetDs, const char* seriesUID, bool completed)
 {
     QDateTime now = QDateTime::currentDateTime();
     nSetDs.putAndInsertString(DCM_SpecificCharacterSet, "ISO_IR 192"); // UTF-8
     CopyPatientData(&patientDs, &nSetDs);
-
-    char seriesUID[100] = {0};
-    dcmGenerateUniqueIdentifier(seriesUID, SITE_SERIES_UID_ROOT);
 
     nSetDs.putAndInsertString(DCM_PerformedProcedureStepStatus, completed ? "COMPLETED" : "DISCONTINUED");
     nSetDs.putAndInsertString(DCM_PerformedProcedureStepEndDate, now.toString("yyyyMMdd").toUtf8());
@@ -474,7 +471,7 @@ QString DcmClient::nCreateRQ(DcmDataset* patientDs)
     return QString::fromUtf8(rsp.msg.NCreateRSP.AffectedSOPInstanceUID);
 }
 
-QString DcmClient::nSetRQ(DcmDataset* patientDs, const QString& sopInstance)
+bool DcmClient::nSetRQ(const char* seriesUID, DcmDataset* patientDs, const QString& sopInstance)
 {
     if (!createAssociation(QSettings().value("mpps-server").toString()))
     {
@@ -482,7 +479,7 @@ QString DcmClient::nSetRQ(DcmDataset* patientDs, const QString& sopInstance)
     }
 
     DcmDataset nSetDs;
-    QString seriesUID = BuildNSetDataSet(*patientDs, nSetDs, true);
+    BuildNSetDataSet(*patientDs, nSetDs, seriesUID, true);
 
     nSetDs.writeXML(std::cout << "------N-Set------------" << std::endl);
 
@@ -498,27 +495,27 @@ QString DcmClient::nSetRQ(DcmDataset* patientDs, const QString& sopInstance)
     req.msg.NSetRQ.DataSetType = DIMSE_DATASET_PRESENT;
 
     OFCondition cond = DIMSE_sendMessageUsingMemoryData(assoc, presId, &req, nullptr, &nSetDs, nullptr, nullptr);
-    if (cond.bad()) return nullptr;
+    if (cond.bad()) return false;
 
     /* receive response */
     int tout = timeout();
     cond = DIMSE_receiveCommand(assoc, 0 == tout? DIMSE_BLOCKING: DIMSE_NONBLOCKING, tout, &presId, &rsp, nullptr);
-    if (cond.bad()) return nullptr;
+    if (cond.bad()) return false;
 
     if (rsp.CommandField != DIMSE_N_SET_RSP)
     {
         qDebug() << "DIMSE: Unexpected Response Command Field: "<< rsp.CommandField;
-        return nullptr;
+        return false;
     }
 
     if (rsp.msg.NSetRSP.MessageIDBeingRespondedTo != req.msg.NSetRQ.MessageID)
     {
         qDebug() << "DIMSE: Unexpected Response MsgId: " << rsp.msg.NSetRSP.MessageIDBeingRespondedTo
                  << " (expected: " << req.msg.NSetRQ.MessageID << ")";
-        return nullptr;
+        return false;
     }
 
-    return seriesUID;
+    return true;
 }
 
 bool DcmClient::cStoreRQ(DcmDataset* dset, const char* sopInstance)

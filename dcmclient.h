@@ -44,7 +44,7 @@ public:
 
     // Returns seriesUID for sendToServer
     //
-    QString nSetRQ(DcmDataset* patientDs, const QString& sopInstance);
+    bool nSetRQ(const char *seriesUID, DcmDataset* patientDs, const QString& sopInstance);
 
     bool sendToServer(const QString& server, DcmDataset* patientDs, const QString& seriesUID,
         int seriesNumber, const QString& file, int instanceNumber);
