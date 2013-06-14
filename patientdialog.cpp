@@ -153,6 +153,28 @@ void PatientDialog::setPhysician(const QString& physician)
     cbPhysician->setEditText(physician);
 }
 
+inline static void setEditableCb(QComboBox* cb, bool editable)
+{
+    if (!editable)
+    {
+        auto text = cb->currentText();
+        cb->clear();
+        cb->addItem(text);
+        cb->setCurrentIndex(0);
+    }
+    cb->setEditable(editable);
+}
+
+void PatientDialog::setEditable(bool editable)
+{
+    textPatientId->setReadOnly(!editable);
+    textPatientName->setReadOnly(!editable);
+    dateBirthday->setReadOnly(!editable);
+    setEditableCb(cbPatientSex, editable);
+    setEditableCb(cbPhysician, editable);
+    setEditableCb(cbStudyType, editable);
+}
+
 void PatientDialog::savePatientFile(const QString& outputPath)
 {
     QSettings settings(outputPath, QSettings::IniFormat);
@@ -162,6 +184,7 @@ void PatientDialog::savePatientFile(const QString& outputPath)
     settings.setValue("name", textPatientName->text());
     settings.setValue("sex", cbPatientSex->currentText());
     settings.setValue("birthday", dateBirthday->text());
+    settings.setValue("physician", cbPhysician->currentText());
     settings.setValue("study", cbStudyType->currentText());
     settings.endGroup();
 }

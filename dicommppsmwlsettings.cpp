@@ -25,6 +25,10 @@ DicomMppsMwlSettings::DicomMppsMwlSettings(QWidget *parent) :
     mainLayout->addRow(checkTransCyr = new QCheckBox(tr("&Translate latin letters back to cyrillic")));
     checkTransCyr->setChecked(settings.value("translate-cyrillic", true).toBool());
 
+    auto spacer = new QWidget;
+    spacer->setMinimumHeight(16);
+    mainLayout->addWidget(spacer);
+
     mainLayout->addRow(checkUseMpps = new QCheckBox(tr("MPPS F&unction")), cbMppsServer = new ComboBoxWithPopupSignal);
     mainLayout->addRow(checkStartWithMpps = new QCheckBox(tr("&In progress is automatically sent when an examitaion has been started")));
     mainLayout->addRow(checkCompleteWithMpps = new QCheckBox(tr("&Completed is automatically sent when an examitaion has been ended")));

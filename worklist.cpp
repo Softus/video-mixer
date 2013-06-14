@@ -29,7 +29,7 @@ static inline int next(const QString& str, int idx)
     return str.length() > ++idx? str[idx].toLower().unicode(): 0;
 }
 
-static QString transcyr(const QString& str)
+QString transcyr(const QString& str)
 {
     if (str.isNull())
     {
@@ -139,6 +139,8 @@ static QString transcyr(const QString& str)
                 ++i, ret.append(L'Я');
                 break;
             case '\x0':
+            case ' ':
+            case '.':
                 ret.append(L'Ы').append(L'Й');
                 break;
             default:
@@ -244,6 +246,8 @@ static QString transcyr(const QString& str)
                 ++i, ret.append(L'я');
                 break;
             case '\x0':
+            case ' ':
+            case '.':
                 ret.append(L'ы').append(L'й');
                 break;
             default:

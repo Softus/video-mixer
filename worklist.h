@@ -52,4 +52,6 @@ public slots:
     void onAddRow(DcmDataset* responseIdentifiers);
 };
 
+QString transcyr(const QString& str);
+
 #endif // WORKLIST_H

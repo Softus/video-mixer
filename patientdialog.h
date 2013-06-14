@@ -35,6 +35,7 @@ public:
     void setStudyName(const QString& name);
     void setPhysician(const QString& physician);
     void savePatientFile(const QString& outputPath);
+    void setEditable(bool editable);
 
 protected:
     virtual void done(int);

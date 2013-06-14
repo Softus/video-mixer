@@ -1234,6 +1234,8 @@ void MainWindow::onStartStudy(
     activateWindow();
 
     QWaitCursor wait(this);
+
+    QSettings settings;
     listImagesAndClips->clear();
     imageNo = clipNo = 0;
 
@@ -1243,6 +1245,7 @@ void MainWindow::onStartStudy(
     if (patient)
     {
         const char *str = nullptr;
+        auto trans = settings.value("translate-cyrillic", true).toBool();
         if (patient->findAndGetString(DCM_PatientID, str, true).good())
         {
             dlg.setPatientId(QString::fromUtf8(str));
@@ -1250,7 +1253,7 @@ void MainWindow::onStartStudy(
 
         if (patient->findAndGetString(DCM_PatientName, str, true).good())
         {
-            dlg.setPatientName(QString::fromUtf8(str));
+            dlg.setPatientName(trans? transcyr(QString::fromUtf8(str)): QString::fromUtf8(str));
         }
 
         if (patient->findAndGetString(DCM_PatientBirthDate, str, true).good())
@@ -1265,13 +1268,15 @@ void MainWindow::onStartStudy(
 
         if (patient->findAndGetString(DCM_ScheduledPerformingPhysicianName, str, true).good())
         {
-            dlg.setPhysician(QString::fromUtf8(str));
+            dlg.setPhysician(trans? transcyr(QString::fromUtf8(str)): QString::fromUtf8(str));
         }
 
         if (patient->findAndGetString(DCM_ScheduledProcedureStepDescription, str, true).good())
         {
             dlg.setStudyName(QString::fromUtf8(str));
         }
+
+        dlg.setEditable(false);
     }
 #endif
 
@@ -1300,7 +1305,6 @@ void MainWindow::onStartStudy(
     {
         patient->saveFile(outputPath.absoluteFilePath(".patient.dcm").toLocal8Bit());
 
-        QSettings settings;
         if (settings.value("start-with-mpps", true).toBool() && !settings.value("mpps-server").toString().isEmpty())
         {
             DcmClient client(UID_ModalityPerformedProcedureStepSOPClass);
