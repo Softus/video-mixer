@@ -141,7 +141,7 @@ QString transcyr(const QString& str)
             case '\x0':
             case ' ':
             case '.':
-                ret.append(L'Ы').append(L'Й');
+                ret.append(L'И').append(L'Й'); // Фамилии на ый заканчиваются редко
                 break;
             default:
                 ret.append(L'Ы');
@@ -248,7 +248,7 @@ QString transcyr(const QString& str)
             case '\x0':
             case ' ':
             case '.':
-                ret.append(L'ы').append(L'й');
+                ret.append(L'и').append(L'й'); // Фамилии на ый заканчиваются редко
                 break;
             default:
                 ret.append(L'ы');
