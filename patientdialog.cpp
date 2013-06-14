@@ -14,7 +14,7 @@ PatientDialog::PatientDialog(QWidget *parent) :
     QDialog(parent)
 {
     setWindowTitle(tr("New patient"));
-    setMinimumSize(480, 200);
+    setMinimumSize(480, 240);
 
     auto layoutMain = new QFormLayout;
     layoutMain->addRow(tr("&Patient id"), textPatientId = new QLineEdit);
@@ -24,6 +24,11 @@ PatientDialog::PatientDialog(QWidget *parent) :
     layoutMain->addRow(tr("&Birthday"), dateBirthday = new QDateEdit);
     dateBirthday->setCalendarPopup(true);
     dateBirthday->setDisplayFormat(tr("MM/dd/yyyy"));
+
+    layoutMain->addRow(tr("P&hysician"), cbPhysician = new QComboBox);
+    cbPhysician->addItems(QSettings().value("physicians").toStringList());
+    cbPhysician->setEditable(true);
+
     layoutMain->addRow(tr("Study &type"), cbStudyType = new QComboBox);
     cbStudyType->addItems(QSettings().value("studies").toStringList());
     cbStudyType->setEditable(true);
@@ -64,6 +69,11 @@ void PatientDialog::done(int result)
     QDialog::done(result);
 }
 
+QString PatientDialog::patientId() const
+{
+    return textPatientId->text();
+}
+
 QString PatientDialog::patientName() const
 {
     return textPatientName->text();
@@ -72,6 +82,11 @@ QString PatientDialog::patientName() const
 QString PatientDialog::studyName() const
 {
     return cbStudyType->currentText();
+}
+
+QString PatientDialog::physician() const
+{
+    return cbPhysician->currentText();
 }
 
 void PatientDialog::setPatientId(const QString& id)
@@ -131,6 +146,11 @@ void PatientDialog::setPatientBirthDate(const QDate& date)
 void PatientDialog::setStudyName(const QString& name)
 {
     cbStudyType->setEditText(name);
+}
+
+void PatientDialog::setPhysician(const QString& physician)
+{
+    cbPhysician->setEditText(physician);
 }
 
 void PatientDialog::savePatientFile(const QString& outputPath)

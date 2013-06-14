@@ -120,7 +120,7 @@ MainWindow::MainWindow(QWidget *parent) :
     running(false),
     recording(false)
 {
-    setWindowTitle(PRODUCT_FULL_NAME);
+    updateWindowTitle();
 
     // This magic required for updating widgets from worker threads on windows
     //
@@ -580,16 +580,24 @@ QString MainWindow::replace(QString str, int seqNo)
     const QDateTime ts = QDateTime::currentDateTime();
 
     return str
-        .replace("%name%", patientName)
-        .replace("%study%", studyName)
-        .replace("%yyyy%", ts.toString("yyyy"))
-        .replace("%yy%", ts.toString("yy"))
-        .replace("%MM%", ts.toString("MM"))
-        .replace("%MMM%", ts.toString("MMM"))
-        .replace("%MMMM%", ts.toString("MMMM"))
-        .replace("%dd%", ts.toString("dd"))
-        .replace("%mm%", ts.toString("mm"))
-        .replace("%nn%", nn)
+        .replace("%name%", patientName, Qt::CaseInsensitive)
+        .replace("%id%", patientId, Qt::CaseInsensitive)
+        .replace("%physician%", physician, Qt::CaseInsensitive)
+        .replace("%study%", studyName, Qt::CaseInsensitive)
+        .replace("%yyyy%", ts.toString("yyyy"), Qt::CaseInsensitive)
+        .replace("%yy%", ts.toString("yy"), Qt::CaseInsensitive)
+        .replace("%mm%", ts.toString("MM"), Qt::CaseInsensitive)
+        .replace("%mmm%", ts.toString("MMM"), Qt::CaseInsensitive)
+        .replace("%mmmm%", ts.toString("MMMM"), Qt::CaseInsensitive)
+        .replace("%dd%", ts.toString("dd"), Qt::CaseInsensitive)
+        .replace("%ddd%", ts.toString("ddd"), Qt::CaseInsensitive)
+        .replace("%dddd%", ts.toString("dddd"), Qt::CaseInsensitive)
+        .replace("%hh%", ts.toString("hh"), Qt::CaseInsensitive)
+        .replace("%min%", ts.toString("mm"), Qt::CaseInsensitive)
+        .replace("%ss%", ts.toString("ss"), Qt::CaseInsensitive)
+        .replace("%zzz%", ts.toString("zzz"), Qt::CaseInsensitive)
+        .replace("%ap%", ts.toString("ap"), Qt::CaseInsensitive)
+        .replace("%nn%", nn, Qt::CaseInsensitive)
         ;
 }
 
@@ -637,22 +645,37 @@ void MainWindow::updatePipeline()
 #endif
 }
 
-void MainWindow::updateOutputPath(const QString patientName, const QString studyName)
+void MainWindow::updateWindowTitle()
 {
-    this->patientName = fixFileName(patientName);
-    this->studyName   = fixFileName(studyName);
-
     QString windowTitle(PRODUCT_FULL_NAME);
-    if (!patientName.isEmpty())
+    if (running)
     {
-        windowTitle.append(tr(" - ")).append(patientName);
+        if (!patientId.isEmpty())
+        {
+            windowTitle.append(tr(" - ")).append(patientId);
+        }
+
+        if (!patientName.isEmpty())
+        {
+            windowTitle.append(tr(" - ")).append(patientName);
+        }
+
+        if (!physician.isEmpty())
+        {
+            windowTitle.append(tr(" - ")).append(physician);
+        }
+
+        if (!studyName.isEmpty())
+        {
+            windowTitle.append(tr(" - ")).append(studyName);
+        }
     }
 
-    if (!studyName.isEmpty())
-    {
-        windowTitle.append(tr(" - ")).append(studyName);
-    }
+    setWindowTitle(windowTitle);
+}
 
+void MainWindow::updateOutputPath()
+{
     QSettings settings;
 
     outputPath.setPath(replace(settings.value("output-path", "/video").toString()
@@ -662,10 +685,8 @@ void MainWindow::updateOutputPath(const QString patientName, const QString study
     {
         QString msg = tr("Failed to create '%1'").arg(outputPath.absolutePath());
         qCritical() << msg;
-        QMessageBox::critical(this, windowTitle, msg, QMessageBox::Ok);
+        QMessageBox::critical(this, windowTitle(), msg, QMessageBox::Ok);
     }
-
-    setWindowTitle(windowTitle);
 }
 
 void MainWindow::releasePipeline()
@@ -931,7 +952,7 @@ void MainWindow::onStartClick()
     running = recording = false;
     updateRecordButton();
     removeVideoTail("video");
-    setWindowTitle(PRODUCT_FULL_NAME);
+    updateWindowTitle();
 
 #ifdef WITH_DICOM
 
@@ -972,7 +993,7 @@ void MainWindow::onSnapshotClick()
 {
     QSettings settings;
     QString imageExt = getExt(settings.value("image-encoder", "jpegenc").toString());
-    QString imageFileName = replace(settings.value("image-file", "image-%study%-%nn%").toString(), ++imageNo).append(imageExt);
+    QString imageFileName = replace(settings.value("image-template", "image-%study%-%nn%").toString(), ++imageNo).append(imageExt);
 
     setElementProperty(imageSink, "location", outputPath.absoluteFilePath(imageFileName), QGst::StateReady);
 
@@ -1028,7 +1049,7 @@ QString MainWindow::appendVideoTail(const QString& prefix, int idx)
     // Manually increment video/clip file name
     //
     QString videoExt = getExt(muxDef);
-    QString clipFileName = replace(settings.value(prefix + "-file", prefix + "-%study%-%nn%").toString(), idx).append(videoExt);
+    QString clipFileName = replace(settings.value(prefix + "-template", prefix + "-%study%-%nn%").toString(), idx).append(videoExt);
     auto absPath = outputPath.absoluteFilePath(clipFileName);
     sink->setProperty("location", absPath);
     mux->setState(QGst::StatePaused);
@@ -1172,7 +1193,7 @@ void MainWindow::onShowArchiveClick()
         archiveWindow->setRoot(QSettings().value("output-path", "/video").toString());
     }
 
-    updateOutputPath(patientName, studyName);
+    updateOutputPath();
     archiveWindow->setPath(outputPath.absolutePath());
     archiveWindow->show();
     archiveWindow->activateWindow();
@@ -1241,6 +1262,11 @@ void MainWindow::onStartStudy(
             dlg.setPatientSex(QString::fromUtf8(str));
         }
 
+        if (patient->findAndGetString(DCM_ScheduledPerformingPhysicianName, str, true).good())
+        {
+            dlg.setPhysician(QString::fromUtf8(str));
+        }
+
         if (patient->findAndGetString(DCM_ScheduledProcedureStepDescription, str, true).good())
         {
             dlg.setStudyName(QString::fromUtf8(str));
@@ -1259,7 +1285,12 @@ void MainWindow::onStartStudy(
         return;
     }
 
-    updateOutputPath(dlg.patientName(), dlg.studyName());
+    patientId   = fixFileName(dlg.patientId());
+    patientName = fixFileName(dlg.patientName());
+    physician   = fixFileName(dlg.physician());
+    studyName   = fixFileName(dlg.studyName());
+
+    updateOutputPath();
 
     // After updateOutputPath the outputPath is usable
     //
@@ -1295,6 +1326,7 @@ void MainWindow::onStartStudy(
     updateStartButton();
     updateRecordAll();
 
+    updateWindowTitle();
     displayWidget->update();
 }
 

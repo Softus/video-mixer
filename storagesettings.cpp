@@ -40,14 +40,15 @@ StorageSettings::StorageSettings(QWidget *parent) :
     frameFile->setFrameShape(QFrame::Box);
     frameFile->setFrameShadow(QFrame::Sunken);
     QFormLayout* fileLayout = new QFormLayout;
-    fileLayout->addRow(tr("&Pictures template"), textImageTemplate = new QLineEdit(settings.value("image-file", "image-%study%-%nn%").toString()));
-    fileLayout->addRow(tr("&Clips template"), textClipTemplate = new QLineEdit(settings.value("clip-file", "clip-%study%-%nn%").toString()));
-    fileLayout->addRow(tr("&Video template"), textVideoTemplate = new QLineEdit(settings.value("video-file", "video-%study%").toString()));
+    fileLayout->addRow(tr("&Pictures template"), textImageTemplate = new QLineEdit(settings.value("image-template", "image-%study%-%nn%").toString()));
+    fileLayout->addRow(tr("&Clips template"), textClipTemplate = new QLineEdit(settings.value("clip-template", "clip-%study%-%nn%").toString()));
+    fileLayout->addRow(tr("&Video template"), textVideoTemplate = new QLineEdit(settings.value("video-template", "video-%study%").toString()));
     frameFile->setLayout(fileLayout);
     layoutMain->addRow(frameFile);
-    layoutMain->addRow(new QLabel(tr("%yyyy%\t\tyear\n%MM%\t\tmonth\n%dd%\t\tday\n%hh%\t\thour\n%mm%\t\tminute\n"
-                                     "%name%\tpatient name, if specified\n%study%\tstudy name\n%nn%\t\tsequential number")));
-
+    layoutMain->addRow(new QLabel(tr("%yyyy%\t\tyear\n%mm%\t\tmonth\n%dd%\t\tday\n%hh%\t\thour\n%min%\t\tminute\n"
+                                     "%id%\t\tpatient id, if specified\n%name%\tpatient name, if specified\n"
+                                     "%physician%\tphysician name, if specified\n%study%\tstudy name\n"
+                                     "%nn%\t\tsequential number")));
     setLayout(layoutMain);
 }
 

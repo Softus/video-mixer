@@ -3,6 +3,7 @@
 #include "qwaitcursor.h"
 #include "settings.h"
 #include "storagesettings.h"
+#include "physicianssettings.h"
 #include "studiessettings.h"
 #include "videosettings.h"
 
@@ -27,9 +28,10 @@ Settings::Settings(QWidget *parent, Qt::WindowFlags flags)
     listWidget->setSpacing(2);
 
     pagesWidget = new QStackedWidget;
-    pagesWidget->setMinimumSize(520, 360);
+    pagesWidget->setMinimumSize(520, 400); // Storage settings is a big one
 
     createPages();
+    listWidget->setCurrentRow(0);
 
     QHBoxLayout *layoutContent = new QHBoxLayout;
     layoutContent->addWidget(listWidget);
@@ -60,8 +62,8 @@ Settings::Settings(QWidget *parent, Qt::WindowFlags flags)
 
 void Settings::createPage(const QString& title, const QMetaObject& page)
 {
-    auto btn= new QListWidgetItem(title, listWidget);
-    btn->setData(Qt::UserRole, QVariant::fromValue(page));
+    auto item = new QListWidgetItem(title, listWidget);
+    item->setData(Qt::UserRole, QVariant::fromValue(page));
 }
 
 void Settings::createPages()
@@ -77,6 +79,7 @@ void Settings::createPages()
 
     createPage(tr("Video source"), VideoSettings::staticMetaObject);
     createPage(tr("Storage"), StorageSettings::staticMetaObject);
+    createPage(tr("Physicians"), PhysiciansSettings::staticMetaObject);
     createPage(tr("Studies"), StudiesSettings::staticMetaObject);
 
     // Sort pages using current locale
@@ -98,11 +101,11 @@ void Settings::changePage(QListWidgetItem *current, QListWidgetItem *previous)
     {
         const QMetaObject& mobj = data.value<QMetaObject>();
         QWidget* page = static_cast<QWidget*>(mobj.newInstance());
+        connect(this, SIGNAL(save()), page, SLOT(save()));
         auto count = pagesWidget->count();
         current->setData(Qt::UserRole, count);
         pagesWidget->addWidget(page);
         pagesWidget->setCurrentIndex(count);
-        connect(this, SIGNAL(save()), page, SLOT(save()));
     }
     else
     {

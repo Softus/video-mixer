@@ -31,6 +31,8 @@
 /mainwindow.h -text
 /patientdialog.cpp -text
 /patientdialog.h -text
+/physicianssettings.cpp -text
+/physicianssettings.h -text
 pixmaps/about.png -text
 pixmaps/camera.png -text
 pixmaps/database.png -text

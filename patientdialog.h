@@ -19,17 +19,21 @@ class PatientDialog : public QDialog
     QLineEdit* textPatientName;
     QComboBox* cbPatientSex;
     QDateEdit* dateBirthday;
+    QComboBox* cbPhysician;
     QComboBox* cbStudyType;
 
 public:
     explicit PatientDialog(QWidget *parent = 0);
+    QString patientId() const;
     QString patientName() const;
     QString studyName() const;
+    QString physician() const;
     void setPatientId(const QString& id);
     void setPatientName(const QString& name);
     void setPatientBirthDate(const QDate& date);
     void setPatientSex(const QString& sex);
     void setStudyName(const QString& name);
+    void setPhysician(const QString& physician);
     void savePatientFile(const QString& outputPath);
 
 protected:

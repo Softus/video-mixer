@@ -53,8 +53,12 @@ class MainWindow : public QWidget
     QDir          outputPath;
     QString       clipPreviewFileName;
     QString       pipelineDef;
+
+    QString       patientId;
     QString       patientName;
+    QString       physician;
     QString       studyName;
+
     int           imageNo;
     int           clipNo;
     int           studyNo;
@@ -83,7 +87,8 @@ class MainWindow : public QWidget
     QString buildPipeline();
     QGst::PipelinePtr createPipeline();
     void releasePipeline();
-    void updateOutputPath(const QString patient, const QString study);
+    void updateWindowTitle();
+    void updateOutputPath();
     QString appendVideoTail(const QString& prefix, int idx);
     void removeVideoTail(const QString& prefix);
 

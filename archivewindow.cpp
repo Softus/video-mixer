@@ -62,9 +62,6 @@ ArchiveWindow::ArchiveWindow(QWidget *parent) :
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     barArchive->addWidget(spacer);
 
-    auto actionBrowse = barArchive->addAction(QIcon(":buttons/folder"), tr("File browser"), this, SLOT(onShowFolderClick()));
-    actionBrowse->setShortcut(Qt::Key_F2); // Same as the key that open this dialog
-
     actionMode = new QAction(barArchive);
     actionMode->setShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_0));
     connect(actionMode, SIGNAL(triggered()), this, SLOT(onSwitchModeClick()));
@@ -83,6 +80,9 @@ ArchiveWindow::ArchiveWindow(QWidget *parent) :
 
     actionMode->setMenu(menuMode);
     barArchive->addAction(actionMode);
+
+    auto actionBrowse = barArchive->addAction(QIcon(":buttons/folder"), tr("File browser"), this, SLOT(onShowFolderClick()));
+    actionBrowse->setShortcut(Qt::Key_F2); // Same as the key that open this dialog
 
     layoutMain->addWidget(barArchive);
 
@@ -314,7 +314,7 @@ void ArchiveWindow::selectPath(bool)
 
 void ArchiveWindow::onListRowChanged(int idx)
 {
-    actionDelete->setEnabled(idx >= 0);
+    actionDelete->setEnabled(idx >= 0 && listFiles->item(idx)->text() != "..");
     if (actionMode->data().toInt() == GALLERY_MODE && idx >= 0)
     {
         QFileInfo fi(curr.absoluteFilePath(listFiles->item(idx)->text()));
@@ -428,6 +428,13 @@ void ArchiveWindow::onDeleteClick()
         stopMedia();
         foreach(auto item, items)
         {
+            if (item->text() == "..")
+            {
+                // User definitelly does not want this folder to be removed
+                //
+                continue;
+            }
+
             removeFileOrFolder(curr.absoluteFilePath(item->text()));
 
             // Delete both the clip and the thumbnail

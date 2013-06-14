@@ -52,7 +52,8 @@ SOURCES += beryllium.cpp mainwindow.cpp \
     patientdialog.cpp \
     aboutdialog.cpp \
     archivewindow.cpp \
-    dicommppsmwlsettings.cpp
+    dicommppsmwlsettings.cpp \
+    physicianssettings.cpp
 HEADERS += mainwindow.h qwaitcursor.h \
     videosettings.h \
     settings.h \
@@ -63,7 +64,8 @@ HEADERS += mainwindow.h qwaitcursor.h \
     archivewindow.h \
     product.h \
     comboboxwithpopupsignal.h \
-    dicommppsmwlsettings.h
+    dicommppsmwlsettings.h \
+    physicianssettings.h
 
 FORMS   +=
 
