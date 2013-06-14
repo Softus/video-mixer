@@ -895,26 +895,33 @@ void MainWindow::onStartClick()
 
     int userChoice;
 #ifdef WITH_DICOM
-    userChoice = QMessageBox::question(this, windowTitle(),
-       tr("Send study results to the server?"), tr("Continue the study"), tr ("Don't sent"), tr("Send"), 2, 0);
+    QSettings settings;
 
-    if (userChoice == 0)
+    if (!settings.value("storage-servers").toStringList().isEmpty())
     {
-        // Continue the study
-        //
-        return;
-    }
-#else
-    userChoice = QMessageBox::question(this, windowTitle(),
-       tr("End the study?"), QMessageBox::Yes | QMessageBox::Default, QMessageBox::No);
+        userChoice = QMessageBox::question(this, windowTitle(),
+           tr("Send study results to the server?"), tr("Continue the study"), tr ("Don't sent"), tr("Send"), 2, 0);
 
-    if (userChoice == QMessageBox::No)
-    {
-        // Don't end the study
-        //
-        return;
+        if (userChoice == 0)
+        {
+            // Continue the study
+            //
+            return;
+        }
     }
+    else
 #endif
+    {
+        userChoice = QMessageBox::question(this, windowTitle(),
+           tr("End the study?"), QMessageBox::Yes | QMessageBox::Default, QMessageBox::No);
+
+        if (userChoice == QMessageBox::No)
+        {
+            // Don't end the study
+            //
+            return;
+        }
+    }
 
     QWaitCursor wait(this);
     if (recording)
@@ -928,7 +935,7 @@ void MainWindow::onStartClick()
 
 #ifdef WITH_DICOM
 
-    if (pendingPatient && QSettings().value("complete-with-mpps", true).toBool())
+    if (pendingPatient && settings.value("complete-with-mpps", true).toBool())
     {
         QString   seriesUID;
         if (!pendingSOPInstanceUID.isEmpty())
@@ -1178,6 +1185,13 @@ void MainWindow::onShowSettingsClick()
     if (dlg.exec())
     {
         updatePipeline();
+
+        // Recreate worklist just in case the columns/servers were changed
+        //
+#ifdef WITH_DICOM
+        delete worklist;
+        worklist = nullptr;
+#endif
     }
 }
 
@@ -1254,7 +1268,8 @@ void MainWindow::onStartStudy(
     {
         patient->saveFile(outputPath.absoluteFilePath(".patient.dcm").toLocal8Bit());
 
-        if (QSettings().value("start-with-mpps", true).toBool())
+        QSettings settings;
+        if (settings.value("start-with-mpps", true).toBool() && !settings.value("mpps-server").toString().isEmpty())
         {
             DcmClient client(UID_ModalityPerformedProcedureStepSOPClass);
             pendingSOPInstanceUID = client.nCreateRQ(patient);

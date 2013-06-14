@@ -126,8 +126,6 @@ void Worklist::onAddRow(DcmDataset* dset)
     {
        maxDate = date;
        table->selectRow(row);
-       actionDetail->setEnabled(true);
-       actionStartStudy->setEnabled(true);
     }
 
     qApp->processEvents();
@@ -183,6 +181,9 @@ void Worklist::onLoadClick()
             table->sortItems(dateColumn);
         }
     }
+
+    actionDetail->setEnabled(table->rowCount() > 0);
+    actionStartStudy->setEnabled(table->rowCount() > 0);
 
     table->setSortingEnabled(true);
     table->scrollToItem(table->currentItem());

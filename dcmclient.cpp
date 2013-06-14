@@ -103,10 +103,8 @@ static void BuildCFindDataSet(DcmDataset& ds)
 
 static void BuildCStoreDataSet(/*const*/ DcmDataset& patientDs, DcmDataset& cStoreDs, const QString& seriesUID)
 {
-    QDateTime now = QDateTime::currentDateTime();
-    QSettings settings;
-    QString modality = settings.value("modality").toString().toUpper();
-    QString aet = settings.value("aet", qApp->applicationName().toUpper()).toString();
+    auto now = QDateTime::currentDateTime();
+    auto modality = QSettings().value("modality").toString().toUpper();
 
     patientDs.findAndInsertCopyOfElement(DCM_SpecificCharacterSet, &cStoreDs);
     CopyPatientData(&patientDs, &cStoreDs);
