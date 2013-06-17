@@ -9,17 +9,21 @@ DicomMppsMwlSettings::DicomMppsMwlSettings(QWidget *parent) :
 {
     auto mainLayout = new QFormLayout;
     mainLayout->addRow(checkUseMwl = new QCheckBox(tr("MWL &Function")), cbMwlServer = new ComboBoxWithPopupSignal);
+    connect(checkUseMwl, SIGNAL(toggled(bool)), this, SLOT(onUseToggle(bool)));
 
     QSettings settings;
     QString mwlServer = settings.value("mwl-server").toString();
-    if (!mwlServer.isEmpty())
+    if (mwlServer.isEmpty())
+    {
+        cbMwlServer->setEnabled(false);
+    }
+    else
     {
         cbMwlServer->addItem(mwlServer);
         cbMwlServer->setCurrentIndex(0);
         checkUseMwl->setChecked(true);
     }
 
-    connect(cbMwlServer, SIGNAL(currentIndexChanged(int)), this, SLOT(onServerChanged(int)));
     connect(cbMwlServer, SIGNAL(beforePopup()), this, SLOT(onUpdateServers()));
 
     mainLayout->addRow(checkTransCyr = new QCheckBox(tr("&Translate latin letters back to cyrillic")));
@@ -30,11 +34,16 @@ DicomMppsMwlSettings::DicomMppsMwlSettings(QWidget *parent) :
     mainLayout->addWidget(spacer);
 
     mainLayout->addRow(checkUseMpps = new QCheckBox(tr("MPPS F&unction")), cbMppsServer = new ComboBoxWithPopupSignal);
+    connect(checkUseMpps, SIGNAL(toggled(bool)), this, SLOT(onUseToggle(bool)));
     mainLayout->addRow(checkStartWithMpps = new QCheckBox(tr("&In progress is automatically sent when an examitaion has been started")));
     mainLayout->addRow(checkCompleteWithMpps = new QCheckBox(tr("&Completed is automatically sent when an examitaion has been ended")));
 
     QString mppsServer = settings.value("mpps-server").toString();
-    if (!mppsServer.isEmpty())
+    if (mppsServer.isEmpty())
+    {
+        cbMppsServer->setEnabled(false);
+    }
+    else
     {
         cbMppsServer->addItem(mppsServer);
         cbMppsServer->setCurrentIndex(0);
@@ -43,7 +52,6 @@ DicomMppsMwlSettings::DicomMppsMwlSettings(QWidget *parent) :
     checkStartWithMpps->setChecked(settings.value("start-with-mpps", true).toBool());
     checkCompleteWithMpps->setChecked(settings.value("complete-with-mpps", true).toBool());
 
-    connect(cbMppsServer, SIGNAL(currentIndexChanged(int)), this, SLOT(onServerChanged(int)));
     connect(cbMppsServer, SIGNAL(beforePopup()), this, SLOT(onUpdateServers()));
 
     setLayout(mainLayout);
@@ -68,16 +76,15 @@ void DicomMppsMwlSettings::onUpdateServers()
     cb->setCurrentIndex(cb->findText(server));
 }
 
-void DicomMppsMwlSettings::onServerChanged(int idx)
+void DicomMppsMwlSettings::onUseToggle(bool checked)
 {
-    auto cb = static_cast<QComboBox*>(sender());
-    if (cb == cbMppsServer)
+    auto check = static_cast<QCheckBox*>(sender());
+    auto cb = check == checkUseMpps? cbMppsServer: cbMwlServer;
+
+    cb->setEnabled(checked);
+    if (!checked)
     {
-        checkUseMpps->setChecked(idx >= 0);
-    }
-    else
-    {
-        checkUseMwl->setChecked(idx >= 0);
+        cb->setCurrentIndex(-1);
     }
 }
 

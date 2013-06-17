@@ -27,7 +27,7 @@ signals:
     
 public slots:
     void onUpdateServers();
-    void onServerChanged(int idx);
+    void onUseToggle(bool checked);
     void save();
 };
 
