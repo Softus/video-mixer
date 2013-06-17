@@ -75,12 +75,6 @@
     <ClCompile Include="dicomdevicesettings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="dicommppssettings.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="dicommwlsettings.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="dicomserverdetails.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -97,9 +91,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="settings.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="startstudydialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="storagesettings.cpp">
@@ -156,18 +147,6 @@
     <ClCompile Include="Release\moc_dicomdevicesettings.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Debug\moc_dicommppssettings.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_dicommppssettings.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_dicommwlsettings.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_dicommwlsettings.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Debug\moc_dicomserverdetails.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
@@ -202,12 +181,6 @@
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_settings.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_startstudydialog.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_startstudydialog.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_storagesettings.cpp">
@@ -249,6 +222,27 @@
     <ClCompile Include="GeneratedFiles\qrc_beryllium.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="dicommppsmwlsettings.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_dicommppsmwlsettings.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_dicommppsmwlsettings.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="transcyrillic.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="physicianssettings.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_physicianssettings.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_physicianssettings.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="aboutdialog.h">
@@ -267,12 +261,6 @@
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="dicomdevicesettings.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="dicommppssettings.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="dicommwlsettings.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="dicomserverdetails.h">
@@ -299,9 +287,6 @@
     <CustomBuild Include="settings.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="startstudydialog.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="storagesettings.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
@@ -319,6 +304,12 @@
     </CustomBuild>
     <CustomBuild Include="worklistquerysettings.h">
       <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="dicommppsmwlsettings.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="physicianssettings.h">
+      <Filter>Generated Files</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -408,5 +399,10 @@
     <None Include="pixmaps\user_manage.png">
       <Filter>Resource Files</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="transcyrillic.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

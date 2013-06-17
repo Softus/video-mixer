@@ -6,6 +6,7 @@
 /*.user
 /Debug
 /GeneratedFiles
+/Release
 /Win32
 /ipch
 pkg/beryllium.deb

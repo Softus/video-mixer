@@ -1304,7 +1304,7 @@ void MainWindow::onStartStudy(
 #ifdef WITH_DICOM
     if (patient)
     {
-        patient->saveFile(OFFilename(outputPath.absoluteFilePath(".patient.dcm").toLocal8Bit()));
+        patient->saveFile((const char*)(outputPath.absoluteFilePath(".patient.dcm").toLocal8Bit()));
 
         if (settings.value("start-with-mpps", true).toBool() && !settings.value("mpps-server").toString().isEmpty())
         {
