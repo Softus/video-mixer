@@ -31,9 +31,9 @@ Worklist::Worklist(QWidget *parent) :
     dateColumn(-1),
     activeConnection(nullptr)
 {
-    setWindowTitle(tr("Worklist"));
-
     QSettings settings;
+    setWindowTitle(tr("Worklist - %1").arg(settings.value("mwl-server").toString()));
+
     auto translateCyrillic = settings.value("translate-cyrillic", true).toBool();
     auto cols = settings.value("worklist-columns").toStringList();
     if (cols.size() == 0)

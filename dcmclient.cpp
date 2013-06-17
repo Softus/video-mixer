@@ -254,7 +254,7 @@ T_ASC_Parameters* DcmClient::initAssocParams(const QString& server, const char* 
     auto values = settings.value(srvName).toStringList();
     if (values.count() < 6)
     {
-        cond = new OFConditionString(0, 2, OF_error, missedParameter.arg(srvName).toLocal8Bit());
+        cond = makeOFCondition(0, 2, OF_error, missedParameter.arg(srvName).toLocal8Bit());
         return nullptr;
     }
 
@@ -350,7 +350,7 @@ bool DcmClient::createAssociation(const QString& server, const char* transferSyn
             {
                 return true;
             }
-            cond = new OFConditionString(0, 1, OF_error, tr("Accepted presentation context ID not found").toLocal8Bit());
+            cond = makeOFCondition(0, 1, OF_error, tr("Accepted presentation context ID not found").toLocal8Bit());
         }
     }
 
@@ -557,7 +557,7 @@ bool DcmClient::sendToServer(const QString& server, DcmDataset* patientDs, const
     dcmGenerateUniqueIdentifier(instanceUID,  SITE_INSTANCE_UID_ROOT);
 
     src.setImageFile(file.toLocal8Bit().constBegin());
-    qDebug() << src.getImageFile().c_str();
+    qDebug() << file;
 
     DcmDataset *dset = nullptr;
     cond = i2d.convert(&src, &dst, dset, writeXfer);
@@ -566,7 +566,7 @@ bool DcmClient::sendToServer(const QString& server, DcmDataset* patientDs, const
         qDebug() << cond.text();
         // cond.reset()
         //
-        cond = ECC_Normal;
+        cond = EC_Normal;
         return true;
     }
 

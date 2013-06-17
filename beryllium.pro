@@ -22,7 +22,7 @@ unix {
 dicom {
     QT       += network
     DEFINES  += WITH_DICOM
-    LIBS     += -ldcmnet -lwrap -li2d -ldcmdata -loflog -lofstd -lssl
+    LIBS     += -ldcmnet -lwrap -li2d -ldcmdata -loflog -lofstd -lssl -lz
 
     SOURCES  += worklist.cpp dcmclient.cpp detailsdialog.cpp \
     dicomdevicesettings.cpp \

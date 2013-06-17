@@ -127,7 +127,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //
     connect(this, SIGNAL(enableWidget(QWidget*, bool)), this, SLOT(onEnableWidget(QWidget*, bool)), Qt::QueuedConnection);
 
-    QVBoxLayout* layoutMain = new QVBoxLayout();
+    auto layoutMain = new QVBoxLayout();
     layoutMain->setMenuBar(createMenuBar());
     layoutMain->addWidget(createToolBar());
 
@@ -577,8 +577,8 @@ static QString fixFileName(QString str)
 
 QString MainWindow::replace(QString str, int seqNo)
 {
-    const QString nn = seqNo >= 10? QString::number(seqNo): QString("0").append('0' + seqNo);
-    const QDateTime ts = QDateTime::currentDateTime();
+    auto nn = seqNo >= 10? QString::number(seqNo): QString("0").append('0' + seqNo);
+    auto ts = QDateTime::currentDateTime();
 
     return str
         .replace("%name%", patientName, Qt::CaseInsensitive)
@@ -1304,7 +1304,7 @@ void MainWindow::onStartStudy(
 #ifdef WITH_DICOM
     if (patient)
     {
-        patient->saveFile(outputPath.absoluteFilePath(".patient.dcm").toLocal8Bit());
+        patient->saveFile(OFFilename(outputPath.absoluteFilePath(".patient.dcm").toLocal8Bit()));
 
         if (settings.value("start-with-mpps", true).toBool() && !settings.value("mpps-server").toString().isEmpty())
         {

@@ -21,7 +21,7 @@
 DicomServerDetails::DicomServerDetails(QWidget *parent) :
     QDialog(parent)
 {
-    QFormLayout* layoutMain = new QFormLayout;
+    auto layoutMain = new QFormLayout;
     layoutMain->addRow(tr("&Name"), textName = new QLineEdit);
     connect(textName, SIGNAL(editingFinished()), this, SLOT(onNameChanged()));
     layoutMain->addRow(tr("&AE title"), textAet = new QLineEdit);
@@ -36,7 +36,7 @@ DicomServerDetails::DicomServerDetails(QWidget *parent) :
     layoutMain->addRow(nullptr, checkEcho = new QCheckBox(tr("&Echo")));
     checkEcho->setChecked(true);
 
-    QHBoxLayout* layoutSopClass = new QHBoxLayout;
+    auto layoutSopClass = new QHBoxLayout;
     layoutSopClass->addWidget(radioNew = new QRadioButton(tr("Ne&w")));
     radioNew->setChecked(true);
     layoutSopClass->addWidget(radioRetire = new QRadioButton(tr("&Retire")));
@@ -44,12 +44,12 @@ DicomServerDetails::DicomServerDetails(QWidget *parent) :
     layoutMain->addRow(tr("SOP class"), layoutSopClass);
     layoutMain->addItem(new QSpacerItem(30,30));
 
-    QHBoxLayout *layoutBtns = new QHBoxLayout;
+    auto layoutBtns = new QHBoxLayout;
     layoutBtns->addStretch(1);
-    QPushButton *btnTest = new QPushButton(tr("&Test"));
+    auto btnTest = new QPushButton(tr("&Test"));
     connect(btnTest , SIGNAL(clicked()), this, SLOT(onClickTest()));
     layoutBtns->addWidget(btnTest );
-    QPushButton *btnCancel = new QPushButton(tr("Reject"));
+    auto btnCancel = new QPushButton(tr("Cancel"));
     connect(btnCancel, SIGNAL(clicked()), this, SLOT(reject()));
     layoutBtns->addWidget(btnCancel);
     btnSave = new QPushButton(tr("Save"));

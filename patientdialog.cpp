@@ -13,6 +13,8 @@
 PatientDialog::PatientDialog(QWidget *parent) :
     QDialog(parent)
 {
+    QSettings settings;
+
     setWindowTitle(tr("New patient"));
     setMinimumSize(480, 240);
 
@@ -36,15 +38,16 @@ PatientDialog::PatientDialog(QWidget *parent) :
     auto layoutBtns = new QHBoxLayout;
 
 #ifdef WITH_DICOM
-    auto *btnWorklist = new QPushButton(QIcon(":buttons/show_worklist"), nullptr);
+    auto btnWorklist = new QPushButton(QIcon(":buttons/show_worklist"), nullptr);
     btnWorklist->setToolTip(tr("Show work list"));
     connect(btnWorklist, SIGNAL(clicked()), this, SLOT(onShowWorklist()));
     layoutBtns->addWidget(btnWorklist);
+    btnWorklist->setEnabled(!settings.value("mwl-server").toString().isEmpty());
 #endif
 
     layoutBtns->addStretch(1);
 
-    auto *btnReject = new QPushButton(tr("Reject"));
+    auto btnReject = new QPushButton(tr("Cancel"));
     connect(btnReject, SIGNAL(clicked()), this, SLOT(reject()));
     layoutBtns->addWidget(btnReject);
 
@@ -56,7 +59,6 @@ PatientDialog::PatientDialog(QWidget *parent) :
     layoutMain->addRow(layoutBtns);
 
     setLayout(layoutMain);
-    QSettings settings;
     restoreGeometry(settings.value("new-patient-geometry").toByteArray());
     setWindowState((Qt::WindowState)settings.value("new-patient-state").toInt());
 }

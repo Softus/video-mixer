@@ -33,25 +33,25 @@ Settings::Settings(QWidget *parent, Qt::WindowFlags flags)
     createPages();
     listWidget->setCurrentRow(0);
 
-    QHBoxLayout *layoutContent = new QHBoxLayout;
+    auto layoutContent = new QHBoxLayout;
     layoutContent->addWidget(listWidget);
     layoutContent->addWidget(pagesWidget, 1);
 
-    QHBoxLayout *layoutBtns = new QHBoxLayout;
+    auto layoutBtns = new QHBoxLayout;
     layoutBtns->addStretch(1);
 
-    QPushButton *btnApply = new QPushButton(tr("Appl&y"));
+    auto btnApply = new QPushButton(tr("Appl&y"));
     connect(btnApply, SIGNAL(clicked()), this, SLOT(onClickApply()));
     layoutBtns->addWidget(btnApply);
     btnCancel = new QPushButton(tr("Cancel"));
     connect(btnCancel, SIGNAL(clicked()), this, SLOT(reject()));
     layoutBtns->addWidget(btnCancel);
-    QPushButton *btnOk = new QPushButton(tr("Ok"));
+    auto btnOk = new QPushButton(tr("Ok"));
     connect(btnOk, SIGNAL(clicked()), this, SLOT(accept()));
     btnOk->setDefault(true);
     layoutBtns->addWidget(btnOk);
 
-    QVBoxLayout *mainLayout = new QVBoxLayout;
+    auto mainLayout = new QVBoxLayout;
     mainLayout->addLayout(layoutContent);
     mainLayout->addSpacing(12);
     mainLayout->addLayout(layoutBtns);
