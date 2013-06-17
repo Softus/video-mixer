@@ -10,6 +10,7 @@
 #ifdef WITH_DICOM
 #include "worklist.h"
 #include "dcmclient.h"
+#include "transcyrillic.h"
 #include <dcmtk/dcmdata/dcdatset.h>
 #include <dcmtk/dcmdata/dcuid.h>
 #include <dcmtk/dcmdata/dcdeftag.h>
@@ -1253,7 +1254,7 @@ void MainWindow::onStartStudy(
 
         if (patient->findAndGetString(DCM_PatientName, str, true).good())
         {
-            dlg.setPatientName(trans? transcyr(QString::fromUtf8(str)): QString::fromUtf8(str));
+            dlg.setPatientName(trans? translateToCyrillic(QString::fromUtf8(str)): QString::fromUtf8(str));
         }
 
         if (patient->findAndGetString(DCM_PatientBirthDate, str, true).good())
@@ -1268,7 +1269,7 @@ void MainWindow::onStartStudy(
 
         if (patient->findAndGetString(DCM_ScheduledPerformingPhysicianName, str, true).good())
         {
-            dlg.setPhysician(trans? transcyr(QString::fromUtf8(str)): QString::fromUtf8(str));
+            dlg.setPhysician(trans? translateToCyrillic(QString::fromUtf8(str)): QString::fromUtf8(str));
         }
 
         if (patient->findAndGetString(DCM_ScheduledProcedureStepDescription, str, true).good())

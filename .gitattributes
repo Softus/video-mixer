@@ -72,6 +72,8 @@ pkg/debian/usr/share/man/man1/beryllium.1 -text
 /storagesettings.h -text
 /studiessettings.cpp -text
 /studiessettings.h -text
+/transcyrillic.cpp -text
+/transcyrillic.h -text
 /videosettings.cpp -text
 /videosettings.h -text
 /worklist.cpp -text
