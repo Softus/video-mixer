@@ -12,6 +12,8 @@
 #include <dcmtk/dcmdata/dcpixseq.h>  /* for DcmPixelSequence */
 #include <dcmtk/dcmdata/dcpxitem.h>  /* for DcmPixelItem */
 
+#define OFFIS_DCMTK_VER 0x030600
+
 #if defined(UNICODE) || defined (_UNICODE)
 #include <MediaInfo/MediaInfo.h>
 #else
@@ -154,7 +156,11 @@ public:
 
             if (0 == codec.compare("JPEG", Qt::CaseInsensitive))
             {
+#if OFFIS_DCMTK_VER < 0x030601
+                ts = EXS_JPEGProcess1TransferSyntax;
+#else
                 ts = EXS_JPEGProcess1;
+#endif
             }
             else
             {
@@ -177,9 +183,11 @@ public:
             if (cond.bad())
               return cond;
 
+#if OFFIS_DCMTK_VER >= 0x030601
             cond = dset->putAndInsertTagKey(DCM_FrameIncrementPointer, DCM_FrameTime);
             if (cond.bad())
               return cond;
+#endif
 
             auto codecProfile = getStr(__T("Codec_Profile"));
             if (0 == codec.compare("MPEG-2V", Qt::CaseInsensitive))
@@ -193,6 +201,7 @@ public:
                     ts = EXS_MPEG2MainProfileAtHighLevel;
                 }
             }
+#if OFFIS_DCMTK_VER >= 0x030601
             else if (0 == codec.compare("AVC", Qt::CaseInsensitive))
             {
                 if (codecProfile.startsWith("main@", Qt::CaseInsensitive))
@@ -204,13 +213,12 @@ public:
                     ts = EXS_MPEG4BDcompatibleHighProfileLevel4_1;
                 }
             }
+#endif
             else
-
             {
-                return makeOFCondition(0, 5, OF_error, "Unsupperted image format");
+                return makeOFCondition(0, 5, OF_error, "Unsupported video format");
             }
         }
-
         return EC_Normal;
     }
 };

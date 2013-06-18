@@ -222,26 +222,29 @@
     <ClCompile Include="GeneratedFiles\qrc_beryllium.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="dicommppsmwlsettings.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="Debug\moc_dicommppsmwlsettings.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_dicommppsmwlsettings.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="transcyrillic.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="physicianssettings.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="Debug\moc_physicianssettings.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_physicianssettings.cpp">
       <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="transcyrillic.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="physicianssettings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dicommppsmwlsettings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dcmconverter.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -309,7 +312,7 @@
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="physicianssettings.h">
-      <Filter>Generated Files</Filter>
+      <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -402,6 +405,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="transcyrillic.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dcmconverter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
