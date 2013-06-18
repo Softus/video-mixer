@@ -4,8 +4,6 @@
 #include <QObject>
 #include <QString>
 
-#define SITE_UID_ROOT                           "9.9.999.0.1" // TODO: request real one
-
 #define HAVE_CONFIG_H
 #include <dcmtk/config/osconfig.h>   /* make sure OS specific configuration is included first */
 #include <dcmtk/ofstd/ofcond.h>    /* for class OFCondition */

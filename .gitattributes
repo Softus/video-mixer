@@ -14,6 +14,8 @@
 /comboboxwithpopupsignal.h -text
 /dcmclient.cpp -text
 /dcmclient.h -text
+/dcmconverter.cpp -text
+/dcmconverter.h -text
 /detailsdialog.cpp -text
 /detailsdialog.h -text
 /dicomdevicesettings.cpp -text

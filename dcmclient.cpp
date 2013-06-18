@@ -1,15 +1,12 @@
 #include "worklist.h"
 #include "dcmclient.h"
+#include "dcmconverter.h"
 #include "product.h"
 
 #include <dcmtk/dcmdata/dcdeftag.h>
 #include <dcmtk/dcmdata/dcdicent.h>
 #include <dcmtk/dcmdata/dcdict.h>
 #include <dcmtk/dcmdata/dcfilefo.h>
-
-#include <dcmtk/dcmdata/libi2d/i2d.h>
-#include <dcmtk/dcmdata/libi2d/i2djpgs.h>
-#include <dcmtk/dcmdata/libi2d/i2dplnsc.h>
 
 #include <dcmtk/dcmnet/assoc.h>
 #include <dcmtk/dcmnet/dimse.h>
@@ -350,11 +347,14 @@ bool DcmClient::createAssociation(const QString& server, const char* transferSyn
             {
                 return true;
             }
-            cond = makeOFCondition(0, 1, OF_error, tr("Accepted presentation context ID not found").toLocal8Bit());
+            cond = makeOFCondition(0, 1, OF_error, tr("Accepted presentation context ID not found").toUtf8());
+            ASC_releaseAssociation(assoc);
+            ASC_destroyAssociation(&assoc);
+            assoc = nullptr;
         }
     }
 
-    qDebug() << cond.text();
+    qDebug() << QString::fromUtf8(cond.text());
     return false;
 }
 
@@ -547,51 +547,50 @@ bool DcmClient::cStoreRQ(DcmDataset* dset, const char* sopInstance)
 bool DcmClient::sendToServer(const QString& server, DcmDataset* patientDs, const QString& seriesUID,
                              int seriesNumber, const QString& file, int instanceNumber)
 {
-    Image2Dcm i2d;
-    I2DJpegSource src;
-    I2DOutputPlugNewSC dst;
     E_TransferSyntax writeXfer;
 
     char instanceUID[100] = {0};
-    char buf[20] = {0};
     dcmGenerateUniqueIdentifier(instanceUID,  SITE_INSTANCE_UID_ROOT);
 
-    src.setImageFile(file.toLocal8Bit().constBegin());
     qDebug() << file;
 
-    DcmDataset *dset = nullptr;
-    cond = i2d.convert(&src, &dst, dset, writeXfer);
+    DcmDataset ds;
+    cond = readAndInsertPixelData(file, &ds, writeXfer);
     if (cond.bad())
     {
-        qDebug() << cond.text();
+        qDebug() << QString::fromUtf8(cond.text());
         // cond.reset()
         //
         cond = EC_Normal;
         return true;
     }
 
-    dset->putAndInsertString(DCM_SOPInstanceUID, instanceUID);
+    cond = ds.putAndInsertString(DCM_SOPInstanceUID, instanceUID);
+    if (cond.bad())
+        return false;
+    cond = ds.putAndInsertString(DCM_InstanceNumber, QString::number(instanceNumber).toUtf8());
+    if (cond.bad())
+        return false;
+    cond = ds.putAndInsertString(DCM_SeriesNumber, QString::number(seriesNumber).toUtf8());
+    if (cond.bad())
+        return false;
 
-    sprintf(buf, "%d", instanceNumber);
-    dset->putAndInsertOFStringArray(DCM_InstanceNumber, buf);
-    sprintf(buf, "%d", seriesNumber);
-    dset->putAndInsertOFStringArray(DCM_SeriesNumber, buf);
-
-    BuildCStoreDataSet(*patientDs, *dset, seriesUID);
+    BuildCStoreDataSet(*patientDs, ds, seriesUID);
     //DcmFileFormat dcmff(dset);
     //cond = dcmff.saveFile(src.getImageFile().append(".dcm").c_str(), writeXfer);
 
     DcmXfer filexfer((E_TransferSyntax)writeXfer);
 
-    // Request association only at the first time
-    //
     if (!createAssociation(server.toUtf8(), filexfer.getXferID()))
     {
         return false;
     }
 
-    cStoreRQ(dset, instanceUID);
+    cStoreRQ(&ds, instanceUID);
 
-    delete dset;
+    ASC_releaseAssociation(assoc);
+    ASC_destroyAssociation(&assoc);
+    assoc = nullptr;
+
     return cond.good();
 }

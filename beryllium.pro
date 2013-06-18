@@ -22,7 +22,7 @@ unix {
 dicom {
     QT       += network
     DEFINES  += WITH_DICOM
-    LIBS     += -ldcmnet -lwrap -li2d -ldcmdata -loflog -lofstd -lssl -lz
+    LIBS     += -lmediainfo -lzen -ldcmnet -lwrap -ldcmdata -loflog -lofstd -lssl -lz
 
     SOURCES  += worklist.cpp dcmclient.cpp detailsdialog.cpp \
     dicomdevicesettings.cpp \
@@ -30,7 +30,8 @@ dicom {
     dicomstoragesettings.cpp \
     dicomserverdetails.cpp \
     worklistcolumnsettings.cpp \
-    worklistquerysettings.cpp
+    worklistquerysettings.cpp \
+    dcmconverter.cpp
 
     HEADERS += worklist.h dcmclient.h detailsdialog.h \
     dicomdevicesettings.h \
@@ -38,7 +39,8 @@ dicom {
     dicomstoragesettings.h \
     dicomserverdetails.h \
     worklistcolumnsettings.h \
-    worklistquerysettings.h
+    worklistquerysettings.h \
+    dcmconverter.h
 }
 
 TARGET   = beryllium

@@ -480,6 +480,7 @@ Check the error log for details.</source>
 %3
 Continue?</source>
         <translation>Не удалось отправить &apos;%1&apos; на &apos;%2&apos;:
+%3
 Продолжить?</translation>
     </message>
     <message>

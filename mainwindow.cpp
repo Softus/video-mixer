@@ -919,7 +919,7 @@ void MainWindow::onStartClick()
 #ifdef WITH_DICOM
     QSettings settings;
 
-    if (!settings.value("storage-servers").toStringList().isEmpty())
+    if (pendingPatient && !settings.value("storage-servers").toStringList().isEmpty())
     {
         userChoice = QMessageBox::question(this, windowTitle(),
            tr("Send study results to the server?"), tr("Continue the study"), tr ("Don't sent"), tr("Send"), 2, 0);
@@ -1304,8 +1304,7 @@ void MainWindow::onStartStudy(
 #ifdef WITH_DICOM
     if (patient)
     {
-        patient->saveFile((const char*)(outputPath.absoluteFilePath(".patient.dcm").toLocal8Bit()));
-
+        patient->saveFile((const char*)outputPath.absoluteFilePath(".patient.dcm").toLocal8Bit());
         if (settings.value("start-with-mpps", true).toBool() && !settings.value("mpps-server").toString().isEmpty())
         {
             DcmClient client(UID_ModalityPerformedProcedureStepSOPClass);
@@ -1372,7 +1371,7 @@ void MainWindow::sendToServer(DcmDataset* patientDs, const QString& seriesUID)
             const QString& file = outputPath.absoluteFilePath(outputPath[i]);
             if (!client.sendToServer(server, patientDs, seriesUID, seriesNo, file, i))
             {
-                if (QMessageBox::Yes != QMessageBox::critical(this, windowTitle(),
+                if (QMessageBox::Yes != QMessageBox::critical(&pdlg, windowTitle(),
                       tr("Faild to send '%1' to '%2':\n%3\nContinue?").arg(outputPath[i], server, client.lastError()),
                       QMessageBox::Yes, QMessageBox::No))
                 {
