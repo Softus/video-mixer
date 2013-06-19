@@ -3,6 +3,7 @@
 
 #include <QDebug>
 #include <QFile>
+#include <QSettings>
 
 #include <dcmtk/dcmdata/dcdeftag.h>
 #include <dcmtk/dcmdata/dcfilefo.h>
@@ -12,7 +13,11 @@
 #include <dcmtk/dcmdata/dcpixseq.h>  /* for DcmPixelSequence */
 #include <dcmtk/dcmdata/dcpxitem.h>  /* for DcmPixelItem */
 
+#ifdef DCDEFINE_H
+#define OFFIS_DCMTK_VER 0x030601
+#else
 #define OFFIS_DCMTK_VER 0x030600
+#endif
 
 #if defined(UNICODE) || defined (_UNICODE)
 #include <MediaInfo/MediaInfo.h>
@@ -71,6 +76,10 @@ public:
         {
             return makeOFCondition(0, 3, OF_error, "Unsupported format");
         }
+
+        cond = dset->putAndInsertString(DCM_SOPClassUID, UID_SecondaryCaptureImageStorage);
+        if (cond.bad())
+          return cond;
 
         cond = dset->putAndInsertUint16(DCM_Rows, getUint16(__T("Height")));
         if (cond.bad())
@@ -188,35 +197,42 @@ public:
             if (cond.bad())
               return cond;
 #endif
-
-            auto codecProfile = getStr(__T("Codec_Profile"));
-            if (0 == codec.compare("MPEG-2V", Qt::CaseInsensitive))
+            if (QSettings().value("store-video-as-binary", false).toBool())
             {
-                if (codecProfile.startsWith("main@", Qt::CaseInsensitive))
-                {
-                    ts = EXS_MPEG2MainProfileAtMainLevel;
-                }
-                else
-                {
-                    ts = EXS_MPEG2MainProfileAtHighLevel;
-                }
+                ts = EXS_LittleEndianImplicit;
             }
-#if OFFIS_DCMTK_VER >= 0x030601
-            else if (0 == codec.compare("AVC", Qt::CaseInsensitive))
-            {
-                if (codecProfile.startsWith("main@", Qt::CaseInsensitive))
-                {
-                    ts = EXS_MPEG4HighProfileLevel4_1;
-                }
-                else
-                {
-                    ts = EXS_MPEG4BDcompatibleHighProfileLevel4_1;
-                }
-            }
-#endif
             else
             {
-                return makeOFCondition(0, 5, OF_error, "Unsupported video format");
+                auto codecProfile = getStr(__T("Codec_Profile"));
+                if (0 == codec.compare("MPEG-2V", Qt::CaseInsensitive))
+                {
+                    if (codecProfile.startsWith("main@", Qt::CaseInsensitive))
+                    {
+                        ts = EXS_MPEG2MainProfileAtMainLevel;
+                    }
+                    else
+                    {
+                        ts = EXS_MPEG2MainProfileAtHighLevel;
+                    }
+                }
+#if OFFIS_DCMTK_VER >= 0x030601
+                else if (0 == codec.compare("AVC", Qt::CaseInsensitive))
+                {
+                    if (codecProfile.startsWith("main@", Qt::CaseInsensitive))
+                    {
+                        ts = EXS_MPEG4HighProfileLevel4_1;
+                    }
+                    else
+                    {
+                        ts = EXS_MPEG4BDcompatibleHighProfileLevel4_1;
+                    }
+                }
+#endif
+                else
+                {
+                    qDebug() << "Unknown 'codec " << codec << "' the file will be stored as binary";
+                    ts = EXS_LittleEndianImplicit;
+                }
             }
         }
         return EC_Normal;

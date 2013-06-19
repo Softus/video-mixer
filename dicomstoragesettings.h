@@ -4,6 +4,7 @@
 #include <QWidget>
 
 QT_BEGIN_NAMESPACE
+class QCheckBox;
 class QListWidget;
 QT_END_NAMESPACE
 
@@ -11,6 +12,7 @@ class DicomStorageSettings : public QWidget
 {
     Q_OBJECT
     QListWidget* listServers;
+    QCheckBox*   checkStoreVideoAsBinary;
 
     QStringList  checkedServers();
 public:

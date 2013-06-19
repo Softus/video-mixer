@@ -1,5 +1,6 @@
 #include "dicomstoragesettings.h"
 #include <QBoxLayout>
+#include <QCheckBox>
 #include <QListWidget>
 #include <QSettings>
 
@@ -9,6 +10,8 @@ DicomStorageSettings::DicomStorageSettings(QWidget *parent) :
     QLayout* mainLayout = new QVBoxLayout;
     mainLayout->setContentsMargins(4,0,4,0);
     mainLayout->addWidget(listServers = new QListWidget);
+    mainLayout->addWidget(checkStoreVideoAsBinary = new QCheckBox(tr("Store video files as regular binary")));
+    checkStoreVideoAsBinary->setChecked(QSettings().value("store-video-as-binary", false).toBool());
 
     setLayout(mainLayout);
 }
@@ -55,5 +58,7 @@ void DicomStorageSettings::showEvent(QShowEvent *e)
 
 void DicomStorageSettings::save()
 {
-    QSettings().setValue("storage-servers", checkedServers());
+    QSettings settings;
+    settings.setValue("storage-servers", checkedServers());
+    settings.setValue("store-video-as-binary", checkStoreVideoAsBinary->isChecked());
 }

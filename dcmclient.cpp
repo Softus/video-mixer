@@ -518,6 +518,15 @@ bool DcmClient::nSetRQ(const char* seriesUID, DcmDataset* patientDs, const QStri
     return true;
 }
 
+static void StoreUserCallback
+    ( void *
+    , T_DIMSE_StoreProgress *
+    , T_DIMSE_C_StoreRQ *
+   )
+{
+    qApp->processEvents();
+}
+
 bool DcmClient::cStoreRQ(DcmDataset* dset, const char* sopInstance)
 {
     T_DIMSE_C_StoreRQ req;
@@ -536,7 +545,7 @@ bool DcmClient::cStoreRQ(DcmDataset* dset, const char* sopInstance)
     /* finally conduct transmission of data */
     int tout = timeout();
     cond = DIMSE_storeUser(assoc, presId, &req,
-      nullptr, dset, nullptr, nullptr,
+      nullptr, dset, StoreUserCallback, nullptr,
       0 == tout? DIMSE_BLOCKING: DIMSE_NONBLOCKING, tout,
       &rsp, &statusDetail);
 

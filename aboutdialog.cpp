@@ -9,6 +9,13 @@
 #include <gst/gst.h>
 
 #ifdef WITH_DICOM
+#if defined(UNICODE) || defined (_UNICODE)
+#include <MediaInfo/MediaInfo.h>
+#else
+#define UNICODE
+#include <MediaInfo/MediaInfo.h>
+#undef UNICODE
+#endif
 #define HAVE_CONFIG_H
 #include <dcmtk/dcmdata/dcuid.h>
 #endif
@@ -45,6 +52,11 @@ AboutDialog::AboutDialog(QWidget *parent) :
     auto lblDcmtk = new QLabel(tr("<a href=\"http://dcmtk.org/\">DCMTK ").append(OFFIS_DCMTK_VERSION_STRING).append("</a>"));
     lblDcmtk->setOpenExternalLinks(true);
     layoutText->addWidget(lblDcmtk);
+
+    auto mediaInfoVer = QString::fromStdWString(MediaInfoLib::MediaInfo::Option_Static(__T("Info_Version")));
+    auto lblMediaInfo = new QLabel(tr("<a href=\"http://mediainfo.sourceforge.net/\">").append(mediaInfoVer).append("</a>"));
+    lblMediaInfo->setOpenExternalLinks(true);
+    layoutText->addWidget(lblMediaInfo);
 #endif
     auto lblIconsSimplico = new QLabel(tr("<a href=\"http://neurovit.deviantart.com/art/simplicio-92311415\">Simplicio icon set by Neurovit</a>"));
     lblIconsSimplico->setOpenExternalLinks(true);

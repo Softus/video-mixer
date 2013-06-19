@@ -19,6 +19,7 @@
 #include <QApplication>
 #include <QBoxLayout>
 #include <QDesktopServices>
+#include <QDebug>
 #include <QDir>
 #include <QFileInfo>
 #include <QFrame>
@@ -1351,8 +1352,9 @@ void MainWindow::sendToServer(DcmDataset* patientDs, const QString& seriesUID)
 {
     QWaitCursor wait(this);
     QProgressDialog pdlg(this);
-    outputPath.setFilter(QDir::Files | QDir::Readable);
-    pdlg.setRange(0, outputPath.count());
+
+    auto files = outputPath.entryInfoList(QDir::Files | QDir::Readable);
+    pdlg.setRange(0, files.count());
 
     // Only single series for now
     //
@@ -1360,19 +1362,26 @@ void MainWindow::sendToServer(DcmDataset* patientDs, const QString& seriesUID)
 
     foreach (auto server, QSettings().value("storage-servers").toStringList())
     {
-        DcmClient client(UID_MultiframeTrueColorSecondaryCaptureImageStorage);
+        DcmClient client(UID_SecondaryCaptureImageStorage);
 
-        for (uint i = 0; !pdlg.wasCanceled() && i < outputPath.count(); ++i)
+        for (auto i = 0; !pdlg.wasCanceled() && i < files.count(); ++i)
         {
+            if (QFile::exists(outputPath.absoluteFilePath(files[i].completeBaseName())))
+            {
+                // Skip clip thumbnail
+                //
+                continue;
+            }
+
             pdlg.setValue(i);
-            pdlg.setLabelText(tr("Storing '%1' to '%2'").arg(outputPath[i], server));
+            pdlg.setLabelText(tr("Storing '%1' to '%2'").arg(files[i].fileName(), server));
             qApp->processEvents();
 
-            const QString& file = outputPath.absoluteFilePath(outputPath[i]);
+            const QString& file = files[i].absoluteFilePath();
             if (!client.sendToServer(server, patientDs, seriesUID, seriesNo, file, i))
             {
                 if (QMessageBox::Yes != QMessageBox::critical(&pdlg, windowTitle(),
-                      tr("Faild to send '%1' to '%2':\n%3\nContinue?").arg(outputPath[i], server, client.lastError()),
+                      tr("Faild to send '%1' to '%2':\n%3\nContinue?").arg(file, server, client.lastError()),
                       QMessageBox::Yes, QMessageBox::No))
                 {
                     break;
