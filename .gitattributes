@@ -61,10 +61,14 @@ pixmaps/stop.png -text
 pixmaps/up.png -text
 pixmaps/user_add.png -text
 pixmaps/user_manage.png -text
+pkg/cookbook.txt -text
 pkg/debian/DEBIAN/control -text
+pkg/debian/usr/share/applications/beryllium.desktop -text
+pkg/debian/usr/share/beryllium/translations/beryllium_ru.qm -text
 pkg/debian/usr/share/doc/beryllium/changelog -text
 pkg/debian/usr/share/doc/beryllium/changelog.Debian -text
 pkg/debian/usr/share/doc/beryllium/copyright -text
+pkg/debian/usr/share/icons/beryllium.png -text
 pkg/debian/usr/share/man/man1/beryllium.1 -text
 /product.h -text
 /qwaitcursor.h -text

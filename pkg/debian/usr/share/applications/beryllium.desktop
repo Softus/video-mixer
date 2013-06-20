@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=Berillyum
+Name[ru_RU]=Берилий
+Comment=Image and video capturing program
+Comment[ru_RU]=Программа для записи видео
+Categories=DICOM;
+Exec=beryllium %U
+Icon=/usr/share/icons/beryllium.png
+StartupNotify=true
+Terminal=false
+Type=Application
+

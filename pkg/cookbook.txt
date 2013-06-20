@@ -1,0 +1,5 @@
+http://tldp.org/HOWTO/html_single/Debian-Binary-Package-Building-HOWTO/
+http://wiki.debian.org/DebianRussian/deb-inside
+
+pkg dependencies: dpkg-shlibdeps
+pkg build: fakeroot dpkg-deb --build debian && mv debian.deb beryllium.deb
