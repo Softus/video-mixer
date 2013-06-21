@@ -13,6 +13,7 @@
 #include <QPainter>
 #include <QPushButton>
 #include <QSettings>
+#include <QStackedWidget>
 #include <QSlider>
 #include <QTimer>
 #include <QToolBar>
@@ -27,6 +28,7 @@
 #include <QGst/Pad>
 #include <QGst/Parse>
 #include <QGst/Query>
+#include <QGst/Ui/VideoWidget>
 
 #include <gst/gstdebugutils.h>
 
@@ -50,9 +52,9 @@ static void DamnQtMadeMeDoTheSunsetByHands(QToolBar* bar)
 ArchiveWindow::ArchiveWindow(QWidget *parent) :
     QDialog(parent)
 {
-    QBoxLayout* layoutMain = new QVBoxLayout;
+    auto layoutMain = new QVBoxLayout;
 
-    QToolBar* barArchive = new QToolBar(tr("Archive"));
+    auto barArchive = new QToolBar(tr("Archive"));
     barArchive->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     actionDelete = barArchive->addAction(QIcon(":buttons/delete"), tr("Delete"), this, SLOT(onDeleteClick()));
     actionDelete->setShortcut(Qt::Key_Delete);
@@ -91,10 +93,10 @@ ArchiveWindow::ArchiveWindow(QWidget *parent) :
 
     player = new QWidget;
 
-    QBoxLayout* playerLayout = new QVBoxLayout();
+    auto playerLayout = new QVBoxLayout();
     playerLayout->setContentsMargins(0,16,0,16);
 
-    QBoxLayout* playerInnerLayout = new QHBoxLayout();
+    auto playerInnerLayout = new QHBoxLayout();
     playerInnerLayout->setContentsMargins(0,0,0,0);
 
     auto barPrev = new QToolBar(tr("Previous"));
@@ -108,10 +110,16 @@ ArchiveWindow::ArchiveWindow(QWidget *parent) :
     barPrev->addWidget(btnPrev);
     playerInnerLayout->addWidget(barPrev);
 
-    displayWidget = new QGst::Ui::VideoWidget();
-    displayWidget->setMinimumSize(videoSize);
-    displayWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    playerInnerLayout->addWidget(displayWidget);
+    // Add two display widgets: one is visible, one is loading.
+    // Once loading is complete, we will switch them.
+    //
+    pagesWidget = new QStackedWidget;
+    pagesWidget->setMinimumSize(videoSize);
+    pagesWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    pagesWidget->addWidget(new QGst::Ui::VideoWidget());
+    pagesWidget->addWidget(new QGst::Ui::VideoWidget());
+
+    playerInnerLayout->addWidget(pagesWidget);
 
     auto barNext = new QToolBar(tr("Next"));
     auto btnNext = new QToolButton;
@@ -419,14 +427,28 @@ void static removeFileOrFolder(const QString& path)
 void ArchiveWindow::onDeleteClick()
 {
     auto items = listFiles->selectedItems();
+
+    if (items.isEmpty())
+    {
+        if (!listFiles->currentItem())
+        {
+            // Nothing is selected. Should never be happend
+            //
+            return;
+        }
+
+        items << listFiles->currentItem();
+    }
+
     int userChoice = QMessageBox::question(this, windowTitle(),
-        items.count() == 1? tr("Are you sure to delete '%1'?").arg(items.first()->text()): tr("Are you sure to delete selected files?"),
+        items.count() == 1? tr("Are you sure to delete\n\n'%1'?").arg(items.first()->text()): tr("Are you sure to delete selected items?"),
         QMessageBox::Ok, QMessageBox::Cancel | QMessageBox::Default);
 
     if (QMessageBox::Ok == userChoice)
     {
         stopMedia();
-        foreach(auto item, items)
+
+        foreach (auto item, items)
         {
             if (item->text() == "..")
             {
@@ -507,8 +529,11 @@ void ArchiveWindow::stopMedia()
     if (pipeline)
     {
         pipeline->setState(QGst::StateNull);
-        pipeline->getState(nullptr, nullptr, 1000000000L); // 1 sec
-        displayWidget->stopPipelineWatch();
+        pipeline->getState(nullptr, nullptr, GST_SECOND); // 1 sec
+        for (int i = 0; i < pagesWidget->count(); ++i)
+        {
+            static_cast<QGst::Ui::VideoWidget*>(pagesWidget->widget(i))->stopPipelineWatch();
+        }
         pipeline.clear();
     }
 }
@@ -526,14 +551,14 @@ void ArchiveWindow::playMediaFile(const QString& file)
     {
         auto pipeDef = QString("filesrc location=\"%1\" ! decodebin ! autovideosink name=displaysink").arg(file);
         pipeline = QGst::Parse::launch(pipeDef).dynamicCast<QGst::Pipeline>();
-        displayWidget->watchPipeline(pipeline);
+        auto hiddenVideoWidget = static_cast<QGst::Ui::VideoWidget*>(pagesWidget->widget(1 - pagesWidget->currentIndex()));
+        hiddenVideoWidget->watchPipeline(pipeline);
         QGlib::connect(pipeline->bus(), "message", this, &ArchiveWindow::onBusMessage);
         pipeline->bus()->addSignalWatch();
-        pipeline->setState(QGst::StateReady);
-        pipeline->getState(nullptr, nullptr, 1000000000L); // 1 sec
+        pipeline->setState(QGst::StatePaused);
+        pipeline->getState(nullptr, nullptr, GST_SECOND * 10); // 10 sec
         auto details = GstDebugGraphDetails(GST_DEBUG_GRAPH_SHOW_MEDIA_TYPE | GST_DEBUG_GRAPH_SHOW_NON_DEFAULT_PARAMS | GST_DEBUG_GRAPH_SHOW_STATES);
         GST_DEBUG_BIN_TO_DOT_FILE_WITH_TS(pipeline.staticCast<QGst::Bin>(), details, qApp->applicationName().toUtf8());
-        pipeline->setState(QGst::StatePaused);
         setWindowTitle(tr("Archive - %1").arg(file));
     }
     catch (QGlib::Error ex)
@@ -625,8 +650,33 @@ void ArchiveWindow::onStateChangedMessage(const QGst::StateChangedMessagePtr& me
 
     if (message->source() == pipeline)
     {
-        if (message->oldState() == QGst::StateReady && message->newState() == QGst::StatePaused)
+        if (message->oldState() == QGst::StateNull && message->newState() == QGst::StateReady)
         {
+            auto sink = pipeline->getElementByName("displaysink");
+            if (sink)
+            {
+                auto childProxy =  sink.dynamicCast<QGst::ChildProxy>();
+                if (childProxy)
+                {
+                    auto cnt = childProxy->childrenCount();
+                    for (uint i = 0; i < cnt; ++i)
+                    {
+                        auto child = childProxy->childByIndex(i);
+                        child->setProperty("force-aspect-ratio", true);
+                    }
+                }
+                else
+                {
+                    sink->setProperty("force-aspect-ratio", true);
+                }
+            }
+        }
+        else if (message->oldState() == QGst::StateReady && message->newState() == QGst::StatePaused)
+        {
+            // The aspect ratio has been already fixed, time to show the video
+            //
+            pagesWidget->setCurrentIndex(1 - pagesWidget->currentIndex());
+
             // Time to adjust framerate
             //
             gint numerator = 0, denominator = 0;
@@ -643,10 +693,10 @@ void ArchiveWindow::onStateChangedMessage(const QGst::StateChangedMessagePtr& me
 
             if (denominator > 0 && numerator > 0)
             {
-                auto frameDuration = (1000000000LL * denominator) / numerator + 1;
+                auto frameDuration = (GST_SECOND * denominator) / numerator + 1;
                 qDebug() << "Framerate " << denominator << "/" << numerator << " duration" << frameDuration;
-                actionSeekFwd->setData(frameDuration);
-                actionSeekBack->setData(-frameDuration);
+                actionSeekFwd->setData((int)frameDuration);
+                actionSeekBack->setData((int)-frameDuration);
             }
 
             // The pipeline now in paused state.

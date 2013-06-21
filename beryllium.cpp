@@ -27,10 +27,18 @@ int main(int argc, char *argv[])
     app.setApplicationVersion(PRODUCT_VERSION_STR);
     app.setWindowIcon(QIcon(":/app/product"));
 
+    // At this time it is safe to use QSettings
+    //
+    QSettings settings;
+
+    // Override some style sheets
+    //
+    app.setStyleSheet(settings.value("css").toString());
+
     // Translations
     //
     QTranslator  translator;
-    QString      locale = QSettings().value("locale").toString();
+    QString      locale = settings.value("locale").toString();
     if (locale.isEmpty())
     {
         locale = QLocale::system().name();

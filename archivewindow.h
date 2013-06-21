@@ -7,11 +7,11 @@
 
 #include <QGst/Message>
 #include <QGst/Pipeline>
-#include <QGst/Ui/VideoWidget>
 
 QT_BEGIN_NAMESPACE
 class QListWidget;
 class QListWidgetItem;
+class QStackedWidget;
 class QToolBar;
 QT_END_NAMESPACE
 
@@ -26,7 +26,7 @@ class ArchiveWindow : public QDialog
     QAction*               actionSeekBack;
     QAction*               actionSeekFwd;
     QListWidget*           listFiles;
-    QGst::Ui::VideoWidget* displayWidget;
+    QStackedWidget*        pagesWidget;
     QWidget*               player;
     QGst::PipelinePtr      pipeline;
     QDir                   root;

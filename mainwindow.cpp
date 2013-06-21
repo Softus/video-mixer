@@ -97,7 +97,6 @@ static void Dump(QGst::ElementPtr elm)
     QGst::ChildProxyPtr childProxy =  elm.dynamicCast<QGst::ChildProxy>();
     if (childProxy)
     {
-        childProxy->data(nullptr);
         auto cnt = childProxy->childrenCount();
         for (uint i = 0; i < cnt; ++i)
         {
@@ -201,7 +200,7 @@ QMenuBar* MainWindow::createMenuBar()
     auto mnuBar = new QMenuBar();
     auto mnu    = new QMenu(tr("&Menu"));
 
-    actionAbout = mnu->addAction(QIcon(":/buttons/about"), tr("A&bout ").arg(PRODUCT_FULL_NAME).append(0x2026), this, SLOT(onShowAboutClick()));
+    actionAbout = mnu->addAction(QIcon(":/buttons/about"), tr("A&bout %1").arg(PRODUCT_FULL_NAME).append(0x2026), this, SLOT(onShowAboutClick()));
     actionAbout->setMenuRole(QAction::AboutRole);
     actionArchive = mnu->addAction(QIcon(":/buttons/database"), tr("&Archive"), this, SLOT(onShowArchiveClick()), Qt::Key_F2);
 #ifdef WITH_DICOM
