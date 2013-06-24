@@ -8,7 +8,8 @@
 
 #include <gst/gst.h>
 
-#ifdef WITH_DICOM
+#define QT_GST_VERSION_STR "0.10.2.2" // No way out
+
 #if defined(UNICODE) || defined (_UNICODE)
 #include <MediaInfo/MediaInfo.h>
 #else
@@ -16,6 +17,7 @@
 #include <MediaInfo/MediaInfo.h>
 #undef UNICODE
 #endif
+#ifdef WITH_DICOM
 #define HAVE_CONFIG_H
 #include <dcmtk/dcmdata/dcuid.h>
 #endif
@@ -42,22 +44,29 @@ AboutDialog::AboutDialog(QWidget *parent) :
     layoutText->addSpacing(16);
 
     layoutText->addWidget(new QLabel(tr("Based on:")));
-    auto lblQt = new QLabel(tr("<a href=\"http://qt-project.org/\">Qt ").append(QT_VERSION_STR).append("</a>"));
-    lblQt->setOpenExternalLinks(true);
-    layoutText->addWidget(lblQt);
-    auto lblGstreamer = new QLabel(tr("<a href=\"http://gstreamer.freedesktop.org/\">").append(gst_version_string()).append("</a>"));
-    lblGstreamer->setOpenExternalLinks(true);
-    layoutText->addWidget(lblGstreamer);
 #ifdef WITH_DICOM
     auto lblDcmtk = new QLabel(tr("<a href=\"http://dcmtk.org/\">DCMTK ").append(OFFIS_DCMTK_VERSION_STRING).append("</a>"));
     lblDcmtk->setOpenExternalLinks(true);
     layoutText->addWidget(lblDcmtk);
+#endif
+
+    auto lblGstreamer = new QLabel(tr("<a href=\"http://gstreamer.freedesktop.org/\">").append(gst_version_string()).append("</a>"));
+    lblGstreamer->setOpenExternalLinks(true);
+    layoutText->addWidget(lblGstreamer);
 
     auto mediaInfoVer = QString::fromStdWString(MediaInfoLib::MediaInfo::Option_Static(__T("Info_Version")));
-    auto lblMediaInfo = new QLabel(tr("<a href=\"http://mediainfo.sourceforge.net/\">").append(mediaInfoVer).append("</a>"));
+    auto lblMediaInfo = new QLabel(tr("<a href=\"http://mediainfo.sourceforge.net/\">").append(mediaInfoVer.replace("- v", "")).append("</a>"));
     lblMediaInfo->setOpenExternalLinks(true);
     layoutText->addWidget(lblMediaInfo);
-#endif
+
+    auto lblQt = new QLabel(tr("<a href=\"http://qt-project.org/\">Qt ").append(QT_VERSION_STR).append("</a>"));
+    lblQt->setOpenExternalLinks(true);
+    layoutText->addWidget(lblQt);
+
+    auto lblQtGstreamer = new QLabel(tr("<a href=\"http://gstreamer.freedesktop.org/modules/qt-gstreamer.html/\">QtGStreamer ").append(QT_GST_VERSION_STR).append("</a>"));
+    lblQtGstreamer->setOpenExternalLinks(true);
+    layoutText->addWidget(lblQtGstreamer);
+
     auto lblIconsSimplico = new QLabel(tr("<a href=\"http://neurovit.deviantart.com/art/simplicio-92311415\">Simplicio icon set by Neurovit</a>"));
     lblIconsSimplico->setOpenExternalLinks(true);
     layoutText->addWidget(lblIconsSimplico);

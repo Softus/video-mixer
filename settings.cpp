@@ -1,5 +1,3 @@
-#include <QtGui>
-
 #include "qwaitcursor.h"
 #include "settings.h"
 #include "storagesettings.h"
@@ -15,6 +13,11 @@
 #include "worklistcolumnsettings.h"
 #include "worklistquerysettings.h"
 #endif
+
+#include <QListWidget>
+#include <QBoxLayout>
+#include <QStackedWidget>
+#include <QPushButton>
 
 Q_DECLARE_METATYPE(QMetaObject)
 static int QMetaObjectMetaType = qRegisterMetaType<QMetaObject>();

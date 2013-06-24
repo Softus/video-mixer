@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui widgets
 
 # GCC tuning
 *-g++*:QMAKE_CXXFLAGS += -std=c++0x -Wno-multichar
@@ -16,7 +16,7 @@ win32 {
 
 unix {
     CONFIG += link_pkgconfig
-    PKGCONFIG += QtGLib-2.0 QtGStreamer-0.10 QtGStreamerUi-0.10 gstreamer-0.10 gstreamer-base-0.10
+    PKGCONFIG += Qt5GLib-2.0 Qt5GStreamer-0.10 Qt5GStreamerUi-0.10 gstreamer-0.10 gstreamer-base-0.10
     LIBS += -lmediainfo -lzen
 }
 

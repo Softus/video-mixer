@@ -4,53 +4,58 @@
 <context>
     <name>AboutDialog</name>
     <message>
-        <location filename="aboutdialog.cpp" line="26"/>
+        <location filename="aboutdialog.cpp" line="28"/>
         <source>About %1</source>
         <oldsource>About </oldsource>
         <translation>О %1</translation>
     </message>
     <message>
-        <location filename="aboutdialog.cpp" line="44"/>
+        <location filename="aboutdialog.cpp" line="46"/>
         <source>Based on:</source>
         <translation>Использует:</translation>
     </message>
     <message>
-        <location filename="aboutdialog.cpp" line="45"/>
+        <location filename="aboutdialog.cpp" line="62"/>
         <source>&lt;a href=&quot;http://qt-project.org/&quot;&gt;Qt </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="aboutdialog.cpp" line="48"/>
+        <location filename="aboutdialog.cpp" line="53"/>
         <source>&lt;a href=&quot;http://gstreamer.freedesktop.org/&quot;&gt;</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="aboutdialog.cpp" line="52"/>
+        <location filename="aboutdialog.cpp" line="48"/>
         <source>&lt;a href=&quot;http://dcmtk.org/&quot;&gt;DCMTK </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="aboutdialog.cpp" line="57"/>
+        <location filename="aboutdialog.cpp" line="58"/>
         <source>&lt;a href=&quot;http://mediainfo.sourceforge.net/&quot;&gt;</source>
         <translation>&lt;a href=&quot;http://mediainfo.sourceforge.net/ru&quot;&gt;</translation>
     </message>
     <message>
-        <location filename="aboutdialog.cpp" line="61"/>
+        <location filename="aboutdialog.cpp" line="66"/>
+        <source>&lt;a href=&quot;http://gstreamer.freedesktop.org/modules/qt-gstreamer.html/&quot;&gt;QtGStreamer </source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="aboutdialog.cpp" line="70"/>
         <source>&lt;a href=&quot;http://neurovit.deviantart.com/art/simplicio-92311415&quot;&gt;Simplicio icon set by Neurovit&lt;/a&gt;</source>
         <translation>&lt;a href=&quot;http://neurovit.deviantart.com/art/simplicio-92311415&quot;&gt;Набор иконок Simplicio от Neurovit&lt;/a&gt;</translation>
     </message>
     <message>
-        <location filename="aboutdialog.cpp" line="64"/>
+        <location filename="aboutdialog.cpp" line="73"/>
         <source>&lt;a href=&quot;http://icons8.com/&quot;&gt;Icons8 icon set by VisualPharm&lt;/a&gt;</source>
         <translation>&lt;a href=&quot;http://icons8.com/&quot;&gt;Набор иконок Icons8 от VisualPharm&lt;/a&gt;</translation>
     </message>
     <message>
-        <location filename="aboutdialog.cpp" line="69"/>
+        <location filename="aboutdialog.cpp" line="78"/>
         <source>&lt;p&gt;Copyright (C) 2013 &lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;. All rights reserved.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Авторское право (C) 2013 &lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;&lt;br/&gt;Программа защищена законом об авторских правах&lt;br/&gt;и международными соглашениями.&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="aboutdialog.cpp" line="75"/>
+        <location filename="aboutdialog.cpp" line="84"/>
         <source>The program is provided AS IS with NO WARRANTY OF ANY KIND,
 INCLUDING THE WARRANTY OF DESIGN,
 MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
@@ -58,7 +63,7 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
 без каких-либо явных или подразумеваемых гарантий любого рода.</translation>
     </message>
     <message>
-        <location filename="aboutdialog.cpp" line="81"/>
+        <location filename="aboutdialog.cpp" line="90"/>
         <source>OK</source>
         <translation>ОК</translation>
     </message>
@@ -754,77 +759,77 @@ Continue?</source>
 <context>
     <name>Settings</name>
     <message>
-        <location filename="settings.cpp" line="43"/>
+        <location filename="settings.cpp" line="46"/>
         <source>Appl&amp;y</source>
         <translation>Применит&amp;ь</translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="46"/>
+        <location filename="settings.cpp" line="49"/>
         <source>Cancel</source>
         <translation>Отмена</translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="49"/>
+        <location filename="settings.cpp" line="52"/>
         <source>Ok</source>
         <translation>ОК</translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="60"/>
+        <location filename="settings.cpp" line="63"/>
         <source>Settings</source>
         <translation>Настройки</translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="74"/>
+        <location filename="settings.cpp" line="77"/>
         <source>DICOM MWL/MPPS</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="80"/>
+        <location filename="settings.cpp" line="83"/>
         <source>Video source</source>
         <translation>Источник видео</translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="81"/>
+        <location filename="settings.cpp" line="84"/>
         <source>Storage</source>
         <translation>Хранилище</translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="82"/>
+        <location filename="settings.cpp" line="85"/>
         <source>Physicians</source>
         <translation>Врачи</translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="83"/>
+        <location filename="settings.cpp" line="86"/>
         <source>Studies</source>
         <translation>Исследования</translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="72"/>
+        <location filename="settings.cpp" line="75"/>
         <source>DICOM device</source>
         <translation>DICOM устройство</translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="73"/>
+        <location filename="settings.cpp" line="76"/>
         <source>DICOM servers</source>
         <translation>DICOM сервера</translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="75"/>
+        <location filename="settings.cpp" line="78"/>
         <source>DICOM storage</source>
         <translation>DICOM хранилище</translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="76"/>
+        <location filename="settings.cpp" line="79"/>
         <source>Worklist column display</source>
         <translation>Колонки рабочего листа</translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="77"/>
+        <location filename="settings.cpp" line="80"/>
         <source>Worklist query settings</source>
         <translation>Настройки рабочего листа</translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="131"/>
+        <location filename="settings.cpp" line="134"/>
         <source>Close</source>
         <translation>Закрыть</translation>
     </message>

@@ -57,7 +57,7 @@ static void DamnQtMadeMeDoTheSunsetByHands(QToolBar* bar)
     foreach (auto action, bar->actions())
     {
         auto shortcut = action->shortcut();
-        if (!shortcut)
+        if (!shortcut.isEmpty())
         {
             continue;
         }
@@ -138,8 +138,8 @@ ArchiveWindow::ArchiveWindow(QWidget *parent) :
     pagesWidget = new QStackedWidget;
     pagesWidget->setMinimumSize(videoSize);
     pagesWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    pagesWidget->addWidget(new QGst::Ui::VideoWidget());
-    pagesWidget->addWidget(new QGst::Ui::VideoWidget());
+    pagesWidget->addWidget(new QGst::Ui::VideoWidget);
+    pagesWidget->addWidget(new QGst::Ui::VideoWidget);
 
     playerInnerLayout->addWidget(pagesWidget);
 
