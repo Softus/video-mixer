@@ -638,7 +638,7 @@ void MainWindow::updatePipeline()
 
     if (archiveWindow != nullptr)
     {
-        archiveWindow->setRoot(settings.value("output-path", "/video").toString());
+        archiveWindow->updateRoot();
     }
 
 #ifdef WITH_DICOM
@@ -1192,7 +1192,7 @@ void MainWindow::onShowArchiveClick()
     if (archiveWindow == nullptr)
     {
         archiveWindow = new ArchiveWindow();
-        archiveWindow->setRoot(QSettings().value("output-path", "/video").toString());
+        archiveWindow->updateRoot();
     }
 
     updateOutputPath();

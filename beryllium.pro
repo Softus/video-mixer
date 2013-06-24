@@ -17,12 +17,13 @@ win32 {
 unix {
     CONFIG += link_pkgconfig
     PKGCONFIG += QtGLib-2.0 QtGStreamer-0.10 QtGStreamerUi-0.10 gstreamer-0.10 gstreamer-base-0.10
+    LIBS += -lmediainfo -lzen
 }
 
 dicom {
     QT       += network
     DEFINES  += WITH_DICOM
-    LIBS     += -lmediainfo -lzen -ldcmnet -lwrap -ldcmdata -loflog -lofstd -lssl -lz
+    LIBS     += -ldcmnet -lwrap -ldcmdata -loflog -lofstd -lssl -lz
 
     SOURCES  += worklist.cpp dcmclient.cpp detailsdialog.cpp \
     dicomdevicesettings.cpp \

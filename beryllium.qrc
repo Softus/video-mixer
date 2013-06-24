@@ -25,6 +25,7 @@
         <file alias="next">pixmaps/next.png</file>
         <file alias="prev">pixmaps/prev.png</file>
         <file alias="rewind">pixmaps/rewind.png</file>
+        <file alias="movie">pixmaps/movie.png</file>
     </qresource>
     <qresource prefix="/app">
         <file alias="product">pixmaps/product.png</file>

@@ -32,6 +32,14 @@
 
 #include <gst/gstdebugutils.h>
 
+#if defined(UNICODE) || defined (_UNICODE)
+#include <MediaInfo/MediaInfo.h>
+#else
+#define UNICODE
+#include <MediaInfo/MediaInfo.h>
+#undef UNICODE
+#endif
+
 #define GALLERY_MODE 2
 
 static QSize videoSize(352, 258);
@@ -172,7 +180,6 @@ ArchiveWindow::ArchiveWindow(QWidget *parent) :
     setWindowState((Qt::WindowState)settings.value("archive-state").toInt());
 
     setAttribute(Qt::WA_DeleteOnClose, false);
-    switchViewMode(settings.value("archive-mode").toInt());
 
     DamnQtMadeMeDoTheSunsetByHands(barArchive);
     DamnQtMadeMeDoTheSunsetByHands(barMediaControls);
@@ -191,9 +198,12 @@ void ArchiveWindow::closeEvent(QCloseEvent *evt)
     QWidget::closeEvent(evt);
 }
 
-void ArchiveWindow::setRoot(const QString& path)
+void ArchiveWindow::updateRoot()
 {
-    root.setPath(path);
+    QSettings settings;
+    root.setPath(settings.value("output-path", "/video").toString());
+    curr = root;
+    switchViewMode(settings.value("archive-mode").toInt());
 }
 
 void ArchiveWindow::setPath(const QString& path)
@@ -255,6 +265,7 @@ void ArchiveWindow::preparePathPopupMenu()
 
 void ArchiveWindow::updateList()
 {
+    MediaInfoLib::MediaInfo mi;
     QFileIconProvider fip;
 
     listFiles->setUpdatesEnabled(false);
@@ -273,11 +284,18 @@ void ArchiveWindow::updateList()
         QIcon icon;
         QPixmap pm;
 
-        if (fi.fileName() == "..")
+        if (fi.isDir())
         {
-            icon.addFile(":/buttons/up");
+            if (fi.fileName() == "..")
+            {
+                icon.addFile(":/buttons/up");
+            }
+            else
+            {
+                icon.addFile(":/buttons/folder");
+            }
         }
-        else if (!fi.isDir() && pm.load(fi.absoluteFilePath()))
+        else if (pm.load(fi.absoluteFilePath()))
         {
             if (QFile::exists(curr.absoluteFilePath(fi.completeBaseName())))
             {
@@ -300,7 +318,15 @@ void ArchiveWindow::updateList()
         }
         else
         {
-            icon = fip.icon(fi);
+            if (mi.Open(fi.absoluteFilePath().toStdWString())
+                && QString::fromStdWString(mi.Get(MediaInfoLib::Stream_General, 0, __T("VideoCount"))) != "0")
+            {
+                icon.addFile(":/buttons/movie");
+            }
+            else
+            {
+                icon = fip.icon(fi); // Should never be happen.
+            }
         }
 
         auto item = new QListWidgetItem(icon, fi.fileName(), listFiles);
@@ -328,7 +354,7 @@ void ArchiveWindow::onListRowChanged(int idx)
         QFileInfo fi(curr.absoluteFilePath(listFiles->item(idx)->text()));
         if (!fi.isDir())
         {
-            playMediaFile(fi.absoluteFilePath());
+            playMediaFile(fi);
         }
     }
 }
@@ -342,7 +368,7 @@ void ArchiveWindow::onListItemDoubleClicked(QListWidgetItem* item)
     }
     else
     {
-        playMediaFile(fi.absoluteFilePath());
+        playMediaFile(fi);
     }
 }
 
@@ -538,18 +564,22 @@ void ArchiveWindow::stopMedia()
     }
 }
 
-void ArchiveWindow::playMediaFile(const QString& file)
+void ArchiveWindow::playMediaFile(const QFileInfo& fi)
 {
     if (actionMode->data().toInt() != GALLERY_MODE)
     {
         switchViewMode(GALLERY_MODE);
+        listFiles->setCurrentItem(listFiles->findItems(fi.fileName(), Qt::MatchExactly).first());
+        return;
+        //
+        // Will get here again once switchig is done
     }
 
     stopMedia();
 
     try
     {
-        auto pipeDef = QString("filesrc location=\"%1\" ! decodebin ! autovideosink name=displaysink").arg(file);
+        auto pipeDef = QString("filesrc location=\"%1\" ! decodebin ! autovideosink name=displaysink").arg(fi.absoluteFilePath());
         pipeline = QGst::Parse::launch(pipeDef).dynamicCast<QGst::Pipeline>();
         auto hiddenVideoWidget = static_cast<QGst::Ui::VideoWidget*>(pagesWidget->widget(1 - pagesWidget->currentIndex()));
         hiddenVideoWidget->watchPipeline(pipeline);
@@ -559,7 +589,7 @@ void ArchiveWindow::playMediaFile(const QString& file)
         pipeline->getState(nullptr, nullptr, GST_SECOND * 10); // 10 sec
         auto details = GstDebugGraphDetails(GST_DEBUG_GRAPH_SHOW_MEDIA_TYPE | GST_DEBUG_GRAPH_SHOW_NON_DEFAULT_PARAMS | GST_DEBUG_GRAPH_SHOW_STATES);
         GST_DEBUG_BIN_TO_DOT_FILE_WITH_TS(pipeline.staticCast<QGst::Bin>(), details, qApp->applicationName().toUtf8());
-        setWindowTitle(tr("Archive - %1").arg(file));
+        setWindowTitle(tr("Archive - %1").arg(fi.fileName()));
     }
     catch (QGlib::Error ex)
     {

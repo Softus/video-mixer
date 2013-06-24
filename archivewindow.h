@@ -35,7 +35,7 @@ class ArchiveWindow : public QDialog
     void updatePath();
     void updateList();
     void stopMedia();
-    void playMediaFile(const QString& file);
+    void playMediaFile(const QFileInfo &fi);
     void onBusMessage(const QGst::MessagePtr& message);
     void onStateChangedMessage(const QGst::StateChangedMessagePtr& message);
     void createSubDirMenu(QAction* parentAction);
@@ -50,7 +50,7 @@ protected:
 signals:
     
 public slots:
-    void setRoot(const QString& root);
+    void updateRoot();
     void setPath(const QString& path);
     void selectPath(QAction* action);
     void selectPath(bool);
