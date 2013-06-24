@@ -4,7 +4,8 @@
 #
 #-------------------------------------------------
 
-QT       += core gui widgets
+QT       += core gui
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 # GCC tuning
 *-g++*:QMAKE_CXXFLAGS += -std=c++0x -Wno-multichar
