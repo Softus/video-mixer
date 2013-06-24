@@ -15,17 +15,16 @@ win32 {
 }
 
 unix {
-    CONFIG += link_pkgconfig
+    CONFIG    += link_pkgconfig
     PKGCONFIG += Qt5GLib-2.0 Qt5GStreamer-0.10 Qt5GStreamerUi-0.10 gstreamer-0.10 gstreamer-base-0.10
-    LIBS += -lmediainfo -lzen
+    LIBS      += -lmediainfo -lzen
 }
 
 dicom {
-    QT       += network
-    DEFINES  += WITH_DICOM
-    LIBS     += -ldcmnet -lwrap -ldcmdata -loflog -lofstd -lssl -lz
-
-    SOURCES  += worklist.cpp dcmclient.cpp detailsdialog.cpp \
+    QT        += network
+    unix:LIBS += -ldcmnet -lwrap -ldcmdata -loflog -lofstd -lssl -lz
+    DEFINES   += WITH_DICOM
+    SOURCES   += worklist.cpp dcmclient.cpp detailsdialog.cpp \
     dicomdevicesettings.cpp \
     dicomserversettings.cpp \
     dicomstoragesettings.cpp \

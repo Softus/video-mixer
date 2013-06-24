@@ -1,3 +1,6 @@
+﻿#if defined(_MSC_VER) 
+#pragma execution_character_set("utf-8")
+#endif
 #include "transcyrillic.h"
 
 static inline int next(const QString& str, int idx)
