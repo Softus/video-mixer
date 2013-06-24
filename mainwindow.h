@@ -104,10 +104,6 @@ class MainWindow : public QWidget
     void setElementProperty(QGst::ElementPtr& elm, const char* prop = nullptr, const QGlib::Value& value = nullptr, QGst::State minimumState = QGst::StatePlaying);
     bool startVideoRecord();
 
-#ifdef WITH_DICOM
-    void sendToServer(DcmDataset* dset, const QString& seriesUID);
-#endif
-
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();

@@ -1,7 +1,7 @@
+#include "product.h"
 #include "worklist.h"
 #include "dcmclient.h"
 #include "dcmconverter.h"
-#include "product.h"
 
 #include <dcmtk/dcmdata/dcdeftag.h>
 #include <dcmtk/dcmdata/dcdicent.h>
@@ -14,6 +14,9 @@
 
 #include <QApplication>
 #include <QDebug>
+#include <QDir>
+#include <QMessageBox>
+#include <QProgressDialog>
 #include <QSettings>
 
 #ifdef QT_DEBUG
@@ -519,11 +522,17 @@ bool DcmClient::nSetRQ(const char* seriesUID, DcmDataset* patientDs, const QStri
 }
 
 static void StoreUserCallback
-    ( void *
+    ( void *callbackData
     , T_DIMSE_StoreProgress *
     , T_DIMSE_C_StoreRQ *
    )
 {
+    auto pThis = static_cast<DcmClient*>(callbackData);
+
+    if (pThis->progressDlg && pThis->progressDlg->wasCanceled())
+    {
+        pThis->abort();
+    }
     qApp->processEvents();
 }
 
@@ -545,7 +554,7 @@ bool DcmClient::cStoreRQ(DcmDataset* dset, const char* sopInstance)
     /* finally conduct transmission of data */
     int tout = timeout();
     cond = DIMSE_storeUser(assoc, presId, &req,
-      nullptr, dset, StoreUserCallback, nullptr,
+      nullptr, dset, StoreUserCallback, this,
       0 == tout? DIMSE_BLOCKING: DIMSE_NONBLOCKING, tout,
       &rsp, &statusDetail);
 
@@ -602,4 +611,46 @@ bool DcmClient::sendToServer(const QString& server, DcmDataset* patientDs, const
     assoc = nullptr;
 
     return cond.good();
+}
+
+void DcmClient::sendToServer(QWidget* parent, DcmDataset* patientDs, const QFileInfoList& files, const QString& seriesUID)
+{
+    QProgressDialog pdlg(parent);
+    progressDlg = &pdlg;
+
+    pdlg.setRange(0, files.count());
+    pdlg.setMinimumDuration(0);
+
+    // Only single series for now
+    //
+    int seriesNo = 1;
+
+    foreach (auto server, QSettings().value("storage-servers").toStringList())
+    {
+        for (auto i = 0; !pdlg.wasCanceled() && i < files.count(); ++i)
+        {
+            if (QFile::exists(files[i].dir().filePath(files[i].completeBaseName())))
+            {
+                // Skip clip thumbnail
+                //
+                continue;
+            }
+
+            pdlg.setValue(i);
+            pdlg.setLabelText(tr("Storing '%1' to '%2'").arg(files[i].fileName(), server));
+            qApp->processEvents();
+
+            auto file = files[i].absoluteFilePath();
+            if (!sendToServer(server, patientDs, seriesUID, seriesNo, file, i))
+            {
+                if (QMessageBox::Yes != QMessageBox::critical(&pdlg, parent->windowTitle(),
+                      tr("Faild to send '%1' to '%2':\n%3\nContinue?").arg(file, server, lastError()),
+                      QMessageBox::Yes, QMessageBox::No))
+                {
+                    break;
+                }
+            }
+        }
+    }
+    progressDlg = nullptr;
 }

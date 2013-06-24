@@ -66,90 +66,112 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
 <context>
     <name>ArchiveWindow</name>
     <message>
-        <location filename="archivewindow.cpp" line="57"/>
-        <location filename="archivewindow.cpp" line="527"/>
+        <location filename="archivewindow.cpp" line="73"/>
+        <location filename="archivewindow.cpp" line="629"/>
         <source>Archive</source>
         <oldsource>archive</oldsource>
         <translation>Архив</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="59"/>
+        <location filename="archivewindow.cpp" line="75"/>
         <source>Delete</source>
         <translation>Удалить</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="86"/>
+        <location filename="archivewindow.cpp" line="108"/>
         <source>File browser</source>
         <translation>Проводник</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="73"/>
+        <location filename="archivewindow.cpp" line="95"/>
         <source>List</source>
         <translation>Список</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="76"/>
+        <location filename="archivewindow.cpp" line="80"/>
+        <source>Dicom</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="archivewindow.cpp" line="98"/>
         <source>Icons</source>
         <translation>Значки</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="79"/>
+        <location filename="archivewindow.cpp" line="101"/>
         <source>Gallery</source>
         <translation>Галерея</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="91"/>
+        <location filename="archivewindow.cpp" line="113"/>
         <source>Path</source>
         <oldsource>path</oldsource>
         <translation>Путь</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="102"/>
-        <location filename="archivewindow.cpp" line="105"/>
+        <location filename="archivewindow.cpp" line="124"/>
+        <location filename="archivewindow.cpp" line="127"/>
         <source>Previous</source>
         <oldsource>Prev</oldsource>
         <translation>Предыдущий</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="124"/>
-        <location filename="archivewindow.cpp" line="127"/>
+        <location filename="archivewindow.cpp" line="146"/>
+        <location filename="archivewindow.cpp" line="149"/>
         <source>Next</source>
         <oldsource>next</oldsource>
         <translation>Следующий</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="137"/>
+        <location filename="archivewindow.cpp" line="159"/>
         <source>Media</source>
         <oldsource>media</oldsource>
         <translation>Медия</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="138"/>
+        <location filename="archivewindow.cpp" line="160"/>
         <source>Rewing</source>
         <translation>Отмотать назад</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="142"/>
-        <location filename="archivewindow.cpp" line="718"/>
+        <location filename="archivewindow.cpp" line="164"/>
+        <location filename="archivewindow.cpp" line="824"/>
         <source>Play</source>
         <translation>Воспроизвести</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="145"/>
+        <location filename="archivewindow.cpp" line="167"/>
         <source>Forward</source>
         <translation>Перемотать вперёд</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="444"/>
+        <location filename="archivewindow.cpp" line="491"/>
         <source>Are you sure to delete
 
 &apos;%1&apos;?</source>
         <translation>Вы действительно хотите удалить &apos;%1&apos;?</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="444"/>
+        <location filename="archivewindow.cpp" line="491"/>
         <source>Are you sure to delete selected items?</source>
         <translation>Вы действительно хотите удалить выбранные объекты?</translation>
+    </message>
+    <message>
+        <location filename="archivewindow.cpp" line="543"/>
+        <source>Failed to load patient dataset:
+
+%1</source>
+        <translation>Не удалось загрузить датасет %1</translation>
+    </message>
+    <message>
+        <location filename="archivewindow.cpp" line="548"/>
+        <source>Are you sure to send &apos;%1&apos; to storage servers?</source>
+        <translation>Вы действительно хотите отправить &apos;%1&apos; в хранилище?</translation>
+    </message>
+    <message>
+        <location filename="archivewindow.cpp" line="548"/>
+        <source>Are you sure to send selected items to storage servers?</source>
+        <translation>Вы действительно хотите отправить выбранные объекты в хранилище?</translation>
     </message>
     <message>
         <source>Are you sure to delete &apos;%1&apos;?</source>
@@ -164,12 +186,12 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
         <translation type="obsolete">Вы действительно хотите удалить файл %1?</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="562"/>
+        <location filename="archivewindow.cpp" line="668"/>
         <source>Archive - %1</source>
         <translation>Архив - %1</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="718"/>
+        <location filename="archivewindow.cpp" line="824"/>
         <source>Pause</source>
         <translation>Пауза</translation>
     </message>
@@ -177,14 +199,28 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
 <context>
     <name>DcmClient</name>
     <message>
-        <location filename="dcmclient.cpp" line="249"/>
+        <location filename="dcmclient.cpp" line="252"/>
         <source>Required settings parameter %1 is missing</source>
         <translation>Необходимый параметр %1 не задан в настройках</translation>
     </message>
     <message>
-        <location filename="dcmclient.cpp" line="350"/>
+        <location filename="dcmclient.cpp" line="353"/>
         <source>Accepted presentation context ID not found</source>
         <translation>Принятый ID контекста представления не найден</translation>
+    </message>
+    <message>
+        <location filename="dcmclient.cpp" line="640"/>
+        <source>Storing &apos;%1&apos; to &apos;%2&apos;</source>
+        <translation>Отправка &apos;%1&apos; на &apos;%2&apos; </translation>
+    </message>
+    <message>
+        <location filename="dcmclient.cpp" line="647"/>
+        <source>Faild to send &apos;%1&apos; to &apos;%2&apos;:
+%3
+Continue?</source>
+        <translation>Не удалось отправить &apos;%1&apos; на &apos;%2&apos;:
+%3
+Продолжить?</translation>
     </message>
 </context>
 <context>
@@ -433,62 +469,62 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
         <translation type="obsolete">О &amp;программе</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="205"/>
+        <location filename="mainwindow.cpp" line="204"/>
         <source>&amp;Archive</source>
         <translation>&amp;Архив</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="207"/>
+        <location filename="mainwindow.cpp" line="206"/>
         <source>&amp;Worlkist</source>
         <translation>&amp;Рабочий лист</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="218"/>
+        <location filename="mainwindow.cpp" line="217"/>
         <source>&amp;Preferences</source>
         <translation>&amp;Настройки</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="233"/>
+        <location filename="mainwindow.cpp" line="232"/>
         <source>Main</source>
         <oldsource>main</oldsource>
         <translation>Главная</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="246"/>
+        <location filename="mainwindow.cpp" line="245"/>
         <source>&amp;Take snapshot</source>
         <translation>Сделать &amp;снимок</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="276"/>
+        <location filename="mainwindow.cpp" line="275"/>
         <source>Show studies archive</source>
         <translation>Открыть архив исследований</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="278"/>
+        <location filename="mainwindow.cpp" line="277"/>
         <source>Edit settings</source>
         <translation>Открыть окно настроек</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="280"/>
+        <location filename="mainwindow.cpp" line="279"/>
         <source>About %1</source>
         <oldsource>About berillyum</oldsource>
         <translation>О %1</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="656"/>
-        <location filename="mainwindow.cpp" line="661"/>
-        <location filename="mainwindow.cpp" line="666"/>
-        <location filename="mainwindow.cpp" line="671"/>
+        <location filename="mainwindow.cpp" line="655"/>
+        <location filename="mainwindow.cpp" line="660"/>
+        <location filename="mainwindow.cpp" line="665"/>
+        <location filename="mainwindow.cpp" line="670"/>
         <source> - </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="687"/>
+        <location filename="mainwindow.cpp" line="686"/>
         <source>Failed to create &apos;%1&apos;</source>
         <translation>Не удалось создать &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="898"/>
+        <location filename="mainwindow.cpp" line="897"/>
         <location filename="mainwindow.cpp" line="1107"/>
         <source>Failed to start recording.
 Check the error log for details.</source>
@@ -496,16 +532,14 @@ Check the error log for details.</source>
 Проверьте журнал ожибок.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1376"/>
         <source>Storing &apos;%1&apos; to &apos;%2&apos;</source>
-        <translation>Отправка &apos;%1&apos; на &apos;%2&apos; </translation>
+        <translation type="obsolete">Отправка &apos;%1&apos; на &apos;%2&apos; </translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1383"/>
         <source>Faild to send &apos;%1&apos; to &apos;%2&apos;:
 %3
 Continue?</source>
-        <translation>Не удалось отправить &apos;%1&apos; на &apos;%2&apos;:
+        <translation type="obsolete">Не удалось отправить &apos;%1&apos; на &apos;%2&apos;:
 %3
 Продолжить?</translation>
     </message>
@@ -514,27 +548,27 @@ Continue?</source>
         <translation type="obsolete">Пациент не задан</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="925"/>
+        <location filename="mainwindow.cpp" line="924"/>
         <source>Send study results to the server?</source>
         <translation>Отправить результат на сервер?</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="925"/>
+        <location filename="mainwindow.cpp" line="924"/>
         <source>Continue the study</source>
         <translation>Продолжить</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="925"/>
+        <location filename="mainwindow.cpp" line="924"/>
         <source>Don&apos;t sent</source>
         <translation>Не отправлять</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="925"/>
+        <location filename="mainwindow.cpp" line="924"/>
         <source>Send</source>
         <translation>Отправить</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="938"/>
+        <location filename="mainwindow.cpp" line="937"/>
         <source>End the study?</source>
         <translation>Завершить исследование?</translation>
     </message>
@@ -578,32 +612,32 @@ Continue?</source>
         <translation type="obsolete">Отправка &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="201"/>
+        <location filename="mainwindow.cpp" line="200"/>
         <source>&amp;Menu</source>
         <translation>&amp;Меню</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="203"/>
+        <location filename="mainwindow.cpp" line="202"/>
         <source>A&amp;bout %1</source>
         <translation>&amp;О %1</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="210"/>
+        <location filename="mainwindow.cpp" line="209"/>
         <source>&amp;Enable RTP streaming</source>
         <translation>Включить RTP &amp;поток</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="214"/>
+        <location filename="mainwindow.cpp" line="213"/>
         <source>&amp;Record entire study</source>
         <translation>Записывать исследование &amp;целиком</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="221"/>
+        <location filename="mainwindow.cpp" line="220"/>
         <source>E&amp;xit</source>
         <translation>В&amp;ыход</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="847"/>
+        <location filename="mainwindow.cpp" line="846"/>
         <source>Failed to load image %1</source>
         <translation>Не удалось загрузить снимок %1</translation>
     </message>

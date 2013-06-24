@@ -29,7 +29,6 @@
 #include <QMenuBar>
 #include <QMessageBox>
 #include <QPainter>
-#include <QProgressDialog>
 #include <QResizeEvent>
 #include <QSettings>
 #include <QTimer>
@@ -973,7 +972,8 @@ void MainWindow::onStartClick()
 
         if (userChoice == 2)
         {
-            sendToServer(pendingPatient, seriesUID);
+            DcmClient client(UID_SecondaryCaptureImageStorage);
+            client.sendToServer(this, pendingPatient, outputPath.entryInfoList(QDir::Files | QDir::Readable), seriesUID);
         }
     }
 
@@ -1345,48 +1345,5 @@ void MainWindow::onShowWorkListClick()
     }
     worklist->show();
     worklist->activateWindow();
-}
-
-void MainWindow::sendToServer(DcmDataset* patientDs, const QString& seriesUID)
-{
-    QWaitCursor wait(this);
-    QProgressDialog pdlg(this);
-
-    auto files = outputPath.entryInfoList(QDir::Files | QDir::Readable);
-    pdlg.setRange(0, files.count());
-
-    // Only single series for now
-    //
-    int seriesNo = 1;
-
-    foreach (auto server, QSettings().value("storage-servers").toStringList())
-    {
-        DcmClient client(UID_SecondaryCaptureImageStorage);
-
-        for (auto i = 0; !pdlg.wasCanceled() && i < files.count(); ++i)
-        {
-            if (QFile::exists(outputPath.absoluteFilePath(files[i].completeBaseName())))
-            {
-                // Skip clip thumbnail
-                //
-                continue;
-            }
-
-            pdlg.setValue(i);
-            pdlg.setLabelText(tr("Storing '%1' to '%2'").arg(files[i].fileName(), server));
-            qApp->processEvents();
-
-            const QString& file = files[i].absoluteFilePath();
-            if (!client.sendToServer(server, patientDs, seriesUID, seriesNo, file, i))
-            {
-                if (QMessageBox::Yes != QMessageBox::critical(&pdlg, windowTitle(),
-                      tr("Faild to send '%1' to '%2':\n%3\nContinue?").arg(file, server, client.lastError()),
-                      QMessageBox::Yes, QMessageBox::No))
-                {
-                    break;
-                }
-            }
-        }
-    }
 }
 #endif

@@ -1,4 +1,12 @@
 #include "archivewindow.h"
+#include "qwaitcursor.h"
+
+#ifdef WITH_DICOM
+#include "dcmclient.h"
+#include <dcmtk/dcmdata/dcdatset.h>
+#include <dcmtk/dcmdata/dcuid.h>
+#endif
+
 #include <QAction>
 #include <QApplication>
 #include <QBoxLayout>
@@ -67,6 +75,12 @@ ArchiveWindow::ArchiveWindow(QWidget *parent) :
     actionDelete = barArchive->addAction(QIcon(":buttons/delete"), tr("Delete"), this, SLOT(onDeleteClick()));
     actionDelete->setShortcut(Qt::Key_Delete);
     actionDelete->setEnabled(false);
+
+#ifdef WITH_DICOM
+    actionStore = barArchive->addAction(QIcon(":buttons/dicom"), tr("Dicom"), this, SLOT(onStoreClick()));
+    actionStore->setShortcut(Qt::Key_F5);
+    actionStore->setEnabled(false);
+#endif
 
     auto spacer = new QWidget;
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
@@ -265,6 +279,7 @@ void ArchiveWindow::preparePathPopupMenu()
 
 void ArchiveWindow::updateList()
 {
+    QWaitCursor wait(this);
     MediaInfoLib::MediaInfo mi;
     QFileIconProvider fip;
 
@@ -348,7 +363,13 @@ void ArchiveWindow::selectPath(bool)
 
 void ArchiveWindow::onListRowChanged(int idx)
 {
-    actionDelete->setEnabled(idx >= 0 && listFiles->item(idx)->text() != "..");
+    auto selectedSomething = listFiles->selectedItems().count() > 1 || (idx >= 0 && listFiles->item(idx)->text() != "..");
+    actionDelete->setEnabled(selectedSomething);
+#ifdef WITH_DICOM
+    actionStore->setEnabled(selectedSomething && QFile::exists(curr.absoluteFilePath(".patient.dcm"))
+                            && !QSettings().value("storage-servers").toStringList().isEmpty());
+#endif
+
     if (actionMode->data().toInt() == GALLERY_MODE && idx >= 0)
     {
         QFileInfo fi(curr.absoluteFilePath(listFiles->item(idx)->text()));
@@ -473,6 +494,7 @@ void ArchiveWindow::onDeleteClick()
     if (QMessageBox::Ok == userChoice)
     {
         stopMedia();
+        QWaitCursor wait(this);
 
         foreach (auto item, items)
         {
@@ -496,6 +518,60 @@ void ArchiveWindow::onDeleteClick()
         }
     }
 }
+
+#ifdef WITH_DICOM
+void ArchiveWindow::onStoreClick()
+{
+    auto items = listFiles->selectedItems();
+
+    if (items.isEmpty())
+    {
+        if (!listFiles->currentItem())
+        {
+            // Nothing is selected. Should never be happend
+            //
+            return;
+        }
+
+        items << listFiles->currentItem();
+    }
+
+    DcmDataset patientDs;
+    auto cond = patientDs.loadFile((const char*)curr.absoluteFilePath(".patient.dcm").toLocal8Bit());
+    if (cond.bad())
+    {
+        QMessageBox::critical(this, windowTitle(), tr("Failed to load patient dataset:\n\n%1").arg(QString::fromLocal8Bit(cond.text())));
+        return;
+    }
+
+    int userChoice = QMessageBox::question(this, windowTitle(),
+        items.count() == 1? tr("Are you sure to send '%1' to storage servers?").arg(items.first()->text()): tr("Are you sure to send selected items to storage servers?"),
+        QMessageBox::Ok, QMessageBox::Cancel | QMessageBox::Default);
+
+    if (QMessageBox::Ok == userChoice)
+    {
+        QFileInfoList files;
+        QWaitCursor wait(this);
+
+        foreach (auto item, items)
+        {
+            if (item->text() == "..")
+            {
+                // User definitelly does not want this folder to be sent
+                //
+                continue;
+            }
+
+            files << QFileInfo(curr, item->text());
+        }
+
+        DcmClient client(UID_SecondaryCaptureImageStorage);
+        char seriesUID[100] = {0};
+        dcmGenerateUniqueIdentifier(seriesUID, SITE_SERIES_UID_ROOT);
+        client.sendToServer(this, &patientDs, files, seriesUID);
+    }
+}
+#endif
 
 void ArchiveWindow::onPrevClick()
 {
@@ -724,7 +800,7 @@ void ArchiveWindow::onStateChangedMessage(const QGst::StateChangedMessagePtr& me
             if (denominator > 0 && numerator > 0)
             {
                 auto frameDuration = (GST_SECOND * denominator) / numerator + 1;
-                qDebug() << "Framerate " << denominator << "/" << numerator << " duration" << frameDuration;
+                //qDebug() << "Framerate " << denominator << "/" << numerator << " duration" << frameDuration;
                 actionSeekFwd->setData((int)frameDuration);
                 actionSeekBack->setData((int)-frameDuration);
             }

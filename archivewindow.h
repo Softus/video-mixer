@@ -21,6 +21,9 @@ class ArchiveWindow : public QDialog
     QToolBar*              barPath;
     QToolBar*              barMediaControls;
     QAction*               actionDelete;
+#ifdef WITH_DICOM
+    QAction*               actionStore;
+#endif
     QAction*               actionPlay;
     QAction*               actionMode;
     QAction*               actionSeekBack;
@@ -61,6 +64,9 @@ public slots:
     void onSwitchModeClick(QAction* action);
     void onShowFolderClick();
     void onDeleteClick();
+#ifdef WITH_DICOM
+    void onStoreClick();
+#endif
     void onPrevClick();
     void onNextClick();
     void onSeekClick();

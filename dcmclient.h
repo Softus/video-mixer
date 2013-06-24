@@ -2,7 +2,7 @@
 #define DCMASSOC_H
 
 #include <QObject>
-#include <QString>
+#include <QFileInfo>
 
 #define HAVE_CONFIG_H
 #include <dcmtk/config/osconfig.h>   /* make sure OS specific configuration is included first */
@@ -14,6 +14,7 @@ struct T_ASC_Parameters;
 struct T_DIMSE_C_FindRQ;
 struct T_DIMSE_C_FindRSP;
 class DcmDataset;
+class QProgressDialog;
 
 class DcmClient : public QObject
 {
@@ -27,7 +28,7 @@ class DcmClient : public QObject
 
 public:
     explicit DcmClient(const char* abstractSyntax, QObject *parent = 0)
-        : QObject(parent), net(nullptr), abstractSyntax(abstractSyntax), presId(0), assoc(nullptr)
+        : QObject(parent), net(nullptr), abstractSyntax(abstractSyntax), presId(0), assoc(nullptr), progressDlg(nullptr)
     {
     }
     ~DcmClient();
@@ -44,6 +45,8 @@ public:
     //
     bool nSetRQ(const char *seriesUID, DcmDataset* patientDs, const QString& sopInstance);
 
+    void sendToServer(QWidget* parent, DcmDataset* patientDs, const QFileInfoList& files, const QString& seriesUID);
+
     bool sendToServer(const QString& server, DcmDataset* patientDs, const QString& seriesUID,
         int seriesNumber, const QString& file, int instanceNumber);
 
@@ -53,6 +56,7 @@ public:
     }
 
     void abort();
+    QProgressDialog* progressDlg;
 
 private:
     int timeout() const;
