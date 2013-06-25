@@ -17,60 +17,77 @@ win32 {
 
 unix {
     CONFIG    += link_pkgconfig
-    PKGCONFIG += Qt5GLib-2.0 Qt5GStreamer-0.10 Qt5GStreamerUi-0.10 gstreamer-0.10 gstreamer-base-0.10
-    LIBS      += -lmediainfo -lzen
+    greaterThan(QT_MAJOR_VERSION, 4) {
+        PKGCONFIG += Qt5GLib-2.0 Qt5GStreamer-0.10 Qt5GStreamerUi-0.10
+    }
+    else {
+        PKGCONFIG += QtGLib-2.0 QtGStreamer-0.10 QtGStreamerUi-0.10
+    }
+    PKGCONFIG += gstreamer-0.10 gstreamer-base-0.10
+
+    # libmediainfo.pc adds UNICODE, but dcmtk isn't compatible with wchar,
+    # so we can't use pkgconfig for this library
+    LIBS += -lmediainfo -lzen
 }
 
 dicom {
     QT        += network
     unix:LIBS += -ldcmnet -lwrap -ldcmdata -loflog -lofstd -lssl -lz
     DEFINES   += WITH_DICOM
-    SOURCES   += worklist.cpp dcmclient.cpp detailsdialog.cpp \
+
+    SOURCES   += dcmclient.cpp \
+    dcmconverter.cpp \
+    detailsdialog.cpp \
     dicomdevicesettings.cpp \
+    dicommppsmwlsettings.cpp \
+    dicomserverdetails.cpp \
     dicomserversettings.cpp \
     dicomstoragesettings.cpp \
-    dicomserverdetails.cpp \
+    transcyrillic.cpp \
     worklistcolumnsettings.cpp \
-    worklistquerysettings.cpp \
-    dcmconverter.cpp
+    worklist.cpp \
+    worklistquerysettings.cpp
 
-    HEADERS += worklist.h dcmclient.h detailsdialog.h \
+    HEADERS += comboboxwithpopupsignal.h \
+    dcmclient.h \
+    dcmconverter.h \
+    detailsdialog.h \
     dicomdevicesettings.h \
+    dicommppsmwlsettings.h \
+    dicomserverdetails.h \
     dicomserversettings.h \
     dicomstoragesettings.h \
-    dicomserverdetails.h \
+    transcyrillic.h \
     worklistcolumnsettings.h \
-    worklistquerysettings.h \
-    dcmconverter.h
+    worklist.h \
+    worklistquerysettings.h
 }
 
 TARGET   = beryllium
 TEMPLATE = app
 
-SOURCES += beryllium.cpp mainwindow.cpp \
-    videosettings.cpp \
+SOURCES += aboutdialog.cpp \
+    archivewindow.cpp \
+    beryllium.cpp \
+    mainwindow.cpp \
+    patientdialog.cpp \
+    physicianssettings.cpp \
     settings.cpp \
     storagesettings.cpp \
     studiessettings.cpp \
-    patientdialog.cpp \
-    aboutdialog.cpp \
-    archivewindow.cpp \
-    dicommppsmwlsettings.cpp \
-    physicianssettings.cpp \
-    transcyrillic.cpp
-HEADERS += mainwindow.h qwaitcursor.h \
-    videosettings.h \
+    videosettings.cpp
+
+HEADERS += aboutdialog.h \
+    archivewindow.h \
+    mainwindow.h \
+    patientdialog.h \
+    physicianssettings.h \
+    product.h \
+    qwaitcursor.h \
     settings.h \
     storagesettings.h \
     studiessettings.h \
-    patientdialog.h \
-    aboutdialog.h \
-    archivewindow.h \
-    product.h \
-    comboboxwithpopupsignal.h \
-    dicommppsmwlsettings.h \
-    physicianssettings.h \
-    transcyrillic.h
+    videosettings.h
 
 FORMS   +=
 

@@ -99,9 +99,6 @@ void VideoSettings::updateDeviceList()
         return;
     }
 
-    src->setState(QGst::StateReady);
-    src->getState(nullptr, nullptr, GST_SECOND * 10);
-
     // Look for device-name for windows and "device" for linux/macosx
     //
     QGst::PropertyProbePtr propertyProbe = src.dynamicCast<QGst::PropertyProbe>();
@@ -112,20 +109,35 @@ void VideoSettings::updateDeviceList()
         foreach (const QGlib::Value& device, devices)
         {
             auto deviceName = device.toString();
-            QGst::PadPtr srcPad = src->getStaticPad("src");
+            auto srcPad = src->getStaticPad("src");
             if (srcPad)
             {
-                //add the device on the combobox
+                // To set the property, the device must be in Null state
+                //
+                src->setProperty(PLATFORM_SPECIFIC_PROPERTY, device);
+
+                // To query the caps, the device must be in Ready state
+                //
+                src->setState(QGst::StateReady);
+                src->getState(nullptr, nullptr, GST_SECOND * 10);
+
+                //qDebug() << deviceName << " caps:\n" << srcPad->caps()->toString();
+
+                // Add the device and its caps to the combobox
+                //
                 listDevices->addItem(deviceName, srcPad->caps()->toString());
                 if (selectedDevice == deviceName)
                 {
                     listDevices->setCurrentIndex(listDevices->count() - 1);
                 }
+
+                // Now switch back to Null state for next device
+                //
+                src->setState(QGst::StateNull);
+                src->getState(nullptr, nullptr, GST_SECOND * 10);
             }
         }
     }
-    src->setState(QGst::StateNull);
-    src->getState(nullptr, nullptr, GST_SECOND * 10);
 }
 
 void VideoSettings::videoDeviceChanged(int index)
