@@ -27,12 +27,12 @@ AboutDialog::AboutDialog(QWidget *parent) :
 {
     setWindowTitle(tr("About %1").arg(PRODUCT_FULL_NAME));
 
-    QBoxLayout* layoutMain = new QHBoxLayout;
+    auto layoutMain = new QHBoxLayout;
     layoutMain->setContentsMargins(16,16,16,16);
     auto icon = new QLabel();
     icon->setPixmap(qApp->windowIcon().pixmap(64));
     layoutMain->addWidget(icon, 1, Qt::AlignTop);
-    QBoxLayout* layoutText = new QVBoxLayout;
+    auto layoutText = new QVBoxLayout;
     layoutText->setContentsMargins(16,0,16,0);
 
     auto lblTitle = new QLabel(QString(PRODUCT_FULL_NAME).append(" ").append(PRODUCT_VERSION_STR));
@@ -87,7 +87,7 @@ AboutDialog::AboutDialog(QWidget *parent) :
     layoutText->addWidget(lblWarranty);
     layoutText->addSpacing(16);
 
-    QPushButton* btnClose = new QPushButton(tr("OK"));
+    auto btnClose = new QPushButton(tr("OK"));
     connect(btnClose, SIGNAL(clicked()), this, SLOT(accept()));
     layoutText->addWidget(btnClose, 1, Qt::AlignRight);
     layoutMain->addLayout(layoutText);

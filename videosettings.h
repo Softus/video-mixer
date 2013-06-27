@@ -41,6 +41,7 @@ class VideoSettings : public QWidget
     QSpinBox* spinBitrate;
     QLineEdit* textRtpClients;
     QCheckBox* checkEnableRtp;
+    QCheckBox* checkDeinterlace;
 
     void updateDeviceList();
     void updateGstList(const char* setting, const char* def, unsigned long long type, QComboBox* cb);

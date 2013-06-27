@@ -330,6 +330,7 @@ QString MainWindow::buildPipeline()
     auto sizeDef   = settings.value("size").toSize();
     auto srcDef   = settings.value("src").toString();
     auto srcFixColor = settings.value("src-colorspace", false).toBool()? "! ffmpegcolorspace ": "";
+    auto srcDeinterlace = settings.value("video-deinterlace").toBool();
     auto srcParams = settings.value("src-parameters").toString();
 
     if (!srcDef.isEmpty())
@@ -346,6 +347,10 @@ QString MainWindow::buildPipeline()
         if (!srcParams.isEmpty())
         {
             pipe.append(" ").append(srcParams);
+        }
+        if (srcDeinterlace)
+        {
+            pipe.append(" ! deinterlace");
         }
     }
 
