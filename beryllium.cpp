@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
 
     // Override some style sheets
     //
-    app.setStyleSheet(settings.value("css").toString());
+    app.setStyleSheet(settings.value("css", "*[mandatoryField=\"true\"] { background-color: pink }").toString());
 
     // Translations
     //

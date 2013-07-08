@@ -14,7 +14,10 @@ struct T_ASC_Parameters;
 struct T_DIMSE_C_FindRQ;
 struct T_DIMSE_C_FindRSP;
 class DcmDataset;
+
+QT_BEGIN_NAMESPACE
 class QProgressDialog;
+QT_END_NAMESPACE
 
 class DcmClient : public QObject
 {

@@ -75,7 +75,8 @@ SOURCES += aboutdialog.cpp \
     settings.cpp \
     storagesettings.cpp \
     studiessettings.cpp \
-    videosettings.cpp
+    videosettings.cpp \
+    mandatoryfieldgroup.cpp
 
 HEADERS += aboutdialog.h \
     archivewindow.h \
@@ -87,7 +88,8 @@ HEADERS += aboutdialog.h \
     settings.h \
     storagesettings.h \
     studiessettings.h \
-    videosettings.h
+    videosettings.h \
+    mandatoryfieldgroup.h
 
 FORMS   +=
 

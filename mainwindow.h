@@ -23,10 +23,11 @@ class QResizeEvent;
 class QTimer;
 class QToolBar;
 class QToolButton;
+QT_END_NAMESPACE
+
 class Worklist;
 class ArchiveWindow;
 class DcmDataset;
-QT_END_NAMESPACE
 
 class MainWindow : public QWidget
 {

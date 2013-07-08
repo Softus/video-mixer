@@ -1,5 +1,7 @@
 #include "patientdialog.h"
 #include "product.h"
+#include "mandatoryfieldgroup.h"
+
 #include <QBoxLayout>
 #include <QComboBox>
 #include <QDateEdit>
@@ -61,6 +63,11 @@ PatientDialog::PatientDialog(QWidget *parent) :
     setLayout(layoutMain);
     restoreGeometry(settings.value("new-patient-geometry").toByteArray());
     setWindowState((Qt::WindowState)settings.value("new-patient-state").toInt());
+
+    auto group = new MandatoryFieldGroup(this);
+    group->add(textPatientId);
+    group->add(textPatientName);
+    group->setOkButton(btnStart);
 }
 
 void PatientDialog::done(int result)
@@ -79,6 +86,27 @@ QString PatientDialog::patientId() const
 QString PatientDialog::patientName() const
 {
     return textPatientName->text();
+}
+
+QDate PatientDialog::patientBirthDate() const
+{
+    return dateBirthday->date();
+}
+
+QString PatientDialog::patientSex() const
+{
+    return cbPatientSex->currentText();
+}
+
+QChar PatientDialog::patientSexCode() const
+{
+    QChar codes[] = {'U', 'F', 'M', 'O'};
+    auto idx = cbPatientSex->currentIndex();
+    if (idx >= 0 && idx < (sizeof(codes) / sizeof(codes[0])))
+    {
+        return codes[idx];
+    }
+    return '\0';
 }
 
 QString PatientDialog::studyName() const

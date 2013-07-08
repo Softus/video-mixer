@@ -41,7 +41,7 @@ DicomDeviceSettings::DicomDeviceSettings(QWidget *parent) :
 
     mainLayout->addRow(tr("&IP address"), textIp);
 
-    mainLayout->addRow(tr("AE &title"), textAet = new QLineEdit(settings.value("aet").toString()));
+    mainLayout->addRow(tr("AE &title"), textAet = new QLineEdit(settings.value("aet", localHost.toUpper()).toString()));
     mainLayout->addRow(tr("&Port"), spinPort = new QSpinBox);
     spinPort->setRange(0, 65535);
     spinPort->setValue(settings.value("local-port").toInt());

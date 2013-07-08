@@ -157,6 +157,12 @@ MainWindow::MainWindow(QWidget *parent) :
     updateRecordAll();
 
     updatePipeline();
+
+    if (settings.value("first-run", true).toBool())
+    {
+        settings.setValue("first-run", false);
+        QTimer::singleShot(0, this, SLOT(onShowSettingsClick()));
+    }
 }
 
 MainWindow::~MainWindow()
@@ -1309,25 +1315,39 @@ void MainWindow::onStartStudy(
 #ifdef WITH_DICOM
     if (patient)
     {
-        patient->saveFile((const char*)outputPath.absoluteFilePath(".patient.dcm").toLocal8Bit());
-        if (settings.value("start-with-mpps", true).toBool() && !settings.value("mpps-server").toString().isEmpty())
-        {
-            DcmClient client(UID_ModalityPerformedProcedureStepSOPClass);
-            pendingSOPInstanceUID = client.nCreateRQ(patient);
-            if (pendingSOPInstanceUID.isNull())
-            {
-                QMessageBox::critical(this, windowTitle(), client.lastError());
-                return;
-            }
-
-            pendingPatient = new DcmDataset(*patient);
-        }
+        pendingPatient = new DcmDataset(*patient);
     }
     else
-#endif
     {
-        dlg.savePatientFile(outputPath.absoluteFilePath(".patient"));
+        pendingPatient = new DcmDataset();
+        pendingPatient->putAndInsertString(DCM_PatientID, patientId.toUtf8());
+        pendingPatient->putAndInsertString(DCM_PatientName, patientName.toUtf8());
+        pendingPatient->putAndInsertString(DCM_PatientBirthDate, dlg.patientId().toUtf8());
+        pendingPatient->putAndInsertString(DCM_PatientSex, QString().append(dlg.patientSexCode()).toUtf8());
+
+        DcmItem* sps = nullptr;
+        pendingPatient->findOrCreateSequenceItem(DCM_ScheduledProcedureStepSequence, sps);
+        if (sps)
+        {
+            sps->putAndInsertString(DCM_ScheduledPerformingPhysicianName, physician.toUtf8());
+            sps->putAndInsertString(DCM_ScheduledProcedureStepDescription, studyName.toUtf8());
+        }
     }
+
+    pendingPatient->saveFile((const char*)outputPath.absoluteFilePath(".patient.dcm").toLocal8Bit());
+    if (settings.value("start-with-mpps", true).toBool() && !settings.value("mpps-server").toString().isEmpty())
+    {
+        DcmClient client(UID_ModalityPerformedProcedureStepSOPClass);
+        pendingSOPInstanceUID = client.nCreateRQ(pendingPatient);
+        if (pendingSOPInstanceUID.isNull())
+        {
+            QMessageBox::critical(this, windowTitle(), client.lastError());
+            return;
+        }
+    }
+#else
+    dlg.savePatientFile(outputPath.absoluteFilePath(".patient"));
+#endif
 
     running = startVideoRecord();
 

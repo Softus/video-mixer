@@ -5,7 +5,7 @@
 #include <QBoxLayout>
 #include <QLabel>
 #include <QPushButton>
-
+#include <QtMultimedia/qmediarecorder.h>
 #include <gst/gst.h>
 
 #define QT_GST_VERSION_STR "0.10.2.2" // No way out

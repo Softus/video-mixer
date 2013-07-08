@@ -277,7 +277,7 @@ T_ASC_Parameters* DcmClient::initAssocParams(const QString& peerAet, const QStri
         cond = ASC_createAssociationParameters(&params, settings.value("pdu-size", ASC_DEFAULTMAXPDU).toInt());
         if (cond.good())
         {
-            ASC_setAPTitles(params, settings.value("aet").toString().toUtf8(), peerAet.toUtf8(), nullptr);
+            ASC_setAPTitles(params, settings.value("aet", qApp->applicationName().toUpper()).toString().toUtf8(), peerAet.toUtf8(), nullptr);
 
             /* Figure out the presentation addresses and copy the */
             /* corresponding values into the DcmAssoc parameters.*/

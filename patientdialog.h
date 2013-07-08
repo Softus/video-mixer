@@ -26,6 +26,9 @@ public:
     explicit PatientDialog(QWidget *parent = 0);
     QString patientId() const;
     QString patientName() const;
+    QDate patientBirthDate() const;
+    QString patientSex() const;
+    QChar patientSexCode() const;
     QString studyName() const;
     QString physician() const;
     void setPatientId(const QString& id);
