@@ -5,7 +5,6 @@
 #include <QBoxLayout>
 #include <QLabel>
 #include <QPushButton>
-#include <QtMultimedia/qmediarecorder.h>
 #include <gst/gst.h>
 
 #define QT_GST_VERSION_STR "0.10.2.2" // No way out
@@ -25,7 +24,7 @@
 AboutDialog::AboutDialog(QWidget *parent) :
     QDialog(parent)
 {
-    setWindowTitle(tr("About %1").arg(PRODUCT_FULL_NAME));
+    setWindowTitle(tr("About %1").arg(tr("Beryllium")/*PRODUCT_FULL_NAME*/));
 
     auto layoutMain = new QHBoxLayout;
     layoutMain->setContentsMargins(16,16,16,16);
@@ -35,7 +34,7 @@ AboutDialog::AboutDialog(QWidget *parent) :
     auto layoutText = new QVBoxLayout;
     layoutText->setContentsMargins(16,0,16,0);
 
-    auto lblTitle = new QLabel(QString(PRODUCT_FULL_NAME).append(" ").append(PRODUCT_VERSION_STR));
+    auto lblTitle = new QLabel(QString(tr(PRODUCT_FULL_NAME)).append(" ").append(PRODUCT_VERSION_STR));
     auto titleFont = lblTitle->font();
     titleFont.setBold(true);
     titleFont.setPointSize(titleFont.pointSize() * 2);
@@ -76,7 +75,7 @@ AboutDialog::AboutDialog(QWidget *parent) :
     layoutText->addSpacing(16);
 
     auto lblCopyright = new QLabel(tr("<p>Copyright (C) 2013 <a href=\"%1\">%2</a>. All rights reserved.</p>")
-       .arg(PRODUCT_SITE_URL, ORGANIZATION_FULL_NAME));
+                                   .arg(PRODUCT_SITE_URL, tr("Irkutsk Diagnostic Centre")/*ORGANIZATION_FULL_NAME*/));
     lblCopyright->setOpenExternalLinks(true);
     layoutText->addWidget(lblCopyright);
     layoutText->addSpacing(16);

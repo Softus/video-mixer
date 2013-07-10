@@ -16,15 +16,23 @@ PatientDialog::PatientDialog(QWidget *parent) :
     QDialog(parent)
 {
     QSettings settings;
+    auto listMandatory = settings.value("new-study-mandatory-fields", QStringList() << "PatientID" << "Name").toStringList();
 
     setWindowTitle(tr("New patient"));
     setMinimumSize(480, 240);
 
     auto layoutMain = new QFormLayout;
-    layoutMain->addRow(tr("&Patient id"), textPatientId = new QLineEdit);
+    layoutMain->addRow(tr("&Patient ID"), textPatientId = new QLineEdit);
     layoutMain->addRow(tr("&Name"), textPatientName = new QLineEdit);
     layoutMain->addRow(tr("&Sex"), cbPatientSex = new QComboBox);
-    cbPatientSex->addItems(QStringList() << tr("unspecified") << tr("female") << tr("male") << tr("other"));
+    cbPatientSex->addItems(QStringList() << "" << tr("female") << tr("male") << tr("other"));
+    QChar patientSexCodes[] = {'U', 'F', 'M', 'O'};
+    for (int i = 0; i < cbPatientSex->count(); ++i)
+    {
+        cbPatientSex->setItemData(i, patientSexCodes[i]);
+    }
+    cbPatientSex->setEditable(true);
+
     layoutMain->addRow(tr("&Birthday"), dateBirthday = new QDateEdit);
     dateBirthday->setCalendarPopup(true);
     dateBirthday->setDisplayFormat(tr("MM/dd/yyyy"));
@@ -64,10 +72,23 @@ PatientDialog::PatientDialog(QWidget *parent) :
     restoreGeometry(settings.value("new-patient-geometry").toByteArray());
     setWindowState((Qt::WindowState)settings.value("new-patient-state").toInt());
 
-    auto group = new MandatoryFieldGroup(this);
-    group->add(textPatientId);
-    group->add(textPatientName);
-    group->setOkButton(btnStart);
+    if (!listMandatory.isEmpty())
+    {
+        auto group = new MandatoryFieldGroup(this);
+        if (listMandatory.contains("PatientID"))
+            group->add(textPatientId);
+        if (listMandatory.contains("Name"))
+            group->add(textPatientName);
+        if (listMandatory.contains("Sex"))
+            group->add(cbPatientSex);
+        if (listMandatory.contains("Birthday"))
+            group->add(dateBirthday);
+        if (listMandatory.contains("Physician"))
+            group->add(cbPhysician);
+        if (listMandatory.contains("StudyType"))
+            group->add(cbStudyType);
+        group->setOkButton(btnStart);
+    }
 }
 
 void PatientDialog::done(int result)
@@ -100,13 +121,8 @@ QString PatientDialog::patientSex() const
 
 QChar PatientDialog::patientSexCode() const
 {
-    QChar codes[] = {'U', 'F', 'M', 'O'};
     auto idx = cbPatientSex->currentIndex();
-    if (idx >= 0 && idx < (sizeof(codes) / sizeof(codes[0])))
-    {
-        return codes[idx];
-    }
-    return '\0';
+    return idx < 0? '\x0': cbPatientSex->itemData(idx).toChar();
 }
 
 QString PatientDialog::studyName() const
@@ -131,40 +147,17 @@ void PatientDialog::setPatientName(const QString& name)
 
 void PatientDialog::setPatientSex(const QString& sex)
 {
-    QString real;
+    // For 'Female' search for text, for 'F' search for data
+    //
+    auto idx = sex.length() != 1? cbPatientSex->findText(sex): cbPatientSex->findData(sex[0].toUpper());
 
-    if (sex.length() != 1)
+    if (idx < 0)
     {
-        real = sex;
+        cbPatientSex->setEditText(sex);
     }
     else
     {
-        switch (sex[0].unicode())
-        {
-        case 'f':
-        case 'F':
-            real = tr("female");
-            break;
-        case 'm':
-        case 'M':
-            real = tr("male");
-            break;
-        case 'o':
-        case 'O':
-            real = tr("other");
-            break;
-        default:
-            real = tr("unspecified");
-            break;
-        }
-    }
-
-    auto idx = cbPatientSex->findText(real);
-    cbPatientSex->setCurrentIndex(idx);
-    if (idx < 0)
-    {
-        cbPatientSex->setEditable(true);
-        cbPatientSex->setEditText(real);
+        cbPatientSex->setCurrentIndex(idx);
     }
 }
 

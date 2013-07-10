@@ -33,6 +33,8 @@
 /mainwindow.h -text
 /mandatoryfieldgroup.cpp -text
 /mandatoryfieldgroup.h -text
+/mandatoryfieldssettings.cpp -text
+/mandatoryfieldssettings.h -text
 /patientdialog.cpp -text
 /patientdialog.h -text
 /physicianssettings.cpp -text

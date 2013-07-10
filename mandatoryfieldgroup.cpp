@@ -5,17 +5,25 @@
 #include <QComboBox>
 #include <QLineEdit>
 #include <QPushButton>
+#include <QSettings>
 
 void MandatoryFieldGroup::add(QWidget *widget)
 {
+    mandatoryFieldColor = QColor(QSettings().value("mandatory-field-color", "pink").toString()).rgba();
     if (!widgets.contains(widget))
     {
         if (widget->inherits("QCheckBox"))
+        {
             connect(widget, SIGNAL(clicked()), this, SLOT(changed()));
+        }
         else if (widget->inherits("QComboBox"))
-            connect(widget, SIGNAL(highlighted(int)), this, SLOT(changed()));
+        {
+            connect(widget, SIGNAL(currentTextChanged(const QString&)), this, SLOT(changed()));
+        }
         else if (widget->inherits("QLineEdit"))
+        {
             connect(widget, SIGNAL(textChanged(const QString&)), this, SLOT(changed()));
+        }
         else
         {
             qWarning("MandatoryFieldGroup: unsupported class %s", widget->metaObject()->className());
@@ -46,13 +54,25 @@ void MandatoryFieldGroup::setOkButton(QPushButton *button)
 
 void MandatoryFieldGroup::setMandatory(QWidget* widget, bool mandatory)
 {
-    if (widget->property("mandatoryField").toBool() != mandatory)
+    if ((widget->property("mandatoryFieldBaseColor").toUInt() == 0) != mandatory)
     {
-        widget->setProperty("mandatoryField", mandatory);
-        widget->setToolTip(mandatory? tr("This is a mandatory field"): "");
-        widget->style()->unpolish(widget);
-        widget->style()->polish(widget);
+        return;
     }
+
+    auto p = QPalette(widget->palette());
+    if (mandatory)
+    {
+        widget->setProperty("mandatoryFieldBaseColor", p.color(QPalette::Base).rgba());
+        p.setColor(QPalette::Base, mandatoryFieldColor);
+        widget->setToolTip(tr("This is a mandatory field"));
+    }
+    else
+    {
+        p.setColor(QPalette::Base, widget->property("mandatoryFieldBaseColor").toUInt());
+        widget->setProperty("mandatoryFieldBaseColor", 0);
+        widget->setToolTip("");
+    }
+    widget->setPalette(p);
 }
 
 void MandatoryFieldGroup::changed()

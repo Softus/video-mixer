@@ -1,7 +1,8 @@
-#include "qwaitcursor.h"
 #include "settings.h"
-#include "storagesettings.h"
+
+#include "mandatoryfieldssettings.h"
 #include "physicianssettings.h"
+#include "storagesettings.h"
 #include "studiessettings.h"
 #include "videosettings.h"
 
@@ -18,6 +19,7 @@
 #include <QBoxLayout>
 #include <QStackedWidget>
 #include <QPushButton>
+#include "qwaitcursor.h"
 
 Q_DECLARE_METATYPE(QMetaObject)
 static int QMetaObjectMetaType = qRegisterMetaType<QMetaObject>();
@@ -27,7 +29,7 @@ Settings::Settings(QWidget *parent, Qt::WindowFlags flags)
 {
     listWidget = new QListWidget;
     listWidget->setMovement(QListView::Static);
-    listWidget->setMaximumWidth(200);
+    listWidget->setMaximumWidth(220);
     listWidget->setSpacing(2);
 
     pagesWidget = new QStackedWidget;
@@ -84,6 +86,7 @@ void Settings::createPages()
     createPage(tr("Storage"), StorageSettings::staticMetaObject);
     createPage(tr("Physicians"), PhysiciansSettings::staticMetaObject);
     createPage(tr("Studies"), StudiesSettings::staticMetaObject);
+    createPage(tr("Mandatory fields"), MandatoryFieldsSettings::staticMetaObject);
 
     // Sort pages using current locale
     //

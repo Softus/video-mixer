@@ -1,7 +1,8 @@
 #ifndef MANDATORYFIELDGROUP_H
 #define MANDATORYFIELDGROUP_H
 
-#include <qobject.h>
+#include <QObject>
+#include <QRgb>
 
 QT_BEGIN_NAMESPACE
 class QPushButton;
@@ -11,6 +12,7 @@ QT_END_NAMESPACE
 class MandatoryFieldGroup : public QObject
 {
     Q_OBJECT
+    QRgb mandatoryFieldColor;
     void setMandatory(QWidget* widget, bool mandatory);
 
 public:
