@@ -76,6 +76,7 @@ pkg/debian/usr/share/doc/beryllium/changelog.Debian -text
 pkg/debian/usr/share/doc/beryllium/copyright -text
 pkg/debian/usr/share/icons/beryllium.png -text
 pkg/debian/usr/share/man/man1/beryllium.1 -text
+pkg/rpm/beryllium.spec -text
 /product.h -text
 /qwaitcursor.h -text
 /settings.cpp -text

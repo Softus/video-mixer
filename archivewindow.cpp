@@ -66,7 +66,7 @@ static void DamnQtMadeMeDoTheSunsetByHands(QToolBar* bar)
 }
 
 ArchiveWindow::ArchiveWindow(QWidget *parent) :
-    QDialog(parent)
+    QWidget(parent)
 {
     auto layoutMain = new QVBoxLayout;
 

@@ -32,6 +32,7 @@ unix {
 
 dicom {
     QT        += network
+#   fedora:LIBS += -ldcmnet -ldcmdata -loflog -lofstd -lssl -lz
     unix:LIBS += -ldcmnet -lwrap -ldcmdata -loflog -lofstd -lssl -lz
     DEFINES   += WITH_DICOM
 

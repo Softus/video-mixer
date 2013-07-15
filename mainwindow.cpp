@@ -120,6 +120,7 @@ MainWindow::MainWindow(QWidget *parent) :
     running(false),
     recording(false)
 {
+    QSettings settings;
     updateWindowTitle();
 
     // This magic required for updating widgets from worker threads on windows
@@ -127,8 +128,11 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, SIGNAL(enableWidget(QWidget*, bool)), this, SLOT(onEnableWidget(QWidget*, bool)), Qt::QueuedConnection);
 
     auto layoutMain = new QVBoxLayout();
-    layoutMain->setMenuBar(createMenuBar());
     layoutMain->addWidget(createToolBar());
+    if (settings.value("enable-menu", false).toBool())
+    {
+        layoutMain->setMenuBar(createMenuBar());
+    }
 
     displayWidget = new QGst::Ui::VideoWidget();
     displayWidget->setMinimumSize(712, 576);
@@ -148,7 +152,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     setLayout(layoutMain);
 
-    QSettings settings;
     restoreGeometry(settings.value("mainwindow-geometry").toByteArray());
     setWindowState((Qt::WindowState)settings.value("mainwindow-state").toInt());
 
@@ -205,11 +208,15 @@ QMenuBar* MainWindow::createMenuBar()
     auto mnuBar = new QMenuBar();
     auto mnu    = new QMenu(tr("&Menu"));
 
-    actionAbout = mnu->addAction(QIcon(":/buttons/about"), tr("A&bout %1").arg(PRODUCT_FULL_NAME).append(0x2026), this, SLOT(onShowAboutClick()));
+    mnu->addAction(actionAbout);
     actionAbout->setMenuRole(QAction::AboutRole);
-    actionArchive = mnu->addAction(QIcon(":/buttons/database"), tr("&Archive"), this, SLOT(onShowArchiveClick()), Qt::Key_F2);
+
+    actionArchive->setShortcut(Qt::Key_F2);
+    mnu->addAction(actionArchive);
+
 #ifdef WITH_DICOM
-    actionWorklist = mnu->addAction(QIcon(":/buttons/show_worklist"), tr("&Worlkist"), this, SLOT(onShowWorkListClick()), Qt::Key_F3);
+    actionWorklist->setShortcut(Qt::Key_F3);
+    mnu->addAction(actionWorklist);
 #endif
     mnu->addSeparator();
     auto actionRtp = mnu->addAction(tr("&Enable RTP streaming"), this, SLOT(toggleSetting()));
@@ -220,8 +227,9 @@ QMenuBar* MainWindow::createMenuBar()
     actionFullVideo->setCheckable(true);
     actionFullVideo->setData("enable-video");
 
-    actionSettings = mnu->addAction(QIcon(":/buttons/settings"), tr("&Preferences").append(0x2026), this, SLOT(onShowSettingsClick()), Qt::Key_F9);
+    actionSettings->setShortcut(Qt::Key_F9);
     actionSettings->setMenuRole(QAction::PreferencesRole);
+    mnu->addAction(actionSettings);
     mnu->addSeparator();
     auto actionExit = mnu->addAction(tr("E&xit"), qApp, SLOT(quit()), Qt::ALT | Qt::Key_F4);
     actionExit->setMenuRole(QAction::QuitRole);
@@ -271,19 +279,17 @@ QToolBar* MainWindow::createToolBar()
     bar->addWidget(lblRecordAll);
 
 #ifdef WITH_DICOM
-//    QAction* actionWorklist = bar->addAction(QIcon(":/buttons/show_worklist"), tr("Worklist"), this, SLOT(onShowWorkListClick()));
-//    actionWorklist->setToolTip(tr("Show work list"));
-    bar->addAction(actionWorklist);
+    actionWorklist = bar->addAction(QIcon(":/buttons/show_worklist"), tr("&Worlkist"), this, SLOT(onShowWorkListClick()));
 #endif
 
-    // These actions are from the main menu
-    //
+    actionArchive = bar->addAction(QIcon(":/buttons/database"), tr("&Archive"), this, SLOT(onShowArchiveClick()));
     actionArchive->setToolTip(tr("Show studies archive"));
-    bar->addAction(actionArchive);
+
+    actionSettings = bar->addAction(QIcon(":/buttons/settings"), tr("&Preferences").append(0x2026), this, SLOT(onShowSettingsClick()));
     actionSettings->setToolTip(tr("Edit settings"));
-    bar->addAction(actionSettings);
+
+    actionAbout = bar->addAction(QIcon(":/buttons/about"), tr("A&bout %1").arg(PRODUCT_FULL_NAME).append(0x2026), this, SLOT(onShowAboutClick()));
     actionAbout->setToolTip(tr("About %1").arg(PRODUCT_FULL_NAME));
-    bar->addAction(actionAbout);
 
     return bar;
 }

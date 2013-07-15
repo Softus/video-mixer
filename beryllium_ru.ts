@@ -7,7 +7,7 @@
         <location filename="aboutdialog.cpp" line="27"/>
         <source>About %1</source>
         <oldsource>About </oldsource>
-        <translation>О %1</translation>
+        <translation>О программе %1</translation>
     </message>
     <message>
         <location filename="aboutdialog.cpp" line="45"/>
@@ -484,63 +484,63 @@ Continue?</source>
         <translation type="obsolete">О &amp;программе</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="210"/>
+        <location filename="mainwindow.cpp" line="285"/>
         <source>&amp;Archive</source>
         <translation>&amp;Архив</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="212"/>
+        <location filename="mainwindow.cpp" line="282"/>
         <source>&amp;Worlkist</source>
         <translation>&amp;Рабочий лист</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="223"/>
+        <location filename="mainwindow.cpp" line="288"/>
         <source>&amp;Preferences</source>
         <translation>&amp;Настройки</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="238"/>
+        <location filename="mainwindow.cpp" line="246"/>
         <source>Main</source>
         <oldsource>main</oldsource>
         <translation>Главная</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="251"/>
+        <location filename="mainwindow.cpp" line="259"/>
         <source>&amp;Take snapshot</source>
         <translation>Сделать &amp;снимок</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="281"/>
+        <location filename="mainwindow.cpp" line="286"/>
         <source>Show studies archive</source>
         <translation>Открыть архив исследований</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="283"/>
+        <location filename="mainwindow.cpp" line="289"/>
         <source>Edit settings</source>
         <translation>Открыть окно настроек</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="285"/>
+        <location filename="mainwindow.cpp" line="292"/>
         <source>About %1</source>
         <oldsource>About berillyum</oldsource>
-        <translation>О %1</translation>
+        <translation>О программе %1</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="666"/>
-        <location filename="mainwindow.cpp" line="671"/>
-        <location filename="mainwindow.cpp" line="676"/>
-        <location filename="mainwindow.cpp" line="681"/>
+        <location filename="mainwindow.cpp" line="672"/>
+        <location filename="mainwindow.cpp" line="677"/>
+        <location filename="mainwindow.cpp" line="682"/>
+        <location filename="mainwindow.cpp" line="687"/>
         <source> - </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="697"/>
+        <location filename="mainwindow.cpp" line="703"/>
         <source>Failed to create &apos;%1&apos;</source>
         <translation>Не удалось создать &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="908"/>
-        <location filename="mainwindow.cpp" line="1118"/>
+        <location filename="mainwindow.cpp" line="914"/>
+        <location filename="mainwindow.cpp" line="1124"/>
         <source>Failed to start recording.
 Check the error log for details.</source>
         <translation>Невозможно начать запись.
@@ -563,62 +563,62 @@ Continue?</source>
         <translation type="obsolete">Пациент не задан</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="935"/>
+        <location filename="mainwindow.cpp" line="941"/>
         <source>Send study results to the server?</source>
         <translation>Отправить результат на сервер?</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="935"/>
+        <location filename="mainwindow.cpp" line="941"/>
         <source>Continue the study</source>
         <translation>Продолжить</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="935"/>
+        <location filename="mainwindow.cpp" line="941"/>
         <source>Don&apos;t sent</source>
         <translation>Не отправлять</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="935"/>
+        <location filename="mainwindow.cpp" line="941"/>
         <source>Send</source>
         <translation>Отправить</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="948"/>
+        <location filename="mainwindow.cpp" line="954"/>
         <source>End the study?</source>
         <translation>Завершить исследование?</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1135"/>
+        <location filename="mainwindow.cpp" line="1141"/>
         <source>End &amp;study</source>
         <translation>Завершить &amp;исследование</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1135"/>
+        <location filename="mainwindow.cpp" line="1141"/>
         <source>Start &amp;study</source>
         <translation>Начать &amp;исследование</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1154"/>
+        <location filename="mainwindow.cpp" line="1160"/>
         <source>Paus&amp;e</source>
         <translation>П&amp;ауза</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1154"/>
+        <location filename="mainwindow.cpp" line="1160"/>
         <source>R&amp;ecord</source>
         <translation>З&amp;апись</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1162"/>
+        <location filename="mainwindow.cpp" line="1168"/>
         <source>on</source>
         <translation>вкл</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1162"/>
+        <location filename="mainwindow.cpp" line="1168"/>
         <source>off</source>
         <translation>выкл</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1166"/>
+        <location filename="mainwindow.cpp" line="1172"/>
         <source>Recording of entire study is %1</source>
         <translation>Запись всего исследования %1</translation>
     </message>
@@ -627,32 +627,32 @@ Continue?</source>
         <translation type="obsolete">Отправка &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="206"/>
+        <location filename="mainwindow.cpp" line="209"/>
         <source>&amp;Menu</source>
         <translation>&amp;Меню</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="208"/>
+        <location filename="mainwindow.cpp" line="291"/>
         <source>A&amp;bout %1</source>
         <translation>&amp;О %1</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="215"/>
+        <location filename="mainwindow.cpp" line="222"/>
         <source>&amp;Enable RTP streaming</source>
         <translation>Включить RTP &amp;поток</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="219"/>
+        <location filename="mainwindow.cpp" line="226"/>
         <source>&amp;Record entire study</source>
         <translation>Записывать исследование &amp;целиком</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="226"/>
+        <location filename="mainwindow.cpp" line="234"/>
         <source>E&amp;xit</source>
         <translation>В&amp;ыход</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="857"/>
+        <location filename="mainwindow.cpp" line="863"/>
         <source>Failed to load image %1</source>
         <translation>Не удалось загрузить снимок %1</translation>
     </message>

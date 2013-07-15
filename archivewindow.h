@@ -15,7 +15,7 @@ class QStackedWidget;
 class QToolBar;
 QT_END_NAMESPACE
 
-class ArchiveWindow : public QDialog
+class ArchiveWindow : public QWidget
 {
     Q_OBJECT
     QToolBar*              barPath;
