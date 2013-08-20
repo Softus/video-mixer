@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2013 Irkutsk Diagnostic Center.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; version 2.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "dicomdevicesettings.h"
 #include <QCheckBox>
 #include <QDebug>
@@ -12,7 +28,7 @@ DicomDeviceSettings::DicomDeviceSettings(QWidget *parent) :
     QWidget(parent)
 {
     QSettings settings;
-    QFormLayout* mainLayout = new QFormLayout;
+    auto mainLayout = new QFormLayout;
 
     auto localHost = QHostInfo::localHostName();
     auto textName = new QLineEdit(localHost);
@@ -29,8 +45,6 @@ DicomDeviceSettings::DicomDeviceSettings(QWidget *parent) :
             // Skip 127.x.x.x and IPv6 local subnet
             continue;
         }
-        int aa = addr.  toIPv4Address() ;
-        qDebug() << aa;
         if (!strIps.isEmpty())
         {
             strIps.append(", ");

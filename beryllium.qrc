@@ -14,7 +14,7 @@
         <file alias="refresh">pixmaps/refresh.png</file>
         <file alias="settings">pixmaps/settings.png</file>
         <file alias="start">pixmaps/start.png</file>
-        <file alias="film">pixmaps/film.png</file>
+    <file alias="film">pixmaps/film.png</file>
         <file alias="database">pixmaps/database.png</file>
         <file alias="gallery">pixmaps/gallery.png</file>
         <file alias="delete">pixmaps/delete.png</file>

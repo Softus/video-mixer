@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2013 Irkutsk Diagnostic Center.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; version 2.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "aboutdialog.h"
 #include "product.h"
 
@@ -7,7 +23,9 @@
 #include <QPushButton>
 #include <gst/gst.h>
 
-#define QT_GST_VERSION_STR "0.10.2.2" // No way out
+// No way to figure it out, so define it here
+//
+#define QT_GST_VERSION_STR "0.10.2.2"
 
 #if defined(UNICODE) || defined (_UNICODE)
 #include <MediaInfo/MediaInfo.h>
@@ -75,7 +93,7 @@ AboutDialog::AboutDialog(QWidget *parent) :
     layoutText->addSpacing(16);
 
     auto lblCopyright = new QLabel(tr("<p>Copyright (C) 2013 <a href=\"%1\">%2</a>. All rights reserved.</p>")
-                                   .arg(PRODUCT_SITE_URL, tr("Irkutsk Diagnostic Centre")/*ORGANIZATION_FULL_NAME*/));
+                                   .arg(PRODUCT_SITE_URL, tr("Irkutsk Diagnostic Center")/*ORGANIZATION_FULL_NAME*/));
     lblCopyright->setOpenExternalLinks(true);
     layoutText->addWidget(lblCopyright);
     layoutText->addSpacing(16);

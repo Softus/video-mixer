@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2013 Irkutsk Diagnostic Center.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; version 2.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef PRODUCT_H
 #define PRODUCT_H
 
@@ -9,7 +25,7 @@
 #define PRODUCT_VERSION         0x000300
 #define PRODUCT_VERSION_STR     "0.3"
 
-#define ORGANIZATION_FULL_NAME  "Irkutsk Diagnostic Centre"
+#define ORGANIZATION_FULL_NAME  "Irkutsk Diagnostic Center"
 #define ORGANIZATION_SHORT_NAME "irk-dc" // lowercase, no spaces
 
 #define SITE_UID_ROOT           "9.9.999.0.1" // TODO: request real one

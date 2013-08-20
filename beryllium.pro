@@ -1,8 +1,17 @@
-#-------------------------------------------------
+
+# Copyright (C) 2013 Irkutsk Diagnostic Center.
 #
-# Project beryllium
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation; version 2.
 #
-#-------------------------------------------------
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 QT       += core gui
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
@@ -49,7 +58,7 @@ dicom {
     worklist.cpp \
     worklistquerysettings.cpp
 
-    HEADERS += comboboxwithpopupsignal.h \
+    HEADERS += \
     dcmclient.h \
     dcmconverter.h \
     detailsdialog.h \
@@ -71,18 +80,21 @@ SOURCES += aboutdialog.cpp \
     archivewindow.cpp \
     beryllium.cpp \
     mainwindow.cpp \
+    mandatoryfieldgroup.cpp \
+    mandatoryfieldssettings.cpp \
     patientdialog.cpp \
     physicianssettings.cpp \
     settings.cpp \
     storagesettings.cpp \
     studiessettings.cpp \
-    videosettings.cpp \
-    mandatoryfieldgroup.cpp \
-    mandatoryfieldssettings.cpp
+    videosettings.cpp
 
 HEADERS += aboutdialog.h \
     archivewindow.h \
+    comboboxwithpopupsignal.h \
     mainwindow.h \
+    mandatoryfieldgroup.h \
+    mandatoryfieldssettings.h \
     patientdialog.h \
     physicianssettings.h \
     product.h \
@@ -90,9 +102,7 @@ HEADERS += aboutdialog.h \
     settings.h \
     storagesettings.h \
     studiessettings.h \
-    videosettings.h \
-    mandatoryfieldgroup.h \
-    mandatoryfieldssettings.h
+    videosettings.h
 
 FORMS   +=
 

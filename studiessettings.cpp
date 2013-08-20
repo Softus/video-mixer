@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2013 Irkutsk Diagnostic Center.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; version 2.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "studiessettings.h"
 #include <QBoxLayout>
 #include <QListWidget>
@@ -8,19 +24,18 @@ StudiesSettings::StudiesSettings(QWidget *parent) :
     QWidget(parent)
 {
     QSettings settings;
-    QLayout* mainLayout = new QHBoxLayout;
+    auto mainLayout = new QHBoxLayout;
     mainLayout->setContentsMargins(4,0,4,0);
     listStudies = new QListWidget;
     listStudies->addItems(settings.value("studies").toStringList());
     for (int i = 0; i < listStudies->count(); ++i)
     {
-        QListWidgetItem* item = listStudies->item(i);
-        item->setFlags(Qt::ItemIsEditable | Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+        listStudies->item(i)->setFlags(Qt::ItemIsEditable | Qt::ItemIsSelectable | Qt::ItemIsEnabled);
     }
 
     mainLayout->addWidget(listStudies);
-    QBoxLayout* buttonsLayout = new QVBoxLayout;
-    QPushButton* btnAdd = new QPushButton(tr("&Add"));
+    auto buttonsLayout = new QVBoxLayout;
+    auto btnAdd = new QPushButton(tr("&Add"));
     connect(btnAdd, SIGNAL(clicked()), this, SLOT(onAddClicked()));
     buttonsLayout->addWidget(btnAdd);
     btnEdit = new QPushButton(tr("&Edit"));
@@ -39,7 +54,7 @@ StudiesSettings::StudiesSettings(QWidget *parent) :
 
 void StudiesSettings::onAddClicked()
 {
-    QListWidgetItem* item = new QListWidgetItem(tr("(new study)"), listStudies);
+    auto item = new QListWidgetItem(tr("(new study)"), listStudies);
     item->setFlags(Qt::ItemIsEditable | Qt::ItemIsSelectable | Qt::ItemIsEnabled);
     listStudies->scrollToItem(item);
     listStudies->setCurrentItem(item, QItemSelectionModel::ClearAndSelect);
