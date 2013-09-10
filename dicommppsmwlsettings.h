@@ -17,7 +17,7 @@
 #ifndef DICOMMPPSMWLSETTINGS_H
 #define DICOMMPPSMWLSETTINGS_H
 
-#include <QComboBox>
+#include <QWidget>
 
 QT_BEGIN_NAMESPACE
 class QCheckBox;

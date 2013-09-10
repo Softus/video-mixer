@@ -16,6 +16,8 @@
 QT       += core gui
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
+DISTRO = $$system(cat /proc/version)
+
 # GCC tuning
 *-g++*:QMAKE_CXXFLAGS += -std=c++0x -Wno-multichar
 
@@ -41,7 +43,6 @@ unix {
 
 dicom {
     QT        += network
-#   fedora:LIBS += -ldcmnet -ldcmdata -loflog -lofstd -lssl -lz
     unix:LIBS += -ldcmnet -lwrap -ldcmdata -loflog -lofstd -lssl -lz
     DEFINES   += WITH_DICOM
 
