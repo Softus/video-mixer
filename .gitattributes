@@ -36,7 +36,6 @@ DEBIAN/control -text
 /dicomstoragesettings.h -text
 docs/changelog -text
 docs/copyright -text
-/fedora.patch -text
 /mainwindow.cpp -text
 /mainwindow.h -text
 /mandatoryfieldgroup.cpp -text
