@@ -11,11 +11,6 @@ Build-Depends: libboost-dev, libmediainfo-dev,
 Package: beryllium
 Architecture: i386 amd64
 Pre-Depends: debconf (>= 1.1) | debconf-2.0
-Depends: ${shlibs:Depends},
-  libc6 (>= 2.14), libgcc1 (>= 1:4.1.1), libstdc++6 (>= 4.1.1)
-  libgstreamer0.10-0 (>= 0.10.31), libmediainfo0 (>= 0.7.52),
-  libqtcore4 (>= 4:4.7.0~beta1), libqtgui4 (>= 4:4.5.3),
-  libqtglib-2.0-0 (>= 0.10.1), 
-  libqtgstreamer-0.10-0 (>= 0.10.1), libqtgstreamerui-0.10-0 (>= 0.10.1)
+Depends: ${shlibs:Depends}
 Description: Beryllium DICOM edition
   Video and image capturing for medicine.
