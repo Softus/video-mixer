@@ -8,7 +8,8 @@ for f in $(grep -l WITH_DICOM *.h *.cpp);
   do unifdef -o $f -UWITH_DICOM $f;
 done
 rm -fr dicom*
-touch dicom.pri
+sed -i '$d' beryllium.pro
+sed -i 's/beryllium/beryllium-free/g' docs/*
 
 distro=$(lsb_release -is)
 case $distro in

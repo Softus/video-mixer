@@ -95,4 +95,4 @@ unix {
 	INSTALLS += translations shortcut icon man
 }
 
-include (dicom/dicom.pri)
+include (dicom/dicom.pri) # Must be very last line of this file
