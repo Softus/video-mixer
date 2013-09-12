@@ -10,5 +10,8 @@
 /Makefile.*
 /Release
 /Win32
+/builddir
+debian/changelog
+debian/copyright
 /ipch
 /release

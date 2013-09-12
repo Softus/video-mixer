@@ -21,6 +21,9 @@
 /dcmclient.h -text
 /dcmconverter.cpp -text
 /dcmconverter.h -text
+debian/compat -text
+debian/control -text
+debian/rules -text
 /detailsdialog.cpp -text
 /detailsdialog.h -text
 /dicomdevicesettings.cpp -text

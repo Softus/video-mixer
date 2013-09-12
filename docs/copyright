@@ -1,16 +1,25 @@
-beryllium
+Format: http://dep.debian.net/deps/dep5
+Upstream-Name: beryllium
+Source: http://dc.baikal.ru/products/beryllium/packages
 
-Copyright (c) 2013 Beryllium team <beryllium@dc.baikal.ru>
+Files: *
+Copyright: 2013 Beryllium team <beryllium@dc.baikal.ru>
+License: LGPL-2.1+
 
-The home page of beryllium is at:
-http://dc.baikal.ru/products/beryllium/ 
+License: LGPL-2.1+
+    This package is free software; you can redistribute it and/or
+    modify it under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either
+    version 2.1 of the License, or (at your option) any later version.
 
-The entire code base may be distributed under the terms of the GNU General
-Public License (GPL), which appears immediately below.  Alternatively, all
-of the source code as any code derived from that code may instead be
-distributed under the GNU Lesser General Public License (LGPL), at the
-choice of the distributor. The complete text of the LGPL appears at the
-bottom of this file.
+    This package is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-See /usr/share/common-licenses/(GPL|LGPL)
+    You should have received a copy of the GNU Lesser General Public
+    License along with this package; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
+On Debian systems, the complete text of the GNU Lesser General
+Public License can be found in `/usr/share/common-licenses/LGPL'.

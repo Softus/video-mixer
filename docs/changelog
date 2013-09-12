@@ -1,6 +1,5 @@
-beryllium (0.3-5);
+beryllium (0.3.8) debian;
 
-    * First build
+  * First build
 
  -- Pavel Bludov <pbludov@gmail.com>  Fri, 26 Apr 2013 19:46:55 +0900
-
