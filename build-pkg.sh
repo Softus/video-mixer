@@ -15,7 +15,6 @@ if [ $dicom == 0 ]; then
   done
   rm -fr dicom*
   sed -i '$d' beryllium.pro
-  sed -i 's/beryllium/beryllium-free/g' docs/changelog debian/control
   sed -i 's/DICOM/free/g' debian/control
 fi
 
