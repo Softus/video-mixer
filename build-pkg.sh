@@ -15,14 +15,14 @@ if [ -z $dicom ]; then
   done
   rm -fr dicom*
   sed -i '$d' beryllium.pro
+  sed -i 's/beryllium/beryllium-free/g' docs/changelog debian/control
+  sed -i 's/DICOM/free/g' debian/control
 fi
 
 distro=$(lsb_release -is)
 case $distro in
 Ubuntu | Debian)  echo "Building DEB package"
     cp docs/* debian/
-    sed -i 's/beryllium/beryllium-free/g' docs/* debian/*
-    sed -i 's/DICOM/free/g' docs/* debian/control
     dpkg-buildpackage -I.svn -I*.sh -rfakeroot 
     ;;
 "openSUSE project" | fedora)  echo "Building RPM package"
