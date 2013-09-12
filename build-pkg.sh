@@ -4,20 +4,20 @@
 lrelease *.ts
 
 for arg in "$@"; do
-  if $arg == 'dicom'; then dicom=1; fi
+  if [ $arg == 'dicom']; then dicom=1; fi
 done
 
 # Remove non-free code
-if [ -z $dicom]; then  
+if [ -z $dicom]; then
+  echo FREE edition
   for f in $(grep -l WITH_DICOM *.h *.cpp)
     do unifdef -o $f -UWITH_DICOM $f
   done
   rm -fr dicom*
   sed -i '$d' beryllium.pro
-  sed -i 's/beryllium/beryllium-free/g' docs/* debian/* beryllium.spec
-  rpmarchive=beryllium-free.tar.gz
+  sed -i 's/beryllium/beryllium-free/g' docs/* debian/*
 else
-  rpmarchive=beryllium.tar.gz
+  echo dicom edition
 fi
 
 distro=$(lsb_release -is)
@@ -26,7 +26,7 @@ Ubuntu | Debian)  echo "Building DEB package"
     cp docs/* debian/ && dpkg-buildpackage -I.svn -I*.sh -rfakeroot 
     ;;
 "openSUSE project" | fedora)  echo "Building RPM package"
-    tar czf ../$rpmarchive ../beryllium --exclude=.svn --exclude=*.sh && rpmbuild -Ddicom=$dicom -ta ../$rpmarchive
+    tar czf ../$rpmarchive ../beryllium --exclude=.svn --exclude=*.sh && rpmbuild -D"dicom $dicom" -ta ../$rpmarchive
     ;;
 *) echo "$distro is not supported yet"
    ;;

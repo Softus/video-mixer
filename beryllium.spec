@@ -1,4 +1,4 @@
-%if %dicom
+%if %dicom == 1
 Summary: Beryllium DICOM edition.
 %else
 Summary: Beryllium free edition.
@@ -18,7 +18,7 @@ Requires: gstreamer-0_10-plugins-base >= 0.10.31, gstreamer-0_10-plugins-good >=
 Requires: libgstreamer-0_10-0 >= 0.10.31, libmediainfo0 >= 0.7.52, libqt4 >= 4.7.0, libQtGLib-2_0-0, libQtGStreamer-0_10-0, libstdc++6 >= 4.4.0
 
 %description
-%if %dicom
+%if %dicom == 1
 Beryllium DICOM edition.
 %else
 Beryllium free edition.
@@ -31,7 +31,7 @@ Video and image capturing for medicine.
 %setup -qn %{name}
  
 %build
-%if %dicom
+%if %dicom == 1
 qmake CONFIG+=dicom PREFIX=%{_prefix} QMAKE_CFLAGS+="%optflags" QMAKE_CXXFLAGS+="%optflags";
 %else
 qmake PREFIX=%{_prefix} QMAKE_CFLAGS+="%optflags" QMAKE_CXXFLAGS+="%optflags";
