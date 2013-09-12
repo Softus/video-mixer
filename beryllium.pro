@@ -13,6 +13,8 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+isEmpty(PREFIX):  PREFIX   = /usr/local
+
 QT       += core gui
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -109,3 +111,20 @@ FORMS   +=
 
 RESOURCES    += beryllium.qrc
 TRANSLATIONS += beryllium_ru.ts
+
+unix {
+    INSTALLS += target
+    target.path = $$PREFIX/bin
+
+	shortcut.files = beryllium.desktop
+	shortcut.path = $$PREFIX/share/applications
+	icon.files = pixmaps/beryllium.png
+	icon.path = $$PREFIX/share/icons
+	man.files = beryllium.1
+	man.path = $$PREFIX/share/man/man1
+	translations.files = beryllium_ru.qm
+	translations.path = $$PREFIX/share/beryllium/translations
+
+	INSTALLS += translations shortcut icon man
+}
+

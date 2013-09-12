@@ -29,6 +29,6 @@
         <file alias="dicom">pixmaps/dicom.png</file>
     </qresource>
     <qresource prefix="/app">
-        <file alias="product">pixmaps/product.png</file>
+        <file alias="product">pixmaps/beryllium.png</file>
     </qresource>
 </RCC>

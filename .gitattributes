@@ -1,16 +1,22 @@
 * text=auto !eol
+DEBIAN/control -text
+/HACKING -text
 /README -text
 /aboutdialog.cpp -text
 /aboutdialog.h -text
 /archivewindow.cpp -text
 /archivewindow.h -text
+/beryllium.1 -text
 /beryllium.cpp -text
+/beryllium.desktop -text
 /beryllium.pro -text
 /beryllium.qrc -text
 /beryllium.sln -text
+/beryllium.spec -text
 /beryllium.vcxproj -text
 /beryllium.vcxproj.filters -text
 /beryllium_ru.ts -text
+/build-pkg.sh -text
 /comboboxwithpopupsignal.h -text
 /dcmclient.cpp -text
 /dcmclient.h -text
@@ -28,6 +34,8 @@
 /dicomserversettings.h -text
 /dicomstoragesettings.cpp -text
 /dicomstoragesettings.h -text
+docs/changelog -text
+docs/copyright -text
 /fedora.patch -text
 /mainwindow.cpp -text
 /mainwindow.h -text
@@ -40,6 +48,7 @@
 /physicianssettings.cpp -text
 /physicianssettings.h -text
 pixmaps/about.png -text
+pixmaps/beryllium.png -text
 pixmaps/camera.png -text
 pixmaps/database.png -text
 pixmaps/delete.png -text
@@ -55,7 +64,6 @@ pixmaps/movie.png -text
 pixmaps/next.png -text
 pixmaps/pause.png -text
 pixmaps/prev.png -text
-pixmaps/product.png -text
 pixmaps/record.png -text
 pixmaps/record_off.png -text
 pixmaps/record_on.png -text
@@ -67,16 +75,6 @@ pixmaps/stop.png -text
 pixmaps/up.png -text
 pixmaps/user_add.png -text
 pixmaps/user_manage.png -text
-pkg/cookbook.txt -text
-pkg/debian/DEBIAN/control -text
-pkg/debian/usr/share/applications/beryllium.desktop -text
-pkg/debian/usr/share/beryllium/translations/beryllium_ru.qm -text
-pkg/debian/usr/share/doc/beryllium/changelog -text
-pkg/debian/usr/share/doc/beryllium/changelog.Debian -text
-pkg/debian/usr/share/doc/beryllium/copyright -text
-pkg/debian/usr/share/icons/beryllium.png -text
-pkg/debian/usr/share/man/man1/beryllium.1 -text
-pkg/rpm/beryllium.spec -text
 /product.h -text
 /qwaitcursor.h -text
 /settings.cpp -text

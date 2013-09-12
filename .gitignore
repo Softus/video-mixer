@@ -6,9 +6,9 @@
 /*.user
 /Debug
 /GeneratedFiles
+/Makefile
+/Makefile.*
 /Release
 /Win32
 /ipch
-pkg/beryllium.deb
-pkg/debian/usr/bin/beryllium
 /release

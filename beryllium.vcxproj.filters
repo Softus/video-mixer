@@ -46,12 +46,12 @@
       <ParseFiles>false</ParseFiles>
     </Filter>
     <Filter Include="Generated Files\Debug">
-      <UniqueIdentifier>{33fd1bff-83ef-4a3c-b86a-f6031696ab2a}</UniqueIdentifier>
+      <UniqueIdentifier>{9e80c40d-3d0c-4717-b9a5-b4e87d9baf5f}</UniqueIdentifier>
       <Extensions>cpp;moc</Extensions>
       <SourceControlFiles>False</SourceControlFiles>
     </Filter>
     <Filter Include="Generated Files\Release">
-      <UniqueIdentifier>{c1deecae-efad-4ce8-8780-380f1bb295ba}</UniqueIdentifier>
+      <UniqueIdentifier>{bc73e3b2-5aff-48f6-809b-f414c4a0246a}</UniqueIdentifier>
       <Extensions>cpp;moc</Extensions>
       <SourceControlFiles>False</SourceControlFiles>
     </Filter>
@@ -66,28 +66,19 @@
     <ClCompile Include="beryllium.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="dcmclient.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="detailsdialog.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="dicomdevicesettings.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="dicomserverdetails.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="dicomserversettings.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="dicomstoragesettings.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="mainwindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="mandatoryfieldgroup.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mandatoryfieldssettings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="patientdialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="physicianssettings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="settings.cpp">
@@ -100,15 +91,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="videosettings.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="worklist.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="worklistcolumnsettings.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="worklistquerysettings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_aboutdialog.cpp">
@@ -129,52 +111,34 @@
     <ClCompile Include="Release\moc_comboboxwithpopupsignal.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Debug\moc_dcmclient.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_dcmclient.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_detailsdialog.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_detailsdialog.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_dicomdevicesettings.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_dicomdevicesettings.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_dicomserverdetails.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_dicomserverdetails.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_dicomserversettings.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_dicomserversettings.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_dicomstoragesettings.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_dicomstoragesettings.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Debug\moc_mainwindow.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_mainwindow.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="Debug\moc_mandatoryfieldgroup.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_mandatoryfieldgroup.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_mandatoryfieldssettings.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_mandatoryfieldssettings.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
     <ClCompile Include="Debug\moc_patientdialog.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_patientdialog.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_physicianssettings.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_physicianssettings.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_settings.cpp">
@@ -201,50 +165,8 @@
     <ClCompile Include="Release\moc_videosettings.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Debug\moc_worklist.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_worklist.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_worklistcolumnsettings.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_worklistcolumnsettings.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_worklistquerysettings.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_worklistquerysettings.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\qrc_beryllium.cpp">
       <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_dicommppsmwlsettings.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_dicommppsmwlsettings.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_physicianssettings.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_physicianssettings.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="transcyrillic.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="physicianssettings.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="dicommppsmwlsettings.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="dcmconverter.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -257,28 +179,19 @@
     <CustomBuild Include="comboboxwithpopupsignal.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="dcmclient.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="detailsdialog.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="dicomdevicesettings.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="dicomserverdetails.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="dicomserversettings.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="dicomstoragesettings.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="mainwindow.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="mandatoryfieldgroup.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="mandatoryfieldssettings.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
     <CustomBuild Include="patientdialog.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="physicianssettings.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <ClInclude Include="product.h">
@@ -299,21 +212,6 @@
     <CustomBuild Include="videosettings.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="worklist.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="worklistcolumnsettings.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="worklistquerysettings.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="dicommppsmwlsettings.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="physicianssettings.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <None Include="beryllium_ru.ts">
@@ -322,6 +220,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="pixmaps\about.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="pixmaps\beryllium.png">
       <Filter>Resource Files</Filter>
     </None>
     <CustomBuild Include="beryllium.qrc">
@@ -337,6 +238,9 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="pixmaps\details.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="pixmaps\dicom.png">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="pixmaps\film.png">
@@ -357,6 +261,9 @@
     <None Include="pixmaps\list.png">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="pixmaps\movie.png">
+      <Filter>Resource Files</Filter>
+    </None>
     <None Include="pixmaps\next.png">
       <Filter>Resource Files</Filter>
     </None>
@@ -364,9 +271,6 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="pixmaps\prev.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="pixmaps\product.png">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="pixmaps\record.png">
@@ -402,13 +306,5 @@
     <None Include="pixmaps\user_manage.png">
       <Filter>Resource Files</Filter>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="transcyrillic.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="dcmconverter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>
