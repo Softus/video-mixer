@@ -7,7 +7,7 @@ Name: beryllium
 Provides: beryllium
 Version: 0.3.8
 Release: 1
-License: LGPL
+License: LGPL-2.1+
 Source: %{name}.tar.gz
 #Source: %{name}-%{version}.tar.bz2
 URL: http://dc.baikal.ru/products/beryllium
@@ -16,6 +16,10 @@ Packager: Beryllium team <beryllium@dc.baikal.ru>
 
 Requires: gstreamer-0_10-plugins-base >= 0.10.31, gstreamer-0_10-plugins-good >= 0.10.31, gstreamer-0_10-plugins-bad >= 0.10.23, gstreamer-0_10-plugins-ugly >= 0.10.19
 Requires: libgstreamer-0_10-0 >= 0.10.31, libmediainfo0 >= 0.7.52, libqt4 >= 4.7.0, libQtGLib-2_0-0, libQtGStreamer-0_10-0, libstdc++6 >= 4.4.0
+%if %dicom == 1
+Requires: dcmtk
+BuildRequires: dcmtk-devel
+%endif
 
 %description
 %if %dicom == 1
@@ -31,11 +35,7 @@ Video and image capturing for medicine.
 %setup -qn %{name}
  
 %build
-%if %dicom == 1
 qmake CONFIG+=dicom PREFIX=%{_prefix} QMAKE_CFLAGS+="%optflags" QMAKE_CXXFLAGS+="%optflags";
-%else
-qmake PREFIX=%{_prefix} QMAKE_CFLAGS+="%optflags" QMAKE_CXXFLAGS+="%optflags";
-%endif
 make %{?_smp_mflags};
 
 %install

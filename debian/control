@@ -1,11 +1,12 @@
 Source: beryllium
 Section: contrib/misc
 Priority: optional
-Maintainer: beryllium team <beryllium@dc.baikal.ru>
+Maintainer: Beryllium team <beryllium@dc.baikal.ru>
 Standards-Version: 3.2.1
-Build-Depends: libboost-dev, libmediainfo-dev, libdcmtk2-dev, libssl-dev, libwrap0-dev,
+Build-Depends: libboost-dev, libmediainfo-dev,
   libgstreamer0.10-dev, libgstreamer-plugins-base0.10-dev,
-  libqt5opengl5-dev | libqt4-opengl-dev
+  libqt5opengl5-dev | libqt4-opengl-dev,
+  libdcmtk2-dev, libssl-dev, libwrap0-dev
 
 Package: beryllium
 Architecture: i386 amd64
