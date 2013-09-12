@@ -9,7 +9,7 @@ for arg in "$@"; do
 done
 
 # Remove non-free code
-if [ -z $dicom ]; then
+if [ $dicom != 0 ]; then
   for f in $(grep -l WITH_DICOM *.h *.cpp)
     do unifdef -o $f -UWITH_DICOM $f
   done
