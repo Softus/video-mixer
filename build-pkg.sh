@@ -15,6 +15,9 @@ if [ -z $dicom]; then
   rm -fr dicom*
   sed -i '$d' beryllium.pro
   sed -i 's/beryllium/beryllium-free/g' docs/* debian/* beryllium.spec
+  rpmarchive=beryllium-free.tar.gz
+else
+  rpmarchive=beryllium.tar.gz
 fi
 
 distro=$(lsb_release -is)
@@ -23,7 +26,7 @@ Ubuntu | Debian)  echo "Building DEB package"
     cp docs/* debian/ && dpkg-buildpackage -I.svn -I*.sh -rfakeroot 
     ;;
 "openSUSE project" | fedora)  echo "Building RPM package"
-    tar czf ../beryllium.tar.gz ../beryllium --exclude=.svn --exclude=*.sh && rpmbuild -Ddicom=$dicom -ta ../beryllium.tar.gz
+    tar czf ../$rpmarchive ../beryllium --exclude=.svn --exclude=*.sh && rpmbuild -Ddicom=$dicom -ta ../$rpmarchive
     ;;
 *) echo "$distro is not supported yet"
    ;;
