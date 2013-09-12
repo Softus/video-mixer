@@ -23,12 +23,12 @@
 #include "videosettings.h"
 
 #ifdef WITH_DICOM
-#include "dicomdevicesettings.h"
-#include "dicomserversettings.h"
-#include "dicommppsmwlsettings.h"
-#include "dicomstoragesettings.h"
-#include "worklistcolumnsettings.h"
-#include "worklistquerysettings.h"
+#include "dicom/dicomdevicesettings.h"
+#include "dicom/dicomserversettings.h"
+#include "dicom/dicommppsmwlsettings.h"
+#include "dicom/dicomstoragesettings.h"
+#include "dicom/worklistcolumnsettings.h"
+#include "dicom/worklistquerysettings.h"
 #endif
 
 #include <QListWidget>

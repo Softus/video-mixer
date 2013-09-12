@@ -133,12 +133,10 @@ signals:
 private slots:
 #ifdef WITH_DICOM
     void onShowWorkListClick();
+    void onStartStudy(DcmDataset* patient = nullptr);
+#else
+    void onStartStudy();
 #endif
-    void onStartStudy(
-        #ifdef WITH_DICOM
-            DcmDataset* patient = nullptr
-        #endif
-            );
     void onShowAboutClick();
     void onShowArchiveClick();
     void onShowSettingsClick();

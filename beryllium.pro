@@ -43,39 +43,6 @@ unix {
     LIBS += -lmediainfo -lzen
 }
 
-dicom {
-    QT        += network
-    unix:LIBS += -ldcmnet -lwrap -ldcmdata -loflog -lofstd -lssl -lz
-    DEFINES   += WITH_DICOM
-
-    SOURCES   += dcmclient.cpp \
-    dcmconverter.cpp \
-    detailsdialog.cpp \
-    dicomdevicesettings.cpp \
-    dicommppsmwlsettings.cpp \
-    dicomserverdetails.cpp \
-    dicomserversettings.cpp \
-    dicomstoragesettings.cpp \
-    transcyrillic.cpp \
-    worklistcolumnsettings.cpp \
-    worklist.cpp \
-    worklistquerysettings.cpp
-
-    HEADERS += \
-    dcmclient.h \
-    dcmconverter.h \
-    detailsdialog.h \
-    dicomdevicesettings.h \
-    dicommppsmwlsettings.h \
-    dicomserverdetails.h \
-    dicomserversettings.h \
-    dicomstoragesettings.h \
-    transcyrillic.h \
-    worklistcolumnsettings.h \
-    worklist.h \
-    worklistquerysettings.h
-}
-
 TARGET   = beryllium
 TEMPLATE = app
 
@@ -128,3 +95,4 @@ unix {
 	INSTALLS += translations shortcut icon man
 }
 
+include (dicom/dicom.pri)

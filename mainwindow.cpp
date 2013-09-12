@@ -24,9 +24,9 @@
 #include "patientdialog.h"
 
 #ifdef WITH_DICOM
-#include "worklist.h"
-#include "dcmclient.h"
-#include "transcyrillic.h"
+#include "dicom/worklist.h"
+#include "dicom/dcmclient.h"
+#include "dicom/transcyrillic.h"
 #include <dcmtk/dcmdata/dcdatset.h>
 #include <dcmtk/dcmdata/dcuid.h>
 #include <dcmtk/dcmdata/dcdeftag.h>
@@ -1161,7 +1161,6 @@ void MainWindow::updateStartButton()
     btnRecord->setEnabled(running);
     btnSnapshot->setEnabled(running);
     actionSettings->setEnabled(!running);
-    //displayWidget->setVisible(running && displaySink);
 #ifdef WITH_DICOM
     if (worklist)
     {
@@ -1201,7 +1200,6 @@ void MainWindow::prepareSettingsMenu()
         {
             action->setChecked(settings.value(propName).toBool());
             action->setDisabled(running);
-            continue;
         }
     }
 }
@@ -1242,9 +1240,9 @@ void MainWindow::onShowSettingsClick()
     {
         updatePipeline();
 
+#ifdef WITH_DICOM
         // Recreate worklist just in case the columns/servers were changed
         //
-#ifdef WITH_DICOM
         delete worklist;
         worklist = nullptr;
 #endif
@@ -1256,11 +1254,11 @@ void MainWindow::onEnableWidget(QWidget* widget, bool enable)
     widget->setEnabled(enable);
 }
 
-void MainWindow::onStartStudy(
 #ifdef WITH_DICOM
-        DcmDataset* patient
+void MainWindow::onStartStudy(DcmDataset* patient)
+#else
+void MainWindow::onStartStudy()
 #endif
-        )
 {
     // Switch focus to the main window
     //

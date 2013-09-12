@@ -3,17 +3,21 @@
 # Localizations
 lrelease *.ts
 
+# Remove non-free code
+for f in $(grep -l WITH_DICOM *.h *.cpp);
+  do unifdef -o $f -UWITH_DICOM $f;
+done
+rm -fr dicom*
+touch dicom.pri
+
 distro=$(lsb_release -is)
 case $distro in
 Ubuntu | Debian)  echo "Building DEB package"
-    cp docs/* debian/
-    dpkg-buildpackage -I.svn -rfakeroot 
+    cp docs/* debian/ && dpkg-buildpackage -I.svn -I*.sh -rfakeroot 
     ;;
 "openSUSE project" | fedora)  echo "Building RPM package"
-    cd .. && tar czf beryllium.tar.gz beryllium --exclude=.svn && rpmbuild -ta beryllium.tar.gz
+    tar czf beryllium.tar.gz ../beryllium --exclude=.svn --exclude=*.sh && rpmbuild -ta beryllium.tar.gz
     ;;
 *) echo "$distro is not supported yet"
    ;;
 esac
-
-

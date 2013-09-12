@@ -18,7 +18,7 @@
 #include "qwaitcursor.h"
 
 #ifdef WITH_DICOM
-#include "dcmclient.h"
+#include "dicom/dcmclient.h"
 #include <dcmtk/dcmdata/dcdatset.h>
 #include <dcmtk/dcmdata/dcuid.h>
 #endif
