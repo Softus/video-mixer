@@ -8,7 +8,7 @@ for arg in "$@"; do
 done
 
 # Remove non-free code
-if ! $dicom; then  
+if [ -z $dicom]; then  
   for f in $(grep -l WITH_DICOM *.h *.cpp)
     do unifdef -o $f -UWITH_DICOM $f
   done
@@ -23,7 +23,7 @@ Ubuntu | Debian)  echo "Building DEB package"
     cp docs/* debian/ && dpkg-buildpackage -I.svn -I*.sh -rfakeroot 
     ;;
 "openSUSE project" | fedora)  echo "Building RPM package"
-    tar czf beryllium.tar.gz ../beryllium --exclude=.svn --exclude=*.sh && ../rpmbuild -Ddicom=$dicom -ta ../beryllium.tar.gz
+    tar czf ../beryllium.tar.gz ../beryllium --exclude=.svn --exclude=*.sh && rpmbuild -Ddicom=$dicom -ta ../beryllium.tar.gz
     ;;
 *) echo "$distro is not supported yet"
    ;;
