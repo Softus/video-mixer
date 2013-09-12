@@ -10,7 +10,7 @@ Ubuntu | Debian)  echo "Building DEB package"
     dpkg-buildpackage -I.svn -rfakeroot 
     ;;
 "openSUSE project" | fedora)  echo "Building RPM package"
-    cd .. && tar -X.svn czf beryllium.tar.gz beryllium --exclude=.svn && rpmbuild -ta beryllium.tar.gz
+    cd .. && tar czf beryllium.tar.gz beryllium --exclude=.svn && rpmbuild -ta beryllium.tar.gz
     ;;
 *) echo "$distro is not supported yet"
    ;;
