@@ -17,6 +17,5 @@ Depends: ${shlibs:Depends},
   libqtcore4 (>= 4:4.7.0~beta1), libqtgui4 (>= 4:4.5.3),
   libqtglib-2.0-0 (>= 0.10.1), 
   libqtgstreamer-0.10-0 (>= 0.10.1), libqtgstreamerui-0.10-0 (>= 0.10.1)
-
 Description: Beryllium DICOM edition
   Video and image capturing for medicine.
