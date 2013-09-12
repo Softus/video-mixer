@@ -3,6 +3,7 @@
 # Localizations
 lrelease *.ts
 
+dicom=0
 for arg in "$@"; do
   if [ $arg == 'dicom' ]; then dicom=1; fi
 done
