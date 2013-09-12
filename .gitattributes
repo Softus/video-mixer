@@ -1,5 +1,4 @@
 * text=auto !eol
-DEBIAN/control -text
 /HACKING -text
 /README -text
 /aboutdialog.cpp -text
