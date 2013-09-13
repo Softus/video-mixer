@@ -10,6 +10,7 @@
 /Makefile.*
 /Release
 /Win32
+/beryllium.log
 /builddir
 debian/changelog
 debian/copyright

@@ -41,13 +41,16 @@ int main(int argc, char *argv[])
     QGst::init(&argc, &argv);
 
 #ifdef WITH_DICOM
+    // Pass some arguments to dcmtk.
+    // For example --log-level trace
+    // or --log-config log.cfg
+    // See http://support.dcmtk.org/docs-dcmrt/file_filelog.html for details
+    //
     OFConsoleApplication dcmtkApp(PRODUCT_SHORT_NAME);
     OFCommandLine cmd;
     OFLog::addOptions(cmd);
-    if (dcmtkApp.parseCommandLine(cmd, argc, argv))
-    {
-        OFLog::configureFromCommandLine(cmd, dcmtkApp);
-    }
+    dcmtkApp.parseCommandLine(cmd, argc, argv);
+    OFLog::configureFromCommandLine(cmd, dcmtkApp);
 #endif
 
     // QT init
@@ -63,10 +66,6 @@ int main(int argc, char *argv[])
     //
     QSettings settings;
 
-    // Override some style sheets
-    //
-//    app.setStyleSheet(settings.value("css", "*[mandatoryField=\"true\"] { background-color: pink }").toString());
-
     // Translations
     //
     QTranslator  translator;
@@ -80,7 +79,7 @@ int main(int argc, char *argv[])
     // If failed, then try to load from app data path
     //
     if (translator.load(app.applicationDirPath() + "/" PRODUCT_SHORT_NAME "_" + locale) ||
-            translator.load("/usr/share/" PRODUCT_SHORT_NAME "/translations/" PRODUCT_SHORT_NAME "_" + locale))
+        translator.load(app.applicationDirPath() + "../share/" PRODUCT_SHORT_NAME "/translations/" PRODUCT_SHORT_NAME "_" + locale))
     {
         app.installTranslator(&translator);
     }

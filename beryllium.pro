@@ -13,6 +13,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 isEmpty(PREFIX):  PREFIX   = /usr/local
+DEFINES   += PREFIX=$$PREFIX
 
 QT       += core gui
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets

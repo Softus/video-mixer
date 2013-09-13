@@ -47,6 +47,7 @@ dicom/worklistquerysettings.cpp -text
 dicom/worklistquerysettings.h -text
 docs/changelog -text
 docs/copyright -text
+/log.cfg -text
 /mainwindow.cpp -text
 /mainwindow.h -text
 /mandatoryfieldgroup.cpp -text
