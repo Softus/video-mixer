@@ -28,11 +28,13 @@ if [ $dicom == 0 ]; then
   # Beryllium DICOM edition => Beryllium free edition
   sed -i 's/DICOM/free/g' debian/control beryllium.spec
 else
-  sed -i 'a CONFIG+=dicom' beryllium.pro
+  sed -i '1 i CONFIG+=dicom 
+  ' beryllium.pro
 fi
 
 if [ $debug == 1 ]; then
-  sed -i 'a CONFIG+=debug' beryllium.pro
+  sed -i '1 i CONFIG+=debug
+  ' beryllium.pro
 fi
 
 distro=$(lsb_release -is)
