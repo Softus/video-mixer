@@ -19,8 +19,14 @@
 #include <QLocale>
 #include <QSettings>
 #include <QTranslator>
-
 #include <QGst/Init>
+
+#ifdef WITH_DICOM
+#define HAVE_CONFIG_H
+#include <dcmtk/config/osconfig.h>   /* make sure OS specific configuration is included first */
+#include <dcmtk/ofstd/ofconapp.h>
+#include <dcmtk/oflog/oflog.h>
+#endif
 
 #include "mainwindow.h"
 #include "product.h"
@@ -33,6 +39,16 @@ int main(int argc, char *argv[])
     // For example --gst-debug-level=5
     //
     QGst::init(&argc, &argv);
+
+#ifdef WITH_DICOM
+    OFConsoleApplication dcmtkApp(PRODUCT_SHORT_NAME);
+    OFCommandLine cmd;
+    OFLog::addOptions(cmd);
+    if (dcmtkApp.parseCommandLine(cmd, argc, argv))
+    {
+        OFLog::configureFromCommandLine(cmd, dcmtkApp);
+    }
+#endif
 
     // QT init
     //

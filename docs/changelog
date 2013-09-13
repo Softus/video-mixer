@@ -1,3 +1,9 @@
+beryllium (0.3.9) debian;
+
+  * DICOM debug command line switches
+
+ -- Pavel Bludov <pbludov@gmail.com>  Fri, 13 Sep 2013 14:40:57 +0900
+
 beryllium (0.3.8) debian;
 
   * First build

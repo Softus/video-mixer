@@ -4,18 +4,35 @@
 lrelease *.ts
 
 dicom=0
+debug=0
 for arg in "$@"; do
-  if [ $arg == 'dicom' ]; then dicom=1; fi
+  case $arg in
+  'dicom')
+    dicom=1
+     ;;
+  'debug')
+    debug=1
+     ;;
+  *) echo "Unknown argument $arg"
+     ;;
+  esac
 done
 
-# Remove non-free code
 if [ $dicom == 0 ]; then
+  # Remove all non-free code
   for f in $(grep -l WITH_DICOM *.h *.cpp)
     do unifdef -o $f -UWITH_DICOM $f
   done
   rm -fr dicom*
   sed -i '$d' beryllium.pro
-  sed -i 's/DICOM/free/g' debian/control
+  # Beryllium DICOM edition => Beryllium free edition
+  sed -i 's/DICOM/free/g' debian/control beryllium.spec
+else
+  sed -i 'a CONFIG+=dicom' beryllium.pro
+fi
+
+if [ $debug == 1 ]; then
+  sed -i 'a CONFIG+=debug' beryllium.pro
 fi
 
 distro=$(lsb_release -is)
@@ -25,7 +42,7 @@ Ubuntu | Debian)  echo "Building DEB package"
     dpkg-buildpackage -I.svn -I*.sh -rfakeroot 
     ;;
 "openSUSE project" | fedora)  echo "Building RPM package"
-    tar czf ../beryllium.tar.gz ../beryllium --exclude=.svn --exclude=*.sh && rpmbuild -D"dicom $dicom" -ta ../beryllium.tar.gz
+    tar czf ../beryllium.tar.gz ../beryllium --exclude=.svn --exclude=*.sh && rpmbuild -D"dicom $dicom" -D"debug $debug" -ta ../beryllium.tar.gz
     ;;
 *) echo "$distro is not supported yet"
    ;;

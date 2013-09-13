@@ -1,11 +1,7 @@
-%if %dicom == 1
 Summary: Beryllium DICOM edition.
-%else
-Summary: Beryllium free edition.
-%endif
 Name: beryllium
 Provides: beryllium
-Version: 0.3.8
+Version: 0.3.9
 Release: 1
 License: LGPL-2.1+
 Source: %{name}.tar.gz
@@ -22,11 +18,7 @@ BuildRequires: dcmtk-devel
 %endif
 
 %description
-%if %dicom == 1
 Beryllium DICOM edition.
-%else
-Beryllium free edition.
-%endif
 
 
 Video and image capturing for medicine.
@@ -35,7 +27,7 @@ Video and image capturing for medicine.
 %setup -qn %{name}
  
 %build
-qmake CONFIG+=dicom PREFIX=%{_prefix} QMAKE_CFLAGS+="%optflags" QMAKE_CXXFLAGS+="%optflags";
+qmake PREFIX=%{_prefix} QMAKE_CFLAGS+="%optflags" QMAKE_CXXFLAGS+="%optflags";
 make %{?_smp_mflags};
 
 %install
