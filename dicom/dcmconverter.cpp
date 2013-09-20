@@ -93,10 +93,6 @@ public:
             return makeOFCondition(0, 3, OF_error, "Unsupported format");
         }
 
-        cond = dset->putAndInsertString(DCM_SOPClassUID, UID_SecondaryCaptureImageStorage);
-        if (cond.bad())
-          return cond;
-
         cond = dset->putAndInsertUint16(DCM_Rows, getUint16(__T("Height")));
         if (cond.bad())
           return cond;
@@ -168,6 +164,10 @@ public:
 
         if (type == MediaInfoLib::Stream_Image)
         {
+            cond = dset->putAndInsertString(DCM_SOPClassUID, UID_SecondaryCaptureImageStorage);
+            if (cond.bad())
+              return cond;
+
             if (getStr(__T("Compression_Mode")) == "Lossy")
             {
                 cond = dset->putAndInsertOFStringArray(DCM_LossyImageCompression, "01");
@@ -194,6 +194,10 @@ public:
         }
         else
         {
+            cond = dset->putAndInsertString(DCM_SOPClassUID, UID_VideoEndoscopicImageStorage);
+            if (cond.bad())
+              return cond;
+
             auto frameRate = getStr(__T("FrameRate")).toDouble();
 
             cond = dset->putAndInsertString(DCM_CineRate, QString::number((Uint16)(frameRate + 0.5)).toUtf8());

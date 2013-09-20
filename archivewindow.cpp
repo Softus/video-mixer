@@ -581,7 +581,7 @@ void ArchiveWindow::onStoreClick()
             files << QFileInfo(curr, item->text());
         }
 
-        DcmClient client(UID_SecondaryCaptureImageStorage);
+        DcmClient client(UID_SecondaryCaptureImageStorage); // UID_VideoEndoscopicImageStorage UID_RawDataStorage
         char seriesUID[100] = {0};
         dcmGenerateUniqueIdentifier(seriesUID, SITE_SERIES_UID_ROOT);
         client.sendToServer(this, &patientDs, files, seriesUID);
@@ -808,8 +808,12 @@ void ArchiveWindow::onStateChangedMessage(const QGst::StateChangedMessagePtr& me
                 auto pad = sink->getStaticPad("sink");
                 if (pad)
                 {
-                    auto s = pad->negotiatedCaps()->internalStructure(0);
-                    gst_structure_get_fraction (s.data()->operator const GstStructure *(), "framerate", &numerator, &denominator);
+                    auto caps = pad->negotiatedCaps();
+                    if (caps)
+                    {
+                        auto s = caps->internalStructure(0);
+                        gst_structure_get_fraction (s.data()->operator const GstStructure *(), "framerate", &numerator, &denominator);
+                    }
                 }
             }
 

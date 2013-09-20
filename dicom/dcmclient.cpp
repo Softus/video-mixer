@@ -122,7 +122,11 @@ static void BuildCStoreDataSet(/*const*/ DcmDataset& patientDs, DcmDataset& cSto
     auto now = QDateTime::currentDateTime();
     auto modality = QSettings().value("modality").toString().toUpper();
 
-    patientDs.findAndInsertCopyOfElement(DCM_SpecificCharacterSet, &cStoreDs);
+    if (patientDs.findAndInsertCopyOfElement(DCM_SpecificCharacterSet, &cStoreDs).bad())
+    {
+        cStoreDs.putAndInsertString(DCM_SpecificCharacterSet, "ISO_IR 192"); // UTF-8
+    }
+
     CopyPatientData(&patientDs, &cStoreDs);
 
     patientDs.findAndInsertCopyOfElement(DCM_StudyInstanceUID, &cStoreDs);
@@ -573,6 +577,17 @@ bool DcmClient::cStoreRQ(DcmDataset* dset, const char* sopInstance)
       nullptr, dset, StoreUserCallback, this,
       0 == tout? DIMSE_BLOCKING: DIMSE_NONBLOCKING, tout,
       &rsp, &statusDetail);
+
+    if (rsp.DimseStatus)
+    {
+        OFString err;
+        if (!statusDetail || statusDetail->findAndGetOFString(DCM_ErrorComment, err).bad() || err.length() == 0)
+        {
+            err.assign(QString::number(rsp.DimseStatus).toUtf8());
+        }
+
+        cond = makeOFCondition(0, rsp.DimseStatus, OF_error, err.c_str());
+    }
 
     delete statusDetail;
     return cond.good();

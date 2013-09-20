@@ -465,7 +465,6 @@ QGst::PipelinePtr MainWindow::createPipeline()
 {
     qCritical() << pipelineDef;
 
-    QSettings settings;
     QGst::PipelinePtr pl;
 
     // Default values for all profiles
@@ -492,8 +491,11 @@ QGst::PipelinePtr MainWindow::createPipeline()
             qCritical() << "Element displaysink not found";
         }
 
-        QGlib::connect(pl->getElementByName("clipinspect"),  "handoff", this, &MainWindow::onClipFrame);
-        QGlib::connect(pl->getElementByName("videoinspect"), "handoff", this, &MainWindow::onVideoFrame);
+        auto clipValve = pl->getElementByName("clipinspect");
+        clipValve && QGlib::connect(clipValve, "handoff", this, &MainWindow::onClipFrame);
+
+        auto videoValve = pl->getElementByName("videoinspect");
+        videoValve && QGlib::connect(videoValve, "handoff", this, &MainWindow::onVideoFrame);
 
         videoEncoderValve  = pl->getElementByName("encvalve");
         if (!videoEncoderValve)
@@ -502,14 +504,7 @@ QGst::PipelinePtr MainWindow::createPipeline()
         }
 
         imageValve = pl->getElementByName("imagevalve");
-        if (!imageValve)
-        {
-            qCritical() << "Element imagevalve not found";
-        }
-        else
-        {
-            QGlib::connect(imageValve, "handoff", this, &MainWindow::onImageReady);
-        }
+        imageValve && QGlib::connect(imageValve, "handoff", this, &MainWindow::onImageReady);
 
         imageSink  = pl->getElementByName("imagesink");
         if (!imageSink)
@@ -613,24 +608,24 @@ QString MainWindow::replace(QString str, int seqNo)
     auto ts = QDateTime::currentDateTime();
 
     return str
-        .replace("%name%", patientName, Qt::CaseInsensitive)
-        .replace("%id%", patientId, Qt::CaseInsensitive)
-        .replace("%physician%", physician, Qt::CaseInsensitive)
-        .replace("%study%", studyName, Qt::CaseInsensitive)
-        .replace("%yyyy%", ts.toString("yyyy"), Qt::CaseInsensitive)
-        .replace("%yy%", ts.toString("yy"), Qt::CaseInsensitive)
-        .replace("%mm%", ts.toString("MM"), Qt::CaseInsensitive)
-        .replace("%mmm%", ts.toString("MMM"), Qt::CaseInsensitive)
-        .replace("%mmmm%", ts.toString("MMMM"), Qt::CaseInsensitive)
-        .replace("%dd%", ts.toString("dd"), Qt::CaseInsensitive)
-        .replace("%ddd%", ts.toString("ddd"), Qt::CaseInsensitive)
-        .replace("%dddd%", ts.toString("dddd"), Qt::CaseInsensitive)
-        .replace("%hh%", ts.toString("hh"), Qt::CaseInsensitive)
-        .replace("%min%", ts.toString("mm"), Qt::CaseInsensitive)
-        .replace("%ss%", ts.toString("ss"), Qt::CaseInsensitive)
-        .replace("%zzz%", ts.toString("zzz"), Qt::CaseInsensitive)
-        .replace("%ap%", ts.toString("ap"), Qt::CaseInsensitive)
-        .replace("%nn%", nn, Qt::CaseInsensitive)
+        .replace("%name%",      patientName,         Qt::CaseInsensitive)
+        .replace("%id%",        patientId,           Qt::CaseInsensitive)
+        .replace("%physician%", physician,           Qt::CaseInsensitive)
+        .replace("%study%",     studyName,           Qt::CaseInsensitive)
+        .replace("%yyyy%",      ts.toString("yyyy"), Qt::CaseInsensitive)
+        .replace("%yy%",        ts.toString("yy"),   Qt::CaseInsensitive)
+        .replace("%mm%",        ts.toString("MM"),   Qt::CaseInsensitive)
+        .replace("%mmm%",       ts.toString("MMM"),  Qt::CaseInsensitive)
+        .replace("%mmmm%",      ts.toString("MMMM"), Qt::CaseInsensitive)
+        .replace("%dd%",        ts.toString("dd"),   Qt::CaseInsensitive)
+        .replace("%ddd%",       ts.toString("ddd"),  Qt::CaseInsensitive)
+        .replace("%dddd%",      ts.toString("dddd"), Qt::CaseInsensitive)
+        .replace("%hh%",        ts.toString("hh"),   Qt::CaseInsensitive)
+        .replace("%min%",       ts.toString("mm"),   Qt::CaseInsensitive)
+        .replace("%ss%",        ts.toString("ss"),   Qt::CaseInsensitive)
+        .replace("%zzz%",       ts.toString("zzz"),  Qt::CaseInsensitive)
+        .replace("%ap%",        ts.toString("ap"),   Qt::CaseInsensitive)
+        .replace("%nn%",        nn,                  Qt::CaseInsensitive)
         ;
 }
 
@@ -710,9 +705,13 @@ void MainWindow::updateWindowTitle()
 void MainWindow::updateOutputPath()
 {
     QSettings settings;
+    auto tpl = settings.value("output-path", "/video").toString();
+    if (!patientId.isEmpty())
+    {
+        tpl.append(settings.value("folder-template", "/%yyyy%-%MM%/%dd%/%name%/").toString());
+    }
 
-    outputPath.setPath(replace(settings.value("output-path", "/video").toString()
-        .append(settings.value("folder-template", "/%yyyy%-%MM%/%dd%/%name%/").toString()), ++studyNo));
+    outputPath.setPath(replace(tpl, ++studyNo));
 
     if (!outputPath.mkpath("."))
     {
@@ -1336,10 +1335,16 @@ void MainWindow::onStartStudy()
     if (patient)
     {
         pendingPatient = new DcmDataset(*patient);
+        OFString cp;
+        if (pendingPatient->findAndGetOFString(DCM_SpecificCharacterSet, cp).bad() || cp.length() == 0)
+        {
+            pendingPatient->putAndInsertString(DCM_SpecificCharacterSet, "ISO_IR 192");
+        }
     }
     else
     {
         pendingPatient = new DcmDataset();
+        pendingPatient->putAndInsertString(DCM_SpecificCharacterSet, "ISO_IR 192");
         pendingPatient->putAndInsertString(DCM_PatientID, patientId.toUtf8());
         pendingPatient->putAndInsertString(DCM_PatientName, patientName.toUtf8());
         pendingPatient->putAndInsertString(DCM_PatientBirthDate, dlg.patientId().toUtf8());
@@ -1354,7 +1359,28 @@ void MainWindow::onStartStudy()
         }
     }
 
-    pendingPatient->saveFile((const char*)outputPath.absoluteFilePath(".patient.dcm").toLocal8Bit());
+    OFString studyInstanceUID;
+    char uuid[100] = {0};
+    if (pendingPatient->findAndGetOFString(DCM_StudyInstanceUID, studyInstanceUID).bad() || studyInstanceUID.length() == 0)
+    {
+        pendingPatient->putAndInsertString(DCM_StudyInstanceUID, dcmGenerateUniqueIdentifier(uuid, SITE_STUDY_UID_ROOT));
+    }
+
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+    const E_TransferSyntax writeXfer = EXS_LittleEndianImplicit;
+#elif __BYTE_ORDER == __BIG_ENDIAN
+    const E_TransferSyntax writeXfer = EXS_BigEndianImplicit;
+#else
+#error "Unsupported byte order"
+#endif
+
+    auto cond = pendingPatient->saveFile((const char*)outputPath.absoluteFilePath(".patient.dcm").toLocal8Bit(), writeXfer);
+    if (cond.bad())
+    {
+        QMessageBox::critical(this, windowTitle(), QString::fromLocal8Bit(cond.text()));
+        return;
+    }
+
     if (settings.value("start-with-mpps", true).toBool() && !settings.value("mpps-server").toString().isEmpty())
     {
         DcmClient client(UID_ModalityPerformedProcedureStepSOPClass);
@@ -1364,6 +1390,11 @@ void MainWindow::onStartStudy()
             QMessageBox::critical(this, windowTitle(), client.lastError());
             return;
         }
+        pendingPatient->putAndInsertString(DCM_SOPInstanceUID, pendingSOPInstanceUID.toUtf8());
+    }
+    else
+    {
+        pendingPatient->putAndInsertString(DCM_SOPInstanceUID, dcmGenerateUniqueIdentifier(uuid, SITE_INSTANCE_UID_ROOT));
     }
 #else
     dlg.savePatientFile(outputPath.absoluteFilePath(".patient"));

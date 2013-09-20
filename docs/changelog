@@ -1,3 +1,14 @@
+beryllium (0.3.10) debian;
+
+  * Fixed possible NRE in broken video playback
+  * Suppessed gstreamer warning about missing "handoff" when fill video record is off
+  * Until first study archive window shows root filder, not epmty folder with bogus name
+  * Insert DCM_SpecificCharacterSet, DCM_SOPInstanceUID & DCM_StudyInstanceUID attributes if missed
+  * Fixed .patient.dcm save for libdcmtk < 3.6.1
+  * Report C-Store transfer errors to the user
+
+ -- Pavel Bludov <pbludov@gmail.com>  Fri, 20 Sep 2013 18:30:00 +0900
+
 beryllium (0.3.9) debian;
 
   * DICOM debug command line switches
