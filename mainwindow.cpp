@@ -1004,7 +1004,7 @@ void MainWindow::onStartClick()
 
         if (userChoice == 2)
         {
-            DcmClient client(UID_SecondaryCaptureImageStorage);
+            DcmClient client;
             client.sendToServer(this, pendingPatient, outputPath.entryInfoList(QDir::Files | QDir::Readable), seriesUID);
         }
     }

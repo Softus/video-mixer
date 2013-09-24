@@ -628,8 +628,11 @@ bool DcmClient::sendToServer(const QString& server, DcmDataset* patientDs, const
     //DcmFileFormat dcmff(dset);
     //cond = dcmff.saveFile(src.getImageFile().append(".dcm").c_str(), writeXfer);
 
-    DcmXfer filexfer((E_TransferSyntax)writeXfer);
+    OFString sopClass;
+    ds.findAndGetOFString(DCM_SOPClassUID, sopClass);
+    abstractSyntax = sopClass.c_str();
 
+    DcmXfer filexfer((E_TransferSyntax)writeXfer);
     if (!createAssociation(server.toUtf8(), filexfer.getXferID()))
     {
         return false;

@@ -51,7 +51,6 @@ class ArchiveWindow : public QWidget
     QDir                   root;
     QDir                   curr;
 
-    void updatePath();
     void updateList();
     void stopMedia();
     void playMediaFile(const QFileInfo &fi);
@@ -70,6 +69,7 @@ signals:
     
 public slots:
     void updateRoot();
+    void updatePath();
     void setPath(const QString& path);
     void selectPath(QAction* action);
     void selectPath(bool);

@@ -239,8 +239,7 @@ void ArchiveWindow::updateRoot()
 void ArchiveWindow::setPath(const QString& path)
 {
     curr.setPath(path);
-    updatePath();
-    listFiles->setCurrentRow(0);
+    QTimer::singleShot(0, this, SLOT(updatePath()));
 }
 
 void ArchiveWindow::createSubDirMenu(QAction* parentAction)
@@ -282,6 +281,7 @@ void ArchiveWindow::updatePath()
     } while (dir != root && dir.cdUp());
 
     updateList();
+    listFiles->setCurrentRow(0);
 }
 
 void ArchiveWindow::preparePathPopupMenu()
@@ -581,7 +581,7 @@ void ArchiveWindow::onStoreClick()
             files << QFileInfo(curr, item->text());
         }
 
-        DcmClient client(UID_SecondaryCaptureImageStorage); // UID_VideoEndoscopicImageStorage UID_RawDataStorage
+        DcmClient client; // UID_SecondaryCaptureImageStorage | UID_VideoEndoscopicImageStorage | UID_RawDataStorage
         char seriesUID[100] = {0};
         dcmGenerateUniqueIdentifier(seriesUID, SITE_SERIES_UID_ROOT);
         client.sendToServer(this, &patientDs, files, seriesUID);

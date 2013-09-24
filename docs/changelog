@@ -1,3 +1,10 @@
+beryllium (0.3.11) debian;
+
+  * Fix SIGABRT after changing folder throught a dropdown submenu
+  * Fix mpeg2 video storing
+
+ -- Pavel Bludov <pbludov@gmail.com>  Thu, 24 Sep 2013 17:21:00 +0900
+
 beryllium (0.3.10) debian;
 
   * Fixed possible NRE in broken video playback

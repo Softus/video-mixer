@@ -78,7 +78,7 @@ public:
             return makeOFCondition(0, 2, OF_error, "Failed to open buffer");
         }
 
-        //qDebug() << QString::fromStdWString(mi.Inform());
+        qDebug() << QString::fromStdWString(mi.Inform());
 
         if (getUint16(__T("ImageCount")) > 0)
         {

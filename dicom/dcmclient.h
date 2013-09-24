@@ -46,7 +46,7 @@ class DcmClient : public QObject
     OFCondition cond;
 
 public:
-    explicit DcmClient(const char* abstractSyntax, QObject *parent = 0)
+    DcmClient(const char* abstractSyntax = nullptr, QObject *parent = nullptr)
         : QObject(parent), net(nullptr), abstractSyntax(abstractSyntax), presId(0), assoc(nullptr), progressDlg(nullptr)
     {
     }
