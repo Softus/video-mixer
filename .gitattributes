@@ -94,5 +94,11 @@ pixmaps/user_manage.png -text
 /storagesettings.h -text
 /studiessettings.cpp -text
 /studiessettings.h -text
+touch/clickfilter.cpp -text
+touch/clickfilter.h -text
+touch/slidingstackedwidget.cpp -text
+touch/slidingstackedwidget.h -text
+touch/slidingstackedwidget_p.h -text
+touch/touch.pri -text
 /videosettings.cpp -text
 /videosettings.h -text
