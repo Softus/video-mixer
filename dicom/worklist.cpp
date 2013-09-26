@@ -97,9 +97,6 @@ Worklist::Worklist(QWidget *parent) :
     setWindowState((Qt::WindowState)settings.value("worklist-state").toInt());
     table->horizontalHeader()->restoreState(settings.value("worklist-columns-width").toByteArray());
 
-    // Start loading of worklist right after the window is shown for the first time
-    //
-    QTimer::singleShot(0, this, SLOT(onLoadClick()));
     setAttribute(Qt::WA_DeleteOnClose, false);
 }
 
@@ -159,7 +156,15 @@ void Worklist::onAddRow(DcmDataset* dset)
     qApp->processEvents();
 }
 
-void Worklist::closeEvent(QCloseEvent *evt)
+void Worklist::showEvent(QShowEvent *e)
+{
+    // Refresh the worklist right after the window is shown
+    //
+    QTimer::singleShot(500, this, SLOT(onLoadClick()));
+    QWidget::showEvent(e);
+}
+
+void Worklist::closeEvent(QCloseEvent *e)
 {
     // Force drop connection to the server if the worklist still loading
     //
@@ -172,7 +177,7 @@ void Worklist::closeEvent(QCloseEvent *evt)
     settings.setValue("worklist-geometry", saveGeometry());
     settings.setValue("worklist-state", (int)windowState() & ~Qt::WindowMinimized);
     settings.setValue("worklist-columns-width", table->horizontalHeader()->saveState());
-    QWidget::closeEvent(evt);
+    QWidget::closeEvent(e);
 }
 
 void Worklist::onLoadClick()

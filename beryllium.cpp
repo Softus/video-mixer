@@ -28,6 +28,10 @@
 #include <dcmtk/oflog/oflog.h>
 #endif
 
+#ifdef WITH_TOUCH
+#include "touch/clickfilter.h"
+#endif
+
 #include "mainwindow.h"
 #include "product.h"
 
@@ -88,6 +92,11 @@ int main(int argc, char *argv[])
     //
     {
         MainWindow wnd;
+#ifdef WITH_TOUCH
+//        ClickFilter filter;
+//        wnd.installEventFilter(&filter);
+//        wnd.grabGesture(Qt::TapGesture);
+#endif
         wnd.show();
         errCode = app.exec();
     }

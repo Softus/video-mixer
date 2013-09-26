@@ -32,6 +32,10 @@
 #include <dcmtk/dcmdata/dcdeftag.h>
 #endif
 
+#ifdef WITH_TOUCH
+#include "touch/slidingstackedwidget.h"
+#endif
+
 #include <QApplication>
 #include <QBoxLayout>
 #include <QDesktopServices>
@@ -60,6 +64,16 @@
 #include <QGst/Event>
 #include <QGst/Parse>
 #include <gst/gstdebugutils.h>
+#include <cairo/cairo-gobject.h>
+
+namespace QGlib
+{
+    template <>
+    struct GetTypeImpl<cairo_t*>
+    {
+        inline operator Type() { return CAIRO_GOBJECT_TYPE_CONTEXT; };
+    };
+}
 
 static inline QBoxLayout::Direction bestDirection(const QSize &s)
 {
@@ -133,6 +147,8 @@ MainWindow::MainWindow(QWidget *parent) :
     imageNo(0),
     clipNo(0),
     studyNo(0),
+    overlayWidth(0),
+    overlayHeight(0),
     running(false),
     recording(false)
 {
@@ -144,17 +160,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, SIGNAL(enableWidget(QWidget*, bool)), this, SLOT(onEnableWidget(QWidget*, bool)), Qt::QueuedConnection);
 
     auto layoutMain = new QVBoxLayout();
+#ifndef WITH_TOUCH
     layoutMain->addWidget(createToolBar());
-    if (settings.value("enable-menu", false).toBool())
-    {
-        layoutMain->setMenuBar(createMenuBar());
-    }
-
-    displayWidget = new QGst::Ui::VideoWidget();
-    displayWidget->setMinimumSize(712, 576);
-    displayWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    layoutMain->addWidget(displayWidget);
-
+#endif
     listImagesAndClips = new QListWidget();
     listImagesAndClips->setViewMode(QListView::IconMode);
     listImagesAndClips->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
@@ -164,8 +172,41 @@ MainWindow::MainWindow(QWidget *parent) :
     listImagesAndClips->setIconSize(QSize(144,144));
     listImagesAndClips->setMovement(QListView::Static);
     listImagesAndClips->setWrapping(false);
-    layoutMain->addWidget(listImagesAndClips);
 
+    displayWidget = new QGst::Ui::VideoWidget();
+    displayWidget->setMinimumSize(712, 576);
+    displayWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+#ifdef WITH_TOUCH
+    mainStack = new SlidingStackedWidget();
+
+#ifdef WITH_DICOM
+    worklist = new Worklist();
+    connect(worklist, SIGNAL(startStudy(DcmDataset*)), this, SLOT(onStartStudy(DcmDataset*)));
+    mainStack->addWidget(worklist);
+#endif
+    auto studyLayout = new QVBoxLayout;
+    studyLayout->addWidget(displayWidget);
+    studyLayout->addWidget(listImagesAndClips);
+    auto studyWidget = new QWidget;
+    studyWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    studyWidget->setLayout(studyLayout);
+    mainStack->addWidget(studyWidget);
+    mainStack->setCurrentWidget(studyWidget);
+
+    archiveWindow = new ArchiveWindow();
+    archiveWindow->updateRoot();
+    mainStack->addWidget(archiveWindow);
+    layoutMain->addWidget(mainStack);
+    layoutMain->addWidget(createToolBar());
+#else
+    layoutMain->addWidget(displayWidget);
+    layoutMain->addWidget(listImagesAndClips);
+#endif
+
+    if (settings.value("enable-menu", false).toBool())
+    {
+        layoutMain->setMenuBar(createMenuBar());
+    }
     setLayout(layoutMain);
 
     restoreGeometry(settings.value("mainwindow-geometry").toByteArray());
@@ -395,14 +436,25 @@ QString MainWindow::buildPipeline()
 
     // v4l2src ... ! tee name=splitter ! ffmpegcolorspace ! ximagesink splitter.");
     //
-    auto displaySinkDef = settings.value("display-sink",  "autovideosink name=displaysink async=0").toString();
-    auto displayFixColor = settings.value(displaySinkDef + "-colorspace", false).toBool()? "ffmpegcolorspace ! ": "";
-    auto displayParams = settings.value(displaySinkDef + "-parameters").toString();
+    auto displaySinkDef  = settings.value("display-sink",  "autovideosink name=displaysink async=0").toString();
+    auto displayFixColor = settings.value(displaySinkDef + "-colorspace", false).toBool();
+    auto displayParams   = settings.value(displaySinkDef + "-parameters").toString();
+    auto enableVideo     = settings.value("enable-video").toBool();
     pipe.append(" ! tee name=splitter");
     if (!displaySinkDef.isEmpty())
     {
-        pipe.append(" ! ").append(displayFixColor)
-            .append(displaySinkDef).append(" ").append(displayParams).append(" splitter.");
+#ifdef WITH_TOUCH
+        if (enableVideo)
+        {
+            pipe.append(" ! ffmpegcolorspace ! cairooverlay name=displayoverlay");
+        }
+#endif
+        if (enableVideo || displayFixColor)
+        {
+            pipe.append(" ! ffmpegcolorspace");
+        }
+
+        pipe.append(" ! " ).append(displaySinkDef).append(" ").append(displayParams).append(" splitter.");
     }
 
     // ... ! tee name=splitter ! ximagesink splitter. ! valve name=encvalve ! ffmpegcolorspace ! x264enc
@@ -420,7 +472,6 @@ QString MainWindow::buildPipeline()
     auto rtpPayParams       = settings.value(rtpPayDef + "-parameters").toString();
     auto rtpSinkDef         = settings.value("rtp-sink",      "udpsink clients=127.0.0.1:5000 sync=0").toString();
     auto rtpSinkParams      = settings.value(rtpSinkDef + "-parameters").toString();
-    auto enableVideo        = settings.value("enable-video").toBool();
     auto enableRtp          = !rtpSinkDef.isEmpty() && settings.value("enable-rtp").toBool();
 
     pipe.append(" ! valve name=encvalve drop=1 ! queue max-size-bytes=0 ! ").append(videoFixColor)
@@ -491,6 +542,10 @@ QGst::PipelinePtr MainWindow::createPipeline()
             qCritical() << "Element displaysink not found";
         }
 
+        auto displayOverlay = pl->getElementByName("displayoverlay");
+        displayOverlay && QGlib::connect(displayOverlay, "caps-changed", this, &MainWindow::onCapsOverlay)
+             && QGlib::connect(displayOverlay, "draw", this, &MainWindow::onDrawOverlay);
+
         auto clipValve = pl->getElementByName("clipinspect");
         clipValve && QGlib::connect(clipValve, "handoff", this, &MainWindow::onClipFrame);
 
@@ -519,8 +574,6 @@ QGst::PipelinePtr MainWindow::createPipeline()
         {
             qCritical() << "Element videoencoder not found";
         }
-
-//        QGlib::connect(pl->getElementByName("test"), "handoff", this, &MainWindow::onTestHandoff);
 
         auto details = GstDebugGraphDetails(GST_DEBUG_GRAPH_SHOW_MEDIA_TYPE | GST_DEBUG_GRAPH_SHOW_NON_DEFAULT_PARAMS | GST_DEBUG_GRAPH_SHOW_STATES);
         GST_DEBUG_BIN_TO_DOT_FILE_WITH_TS(pl.staticCast<QGst::Bin>(), details, qApp->applicationName().toUtf8());
@@ -748,7 +801,6 @@ void MainWindow::onClipFrame(const QGst::BufferPtr& buf)
     // Once we got an I-Frame, open second valve
     //
     setElementProperty("clipvalve", "drop", false);
-    setElementProperty("displayoverlay", "text", "R");
 
     if (!clipPreviewFileName.isEmpty())
     {
@@ -778,6 +830,47 @@ void MainWindow::onVideoFrame(const QGst::BufferPtr& buf)
     // Once we got an I-Frame, open second valve
     //
     setElementProperty("videovalve", "drop", false);
+}
+
+void MainWindow::onCapsOverlay(const QGst::CapsPtr& caps)
+{
+    QGst::StructurePtr s = caps->internalStructure(0);
+    if (s)
+    {
+        overlayWidth = s->value("width").toInt();
+        overlayHeight = s->value("height").toInt();
+    }
+    else
+    {
+        overlayWidth = overlayHeight = 0;
+    }
+}
+
+void MainWindow::onDrawOverlay(cairo_t* cr, quint64 timestamp, quint64 /*duration*/)
+{
+    if (!running || !overlayWidth || !overlayHeight)
+    {
+        return;
+    }
+
+    if (1 & (timestamp / 750000000))
+    {
+        // skip every odd second
+        //
+        return;
+    }
+
+    int size = overlayHeight / 30;
+    cairo_translate (cr, overlayWidth - size, size);
+
+    cairo_set_line_width(cr, 2);
+    cairo_set_source_rgb(cr, recording? 0.0: 0.25, recording? 0.25: 0.0, 0);
+
+    cairo_arc(cr, 0, 0, size / 2, 0, 2 * M_PI);
+    cairo_stroke_preserve(cr);
+
+    cairo_set_source_rgb(cr, recording? 0.0: 0.8, recording? 0.8: 0.0, 0.0);
+    cairo_fill(cr);
 }
 
 void MainWindow::onImageReady(const QGst::BufferPtr& buf)
@@ -1141,7 +1234,6 @@ void MainWindow::onRecordClick()
     }
     else
     {
-        setElementProperty("displayoverlay", "text", "");
         removeVideoTail("clip");
         clipPreviewFileName.clear();
         recording = false;
@@ -1219,23 +1311,34 @@ void MainWindow::onShowAboutClick()
 
 void MainWindow::onShowArchiveClick()
 {
+#ifndef WITH_TOUCH
     if (archiveWindow == nullptr)
     {
         archiveWindow = new ArchiveWindow();
         archiveWindow->updateRoot();
     }
+#endif
 
     updateOutputPath();
     archiveWindow->setPath(outputPath.absolutePath());
+#ifdef WITH_TOUCH
+    mainStack->slideInWidget(archiveWindow);
+#else
     archiveWindow->show();
     archiveWindow->activateWindow();
+#endif
 }
 
 void MainWindow::onShowSettingsClick()
 {
-    Settings dlg(this);
-    connect(&dlg, SIGNAL(apply()), this, SLOT(updatePipeline()));
-    if (dlg.exec())
+    Settings* dlg = new Settings(this);
+    connect(dlg, SIGNAL(apply()), this, SLOT(updatePipeline()));
+#ifdef WITH_TOUCH
+    mainStack->addWidget(dlg);
+    mainStack->slideInWidget(dlg);
+#else
+    if (dlg->exec())
+#endif
     {
         updatePipeline();
 
@@ -1246,6 +1349,9 @@ void MainWindow::onShowSettingsClick()
         worklist = nullptr;
 #endif
     }
+#ifndef WITH_TOUCH
+    delete dlg;
+#endif
 }
 
 void MainWindow::onEnableWidget(QWidget* widget, bool enable)
@@ -1345,17 +1451,17 @@ void MainWindow::onStartStudy()
     {
         pendingPatient = new DcmDataset();
         pendingPatient->putAndInsertString(DCM_SpecificCharacterSet, "ISO_IR 192");
-        pendingPatient->putAndInsertString(DCM_PatientID, patientId.toUtf8());
-        pendingPatient->putAndInsertString(DCM_PatientName, patientName.toUtf8());
-        pendingPatient->putAndInsertString(DCM_PatientBirthDate, dlg.patientId().toUtf8());
+        pendingPatient->putAndInsertString(DCM_PatientID, dlg.patientId().toUtf8());
+        pendingPatient->putAndInsertString(DCM_PatientName, dlg.patientName().toUtf8());
+        pendingPatient->putAndInsertString(DCM_PatientBirthDate, dlg.patientBirthDate().toString("yyyyMMdd").toUtf8());
         pendingPatient->putAndInsertString(DCM_PatientSex, QString().append(dlg.patientSexCode()).toUtf8());
 
         DcmItem* sps = nullptr;
         pendingPatient->findOrCreateSequenceItem(DCM_ScheduledProcedureStepSequence, sps);
         if (sps)
         {
-            sps->putAndInsertString(DCM_ScheduledPerformingPhysicianName, physician.toUtf8());
-            sps->putAndInsertString(DCM_ScheduledProcedureStepDescription, studyName.toUtf8());
+            sps->putAndInsertString(DCM_ScheduledPerformingPhysicianName, dlg.physician().toUtf8());
+            sps->putAndInsertString(DCM_ScheduledProcedureStepDescription, dlg.studyName().toUtf8());
         }
     }
 
@@ -1414,6 +1520,7 @@ void MainWindow::onStartStudy()
 #ifdef WITH_DICOM
 void MainWindow::onShowWorkListClick()
 {
+#ifndef WITH_TOUCH
     if (worklist == nullptr)
     {
         worklist = new Worklist();
@@ -1421,5 +1528,8 @@ void MainWindow::onShowWorkListClick()
     }
     worklist->show();
     worklist->activateWindow();
+#else
+    mainStack->slideInWidget(worklist);
+#endif
 }
 #endif

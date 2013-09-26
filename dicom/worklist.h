@@ -56,6 +56,7 @@ public:
 
 protected:
     virtual void closeEvent(QCloseEvent *);
+    virtual void showEvent(QShowEvent *);
 
 signals:
     void startStudy(DcmDataset* patient);

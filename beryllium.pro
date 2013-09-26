@@ -36,7 +36,7 @@ unix {
     else {
         PKGCONFIG += QtGLib-2.0 QtGStreamer-0.10 QtGStreamerUi-0.10
     }
-    PKGCONFIG += gstreamer-0.10 gstreamer-base-0.10
+    PKGCONFIG += gstreamer-0.10 gstreamer-base-0.10 cairo cairo-gobject
 
     # libmediainfo.pc adds UNICODE, but dcmtk isn't compatible with wchar,
     # so we can't use pkgconfig for this library
@@ -95,4 +95,5 @@ unix {
 	INSTALLS += translations shortcut icon man
 }
 
+include (touch/touch.pri)
 include (dicom/dicom.pri) # Must be very last line of this file

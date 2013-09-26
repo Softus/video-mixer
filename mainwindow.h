@@ -44,6 +44,8 @@ QT_END_NAMESPACE
 class Worklist;
 class ArchiveWindow;
 class DcmDataset;
+class SlidingStackedWidget;
+typedef struct _cairo cairo_t;
 
 class MainWindow : public QWidget
 {
@@ -65,6 +67,9 @@ class MainWindow : public QWidget
     Worklist*     worklist;
     QString       pendingSOPInstanceUID;
 #endif
+#ifdef WITH_TOUCH
+    SlidingStackedWidget* mainStack;
+#endif
     QGst::Ui::VideoWidget* displayWidget;
     QListWidget*  listImagesAndClips;
     QDir          outputPath;
@@ -79,6 +84,8 @@ class MainWindow : public QWidget
     int           imageNo;
     int           clipNo;
     int           studyNo;
+    int           overlayWidth;
+    int           overlayHeight;
 
     QMenuBar* createMenuBar();
     QToolBar* createToolBar();
@@ -113,6 +120,8 @@ class MainWindow : public QWidget
     void onStateChangedMessage(const QGst::StateChangedMessagePtr& message);
     void onElementMessage(const QGst::ElementMessagePtr& message);
 
+    void onCapsOverlay(const QGst::CapsPtr&);
+    void onDrawOverlay(cairo_t*, quint64, quint64);
     void onImageReady(const QGst::BufferPtr&);
     void onClipFrame(const QGst::BufferPtr&);
     void onVideoFrame(const QGst::BufferPtr&);
