@@ -59,6 +59,7 @@ docs/copyright -text
 /physicianssettings.cpp -text
 /physicianssettings.h -text
 pixmaps/about.png -text
+pixmaps/back.png -text
 pixmaps/beryllium.png -text
 pixmaps/camera.png -text
 pixmaps/database.png -text
@@ -76,8 +77,6 @@ pixmaps/next.png -text
 pixmaps/pause.png -text
 pixmaps/prev.png -text
 pixmaps/record.png -text
-pixmaps/record_off.png -text
-pixmaps/record_on.png -text
 pixmaps/refresh.png -text
 pixmaps/rewind.png -text
 pixmaps/settings.png -text
