@@ -43,6 +43,9 @@ public slots:
 
     virtual void accept();
 
+protected:
+    void closeEvent(QCloseEvent *);
+
 private:
     void createPages();
     void createPage(const QString& title, const QMetaObject& page);

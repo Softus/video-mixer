@@ -155,7 +155,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QSettings settings;
     updateWindowTitle();
 
-    // This magic required for updating widgets from worker threads on windows
+    // This magic required for updating widgets from worker threads on Microsoft Windows (R)
     //
     connect(this, SIGNAL(enableWidget(QWidget*, bool)), this, SLOT(onEnableWidget(QWidget*, bool)), Qt::QueuedConnection);
 
@@ -178,6 +178,7 @@ MainWindow::MainWindow(QWidget *parent) :
     displayWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 #ifdef WITH_TOUCH
     mainStack = new SlidingStackedWidget();
+    layoutMain->addWidget(mainStack);
 
 #ifdef WITH_DICOM
     worklist = new Worklist();
@@ -187,17 +188,17 @@ MainWindow::MainWindow(QWidget *parent) :
     auto studyLayout = new QVBoxLayout;
     studyLayout->addWidget(displayWidget);
     studyLayout->addWidget(listImagesAndClips);
+    studyLayout->addWidget(createToolBar());
     auto studyWidget = new QWidget;
     studyWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     studyWidget->setLayout(studyLayout);
     mainStack->addWidget(studyWidget);
     mainStack->setCurrentWidget(studyWidget);
+    mainStack->setProperty("MainWidget", mainStack->indexOf(studyWidget));
 
     archiveWindow = new ArchiveWindow();
     archiveWindow->updateRoot();
     mainStack->addWidget(archiveWindow);
-    layoutMain->addWidget(mainStack);
-    layoutMain->addWidget(createToolBar());
 #else
     layoutMain->addWidget(displayWidget);
     layoutMain->addWidget(listImagesAndClips);
@@ -214,7 +215,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     updateStartButton();
     updateRecordButton();
-    updateRecordAll();
 
     updatePipeline();
 
@@ -330,11 +330,6 @@ QToolBar* MainWindow::createToolBar()
     spacer->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
     bar->addWidget(spacer);
 
-    lblRecordAll = new QLabel;
-    lblRecordAll->setMaximumSize(bar->iconSize());
-    lblRecordAll->setMinimumWidth(32);
-    bar->addWidget(lblRecordAll);
-
 #ifdef WITH_DICOM
     actionWorklist = bar->addAction(QIcon(":/buttons/show_worklist"), tr("&Worlkist"), this, SLOT(onShowWorkListClick()));
 #endif
@@ -443,12 +438,10 @@ QString MainWindow::buildPipeline()
     pipe.append(" ! tee name=splitter");
     if (!displaySinkDef.isEmpty())
     {
-#ifdef WITH_TOUCH
         if (enableVideo)
         {
             pipe.append(" ! ffmpegcolorspace ! cairooverlay name=displayoverlay");
         }
-#endif
         if (enableVideo || displayFixColor)
         {
             pipe.append(" ! ffmpegcolorspace");
@@ -1111,8 +1104,6 @@ void MainWindow::onStartClick()
     setElementProperty(videoEncoderValve, "drop", !running);
 
     updateStartButton();
-    updateRecordAll();
-
     displayWidget->update();
 }
 
@@ -1266,17 +1257,6 @@ void MainWindow::updateRecordButton()
     QString strOnOff(recording? tr("Paus&e"): tr("R&ecord"));
     btnRecord->setIcon(icon);
     btnRecord->setText(strOnOff);
-}
-
-void MainWindow::updateRecordAll()
-{
-    auto videoSink = QSettings().value("enable-video").toBool();
-    auto strOnOff(videoSink? tr("on"): tr("off"));
-    auto icon = videoSink? ":/buttons/record_on": ":/buttons/record_off";
-
-    lblRecordAll->setEnabled(running);
-    lblRecordAll->setToolTip(tr("Recording of entire study is %1").arg(strOnOff));
-    lblRecordAll->setPixmap(QIcon(icon).pixmap(lblRecordAll->size()));
 }
 
 void MainWindow::prepareSettingsMenu()
@@ -1511,8 +1491,6 @@ void MainWindow::onStartStudy()
     setElementProperty(videoEncoderValve, "drop", !running);
 
     updateStartButton();
-    updateRecordAll();
-
     updateWindowTitle();
     displayWidget->update();
 }

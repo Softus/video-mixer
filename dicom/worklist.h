@@ -67,6 +67,9 @@ public slots:
     void onStartStudyClick();
     void onCellDoubleClicked(QTableWidgetItem* item);
     void onAddRow(DcmDataset* responseIdentifiers);
+#ifdef WITH_TOUCH
+    void onBackToMainWindowClick();
+#endif
 };
 
 #endif // WORKLIST_H

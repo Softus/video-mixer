@@ -23,6 +23,10 @@
 #include <dcmtk/dcmdata/dcuid.h>
 #endif
 
+#ifdef WITH_TOUCH
+#include "touch/slidingstackedwidget.h"
+#endif
+
 #include <QAction>
 #include <QApplication>
 #include <QBoxLayout>
@@ -88,6 +92,10 @@ ArchiveWindow::ArchiveWindow(QWidget *parent) :
 
     auto barArchive = new QToolBar(tr("Archive"));
     barArchive->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+#ifdef WITH_TOUCH
+    auto actionBack = barArchive->addAction(QIcon(":buttons/back"), tr("Back"), this, SLOT(onBackToMainWindowClick()));
+    actionBack->setShortcut(Qt::Key_Back);
+#endif
     actionDelete = barArchive->addAction(QIcon(":buttons/delete"), tr("Delete"), this, SLOT(onDeleteClick()));
     actionDelete->setShortcut(Qt::Key_Delete);
     actionDelete->setEnabled(false);
@@ -124,7 +132,9 @@ ArchiveWindow::ArchiveWindow(QWidget *parent) :
     auto actionBrowse = barArchive->addAction(QIcon(":buttons/folder"), tr("File browser"), this, SLOT(onShowFolderClick()));
     actionBrowse->setShortcut(Qt::Key_F2); // Same as the key that open this dialog
 
+#ifndef WITH_TOUCH
     layoutMain->addWidget(barArchive);
+#endif
 
     barPath = new QToolBar(tr("Path"));
     layoutMain->addWidget(barPath);
@@ -203,6 +213,9 @@ ArchiveWindow::ArchiveWindow(QWidget *parent) :
     listFiles->addAction(actionEnter);
     layoutMain->addWidget(listFiles);
 
+#ifdef WITH_TOUCH
+    layoutMain->addWidget(barArchive);
+#endif
     setLayout(layoutMain);
 
     QSettings settings;
@@ -844,3 +857,14 @@ void ArchiveWindow::onStateChangedMessage(const QGst::StateChangedMessagePtr& me
         actionPlay->setText(message->newState() == QGst::StatePlaying? tr("Pause"): tr("Play"));
     }
 }
+
+#ifdef WITH_TOUCH
+void ArchiveWindow::onBackToMainWindowClick()
+{
+    auto stackWidget = static_cast<SlidingStackedWidget*>(parent()->qt_metacast("SlidingStackedWidget"));
+    if (stackWidget)
+    {
+        stackWidget->slideInIdx(stackWidget->property("MainWidget").toInt());
+    }
+}
+#endif

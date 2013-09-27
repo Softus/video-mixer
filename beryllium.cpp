@@ -93,9 +93,9 @@ int main(int argc, char *argv[])
     {
         MainWindow wnd;
 #ifdef WITH_TOUCH
-//        ClickFilter filter;
-//        wnd.installEventFilter(&filter);
-//        wnd.grabGesture(Qt::TapGesture);
+        ClickFilter filter;
+        wnd.installEventFilter(&filter);
+        wnd.grabGesture(Qt::TapGesture);
 #endif
         wnd.show();
         errCode = app.exec();

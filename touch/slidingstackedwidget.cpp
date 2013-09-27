@@ -33,7 +33,7 @@ bool SlidingStackedWidget::gestureEvent(QGestureEvent *e)
     auto panGesture = static_cast<QPanGesture*>(e->gesture(Qt::PanGesture));
     if (panGesture && panGesture->state() == Qt::GestureFinished)
     {
-        auto length = panGesture->offset().manhattanLength();
+        auto length = panGesture->offset().x();
         if (length > MIN_LENGTH)
         {
             slideInPrev();

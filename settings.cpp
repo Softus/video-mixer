@@ -31,6 +31,10 @@
 #include "dicom/worklistquerysettings.h"
 #endif
 
+#ifdef WITH_TOUCH
+#include "touch/slidingstackedwidget.h"
+#endif
+
 #include <QListWidget>
 #include <QBoxLayout>
 #include <QStackedWidget>
@@ -151,6 +155,19 @@ void Settings::onClickApply()
     // Replace "Cancel" with "Close" since we can not cancel anymore
     //
     btnCancel->setText(tr("Close"));
+}
+
+void Settings::closeEvent(QCloseEvent *e)
+{
+#ifdef WITH_TOUCH
+    auto stackWidget = static_cast<SlidingStackedWidget*>(parent()->qt_metacast("SlidingStackedWidget"));
+    if (stackWidget)
+    {
+        stackWidget->removeWidget(this);
+    }
+#endif
+
+    QDialog::closeEvent(e);
 }
 
 void Settings::accept()

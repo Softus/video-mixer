@@ -53,7 +53,6 @@ class MainWindow : public QWidget
 
     // UI
     //
-    QLabel*      lblRecordAll;
     QToolButton* btnStart;
     QToolButton* btnRecord;
     QToolButton* btnSnapshot;
@@ -91,7 +90,6 @@ class MainWindow : public QWidget
     QToolBar* createToolBar();
     void updateStartButton();
     void updateRecordButton();
-    void updateRecordAll();
 
     // State machine
     //

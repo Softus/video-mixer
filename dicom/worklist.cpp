@@ -19,6 +19,10 @@
 #include "dcmclient.h"
 #include "transcyrillic.h"
 
+#ifdef WITH_TOUCH
+#include "touch/slidingstackedwidget.h"
+#endif
+
 #include <QAction>
 #include <QApplication>
 #include <QBoxLayout>
@@ -87,8 +91,13 @@ Worklist::Worklist(QWidget *parent) :
     table->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
     auto layoutMain = new QVBoxLayout();
+#ifndef WITH_TOUCH
     layoutMain->addWidget(createToolBar());
+#endif
     layoutMain->addWidget(table);
+#ifdef WITH_TOUCH
+    layoutMain->addWidget(createToolBar());
+#endif
     setLayout(layoutMain);
 
     setMinimumSize(640, 480);
@@ -104,6 +113,11 @@ QToolBar* Worklist::createToolBar()
 {
     QToolBar* bar = new QToolBar(tr("Worklist"));
     bar->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+
+#ifdef WITH_TOUCH
+    auto actionBack = bar->addAction(QIcon(":buttons/back"), tr("Back"), this, SLOT(onBackToMainWindowClick()));
+    actionBack->setShortcut(Qt::Key_Back);
+#endif
 
     actionLoad   = bar->addAction(QIcon(":/buttons/refresh"), tr("&Refresh"), this, SLOT(onLoadClick()));
     actionDetail = bar->addAction(QIcon(":/buttons/details"), tr("&Details"), this, SLOT(onShowDetailsClick()));
@@ -251,3 +265,14 @@ void Worklist::onStartStudyClick()
         startStudy(&ds);
     }
 }
+
+#ifdef WITH_TOUCH
+void Worklist::onBackToMainWindowClick()
+{
+    auto stackWidget = static_cast<SlidingStackedWidget*>(parent()->qt_metacast("SlidingStackedWidget"));
+    if (stackWidget)
+    {
+        stackWidget->slideInIdx(stackWidget->property("MainWidget").toInt());
+    }
+}
+#endif

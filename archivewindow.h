@@ -83,6 +83,9 @@ public slots:
 #ifdef WITH_DICOM
     void onStoreClick();
 #endif
+#ifdef WITH_TOUCH
+    void onBackToMainWindowClick();
+#endif
     void onPrevClick();
     void onNextClick();
     void onSeekClick();
