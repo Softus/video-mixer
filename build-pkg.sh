@@ -5,6 +5,8 @@ lrelease *.ts
 
 dicom=0
 debug=0
+touch=0
+
 for arg in "$@"; do
   case $arg in
   'dicom')
@@ -12,6 +14,9 @@ for arg in "$@"; do
      ;;
   'debug')
     debug=1
+     ;;
+  'touch')
+    touch=1
      ;;
   *) echo "Unknown argument $arg"
      ;;
@@ -37,6 +42,11 @@ if [ $debug == 1 ]; then
   ' beryllium.pro
 fi
 
+if [ $touch == 1 ]; then
+  sed -i '1 i CONFIG+=touch
+  ' beryllium.pro
+fi
+
 distro=$(lsb_release -is)
 case $distro in
 Ubuntu | Debian)  echo "Building DEB package"
@@ -44,7 +54,7 @@ Ubuntu | Debian)  echo "Building DEB package"
     dpkg-buildpackage -I.svn -I*.sh -rfakeroot 
     ;;
 "openSUSE project" | fedora)  echo "Building RPM package"
-    tar czf ../beryllium.tar.gz ../beryllium --exclude=.svn --exclude=*.sh && rpmbuild -D"dicom $dicom" -D"debug $debug" -ta ../beryllium.tar.gz
+    tar czf ../beryllium.tar.gz ../beryllium --exclude=.svn --exclude=*.sh && rpmbuild -D"dicom $dicom" -D"debug $debug" -D"touch $touch" -ta ../beryllium.tar.gz
     ;;
 *) echo "$distro is not supported yet"
    ;;

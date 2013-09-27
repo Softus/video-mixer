@@ -1311,14 +1311,9 @@ void MainWindow::onShowArchiveClick()
 
 void MainWindow::onShowSettingsClick()
 {
-    Settings* dlg = new Settings(this);
-    connect(dlg, SIGNAL(apply()), this, SLOT(updatePipeline()));
-#ifdef WITH_TOUCH
-    mainStack->addWidget(dlg);
-    mainStack->slideInWidget(dlg);
-#else
-    if (dlg->exec())
-#endif
+    Settings dlg(this);
+    connect(&dlg, SIGNAL(apply()), this, SLOT(updatePipeline()));
+    if (dlg.exec())
     {
         updatePipeline();
 
@@ -1329,9 +1324,6 @@ void MainWindow::onShowSettingsClick()
         worklist = nullptr;
 #endif
     }
-#ifndef WITH_TOUCH
-    delete dlg;
-#endif
 }
 
 void MainWindow::onEnableWidget(QWidget* widget, bool enable)

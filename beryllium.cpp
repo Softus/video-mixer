@@ -70,6 +70,10 @@ int main(int argc, char *argv[])
     //
     QSettings settings;
 
+    // Override some style sheets
+    //
+    app.setStyleSheet(settings.value("css").toString());
+
     // Translations
     //
     QTranslator  translator;

@@ -32,7 +32,6 @@ class Settings : public QDialog
     QPushButton *btnCancel;
 public:
     explicit Settings(QWidget *parent = 0, Qt::WindowFlags flags = 0);
-
 signals:
     void save();
     void apply();
@@ -42,9 +41,6 @@ public slots:
     void onClickApply();
 
     virtual void accept();
-
-protected:
-    void closeEvent(QCloseEvent *);
 
 private:
     void createPages();

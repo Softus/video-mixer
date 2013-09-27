@@ -1,3 +1,9 @@
+beryllium (0.3.13) debian;
+
+  * Touch preview
+
+ -- Pavel Bludov <pbludov@gmail.com>  Fri, 27 Sep 2013 15:56:00 +0900
+
 beryllium (0.3.12) debian;
 
   * Slash in patient id fix

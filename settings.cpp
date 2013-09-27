@@ -157,19 +157,6 @@ void Settings::onClickApply()
     btnCancel->setText(tr("Close"));
 }
 
-void Settings::closeEvent(QCloseEvent *e)
-{
-#ifdef WITH_TOUCH
-    auto stackWidget = static_cast<SlidingStackedWidget*>(parent()->qt_metacast("SlidingStackedWidget"));
-    if (stackWidget)
-    {
-        stackWidget->removeWidget(this);
-    }
-#endif
-
-    QDialog::closeEvent(e);
-}
-
 void Settings::accept()
 {
     save();

@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/buttons">
-        <file alias="record_on">pixmaps/record_on.png</file>
         <file alias="stop">pixmaps/stop.png</file>
         <file alias="camera">pixmaps/camera.png</file>
         <file alias="pause">pixmaps/pause.png</file>
@@ -10,11 +9,10 @@
         <file alias="about">pixmaps/about.png</file>
         <file alias="folder">pixmaps/folder.png</file>
         <file alias="record">pixmaps/record.png</file>
-        <file alias="record_off">pixmaps/record_off.png</file>
         <file alias="refresh">pixmaps/refresh.png</file>
         <file alias="settings">pixmaps/settings.png</file>
         <file alias="start">pixmaps/start.png</file>
-    <file alias="film">pixmaps/film.png</file>
+        <file alias="film">pixmaps/film.png</file>
         <file alias="database">pixmaps/database.png</file>
         <file alias="gallery">pixmaps/gallery.png</file>
         <file alias="delete">pixmaps/delete.png</file>
@@ -27,6 +25,7 @@
         <file alias="rewind">pixmaps/rewind.png</file>
         <file alias="movie">pixmaps/movie.png</file>
         <file alias="dicom">pixmaps/dicom.png</file>
+        <file alias="back">pixmaps/back.png</file>
     </qresource>
     <qresource prefix="/app">
         <file alias="product">pixmaps/beryllium.png</file>
