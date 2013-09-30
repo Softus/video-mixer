@@ -15,7 +15,7 @@
  */
 
 #include "dicommppsmwlsettings.h"
-#include "comboboxwithpopupsignal.h"
+#include "../comboboxwithpopupsignal.h"
 #include <QCheckBox>
 #include <QFormLayout>
 #include <QSettings>

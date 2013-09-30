@@ -168,6 +168,30 @@
     <ClCompile Include="GeneratedFiles\qrc_beryllium.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="touch\clickfilter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_clickfilter.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_clickfilter.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="touch\slidingstackedwidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_slidingstackedwidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_slidingstackedwidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_slidingstackedwidget_p.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_slidingstackedwidget_p.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="aboutdialog.h">
@@ -210,6 +234,15 @@
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="videosettings.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="touch\clickfilter.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="touch\slidingstackedwidget.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="touch\slidingstackedwidget_p.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>

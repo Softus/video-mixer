@@ -20,7 +20,7 @@
 #include "transcyrillic.h"
 
 #ifdef WITH_TOUCH
-#include "touch/slidingstackedwidget.h"
+#include "../touch/slidingstackedwidget.h"
 #endif
 
 #include <QAction>
@@ -35,7 +35,7 @@
 #include <QTableWidget>
 #include <QTimer>
 #include <QToolBar>
-#include "qwaitcursor.h"
+#include "../qwaitcursor.h"
 
 #include <dcmtk/dcmdata/dcdatset.h>
 #include <dcmtk/dcmdata/dcdeftag.h>
