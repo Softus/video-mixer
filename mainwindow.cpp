@@ -155,7 +155,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QSettings settings;
     updateWindowTitle();
 
-    // This magic required for updating widgets from worker threads on Microsoft Windows (R)
+    // This magic required for updating widgets from worker threads on Microsoft (R) Windows (TM)
     //
     connect(this, SIGNAL(enableWidget(QWidget*, bool)), this, SLOT(onEnableWidget(QWidget*, bool)), Qt::QueuedConnection);
 

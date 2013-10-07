@@ -22,21 +22,30 @@
 #include <QLabel>
 #include <QPushButton>
 #include <gst/gst.h>
-
-// No way to figure it out, so define it here
-//
-#define QT_GST_VERSION_STR "0.10.2.2"
+#include <QGlib/Value>
 
 #if defined(UNICODE) || defined (_UNICODE)
-#include <MediaInfo/MediaInfo.h>
+  #include <MediaInfo/MediaInfo.h>
 #else
-#define UNICODE
-#include <MediaInfo/MediaInfo.h>
-#undef UNICODE
+  // MediaInfo was built with utf-16 under linux, but we a going to compile with utf-8,
+  // so we define it, include the header, then undefine it back.
+  //
+  #define UNICODE
+  #include <MediaInfo/MediaInfo.h>
+  #undef UNICODE
 #endif
+
 #ifdef WITH_DICOM
 #define HAVE_CONFIG_H
 #include <dcmtk/dcmdata/dcuid.h>
+#endif
+
+// Prior to 10.2.2 QGlib::Value isn't compatible with QGlib::Error
+//
+#ifdef QGLIB_ERROR_H
+  #define QT_GST_VERSION_STR "0.10.2.2"
+#else
+  #define QT_GST_VERSION_STR "0.10.2"
 #endif
 
 AboutDialog::AboutDialog(QWidget *parent) :
@@ -59,6 +68,10 @@ AboutDialog::AboutDialog(QWidget *parent) :
     lblTitle->setFont(titleFont);
     layoutText->addWidget(lblTitle);
     layoutText->addSpacing(16);
+
+    //
+    // Third party libraries
+    //
 
     layoutText->addWidget(new QLabel(tr("Based on:")));
 #ifdef WITH_DICOM
@@ -83,6 +96,10 @@ AboutDialog::AboutDialog(QWidget *parent) :
     auto lblQtGstreamer = new QLabel(tr("<a href=\"http://gstreamer.freedesktop.org/modules/qt-gstreamer.html/\">QtGStreamer ").append(QT_GST_VERSION_STR).append("</a>"));
     lblQtGstreamer->setOpenExternalLinks(true);
     layoutText->addWidget(lblQtGstreamer);
+
+    //
+    // Media
+    //
 
     auto lblIconsSimplico = new QLabel(tr("<a href=\"http://neurovit.deviantart.com/art/simplicio-92311415\">Simplicio icon set by Neurovit</a>"));
     lblIconsSimplico->setOpenExternalLinks(true);
@@ -109,4 +126,5 @@ AboutDialog::AboutDialog(QWidget *parent) :
     layoutText->addWidget(btnClose, 1, Qt::AlignRight);
     layoutMain->addLayout(layoutText);
     setLayout(layoutMain);
+    qApp->aboutQt();
 }

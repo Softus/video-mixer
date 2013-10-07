@@ -351,8 +351,9 @@ bool DcmClient::createAssociation(const QString& server, const char* transferSyn
         return true;
     }
 
-    /* create DcmAssoc, i.e. try to establish a network connection to another */
-    /* DICOM application. This call creates an instance of T_ASC_DcmAssoc*. */
+    // Create DcmAssoc, i.e. try to establish a network connection to another
+    // DICOM application. This call creates an instance of T_ASC_DcmAssoc*.
+    //
     T_ASC_Parameters* params = initAssocParams(server, transferSyntax);
     if (params)
     {
@@ -360,16 +361,21 @@ bool DcmClient::createAssociation(const QString& server, const char* transferSyn
         cond = ASC_requestAssociation(net, params, &assoc);
         if (cond.good())
         {
-            /* dump general information concerning the establishment of the network connection if required */
+            // Dump general information concerning the establishment of the network connection if required
+            //
             qDebug() << "DcmAssoc accepted (max send PDV: " << assoc->sendPDVLength << ")";
 
-            /* figure out which of the accepted presentation contexts should be used */
+            // Figure out which of the accepted presentation contexts should be used
+            //
             presId = transferSyntax? ASC_findAcceptedPresentationContextID(assoc, abstractSyntax, transferSyntax):
                                      ASC_findAcceptedPresentationContextID(assoc, abstractSyntax);
             if (presId != 0)
             {
+                // Main routine exit point is here.
+                //
                 return true;
             }
+
             cond = makeOFCondition(0, 1, OF_error, tr("Accepted presentation context ID not found").toUtf8());
             ASC_releaseAssociation(assoc);
             ASC_destroyAssociation(&assoc);
@@ -385,25 +391,31 @@ QString DcmClient::cEcho(const QString &peerAet, const QString &peerAddress, int
 {
     T_ASC_Association *assoc = nullptr;
     cond = ASC_requestAssociation(net, initAssocParams(peerAet, peerAddress, timeout), &assoc);
+    QString ret;
 
     if (cond.good())
     {
         DIC_US msgId = assoc->nextMsgID++;
         DIC_US status = -1;
 
-        /* send C-ECHO-RQ and handle response */
-        cond = DIMSE_echoUser(assoc, msgId, 0 == timeout? DIMSE_BLOCKING: DIMSE_NONBLOCKING, timeout, &status, nullptr);
+        cond = DIMSE_echoUser(assoc, msgId, 0 == timeout? DIMSE_BLOCKING: DIMSE_NONBLOCKING,
+            timeout, &status, nullptr);
+        if (cond.good())
+        {
+            ret = QString::fromLocal8Bit(DU_cstoreStatusString(status))
+                .append(" ").append(QString::fromUtf8(assoc->params->theirImplementationVersionName));
+        }
 
         ASC_releaseAssociation(assoc);
         ASC_destroyAssociation(&assoc);
 
         if (cond.good())
         {
-            return QString::fromUtf8(DU_cstoreStatusString(status));
+            return ret;
         }
     }
 
-    return cond.text();
+    return QString::fromLocal8Bit(cond.text());
 }
 
 bool DcmClient::findSCU()
@@ -416,17 +428,17 @@ bool DcmClient::findSCU()
     DcmDataset ds;
     BuildCFindDataSet(ds);
 
-    /* prepare C-FIND-RQ message */
     T_DIMSE_C_FindRQ req;
     T_DIMSE_C_FindRSP rsp;
-    bzero(OFreinterpret_cast(char*, &req), sizeof(req));
+    bzero((char*)&req, sizeof(req));
+    bzero((char*)&rsp, sizeof(rsp));
     strcpy(req.AffectedSOPClassUID, abstractSyntax);
     req.DataSetType = DIMSE_DATASET_PRESENT;
     req.Priority = DIMSE_PRIORITY_LOW;
-    /* complete preparation of C-FIND-RQ message */
     req.MessageID = assoc->nextMsgID++;
 
-    /* finally conduct transmission of data */
+    // Finally conduct transmission of data
+    //
     DcmDataset *statusDetail = nullptr;
     int tout = timeout();
     cond = DIMSE_findUser(assoc, presId, &req, &ds,
@@ -442,18 +454,20 @@ bool DcmClient::findSCU()
     return cond.good();
 }
 
-QString DcmClient::nCreateRQ(DcmDataset* patientDs)
+QString DcmClient::nCreateRQ(DcmDataset* dsPatient)
 {
     if (!createAssociation(QSettings().value("mpps-server").toString()))
     {
         return nullptr;
     }
 
-    DcmDataset nCreateDs;
-    BuildNCreateDataSet(*patientDs, nCreateDs);
+    DcmDataset dsNCreate;
+    BuildNCreateDataSet(*dsPatient, dsNCreate);
 
+#ifdef QT_DEBUG
     patientDs->writeXML(std::cout << "------C-FIND------------" << std::endl);
-    nCreateDs.writeXML(std::cout << "------N-Create------------" << std::endl);
+    nCreateDs.writeXML(std::cout  << "------N-Create----------" << std::endl);
+#endif
 
     T_DIMSE_Message req, rsp;
     bzero((char*)&req, sizeof(req));
@@ -464,13 +478,16 @@ QString DcmClient::nCreateRQ(DcmDataset* patientDs)
     strcpy(req.msg.NCreateRQ.AffectedSOPClassUID, abstractSyntax);
     req.msg.NCreateRQ.DataSetType = DIMSE_DATASET_PRESENT;
 
-    cond = DIMSE_sendMessageUsingMemoryData(assoc, presId, &req, nullptr, &nCreateDs, nullptr, nullptr);
+    // Send request to the server
+    //
+    cond = DIMSE_sendMessageUsingMemoryData(assoc, presId, &req, nullptr, &dsNCreate, nullptr, nullptr);
     if (cond.bad())
     {
         return nullptr;
     }
 
-    /* receive response */
+    // Receive response
+    //
     int tout = timeout();
     cond = DIMSE_receiveCommand(assoc, 0 == tout? DIMSE_BLOCKING: DIMSE_NONBLOCKING, tout, &presId, &rsp, nullptr);
     if (cond.bad())
@@ -504,10 +521,11 @@ bool DcmClient::nSetRQ(const char* seriesUID, DcmDataset* patientDs, const QStri
     DcmDataset nSetDs;
     BuildNSetDataSet(*patientDs, nSetDs, seriesUID, true);
 
+#ifdef QT_DEBUG
     nSetDs.writeXML(std::cout << "------N-Set------------" << std::endl);
+#endif
 
     T_DIMSE_Message req, rsp;
-
     bzero((char*)&req, sizeof(req));
     bzero((char*)&rsp, sizeof(rsp));
 
@@ -573,10 +591,8 @@ bool DcmClient::cStoreRQ(DcmDataset* dset, const char* sopInstance)
 
     /* finally conduct transmission of data */
     int tout = timeout();
-    cond = DIMSE_storeUser(assoc, presId, &req,
-      nullptr, dset, StoreUserCallback, this,
-      0 == tout? DIMSE_BLOCKING: DIMSE_NONBLOCKING, tout,
-      &rsp, &statusDetail);
+    cond = DIMSE_storeUser(assoc, presId, &req, nullptr, dset, StoreUserCallback, this,
+        0 == tout? DIMSE_BLOCKING: DIMSE_NONBLOCKING, tout, &rsp, &statusDetail);
 
     if (rsp.DimseStatus)
     {
@@ -593,7 +609,7 @@ bool DcmClient::cStoreRQ(DcmDataset* dset, const char* sopInstance)
     return cond.good();
 }
 
-bool DcmClient::sendToServer(const QString& server, DcmDataset* patientDs, const QString& seriesUID,
+bool DcmClient::sendToServer(const QString& server, DcmDataset* dsPatient, const QString& seriesUID,
                              int seriesNumber, const QString& file, int instanceNumber)
 {
     E_TransferSyntax writeXfer;
@@ -624,8 +640,8 @@ bool DcmClient::sendToServer(const QString& server, DcmDataset* patientDs, const
     if (cond.bad())
         return false;
 
-    BuildCStoreDataSet(*patientDs, ds, seriesUID);
-    //DcmFileFormat dcmff(dset);
+    BuildCStoreDataSet(*dsPatient, ds, seriesUID);
+    //DcmFileFormat dcmff(ds);
     //cond = dcmff.saveFile(src.getImageFile().append(".dcm").c_str(), writeXfer);
 
     OFString sopClass;
@@ -647,12 +663,12 @@ bool DcmClient::sendToServer(const QString& server, DcmDataset* patientDs, const
     return cond.good();
 }
 
-void DcmClient::sendToServer(QWidget* parent, DcmDataset* patientDs, const QFileInfoList& files, const QString& seriesUID)
+void DcmClient::sendToServer(QWidget* parent, DcmDataset* dsPatient, const QFileInfoList& listFiles, const QString& seriesUID)
 {
     QProgressDialog pdlg(parent);
     progressDlg = &pdlg;
 
-    pdlg.setRange(0, files.count());
+    pdlg.setRange(0, listFiles.count());
     pdlg.setMinimumDuration(0);
 
     // Only single series for now
@@ -661,9 +677,9 @@ void DcmClient::sendToServer(QWidget* parent, DcmDataset* patientDs, const QFile
 
     foreach (auto server, QSettings().value("storage-servers").toStringList())
     {
-        for (auto i = 0; !pdlg.wasCanceled() && i < files.count(); ++i)
+        for (auto i = 0; !pdlg.wasCanceled() && i < listFiles.count(); ++i)
         {
-            if (QFile::exists(files[i].dir().filePath(files[i].completeBaseName())))
+            if (QFile::exists(listFiles[i].dir().filePath(listFiles[i].completeBaseName())))
             {
                 // Skip clip thumbnail
                 //
@@ -671,16 +687,18 @@ void DcmClient::sendToServer(QWidget* parent, DcmDataset* patientDs, const QFile
             }
 
             pdlg.setValue(i);
-            pdlg.setLabelText(tr("Storing '%1' to '%2'").arg(files[i].fileName(), server));
+            pdlg.setLabelText(tr("Storing '%1' to '%2'").arg(listFiles[i].fileName(), server));
             qApp->processEvents();
 
-            auto file = files[i].absoluteFilePath();
-            if (!sendToServer(server, patientDs, seriesUID, seriesNo, file, i))
+            auto file = listFiles[i].absoluteFilePath();
+            if (!sendToServer(server, dsPatient, seriesUID, seriesNo, file, i))
             {
                 if (QMessageBox::Yes != QMessageBox::critical(&pdlg, parent->windowTitle(),
                       tr("Faild to send '%1' to '%2':\n%3\nContinue?").arg(file, server, lastError()),
                       QMessageBox::Yes, QMessageBox::No))
                 {
+                    // The user choose to cancel
+                    //
                     break;
                 }
             }

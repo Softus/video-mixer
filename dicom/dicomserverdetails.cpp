@@ -16,6 +16,7 @@
 
 #include "dicomserverdetails.h"
 #include "dcmclient.h"
+#include "qwaitcursor.h"
 #include <dcmtk/dcmdata/dcuid.h>
 
 #include <QBoxLayout>
@@ -106,8 +107,11 @@ QString DicomServerDetails::name() const
 
 QStringList DicomServerDetails::values() const
 {
-    return QStringList() << textAet->text() << textIp->text()
-        << QString::number(spinPort->value()) << QString::number(spinTimeout->value())
+    return QStringList()
+        << textAet->text()
+        << textIp->text()
+        << QString::number(spinPort->value())
+        << QString::number(spinTimeout->value())
         << QString(checkEcho->isChecked()? "Echo": "No echo")
         << QString(radioNew->isChecked()? "New": "Retire")
         ;
@@ -115,8 +119,10 @@ QStringList DicomServerDetails::values() const
 
 void DicomServerDetails::onClickTest()
 {
+    QWaitCursor wait(this);
     DcmClient client(UID_VerificationSOPClass);
-    auto status = client.cEcho(textAet->text(), textIp->text().append(':').append(QString::number(spinPort->value())), spinTimeout->value());
+    auto status = client.cEcho(textAet->text(),
+       textIp->text().append(':').append(QString::number(spinPort->value())), spinTimeout->value());
     QMessageBox::information(this, windowTitle(), tr("Server check result:\n\n%1\n").arg(status));
 }
 

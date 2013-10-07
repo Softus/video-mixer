@@ -23,38 +23,47 @@
 #include <QPushButton>
 #include <QSettings>
 
-void MandatoryFieldGroup::add(QWidget *widget)
+MandatoryFieldGroup::MandatoryFieldGroup(QObject *parent)
+    : QObject(parent), okButton(nullptr)
 {
     mandatoryFieldColor = QColor(QSettings().value("mandatory-field-color", "pink").toString()).rgba();
-    if (!widgets.contains(widget))
+}
+
+void MandatoryFieldGroup::add(QWidget *widget)
+{
+    if (widgets.contains(widget))
     {
-        if (widget->inherits("QCheckBox"))
-        {
-            connect(widget, SIGNAL(clicked()), this, SLOT(changed()));
-        }
-        else if (widget->inherits("QComboBox"))
-        {
-            connect(widget, SIGNAL(currentTextChanged(const QString&)), this, SLOT(changed()));
-        }
-        else if (widget->inherits("QLineEdit"))
-        {
-            connect(widget, SIGNAL(textChanged(const QString&)), this, SLOT(changed()));
-        }
-        else
-        {
-            qWarning("MandatoryFieldGroup: unsupported class %s", widget->metaObject()->className());
-            return;
-        }
-        widgets.append(widget);
-        changed();
+        return;
     }
+
+    if (widget->inherits("QCheckBox"))
+    {
+        connect(widget, SIGNAL(clicked()), this, SLOT(changed()));
+    }
+    else if (widget->inherits("QComboBox"))
+    {
+        connect(widget, SIGNAL(currentTextChanged(const QString&)), this, SLOT(changed()));
+    }
+    else if (widget->inherits("QLineEdit"))
+    {
+        connect(widget, SIGNAL(textChanged(const QString&)), this, SLOT(changed()));
+    }
+    else
+    {
+        qWarning("MandatoryFieldGroup: unsupported class %s", widget->metaObject()->className());
+        return;
+    }
+    widgets.append(widget);
+    changed();
 }
 
 void MandatoryFieldGroup::remove(QWidget *widget)
 {
-    widget->setBackgroundRole(QPalette::NoRole);
-    widgets.removeAll(widget);
-    changed();
+    if (widgets.removeAll(widget))
+    {
+        widget->setBackgroundRole(QPalette::NoRole);
+        changed();
+    }
 }
 
 
@@ -124,7 +133,7 @@ void MandatoryFieldGroup::clear()
     if (okButton)
     {
         okButton->setEnabled(true);
-        okButton = 0;
+        okButton = nullptr;
     }
 }
 
