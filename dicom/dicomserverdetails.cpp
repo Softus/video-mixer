@@ -16,7 +16,7 @@
 
 #include "dicomserverdetails.h"
 #include "dcmclient.h"
-#include "qwaitcursor.h"
+#include "../qwaitcursor.h"
 #include <dcmtk/dcmdata/dcuid.h>
 
 #include <QBoxLayout>

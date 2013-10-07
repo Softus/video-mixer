@@ -27,6 +27,9 @@
 #include "dicom/worklist.h"
 #include "dicom/dcmclient.h"
 #include "dicom/transcyrillic.h"
+
+// From DCMTK SDK
+//
 #include <dcmtk/dcmdata/dcdatset.h>
 #include <dcmtk/dcmdata/dcuid.h>
 #include <dcmtk/dcmdata/dcdeftag.h>
@@ -56,6 +59,8 @@
 #include <QToolButton>
 #include <QUrl>
 
+// From QtGstreamer SDK
+//
 #include <QGlib/Connect>
 #include <QGlib/Type>
 #include <QGst/Bus>
@@ -63,7 +68,18 @@
 #include <QGst/ElementFactory>
 #include <QGst/Event>
 #include <QGst/Parse>
+
+// From Gstreamer SDK
+//
 #include <gst/gstdebugutils.h>
+
+#if defined(Q_WS_WIN) && !defined(FILE_ATTRIBUTE_HIDDEN)
+    #define FILE_ATTRIBUTE_HIDDEN 0x00000002
+    extern "C" __declspec(dllimport) int __stdcall SetFileAttributesW(const wchar_t* lpFileName, quint32 dwFileAttributes);
+#endif
+
+// From Cairo SDK
+//
 #include <cairo/cairo-gobject.h>
 #include <boost/math/constants/constants.hpp>
 
@@ -1476,7 +1492,11 @@ void MainWindow::onStartStudy()
         pendingPatient->putAndInsertString(DCM_SOPInstanceUID, dcmGenerateUniqueIdentifier(uuid, SITE_INSTANCE_UID_ROOT));
     }
 #else
-    dlg.savePatientFile(outputPath.absoluteFilePath(".patient"));
+    auto localPatientInfoFile = outputPath.absoluteFilePath(".patient");
+    dlg.savePatientFile(localPatientInfoFile);
+#ifdef Q_WS_WIN
+    SetFileAttributesW(localPatientInfoFile.toStdWString().c_str(), FILE_ATTRIBUTE_HIDDEN);
+#endif
 #endif
 
     running = startVideoRecord();

@@ -77,7 +77,7 @@ static void DamnQtMadeMeDoTheSunsetByHands(QToolBar* bar)
     foreach (auto action, bar->actions())
     {
         auto shortcut = action->shortcut();
-        if (!shortcut.isEmpty())
+        if (shortcut.isEmpty())
         {
             continue;
         }
@@ -659,13 +659,14 @@ void ArchiveWindow::stopMedia()
 
     if (pipeline)
     {
-        pipeline->setState(QGst::StateNull);
-        pipeline->getState(nullptr, nullptr, GST_SECOND); // 1 sec
         for (int i = 0; i < pagesWidget->count(); ++i)
         {
             static_cast<QGst::Ui::VideoWidget*>(pagesWidget->widget(i))->stopPipelineWatch();
         }
+        pipeline->setState(QGst::StateNull);
+        pipeline->getState(nullptr, nullptr, 1 * GST_SECOND); // 1 sec
         pipeline.clear();
+        qApp->processEvents();
     }
 }
 
@@ -684,7 +685,8 @@ void ArchiveWindow::playMediaFile(const QFileInfo& fi)
 
     try
     {
-        auto pipeDef = QString("filesrc location=\"%1\" ! decodebin ! autovideosink name=displaysink").arg(fi.absoluteFilePath());
+//      auto pipeDef = QString("filesrc location=\"%1\" ! decodebin ! autovideosink name=displaysink async=0").arg(fi.absoluteFilePath());
+        auto pipeDef = QString("uridecodebin uri=\"%1\" ! autovideosink name=displaysink async=0").arg(QUrl::fromLocalFile(fi.absoluteFilePath()).toString());
         pipeline = QGst::Parse::launch(pipeDef).dynamicCast<QGst::Pipeline>();
         auto hiddenVideoWidget = static_cast<QGst::Ui::VideoWidget*>(pagesWidget->widget(1 - pagesWidget->currentIndex()));
         hiddenVideoWidget->watchPipeline(pipeline);
@@ -727,9 +729,15 @@ void ArchiveWindow::onBusMessage(const QGst::MessagePtr& message)
             msg.append(ex.message());
 
             qCritical() << msg;
+#ifndef Q_WS_WIN
+            // Showing a message box under Microsoft (R) Windows (TM) breaks everything,
+            // since it becomes the active one and the video output goes here.
+            // So we can no more then hide this error from the user.
+            //
             QMessageBox::critical(this, windowTitle(), msg, QMessageBox::Ok);
+#endif
         }
-        break;
+      break;
     case QGst::MessageEos:
         {
             // Rewind to the start and pause the video

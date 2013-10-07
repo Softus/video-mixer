@@ -126,5 +126,4 @@ AboutDialog::AboutDialog(QWidget *parent) :
     layoutText->addWidget(btnClose, 1, Qt::AlignRight);
     layoutMain->addLayout(layoutText);
     setLayout(layoutMain);
-    qApp->aboutQt();
 }
