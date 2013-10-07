@@ -65,6 +65,7 @@
 #include <QGst/Parse>
 #include <gst/gstdebugutils.h>
 #include <cairo/cairo-gobject.h>
+#include <boost/math/constants/constants.hpp>
 
 namespace QGlib
 {
@@ -859,7 +860,7 @@ void MainWindow::onDrawOverlay(cairo_t* cr, quint64 timestamp, quint64 /*duratio
     cairo_set_line_width(cr, 2);
     cairo_set_source_rgb(cr, recording? 0.0: 0.25, recording? 0.25: 0.0, 0);
 
-    cairo_arc(cr, 0, 0, size / 2, 0, 2 * M_PI);
+    cairo_arc(cr, 0, 0, size / 2, 0, boost::math::constants::two_pi<double>());
     cairo_stroke_preserve(cr);
 
     cairo_set_source_rgb(cr, recording? 0.0: 0.8, recording? 0.8: 0.0, 0.0);
