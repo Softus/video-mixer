@@ -448,7 +448,7 @@ QString MainWindow::buildPipeline()
 
     // v4l2src ... ! tee name=splitter ! ffmpegcolorspace ! ximagesink splitter.");
     //
-    auto displaySinkDef  = settings.value("display-sink",  "autovideosink name=displaysink async=0").toString();
+    auto displaySinkDef  = settings.value("display-sink",  "autovideosink").toString();
     auto displayFixColor = settings.value(displaySinkDef + "-colorspace", false).toBool();
     auto displayParams   = settings.value(displaySinkDef + "-parameters").toString();
     auto enableVideo     = settings.value("enable-video").toBool();
@@ -464,7 +464,7 @@ QString MainWindow::buildPipeline()
             pipe.append(" ! ffmpegcolorspace");
         }
 
-        pipe.append(" ! " ).append(displaySinkDef).append(" ").append(displayParams).append(" splitter.");
+        pipe.append(" ! " ).append(displaySinkDef).append(" name=displaysink async=0 ").append(displayParams).append(" splitter.");
     }
 
     // ... ! tee name=splitter ! ximagesink splitter. ! valve name=encvalve ! ffmpegcolorspace ! x264enc
@@ -474,14 +474,14 @@ QString MainWindow::buildPipeline()
     //                ! identity name=clipinspect ! queue ! mpegpsmux ! filesink videosplitter.
     //           splitter.
     //
-    auto outputPathDef      = settings.value("output-path",   "/video").toString();
-    auto videoEncoderDef    = settings.value("video-encoder", "x264enc").toString();
+    auto outputPathDef      = settings.value("output-path",    "/video").toString();
+    auto videoEncoderDef    = settings.value("video-encoder",  "x264enc").toString();
     auto videoFixColor      = settings.value(videoEncoderDef + "-colorspace", false).toBool()? "ffmpegcolorspace ! ": "";
     auto videoEncoderParams = settings.value(videoEncoderDef + "-parameters").toString();
-    auto rtpPayDef          = settings.value("rtp-payloader", "rtph264pay").toString();
-    auto rtpPayParams       = settings.value(rtpPayDef + "-parameters").toString();
-    auto rtpSinkDef         = settings.value("rtp-sink",      "udpsink clients=127.0.0.1:5000 sync=0").toString();
-    auto rtpSinkParams      = settings.value(rtpSinkDef + "-parameters").toString();
+    auto rtpPayDef          = settings.value("rtp-payloader",  "rtph264pay").toString();
+    auto rtpPayParams       = settings.value(rtpPayDef +       "-parameters").toString();
+    auto rtpSinkDef         = settings.value("rtp-sink",       "udpsink clients=127.0.0.1:5000 sync=0").toString();
+    auto rtpSinkParams      = settings.value(rtpSinkDef +      "-parameters").toString();
     auto enableRtp          = !rtpSinkDef.isEmpty() && settings.value("enable-rtp").toBool();
 
     pipe.append(" ! valve name=encvalve drop=1 ! queue max-size-bytes=0 ! ").append(videoFixColor)
