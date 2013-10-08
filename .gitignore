@@ -14,5 +14,7 @@
 /builddir
 debian/changelog
 debian/copyright
+/dist
 /ipch
+/obj
 /release

@@ -35,6 +35,10 @@
 #include <QProgressDialog>
 #include <QSettings>
 
+#ifdef _MSC_VER
+#pragma comment(lib, "ws2_32.lib")
+#endif
+
 #ifdef QT_DEBUG
 #define DEFAULT_TIMEOUT 3 // 3 seconds for test builds
 #else

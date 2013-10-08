@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?define ProductBuild     = "0.3" ?>
+<?define ProductRevision  = "14" ?>
+<?define ProductName      = "Beryllium" ?>
+
+<?define Manufacturer    = "dc.baikal.ru" ?>
+<?define ProductVersion  = "$(var.ProductBuild).$(var.ProductRevision)" ?>
+<?define UpgradeCode     = "{B100D0FF-AF56-0000-0314-079500628307}" ?>
+<?define SrcDir32        = "$(var.SolutionDir)\Win32\$(var.Configuration)\" ?>
+<?define SrcDir64        = "$(var.SolutionDir)\X64\$(var.Configuration)\" ?>
+
+<?define RequiresAdmin    = "True" ?>
+
+<?if $(var.Platform)=x64?>
+<?define Win64   = "yes" ?>
+<?else ?>
+<?define Win64   = "no" ?>
+<?endif ?>
+
+<?if $(var.RequiresAdmin)=True ?>
+  <?define InstallPrivileges = "elevated" ?>
+  <?define InstallScope      = "perMachine" ?>
+  <?define DstDir            = "ProgramFilesFolder" ?>
+<?else ?>
+  <?define InstallPrivileges = "limited" ?>
+  <?define InstallScope      = "perUser" ?>
+  <?define DstDir            = "CommonAppDataFolder" ?>
+<?endif ?>
+
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Product Id="*"
+    Manufacturer="$(var.Manufacturer)"
+    Name="$(var.ProductName)"
+    Language="!(loc.LANG)"
+    Version="$(var.ProductVersion)"
+    UpgradeCode="$(var.UpgradeCode)"
+    Codepage="1251"
+    >
+    <Package Id="*"
+      InstallPrivileges="$(var.InstallPrivileges)"
+      InstallerVersion="200"
+      Manufacturer="$(var.Manufacturer)"
+      Description="$(var.Manufacturer) $(var.ProductName) Installer"
+      Comments="$(var.ProductName) is a registered trademark of $(var.Manufacturer)"
+      SummaryCodepage="1251"
+      Compressed="yes"
+      InstallScope="$(var.InstallScope)"
+      Languages="!(loc.LANG)"
+    />
+
+    <!-- Major upgrade -->
+    <Upgrade Id="$(var.UpgradeCode)">
+      <UpgradeVersion Minimum="$(var.ProductVersion)" IncludeMinimum="no" OnlyDetect="yes" Property="NEWERVERSIONDETECTED" />
+      <UpgradeVersion Minimum="0.0.0.0" IncludeMinimum="yes" Maximum="$(var.ProductVersion)" IncludeMaximum="no" IgnoreRemoveFailure="yes" Property="OLDERVERSIONBEINGUPGRADED"/>
+    </Upgrade>
+
+    <Property Id="GSTREAMERSDKROOT_X86" Secure="yes">
+      <RegistrySearch Id="GstreamerSdkRoot_key" Root="HKLM" Key="SOFTWARE\GStreamerSDK\x86" Name="InstallDir" Type="raw" />
+    </Property>
+    <Property Id="GSTREAMERSDKVERSION_X86" Secure="yes">
+      <RegistrySearch Id="GstreamerSdkVersion_key" Root="HKLM" Key="SOFTWARE\GStreamerSDK\x86" Name="SdkVersion" Type="raw" />
+    </Property>
+
+    <Property Id="ARPURLINFOABOUT">http://$(var.Manufacturer)/products/$(var.ProductName)</Property>
+    <Property Id="ARPURLUPDATEINFO">http://$(var.Manufacturer)/products/$(var.ProductName)</Property>
+    <Media Id="1" Cabinet="$(var.ProductName).cab" EmbedCab="yes" CompressionLevel="high" />
+
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramMenuFolder" Name="Programs"/>
+        <Directory Id="$(var.DstDir)" Name="PFiles">
+        <Directory Id="ManufacturerFolder" Name="$(var.Manufacturer)">
+
+          <Directory Id="ProductFolder32" Name="$(var.ProductName)" FileSource="$(var.SrcDir32)">
+            <Component Id="Comp_Application32" Guid="B100D0FF-AF56-0101-0314-079500628307" Win64="no">
+              <Environment Id="PATH" Name="PATH" Value="[GSTREAMERSDKROOT_X86]\[GSTREAMERSDKVERSION_X86]\x86" Permanent="no" Part="last" Action="set" System="no" />
+              <File Id="File_Beryllium_x86" Name="beryllium.exe">
+                <Shortcut Id="Shortcut_Beryllium_x86" Directory="ProgramMenuFolder" Name="Beryllium" Advertise="yes" Icon="beryllium.ico">
+                  <Icon Id="beryllium.ico" SourceFile="beryllium.ico" />
+                </Shortcut>
+              </File>
+              <File Id="File_Beryllium_ru_qm_x86" Name="beryllium_ru.qm" />
+              <?if $(var.Configuration)=Debug ?>
+                <File Id="File_Beryllium_pdb_x86" Name="beryllium.pdb" />
+              <?endif ?>
+            </Component>
+            <Component Id="Comp_Qt4Libs32" Guid="B100D0FF-AF56-0102-0314-079500628307" Win64="no">
+              <File Id="File_QtCore4_x86" Name="QtCore4.dll" />
+              <File Id="File_QtGui4_x86"  Name="QtGui4.dll" />
+              <File Id="File_QtNetwork4_x86" Name="QtNetwork4.dll" />
+              <File Id="File_QtOpenGL4_x86" Name="QtOpenGL4.dll" />
+            </Component>
+            <Component Id="Comp_Qt4GstLibs32" Guid="B100D0FF-AF56-0103-0314-079500628307" Win64="no">
+              <File Id="File_QtGLib2_x86" Name="QtGLib-2.0.dll" />
+              <File Id="File_QtGStreamer010_x86"  Name="QtGStreamer-0.10.dll" />
+              <File Id="File_QtGStreamerUi010_x86" Name="QtGStreamerUi-0.10.dll" />
+              <File Id="File_QtGStreamerUtils010_x86" Name="QtGStreamerUtils-0.10.dll" />
+            </Component>
+          </Directory>
+
+          <?if $(var.Platform)=x64?>
+            <Directory Id="ProductFolder64" Name="$(var.ProductName)_X64" FileSource="$(var.SrcDir64)">
+              <Component Id="Comp_Application64" Guid="B100D0FF-AF56-0201-0314-079500628307" Win64="yes">
+                <File Id="File_Beryllium_X64" Name="beryllium.exe" />
+                <File Id="File_Beryllium_ru_qm_X64" Name="beryllium_ru.qm" />
+                <?if $(var.Configuration)=Debug ?>
+                  <File Id="File_Beryllium_pdb_X64" Name="beryllium.pdb" />
+                <?endif ?>
+              </Component>
+              <Component Id="Comp_Qt4Libs64" Guid="B100D0FF-AF56-0202-0314-079500628307" Win64="yes">
+                <File Id="File_QtCore4_X64" Name="QtCore4.dll" />
+                <File Id="File_QtGui4_X64"  Name="QtGui4.dll" />
+                <File Id="File_QtNetwork4_X64" Name="QtNetwork4.dll" />
+                <File Id="File_QtOpenGL4_X64" Name="QtOpenGL4.dll" />
+              </Component>
+              <Component Id="Comp_Qt4GstLibs64" Guid="B100D0FF-AF56-0203-0314-079500628307" Win64="yes">
+                <File Id="File_QtGLib2_X64" Name="QtGLib-2.0.dll" />
+                <File Id="File_QtGStreamer010_X64"  Name="QtGStreamer-0.10.dll" />
+                <File Id="File_QtGStreamerUi010_X64" Name="QtGStreamerUi-0.10.dll" />
+                <File Id="File_QtGStreamerUtils010_X64" Name="QtGStreamerUtils-0.10.dll" />
+              </Component>
+            </Directory>
+          <?endif ?>
+
+        </Directory>
+        </Directory>
+    </Directory>
+
+    <Feature Id="Complete" Title="Complete Feature" Level="1">
+      <ComponentRef Id="Comp_Application32" />
+      <ComponentRef Id="Comp_Qt4Libs32" />
+      <ComponentRef Id="Comp_Qt4GstLibs32" />
+      <?if $(var.Platform)=x64 ?>
+        <ComponentRef Id="Comp_Application64" />
+        <ComponentRef Id="Comp_Qt4Libs64" />
+        <ComponentRef Id="Comp_Qt4GstLibs64" />
+      <?endif ?>
+    </Feature>
+
+    <InstallExecuteSequence>
+      <AppSearch Before="LaunchConditions"/>
+      <RemoveExistingProducts After="InstallInitialize" />
+    </InstallExecuteSequence>
+
+  </Product>
+</Wix>

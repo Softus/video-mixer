@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>3.0</ProductVersion>
+    <ProjectGuid>{a70f0c0c-8b35-48c9-bce4-e5f7a82ba774}</ProjectGuid>
+    <SchemaVersion>2.0</SchemaVersion>
+    <OutputName>beryllium_0.3.14_i386</OutputName>
+    <OutputType>Package</OutputType>
+    <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' ">$(MSBuildExtensionsPath)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <OutputPath>$(SolutionDir)\dist\$(Configuration)$(Platform)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
+    <DefineConstants>Debug;</DefineConstants>
+    <WixVariables>Platform=$(PlatformName)</WixVariables>
+    <SuppressSpecificWarnings>1076</SuppressSpecificWarnings>
+    <Cultures>
+    </Cultures>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <OutputPath>$(SolutionDir)\dist\$(Configuration)$(Platform)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
+    <DefineConstants>
+    </DefineConstants>
+    <CompilerAdditionalOptions>-ext WixUtilExtension
+-ext WixFirewallExtension</CompilerAdditionalOptions>
+    <LinkerAdditionalOptions>-ext WixUtilExtension
+-ext WixFirewallExtension</LinkerAdditionalOptions>
+    <WixVariables>Platform=$(PlatformName)</WixVariables>
+    <SuppressSpecificWarnings>1076</SuppressSpecificWarnings>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+    <DefineConstants>Debug;</DefineConstants>
+    <OutputPath>$(SolutionDir)\dist\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Platform)\$(Configuration)\</IntermediateOutputPath>
+    <WixVariables>Platform=$(Platform)</WixVariables>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
+    <DefineConstants>
+    </DefineConstants>
+    <CompilerAdditionalOptions>-ext WixUtilExtension
+-ext WixFirewallExtension</CompilerAdditionalOptions>
+    <LinkerAdditionalOptions>-ext WixUtilExtension
+-ext WixFirewallExtension</LinkerAdditionalOptions>
+    <OutputPath>$(SolutionDir)\dist\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Platform)\$(Configuration)\</IntermediateOutputPath>
+    <WixVariables>Platform=$(Platform)</WixVariables>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="beryllium.wxs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="WixUI_en-us.wxl">
+      <Link>loc\WixUI_en-us.wxl</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WixUI_ru-ru.wxl">
+      <Link>loc\WixUI_ru-ru.wxl</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <WixExtension Include="WixUIExtension">
+      <HintPath>$(WixExtDir)\WixUIExtension.dll</HintPath>
+      <Name>WixUIExtension</Name>
+    </WixExtension>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="loc" />
+  </ItemGroup>
+  <Import Project="$(WixTargetsPath)" />
+  <!--
+	To modify your build process, add your task inside one of the targets below and uncomment it.
+	Other similar extension points exist, see Wix.targets.
+	<Target Name="BeforeBuild">
+	</Target>
+	<Target Name="AfterBuild">
+	</Target>
+	-->
+</Project>

@@ -1469,12 +1469,16 @@ void MainWindow::onStartStudy()
 #error "Unsupported byte order"
 #endif
 
-    auto cond = pendingPatient->saveFile((const char*)outputPath.absoluteFilePath(".patient.dcm").toLocal8Bit(), writeXfer);
+    auto localPatientInfoFile = outputPath.absoluteFilePath(".patient.dcm");
+    auto cond = pendingPatient->saveFile((const char*)localPatientInfoFile.toLocal8Bit(), writeXfer);
     if (cond.bad())
     {
         QMessageBox::critical(this, windowTitle(), QString::fromLocal8Bit(cond.text()));
         return;
     }
+#ifdef Q_WS_WIN
+    SetFileAttributesW(localPatientInfoFile.toStdWString().c_str(), FILE_ATTRIBUTE_HIDDEN);
+#endif
 
     if (settings.value("start-with-mpps", true).toBool() && !settings.value("mpps-server").toString().isEmpty())
     {

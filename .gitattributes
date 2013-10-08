@@ -1,6 +1,8 @@
 * text=auto !eol
 /HACKING -text
 /README -text
+/WixUI_en-us.wxl -text
+/WixUI_ru-ru.wxl -text
 /aboutdialog.cpp -text
 /aboutdialog.h -text
 /archivewindow.cpp -text
@@ -8,12 +10,14 @@
 /beryllium.1 -text
 /beryllium.cpp -text
 /beryllium.desktop -text
+/beryllium.ico -text
 /beryllium.pro -text
 /beryllium.qrc -text
 /beryllium.sln -text
 /beryllium.spec -text
 /beryllium.vcxproj -text
 /beryllium.vcxproj.filters -text
+/beryllium.wxs -text
 /beryllium_ru.ts -text
 /build-pkg.sh -text
 /comboboxwithpopupsignal.h -text
@@ -47,6 +51,7 @@ dicom/worklistquerysettings.cpp -text
 dicom/worklistquerysettings.h -text
 docs/changelog -text
 docs/copyright -text
+docs/license.rtf -text
 /log.cfg -text
 /mainwindow.cpp -text
 /mainwindow.h -text
@@ -54,6 +59,7 @@ docs/copyright -text
 /mandatoryfieldgroup.h -text
 /mandatoryfieldssettings.cpp -text
 /mandatoryfieldssettings.h -text
+/msi.wixproj -text
 /patientdialog.cpp -text
 /patientdialog.h -text
 /physicianssettings.cpp -text
