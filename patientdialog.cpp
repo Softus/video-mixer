@@ -23,7 +23,7 @@
 #include <QDateEdit>
 #include <QDebug>
 #include <QFormLayout>
-#include <QLineEdit>
+#include <QxtLineEdit>
 #include <QLocale>
 #include <QPushButton>
 #include <QSettings>
@@ -38,9 +38,10 @@ PatientDialog::PatientDialog(QWidget *parent) :
     setMinimumSize(480, 240);
 
     auto layoutMain = new QFormLayout;
-    layoutMain->addRow(tr("&Patient ID"), textPatientId = new QLineEdit);
-    layoutMain->addRow(tr("&Name"), textPatientName = new QLineEdit);
+    layoutMain->addRow(tr("&Patient ID"), textPatientId = new QxtLineEdit);
+    layoutMain->addRow(tr("&Name"), textPatientName = new QxtLineEdit);
     layoutMain->addRow(tr("&Sex"), cbPatientSex = new QComboBox);
+    cbPatientSex->setLineEdit(new QxtLineEdit);
     cbPatientSex->addItems(QStringList() << "" << tr("female") << tr("male") << tr("other"));
     QChar patientSexCodes[] = {'U', 'F', 'M', 'O'};
     for (int i = 0; i < cbPatientSex->count(); ++i)
@@ -54,10 +55,12 @@ PatientDialog::PatientDialog(QWidget *parent) :
     dateBirthday->setDisplayFormat(tr("MM/dd/yyyy"));
 
     layoutMain->addRow(tr("P&hysician"), cbPhysician = new QComboBox);
+    cbPhysician->setLineEdit(new QxtLineEdit);
     cbPhysician->addItems(QSettings().value("physicians").toStringList());
     cbPhysician->setEditable(true);
 
     layoutMain->addRow(tr("Study &type"), cbStudyType = new QComboBox);
+    cbStudyType->setLineEdit(new QxtLineEdit);
     cbStudyType->addItems(QSettings().value("studies").toStringList());
     cbStudyType->setEditable(true);
 

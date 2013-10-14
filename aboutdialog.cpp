@@ -21,6 +21,7 @@
 #include <QBoxLayout>
 #include <QLabel>
 #include <QPushButton>
+#include <qxtglobal.h>
 #include <gst/gst.h>
 #include <QGlib/Value>
 
@@ -40,7 +41,7 @@
 #include <dcmtk/dcmdata/dcuid.h>
 #endif
 
-// Prior to 10.2.2 QGlib::Value isn't compatible with QGlib::Error
+// Prior to 10.2.2 the QGlib::Value was not compatible with the QGlib::Error
 //
 #ifdef QGLIB_ERROR_H
   #define QT_GST_VERSION_STR "0.10.2.2"
@@ -93,6 +94,10 @@ AboutDialog::AboutDialog(QWidget *parent) :
     lblQt->setOpenExternalLinks(true);
     layoutText->addWidget(lblQt);
 
+    auto lblQxt = new QLabel(tr("<a href=\"http://libqxt.org/\">LibQxt ").append(QXT_VERSION_STR).append("</a>"));
+    lblQxt->setOpenExternalLinks(true);
+    layoutText->addWidget(lblQxt);
+
     auto lblQtGstreamer = new QLabel(tr("<a href=\"http://gstreamer.freedesktop.org/modules/qt-gstreamer.html/\">QtGStreamer ").append(QT_GST_VERSION_STR).append("</a>"));
     lblQtGstreamer->setOpenExternalLinks(true);
     layoutText->addWidget(lblQtGstreamer);
@@ -109,6 +114,10 @@ AboutDialog::AboutDialog(QWidget *parent) :
     layoutText->addWidget(lblIconsWin8);
     layoutText->addSpacing(16);
 
+    //
+    // Copyright & warranty
+    //
+
     auto lblCopyright = new QLabel(tr("<p>Copyright (C) 2013 <a href=\"%1\">%2</a>. All rights reserved.</p>")
                                    .arg(PRODUCT_SITE_URL, tr("Irkutsk Diagnostic Center")/*ORGANIZATION_FULL_NAME*/));
     lblCopyright->setOpenExternalLinks(true);
@@ -119,8 +128,12 @@ AboutDialog::AboutDialog(QWidget *parent) :
                                      "INCLUDING THE WARRANTY OF DESIGN,\n"
                                      "MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE."));
     layoutText->addWidget(lblWarranty);
-    layoutText->addSpacing(16);
 
+    //
+    // Footer
+    //
+
+    layoutText->addSpacing(16);
     auto btnClose = new QPushButton(tr("OK"));
     connect(btnClose, SIGNAL(clicked()), this, SLOT(accept()));
     layoutText->addWidget(btnClose, 1, Qt::AlignRight);

@@ -17,6 +17,7 @@ DEFINES   += PREFIX=$$PREFIX
 
 QT       += core gui
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+INCLUDEPATH += libqxt
 
 DISTRO = $$system(cat /proc/version)
 
@@ -57,7 +58,10 @@ SOURCES += aboutdialog.cpp \
     settings.cpp \
     storagesettings.cpp \
     studiessettings.cpp \
-    videosettings.cpp
+    videosettings.cpp \
+    libqxt/qxtlineedit.cpp \
+    libqxt/qxtspanslider.cpp \
+    videoeditor.cpp
 
 HEADERS += aboutdialog.h \
     archivewindow.h \
@@ -72,7 +76,11 @@ HEADERS += aboutdialog.h \
     settings.h \
     storagesettings.h \
     studiessettings.h \
-    videosettings.h
+    videosettings.h \
+    libqxt/qxtlineedit.h \
+    libqxt/qxtspanslider.h \
+    libqxt/qxtspanslider_p.h \
+    videoeditor.h
 
 FORMS   +=
 

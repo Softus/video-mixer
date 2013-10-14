@@ -469,8 +469,8 @@ QString DcmClient::nCreateRQ(DcmDataset* dsPatient)
     BuildNCreateDataSet(*dsPatient, dsNCreate);
 
 #ifdef QT_DEBUG
-    patientDs->writeXML(std::cout << "------C-FIND------------" << std::endl);
-    nCreateDs.writeXML(std::cout  << "------N-Create----------" << std::endl);
+    dsPatient->writeXML(std::cout << "------C-FIND------------" << std::endl);
+    dsNCreate.writeXML(std::cout  << "------N-Create----------" << std::endl);
 #endif
 
     T_DIMSE_Message req, rsp;

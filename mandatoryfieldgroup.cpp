@@ -19,18 +19,26 @@
 // No need for QDateEdit, QSpinBox, etc., since these always return values
 #include <QCheckBox>
 #include <QComboBox>
-#include <QLineEdit>
+#include <QFormLayout>
 #include <QPushButton>
 #include <QSettings>
+#include <QxtLineEdit>
 
 MandatoryFieldGroup::MandatoryFieldGroup(QObject *parent)
     : QObject(parent), okButton(nullptr)
 {
-    mandatoryFieldColor = QColor(QSettings().value("mandatory-field-color", "pink").toString()).rgba();
+    mandatoryFieldColor = QColor(QSettings().value("mandatory-field-color", "red").toString()).rgba();
 }
 
 void MandatoryFieldGroup::add(QWidget *widget)
 {
+    // For comboboxes, datepicker and like that we shuld use inner text edit widget
+    //
+    if (widget->inherits("QComboBox"))
+    {
+        widget = ((QComboBox*)widget->qt_metacast("QComboBox"))->lineEdit();
+    }
+
     if (widgets.contains(widget))
     {
         return;
@@ -39,10 +47,6 @@ void MandatoryFieldGroup::add(QWidget *widget)
     if (widget->inherits("QCheckBox"))
     {
         connect(widget, SIGNAL(clicked()), this, SLOT(changed()));
-    }
-    else if (widget->inherits("QComboBox"))
-    {
-        connect(widget, SIGNAL(currentTextChanged(const QString&)), this, SLOT(changed()));
     }
     else if (widget->inherits("QLineEdit"))
     {
@@ -59,6 +63,11 @@ void MandatoryFieldGroup::add(QWidget *widget)
 
 void MandatoryFieldGroup::remove(QWidget *widget)
 {
+    if (widget->inherits("QComboBox"))
+    {
+        widget = ((QComboBox*)widget->qt_metacast("QComboBox"))->lineEdit();
+    }
+
     if (widgets.removeAll(widget))
     {
         widget->setBackgroundRole(QPalette::NoRole);
@@ -84,20 +93,52 @@ void MandatoryFieldGroup::setMandatory(QWidget* widget, bool mandatory)
         return;
     }
 
-    auto p = QPalette(widget->palette());
+    QWidget* label = nullptr;
+    if (parent())
+    {
+        auto layoutParent = static_cast<QWidget*>(parent())->layout();
+        if (layoutParent && layoutParent->inherits("QFormLayout"))
+        {
+            auto layoutForm = ((QFormLayout*)layoutParent->qt_metacast("QFormLayout"));
+            label = layoutForm->labelForField(widget);
+            if (!label)
+            {
+                // For line edit in a combobox, datepicker and like that we shuld use parent label
+                //
+                label = layoutForm->labelForField(static_cast<QWidget*>(widget->parent()));
+            }
+        }
+    }
+
+    if (!label)
+    {
+        // Checkboxes usually has no label.
+        //
+        label = widget;
+    }
+
+    auto p = QPalette(label->palette());
     if (mandatory)
     {
-        widget->setProperty("mandatoryFieldBaseColor", p.color(QPalette::Base).rgba());
-        p.setColor(QPalette::Base, mandatoryFieldColor);
+        widget->setProperty("mandatoryFieldBaseColor", p.color(QPalette::Foreground).rgba());
+        p.setColor(QPalette::Foreground, mandatoryFieldColor);
         widget->setToolTip(tr("This is a mandatory field"));
+        if (widget->inherits("QxtLineEdit"))
+        {
+            ((QxtLineEdit*)widget->qt_metacast("QxtLineEdit"))->setSampleText(tr("This is a mandatory field"));
+        }
     }
     else
     {
-        p.setColor(QPalette::Base, widget->property("mandatoryFieldBaseColor").toUInt());
+        p.setColor(QPalette::Foreground, widget->property("mandatoryFieldBaseColor").toUInt());
         widget->setProperty("mandatoryFieldBaseColor", 0);
         widget->setToolTip("");
+        if (widget->inherits("QxtLineEdit"))
+        {
+            ((QxtLineEdit*)widget->qt_metacast("QxtLineEdit"))->setSampleText("");
+        }
     }
-    widget->setPalette(p);
+    label->setPalette(p);
 }
 
 void MandatoryFieldGroup::changed()
@@ -109,7 +150,6 @@ void MandatoryFieldGroup::changed()
     Q_FOREACH (auto widget, widgets)
     {
         if ((widget->inherits("QCheckBox") && ((QCheckBox*)widget->qt_metacast("QCheckBox"))->checkState() == Qt::PartiallyChecked)
-            || (widget->inherits("QComboBox") && ((QComboBox*)widget->qt_metacast("QComboBox"))->currentText().isEmpty())
             || (widget->inherits("QLineEdit") && ((QLineEdit*)widget->qt_metacast("QLineEdit"))->text().isEmpty()))
         {
             enable = false;

@@ -52,6 +52,18 @@ dicom/worklistquerysettings.h -text
 docs/changelog -text
 docs/copyright -text
 docs/license.rtf -text
+libqxt/QxtLineEdit -text
+libqxt/QxtSpanSlider -text
+libqxt/qxtglobal.h -text
+libqxt/qxtlineedit.cpp -text
+libqxt/qxtlineedit.h -text
+libqxt/qxtmetaobject.h -text
+libqxt/qxtnamespace.h -text
+libqxt/qxtnull.h -text
+libqxt/qxtnullable.h -text
+libqxt/qxtspanslider.cpp -text
+libqxt/qxtspanslider.h -text
+libqxt/qxtspanslider_p.h -text
 /log.cfg -text
 /mainwindow.cpp -text
 /mainwindow.h -text
@@ -105,5 +117,7 @@ touch/slidingstackedwidget.cpp -text
 touch/slidingstackedwidget.h -text
 touch/slidingstackedwidget_p.h -text
 touch/touch.pri -text
+/videoeditor.cpp -text
+/videoeditor.h -text
 /videosettings.cpp -text
 /videosettings.h -text

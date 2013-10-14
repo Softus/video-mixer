@@ -33,6 +33,7 @@
 #endif
 
 #include "mainwindow.h"
+#include "videoeditor.h"
 #include "product.h"
 
 int main(int argc, char *argv[])
@@ -53,6 +54,7 @@ int main(int argc, char *argv[])
     OFConsoleApplication dcmtkApp(PRODUCT_SHORT_NAME);
     OFCommandLine cmd;
     OFLog::addOptions(cmd);
+    cmd.addOption("--edit-video","", 1);
     dcmtkApp.parseCommandLine(cmd, argc, argv);
     OFLog::configureFromCommandLine(cmd, dcmtkApp);
 #endif
@@ -94,6 +96,20 @@ int main(int argc, char *argv[])
 
     // UI scope
     //
+    int videoEditIdx = app.arguments().indexOf("--edit-video");
+    if (videoEditIdx >= 0 && ++videoEditIdx < app.arguments().size())
+    {
+        VideoEditor wndEditor;
+#ifdef WITH_TOUCH
+        ClickFilter filter;
+        wndEditor.installEventFilter(&filter);
+        wndEditor.grabGesture(Qt::TapGesture);
+#endif
+        wndEditor.show();
+        wndEditor.loadFile(app.arguments().at(videoEditIdx));
+        errCode = app.exec();
+    }
+    else
     {
         MainWindow wnd;
 #ifdef WITH_TOUCH
