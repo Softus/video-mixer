@@ -46,12 +46,12 @@
       <ParseFiles>false</ParseFiles>
     </Filter>
     <Filter Include="Generated Files\Debug">
-      <UniqueIdentifier>{55134c36-741f-4ddc-a0cc-a2cdc310f2c7}</UniqueIdentifier>
+      <UniqueIdentifier>{57649445-a274-4b6f-8b01-5df0951bfca8}</UniqueIdentifier>
       <Extensions>cpp;moc</Extensions>
       <SourceControlFiles>False</SourceControlFiles>
     </Filter>
     <Filter Include="Generated Files\Release">
-      <UniqueIdentifier>{650f053a-bfb5-47d6-95f0-832c4ede9ef1}</UniqueIdentifier>
+      <UniqueIdentifier>{9c999b8d-a7fd-44db-8616-678528c3f885}</UniqueIdentifier>
       <Extensions>cpp;moc</Extensions>
       <SourceControlFiles>False</SourceControlFiles>
     </Filter>
@@ -64,30 +64,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="beryllium.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="dicom\dcmclient.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="dicom\dcmconverter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="dicom\detailsdialog.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="dicom\dicomdevicesettings.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="dicom\dicommppsmwlsettings.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="dicom\dicomserverdetails.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="dicom\dicomserversettings.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="dicom\dicomstoragesettings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="mainwindow.cpp">
@@ -105,6 +81,12 @@
     <ClCompile Include="physicianssettings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="libqxt\qxtlineedit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libqxt\qxtspanslider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="settings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -114,19 +96,10 @@
     <ClCompile Include="studiessettings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="dicom\transcyrillic.cpp">
+    <ClCompile Include="videoeditor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="videosettings.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="dicom\worklist.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="dicom\worklistcolumnsettings.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="dicom\worklistquerysettings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_aboutdialog.cpp">
@@ -145,48 +118,6 @@
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_comboboxwithpopupsignal.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_dcmclient.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_dcmclient.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_detailsdialog.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_detailsdialog.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_dicomdevicesettings.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_dicomdevicesettings.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_dicommppsmwlsettings.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_dicommppsmwlsettings.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_dicomserverdetails.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_dicomserverdetails.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_dicomserversettings.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_dicomserversettings.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_dicomstoragesettings.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_dicomstoragesettings.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_mainwindow.cpp">
@@ -219,6 +150,24 @@
     <ClCompile Include="Release\moc_physicianssettings.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="Debug\moc_qxtlineedit.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_qxtlineedit.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_qxtspanslider.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_qxtspanslider.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_qxtspanslider_p.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_qxtspanslider_p.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
     <ClCompile Include="Debug\moc_settings.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
@@ -237,28 +186,16 @@
     <ClCompile Include="Release\moc_studiessettings.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="Debug\moc_videoeditor.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_videoeditor.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
     <ClCompile Include="Debug\moc_videosettings.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_videosettings.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_worklist.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_worklist.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_worklistcolumnsettings.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_worklistcolumnsettings.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_worklistquerysettings.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_worklistquerysettings.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\qrc_beryllium.cpp">
@@ -273,30 +210,6 @@
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="comboboxwithpopupsignal.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="dicom\dcmclient.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <ClInclude Include="dicom\dcmconverter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <CustomBuild Include="dicom\detailsdialog.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="dicom\dicomdevicesettings.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="dicom\dicommppsmwlsettings.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="dicom\dicomserverdetails.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="dicom\dicomserversettings.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="dicom\dicomstoragesettings.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="mainwindow.h">
@@ -320,6 +233,15 @@
     <ClInclude Include="qwaitcursor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <CustomBuild Include="libqxt\qxtlineedit.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="libqxt\qxtspanslider.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="libqxt\qxtspanslider_p.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
     <CustomBuild Include="settings.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
@@ -329,19 +251,10 @@
     <CustomBuild Include="studiessettings.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <ClInclude Include="dicom\transcyrillic.h">
+    <CustomBuild Include="videoeditor.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
+    </CustomBuild>
     <CustomBuild Include="videosettings.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="dicom\worklist.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="dicom\worklistcolumnsettings.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="dicom\worklistquerysettings.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>

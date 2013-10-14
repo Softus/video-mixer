@@ -726,14 +726,19 @@ void QxtSpanSlider::paintEvent(QPaintEvent* event)
     const QRect gr = style()->subControlRect(QStyle::CC_Slider, &opt, QStyle::SC_SliderGroove, this);
 
     // span
-    const int minv = qMax(lrv, urv);
+    const int minv = qMin(lrv, urv);
+    const int maxv = qMax(lrv, urv);
     const QPoint c = QRect(lr.center(), ur.center()).center();
-    QRect spanRect;
     if (orientation() == Qt::Horizontal)
-        spanRect = QRect(QPoint(minv, c.y() - 2), QPoint(gr.right() - 2, c.y() + 1));
+    {
+        qxt_d().drawSpan(&painter, QRect(QPoint(gr.left(), c.y() - 2), QPoint(minv, c.y() + 1)));
+        qxt_d().drawSpan(&painter, QRect(QPoint(maxv, c.y() - 2), QPoint(gr.right(), c.y() + 1)));
+    }
     else
-        spanRect = QRect(QPoint(c.x() - 2, minv), QPoint(c.x() + 1, gr.bottom() - 3));
-    qxt_d().drawSpan(&painter, spanRect);
+    {
+        qxt_d().drawSpan(&painter, QRect(QPoint(c.x() - 2, gr.top()), QPoint(c.x() + 1, minv)));
+        qxt_d().drawSpan(&painter, QRect(QPoint(c.x() - 2, maxv), QPoint(c.x() + 1, gr.bottom())));
+    }
 
     // handles
     switch (qxt_d().lastPressed)
