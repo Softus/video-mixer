@@ -78,20 +78,6 @@
     extern "C" __declspec(dllimport) int __stdcall SetFileAttributesW(const wchar_t* lpFileName, quint32 dwFileAttributes);
 #endif
 
-// From Cairo SDK
-//
-#include <cairo/cairo-gobject.h>
-#include <boost/math/constants/constants.hpp>
-
-namespace QGlib
-{
-    template <>
-    struct GetTypeImpl<cairo_t*>
-    {
-        inline operator Type() { return CAIRO_GOBJECT_TYPE_CONTEXT; };
-    };
-}
-
 static inline QBoxLayout::Direction bestDirection(const QSize &s)
 {
     return s.width() >= s.height()? QBoxLayout::LeftToRight: QBoxLayout::TopToBottom;
@@ -164,8 +150,6 @@ MainWindow::MainWindow(QWidget *parent) :
     imageNo(0),
     clipNo(0),
     studyNo(0),
-    overlayWidth(0),
-    overlayHeight(0),
     running(false),
     recording(false)
 {
@@ -455,11 +439,8 @@ QString MainWindow::buildPipeline()
     pipe.append(" ! tee name=splitter");
     if (!displaySinkDef.isEmpty())
     {
-        if (enableVideo)
-        {
-            pipe.append(" ! ffmpegcolorspace ! cairooverlay name=displayoverlay");
-        }
-        if (enableVideo || displayFixColor)
+        pipe.append(" ! textoverlay name=displayoverlay silent=1 shadow=0 halignment=right valignment=top text=* xpad=2 ypad=0 font-desc=16");
+        if (displayFixColor)
         {
             pipe.append(" ! ffmpegcolorspace");
         }
@@ -551,10 +532,6 @@ QGst::PipelinePtr MainWindow::createPipeline()
         {
             qCritical() << "Element displaysink not found";
         }
-
-        auto displayOverlay = pl->getElementByName("displayoverlay");
-        displayOverlay && QGlib::connect(displayOverlay, "caps-changed", this, &MainWindow::onCapsOverlay)
-             && QGlib::connect(displayOverlay, "draw", this, &MainWindow::onDrawOverlay);
 
         auto clipValve = pl->getElementByName("clipinspect");
         clipValve && QGlib::connect(clipValve, "handoff", this, &MainWindow::onClipFrame);
@@ -807,6 +784,13 @@ void MainWindow::onClipFrame(const QGst::BufferPtr& buf)
     }
 
     enableWidget(btnRecord, true);
+    auto displayOverlay = pipeline->getElementByName("displayoverlay");
+    if (displayOverlay)
+    {
+        displayOverlay->setProperty("silent", false);
+        displayOverlay->setProperty("color",  0xFF00FF00);
+        displayOverlay->setProperty("outline-color", 0xFF00FF00);
+    }
 
     // Once we got an I-Frame, open second valve
     //
@@ -840,47 +824,6 @@ void MainWindow::onVideoFrame(const QGst::BufferPtr& buf)
     // Once we got an I-Frame, open second valve
     //
     setElementProperty("videovalve", "drop", false);
-}
-
-void MainWindow::onCapsOverlay(const QGst::CapsPtr& caps)
-{
-    QGst::StructurePtr s = caps->internalStructure(0);
-    if (s)
-    {
-        overlayWidth = s->value("width").toInt();
-        overlayHeight = s->value("height").toInt();
-    }
-    else
-    {
-        overlayWidth = overlayHeight = 0;
-    }
-}
-
-void MainWindow::onDrawOverlay(cairo_t* cr, quint64 timestamp, quint64 /*duration*/)
-{
-    if (!running || !overlayWidth || !overlayHeight)
-    {
-        return;
-    }
-
-    if (1 & (timestamp / 750000000))
-    {
-        // skip every odd second
-        //
-        return;
-    }
-
-    int size = overlayHeight / 30;
-    cairo_translate (cr, overlayWidth - size, size);
-
-    cairo_set_line_width(cr, 2);
-    cairo_set_source_rgb(cr, recording? 0.0: 0.25, recording? 0.25: 0.0, 0);
-
-    cairo_arc(cr, 0, 0, size / 2, 0, boost::math::constants::two_pi<double>());
-    cairo_stroke_preserve(cr);
-
-    cairo_set_source_rgb(cr, recording? 0.0: 0.8, recording? 0.8: 0.0, 0.0);
-    cairo_fill(cr);
 }
 
 void MainWindow::onImageReady(const QGst::BufferPtr& buf)
@@ -1010,12 +953,8 @@ void MainWindow::onElementMessage(const QGst::ElementMessagePtr& message)
     {
         // At this time the video output finally has a sink, so set it up now
         //
-        QGst::ElementPtr sink = displayWidget->videoSink();
-        if (sink)
-        {
-            sink->setProperty("force-aspect-ratio", TRUE);
-            displayWidget->update();
-        }
+        message->source()->setProperty("force-aspect-ratio", true);
+        displayWidget->update();
         return;
     }
 
@@ -1118,7 +1057,8 @@ void MainWindow::onStartClick()
 
 #endif
 
-    setElementProperty(videoEncoderValve, "drop", !running);
+    setElementProperty(videoEncoderValve, "drop", true);
+    setElementProperty("displayoverlay", "silent", true);
 
     updateStartButton();
     displayWidget->update();
@@ -1245,6 +1185,14 @@ void MainWindow::onRecordClick()
         removeVideoTail("clip");
         clipPreviewFileName.clear();
         recording = false;
+
+        auto displayOverlay = pipeline->getElementByName("displayoverlay");
+        if (displayOverlay)
+        {
+            displayOverlay->setProperty("silent", !pipeline->getElementByName("videomux"));
+            displayOverlay->setProperty("color",  0xFFFF0000);
+            displayOverlay->setProperty("outline-color", 0xFFFF0000);
+        }
     }
 
     updateRecordButton();
@@ -1506,6 +1454,14 @@ void MainWindow::onStartStudy()
     running = startVideoRecord();
 
     setElementProperty(videoEncoderValve, "drop", !running);
+
+    auto displayOverlay = pipeline->getElementByName("displayoverlay");
+    if (displayOverlay)
+    {
+        displayOverlay->setProperty("silent", !pipeline->getElementByName("videomux"));
+        displayOverlay->setProperty("color",  0xFFFF0000);
+        displayOverlay->setProperty("outline-color", 0xFFFF0000);
+    }
 
     updateStartButton();
     updateWindowTitle();

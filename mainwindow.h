@@ -83,8 +83,6 @@ class MainWindow : public QWidget
     int           imageNo;
     int           clipNo;
     int           studyNo;
-    int           overlayWidth;
-    int           overlayHeight;
 
     QMenuBar* createMenuBar();
     QToolBar* createToolBar();
@@ -118,8 +116,6 @@ class MainWindow : public QWidget
     void onStateChangedMessage(const QGst::StateChangedMessagePtr& message);
     void onElementMessage(const QGst::ElementMessagePtr& message);
 
-    void onCapsOverlay(const QGst::CapsPtr&);
-    void onDrawOverlay(cairo_t*, quint64, quint64);
     void onImageReady(const QGst::BufferPtr&);
     void onClipFrame(const QGst::BufferPtr&);
     void onVideoFrame(const QGst::BufferPtr&);

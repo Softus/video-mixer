@@ -716,6 +716,19 @@ void ArchiveWindow::onBusMessage(const QGst::MessagePtr& message)
         onStateChangedMessage(message.staticCast<QGst::StateChangedMessage>());
         break;
     case QGst::MessageElement:
+        {
+            const QGst::StructurePtr s = message->internalStructure();
+            if (!s)
+            {
+                qDebug() << "Got empty QGst::MessageElement";
+            }
+            else if (s->name() == "prepare-xwindow-id" || s->name() == "prepare-window-handle")
+            {
+                // At this time the video output finally has a sink, so set it up now
+                //
+                message->source()->setProperty("force-aspect-ratio", true);
+            }
+        }
         break;
     case QGst::MessageError:
         {
@@ -793,28 +806,7 @@ void ArchiveWindow::onStateChangedMessage(const QGst::StateChangedMessagePtr& me
 
     if (message->source() == pipeline)
     {
-        if (message->oldState() == QGst::StateNull && message->newState() == QGst::StateReady)
-        {
-            auto sink = pipeline->getElementByName("displaysink");
-            if (sink)
-            {
-                auto childProxy =  sink.dynamicCast<QGst::ChildProxy>();
-                if (childProxy)
-                {
-                    auto cnt = childProxy->childrenCount();
-                    for (uint i = 0; i < cnt; ++i)
-                    {
-                        auto child = childProxy->childByIndex(i);
-                        child->setProperty("force-aspect-ratio", true);
-                    }
-                }
-                else
-                {
-                    sink->setProperty("force-aspect-ratio", true);
-                }
-            }
-        }
-        else if (message->oldState() == QGst::StateReady && message->newState() == QGst::StatePaused)
+        if (message->oldState() == QGst::StateReady && message->newState() == QGst::StatePaused)
         {
             // The aspect ratio has been already fixed, time to show the video
             //
