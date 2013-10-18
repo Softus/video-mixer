@@ -80,7 +80,8 @@ HEADERS += aboutdialog.h \
     libqxt/qxtlineedit.h \
     libqxt/qxtspanslider.h \
     libqxt/qxtspanslider_p.h \
-    videoeditor.h
+    videoeditor.h \
+    defaults.h
 
 FORMS   +=
 

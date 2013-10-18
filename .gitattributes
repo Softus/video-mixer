@@ -24,6 +24,7 @@
 debian/compat -text
 debian/control -text
 debian/rules -text
+/defaults.h -text
 dicom/dcmclient.cpp -text
 dicom/dcmclient.h -text
 dicom/dcmconverter.cpp -text

@@ -15,6 +15,7 @@
  */
 
 #include "videosettings.h"
+#include "defaults.h"
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDebug>
@@ -77,10 +78,10 @@ void VideoSettings::showEvent(QShowEvent *e)
     QWidget::showEvent(e);
     // Refill the boxes every time the page is shown
     //
-    updateGstList("video-encoder", "x264enc", GST_ELEMENT_FACTORY_TYPE_ENCODER | GST_ELEMENT_FACTORY_TYPE_MEDIA_VIDEO, listVideoCodecs);
-    updateGstList("video-muxer", "mpegpsmux", GST_ELEMENT_FACTORY_TYPE_MUXER, listVideoMuxers);
-    updateGstList("image-encoder", "jpegenc", GST_ELEMENT_FACTORY_TYPE_ENCODER | GST_ELEMENT_FACTORY_TYPE_MEDIA_IMAGE, listImageCodecs);
-    updateGstList("rtp-payloader", "rtph264pay", GST_ELEMENT_FACTORY_TYPE_PAYLOADER, listRtpPayloaders);
+    updateGstList("video-encoder", DEFAULT_VIDEO_ENCODER, GST_ELEMENT_FACTORY_TYPE_ENCODER | GST_ELEMENT_FACTORY_TYPE_MEDIA_VIDEO, listVideoCodecs);
+    updateGstList("video-muxer",   DEFAULT_VIDEO_MUXER,   GST_ELEMENT_FACTORY_TYPE_MUXER, listVideoMuxers);
+    updateGstList("image-encoder", DEFAULT_IMAGE_ENCODER, GST_ELEMENT_FACTORY_TYPE_ENCODER | GST_ELEMENT_FACTORY_TYPE_MEDIA_IMAGE, listImageCodecs);
+    updateGstList("rtp-payloader", DEFAULT_RTP_PAYLOADER, GST_ELEMENT_FACTORY_TYPE_PAYLOADER, listRtpPayloaders);
 
     updateDeviceList();
 }

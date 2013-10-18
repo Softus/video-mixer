@@ -15,6 +15,7 @@
  */
 
 #include "../product.h"
+#include "../defaults.h"
 #include "dcmconverter.h"
 
 #include <QDebug>
@@ -217,7 +218,7 @@ public:
             if (cond.bad())
               return cond;
 #endif
-            if (QSettings().value("store-video-as-binary", false).toBool())
+            if (QSettings().value("store-video-as-binary", DEFAULT_STORE_VIDEO_AS_BINARY).toBool())
             {
                 ts = EXS_LittleEndianImplicit;
             }

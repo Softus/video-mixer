@@ -4,10 +4,6 @@
 #include <QGestureEvent>
 #include <QWidget>
 
-ClickFilter::ClickFilter()
-{
-}
-
 static bool sendLeftMouseEvent(QEvent::Type type, QWidget* widget, const QPoint& pt)
 {
     QMouseEvent me(type, widget->mapFromGlobal(pt), pt, Qt::LeftButton, Qt::LeftButton, Qt::NoModifier);

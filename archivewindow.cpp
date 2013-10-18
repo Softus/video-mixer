@@ -15,6 +15,7 @@
  */
 
 #include "archivewindow.h"
+#include "defaults.h"
 #include "qwaitcursor.h"
 
 #ifdef WITH_DICOM
@@ -244,7 +245,7 @@ void ArchiveWindow::closeEvent(QCloseEvent *evt)
 void ArchiveWindow::updateRoot()
 {
     QSettings settings;
-    root.setPath(settings.value("output-path", "/video").toString());
+    root.setPath(settings.value("output-path", DEFAULT_OUTPUT_PATH).toString());
     curr = root;
     switchViewMode(settings.value("archive-mode").toInt());
 }
@@ -695,7 +696,7 @@ void ArchiveWindow::playMediaFile(const QFileInfo& fi)
         pipeline->setState(QGst::StatePaused);
         pipeline->getState(nullptr, nullptr, GST_SECOND * 10); // 10 sec
         auto details = GstDebugGraphDetails(GST_DEBUG_GRAPH_SHOW_MEDIA_TYPE | GST_DEBUG_GRAPH_SHOW_NON_DEFAULT_PARAMS | GST_DEBUG_GRAPH_SHOW_STATES);
-        GST_DEBUG_BIN_TO_DOT_FILE_WITH_TS(pipeline.staticCast<QGst::Bin>(), details, qApp->applicationName().toUtf8());
+        GST_DEBUG_BIN_TO_DOT_FILE_WITH_TS(pipeline.staticCast<QGst::Bin>(), details, qApp->applicationName().append(".archive").toUtf8());
         setWindowTitle(tr("Archive - %1").arg(fi.fileName()));
     }
     catch (QGlib::Error ex)

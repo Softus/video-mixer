@@ -18,6 +18,8 @@
 #include "detailsdialog.h"
 #include "dcmclient.h"
 #include "transcyrillic.h"
+#include "../defaults.h"
+#include "../qwaitcursor.h"
 
 #ifdef WITH_TOUCH
 #include "../touch/slidingstackedwidget.h"
@@ -35,7 +37,6 @@
 #include <QTableWidget>
 #include <QTimer>
 #include <QToolBar>
-#include "../qwaitcursor.h"
 
 #include <dcmtk/dcmdata/dcdatset.h>
 #include <dcmtk/dcmdata/dcdeftag.h>
@@ -54,7 +55,7 @@ Worklist::Worklist(QWidget *parent) :
     QSettings settings;
     setWindowTitle(tr("Worklist - %1").arg(settings.value("mwl-server").toString()));
 
-    auto translateCyrillic = settings.value("translate-cyrillic", true).toBool();
+    auto translateCyrillic = settings.value("translate-cyrillic", DEFAULT_TRANSLATE_CYRILLIC).toBool();
     auto cols = settings.value("worklist-columns").toStringList();
     if (cols.size() == 0)
     {

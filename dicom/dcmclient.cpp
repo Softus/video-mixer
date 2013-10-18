@@ -18,6 +18,7 @@
 #include "worklist.h"
 #include "dcmclient.h"
 #include "dcmconverter.h"
+#include "defaults.h"
 
 #include <dcmtk/dcmdata/dcdeftag.h>
 #include <dcmtk/dcmdata/dcdicent.h>
@@ -37,12 +38,6 @@
 
 #ifdef _MSC_VER
 #pragma comment(lib, "ws2_32.lib")
-#endif
-
-#ifdef QT_DEBUG
-#define DEFAULT_TIMEOUT 3 // 3 seconds for test builds
-#else
-#define DEFAULT_TIMEOUT 30 // 30 seconds for prodaction builds
 #endif
 
 static void CopyPatientData(/*const*/ DcmDataset* src, DcmDataset* dst)
@@ -65,7 +60,7 @@ static void BuildCFindDataSet(DcmDataset& ds)
         if (aet.isEmpty())
             aet = qApp->applicationName().toUpper();
     }
-    auto scheduledDate = settings.value("worklist-by-date", 1).toInt();
+    auto scheduledDate = settings.value("worklist-by-date", DEFAULT_WORKLIST_DATE_RANGE).toInt();
 
     ds.putAndInsertString(DCM_SpecificCharacterSet, "ISO_IR 192"); // UTF-8
     ds.insertEmptyElement(DCM_AccessionNumber);
@@ -98,7 +93,7 @@ static void BuildCFindDataSet(DcmDataset& ds)
             break;
         case 2: // Today +- days
             {
-                auto deltaDays = settings.value("worklist-delta", 30).toInt();
+                auto deltaDays = settings.value("worklist-delta", DEFAULT_WORKLIST_DAY_DELTA).toInt();
                 auto range = QDate::currentDate().addDays(-deltaDays).toString("yyyyMMdd") + "-" +
                     QDate::currentDate().addDays(+deltaDays).toString("yyyyMMdd");
                 sps->putAndInsertString(DCM_ScheduledProcedureStepStartDate, range.toUtf8());

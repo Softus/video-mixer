@@ -8,9 +8,11 @@
 #include <QGst/Ui/VideoWidget>
 
 QT_BEGIN_NAMESPACE
+class QFile;
 class QLabel;
 class QSlider;
 class QTimer;
+class QxtSpanSlider;
 QT_END_NAMESPACE
 
 class VideoEditor : public QWidget
@@ -27,21 +29,27 @@ protected:
 signals:
 
 public slots:
-    void setPosition(int position);
-    void onSeekClick();
     void onPlayPauseClick();
     void onPositionChanged();
+    void onSaveAsClick();
+    void onSaveClick();
+    void onSeekClick();
+    void setPosition(int position);
 
 private:
+    QString                filePath;
     QSlider*               sliderPos;
+    QxtSpanSlider*         sliderRange;
     QLabel*                lblPos;
     QLabel*                lblRange;
     QGst::Ui::VideoWidget* videoWidget;
     QGst::PipelinePtr      pipeline;
     QTimer*                positionTimer;
+    qint64                 duration;
 
     void onBusMessage(const QGst::MessagePtr& message);
     void onStateChange(const QGst::StateChangedMessagePtr& message);
+    void exportVideo(QFile* outFile);
 };
 
 #endif // VIDEOEDITOR_H

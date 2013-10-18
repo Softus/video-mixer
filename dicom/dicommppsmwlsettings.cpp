@@ -16,6 +16,7 @@
 
 #include "dicommppsmwlsettings.h"
 #include "../comboboxwithpopupsignal.h"
+#include "../defaults.h"
 #include <QCheckBox>
 #include <QFormLayout>
 #include <QSettings>
@@ -43,7 +44,7 @@ DicomMppsMwlSettings::DicomMppsMwlSettings(QWidget *parent) :
     connect(cbMwlServer, SIGNAL(beforePopup()), this, SLOT(onUpdateServers()));
 
     mainLayout->addRow(checkTransCyr = new QCheckBox(tr("&Translate latin letters back to cyrillic")));
-    checkTransCyr->setChecked(settings.value("translate-cyrillic", true).toBool());
+    checkTransCyr->setChecked(settings.value("translate-cyrillic", DEFAULT_TRANSLATE_CYRILLIC).toBool());
 
     auto spacer = new QWidget;
     spacer->setMinimumHeight(16);
@@ -65,8 +66,8 @@ DicomMppsMwlSettings::DicomMppsMwlSettings(QWidget *parent) :
         cbMppsServer->setCurrentIndex(0);
         checkUseMpps->setChecked(true);
     }
-    checkStartWithMpps->setChecked(settings.value("start-with-mpps", true).toBool());
-    checkCompleteWithMpps->setChecked(settings.value("complete-with-mpps", true).toBool());
+    checkStartWithMpps->setChecked(settings.value("start-with-mpps", DEFAULT_START_WITH_MPPS).toBool());
+    checkCompleteWithMpps->setChecked(settings.value("complete-with-mpps", DEFAULT_COMPLETE_WITH_MPPS).toBool());
 
     connect(cbMppsServer, SIGNAL(beforePopup()), this, SLOT(onUpdateServers()));
 

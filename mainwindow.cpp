@@ -22,6 +22,7 @@
 #include "settings.h"
 #include "videosettings.h"
 #include "patientdialog.h"
+#include "defaults.h"
 
 #ifdef WITH_DICOM
 #include "dicom/worklist.h"
@@ -205,7 +206,7 @@ MainWindow::MainWindow(QWidget *parent) :
     layoutMain->addWidget(listImagesAndClips);
 #endif
 
-    if (settings.value("enable-menu", false).toBool())
+    if (settings.value("enable-menu").toBool())
     {
         layoutMain->setMenuBar(createMenuBar());
     }
@@ -393,10 +394,10 @@ QString MainWindow::buildPipeline()
     auto deviceDef = settings.value("device").toString();
     auto formatDef = settings.value("format").toString();
     auto sizeDef   = settings.value("size").toSize();
-    auto srcDef   = settings.value("src").toString();
-    auto srcFixColor = settings.value("src-colorspace", false).toBool()? "! ffmpegcolorspace ": "";
+    auto srcDef    = settings.value("src").toString();
+    auto srcFixColor    = settings.value("src-colorspace").toBool()? "! ffmpegcolorspace ": "";
     auto srcDeinterlace = settings.value("video-deinterlace").toBool();
-    auto srcParams = settings.value("src-parameters").toString();
+    auto srcParams      = settings.value("src-parameters").toString();
 
     if (!srcDef.isEmpty())
     {
@@ -432,8 +433,8 @@ QString MainWindow::buildPipeline()
 
     // v4l2src ... ! tee name=splitter ! ffmpegcolorspace ! ximagesink splitter.");
     //
-    auto displaySinkDef  = settings.value("display-sink",  "autovideosink").toString();
-    auto displayFixColor = settings.value(displaySinkDef + "-colorspace", false).toBool();
+    auto displaySinkDef  = settings.value("display-sink", DEFAULT_DISPLAY_SINK).toString();
+    auto displayFixColor = settings.value(displaySinkDef + "-colorspace").toBool();
     auto displayParams   = settings.value(displaySinkDef + "-parameters").toString();
     auto enableVideo     = settings.value("enable-video").toBool();
     pipe.append(" ! tee name=splitter");
@@ -455,14 +456,14 @@ QString MainWindow::buildPipeline()
     //                ! identity name=clipinspect ! queue ! mpegpsmux ! filesink videosplitter.
     //           splitter.
     //
-    auto outputPathDef      = settings.value("output-path",    "/video").toString();
-    auto videoEncoderDef    = settings.value("video-encoder",  "x264enc").toString();
-    auto videoFixColor      = settings.value(videoEncoderDef + "-colorspace", false).toBool()? "ffmpegcolorspace ! ": "";
+    auto outputPathDef      = settings.value("output-path",    DEFAULT_OUTPUT_PATH).toString();
+    auto videoEncoderDef    = settings.value("video-encoder",  DEFAULT_VIDEO_ENCODER).toString();
+    auto videoFixColor      = settings.value(videoEncoderDef + "-colorspace").toBool()? "ffmpegcolorspace ! ": "";
     auto videoEncoderParams = settings.value(videoEncoderDef + "-parameters").toString();
-    auto rtpPayDef          = settings.value("rtp-payloader",  "rtph264pay").toString();
-    auto rtpPayParams       = settings.value(rtpPayDef +       "-parameters").toString();
-    auto rtpSinkDef         = settings.value("rtp-sink",       "udpsink clients=127.0.0.1:5000 sync=0").toString();
-    auto rtpSinkParams      = settings.value(rtpSinkDef +      "-parameters").toString();
+    auto rtpPayDef          = settings.value("rtp-payloader",  DEFAULT_RTP_PAYLOADER).toString();
+    auto rtpPayParams       = settings.value(rtpPayDef + "-parameters").toString();
+    auto rtpSinkDef         = settings.value("rtp-sink",       DEFAULT_RTP_SINK).toString();
+    auto rtpSinkParams      = settings.value(rtpSinkDef + "-parameters").toString();
     auto enableRtp          = !rtpSinkDef.isEmpty() && settings.value("enable-rtp").toBool();
 
     pipe.append(" ! valve name=encvalve drop=1 ! queue max-size-bytes=0 ! ").append(videoFixColor)
@@ -477,7 +478,7 @@ QString MainWindow::buildPipeline()
         if (enableRtp)
         {
             pipe.append(" ! queue ! ").append(rtpPayDef).append(" ").append(rtpPayParams)
-                .append(" ! ").append(rtpSinkDef).append(" name=rtpsink videosplitter.").append(" ").append(rtpSinkParams);
+                .append(" ! ").append(rtpSinkDef).append(" clients=127.0.0.1:5000 sync=0 name=rtpsink ").append(rtpSinkParams).append(" videosplitter. ");
         }
     }
 
@@ -488,16 +489,16 @@ QString MainWindow::buildPipeline()
 
     // ... ! tee name=splitter ... splitter. ! identity name=imagevalve ! jpegenc ! multifilesink splitter.
     //
-    auto imageEncoderDef = settings.value("image-encoder", "jpegenc").toString();
+    auto imageEncoderDef = settings.value("image-encoder", DEFAULT_IMAGE_ENCODER).toString();
     auto imageEncoderFixColor = settings.value(imageEncoderDef + "-colorspace", false).toBool()?
                 "ffmpegcolorspace ! ": "";
     auto imageEncoderParams = settings.value(imageEncoderDef + "-parameters").toString();
-    auto imageSinkDef    = settings.value("image-sink", "multifilesink name=imagesink post-messages=1 async=0 sync=0").toString();
+    auto imageSinkDef       = settings.value("image-sink", DEFAULT_IMAGE_SINK).toString();
     if (!imageSinkDef.isEmpty())
     {
         pipe.append(" ! identity name=imagevalve drop-probability=1.0 ! ")
             .append(imageEncoderFixColor).append(imageEncoderDef).append(" ").append(imageEncoderParams).append(" ! ")
-            .append(imageSinkDef).append(" location=").append(outputPathDef).append("/image splitter.");
+            .append(imageSinkDef).append("  name=imagesink post-messages=1 async=0 sync=0 location=").append(outputPathDef).append("/image splitter.");
     }
 
     return pipe;
@@ -554,8 +555,6 @@ QGst::PipelinePtr MainWindow::createPipeline()
             qCritical() << "Element imagesink not found";
         }
 
-        // To set correct bitrate we must examine default bitrate first
-        //
         videoEncoder = pl->getElementByName("videoencoder");
         if (!videoEncoder)
         {
@@ -745,10 +744,10 @@ void MainWindow::updateWindowTitle()
 void MainWindow::updateOutputPath()
 {
     QSettings settings;
-    auto tpl = settings.value("output-path", "/video").toString();
+    auto tpl = settings.value("output-path", DEFAULT_OUTPUT_PATH).toString();
     if (!patientId.isEmpty())
     {
-        tpl.append(settings.value("folder-template", "/%yyyy%-%MM%/%dd%/%name%/").toString());
+        tpl.append(settings.value("folder-template", DEFAULT_FOLDER_TEMPLATE).toString());
     }
 
     outputPath.setPath(replace(tpl, ++studyNo));
@@ -1067,8 +1066,8 @@ void MainWindow::onStartClick()
 void MainWindow::onSnapshotClick()
 {
     QSettings settings;
-    QString imageExt = getExt(settings.value("image-encoder", "jpegenc").toString());
-    QString imageFileName = replace(settings.value("image-template", "image-%study%-%nn%").toString(), ++imageNo).append(imageExt);
+    QString imageExt = getExt(settings.value("image-encoder", DEFAULT_IMAGE_ENCODER).toString());
+    QString imageFileName = replace(settings.value("image-template", DEFAULT_IMAGE_TEMPLATE).toString(), ++imageNo).append(imageExt);
 
     setElementProperty(imageSink, "location", outputPath.absoluteFilePath(imageFileName), QGst::StateReady);
 
@@ -1083,8 +1082,8 @@ void MainWindow::onSnapshotClick()
 QString MainWindow::appendVideoTail(const QString& prefix, int idx)
 {
     QSettings settings;
-    auto muxDef  = settings.value("video-muxer", "mpegpsmux").toString();
-    auto sinkDef = settings.value(prefix + "-sink",   "filesink").toString();
+    auto muxDef  = settings.value("video-muxer",    DEFAULT_VIDEO_MUXER).toString(); // no prefix- here, muxer must be equal
+    auto sinkDef = settings.value(prefix + "-sink", DEFAULT_VIDEO_SINK).toString();
 
     auto inspect = pipeline->getElementByName((prefix + "inspect").toUtf8());
     if (!inspect)
@@ -1164,7 +1163,7 @@ void MainWindow::onRecordClick()
 {
     if (!recording)
     {
-        QString imageExt = getExt(QSettings().value("image-encoder", "jpegenc").toString());
+        QString imageExt = getExt(QSettings().value("image-encoder", DEFAULT_IMAGE_ENCODER).toString());
         auto clipFileName = appendVideoTail("clip", ++clipNo);
         if (!clipFileName.isEmpty())
         {

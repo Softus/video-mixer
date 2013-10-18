@@ -15,6 +15,9 @@
  */
 
 #include "storagesettings.h"
+#include "qwaitcursor.h"
+#include "defaults.h"
+
 #include <QHBoxLayout>
 #include <QFileDialog>
 #include <QFormLayout>
@@ -23,7 +26,6 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QSettings>
-#include "qwaitcursor.h"
 
 StorageSettings::StorageSettings(QWidget *parent) :
     QWidget(parent)
@@ -32,7 +34,7 @@ StorageSettings::StorageSettings(QWidget *parent) :
     QFormLayout* layoutMain = new QFormLayout;
 
     QHBoxLayout* layoutPath = new QHBoxLayout;
-    textOutputPath = new QLineEdit(settings.value("output-path", "/video").toString());
+    textOutputPath = new QLineEdit(settings.value("output-path", DEFAULT_OUTPUT_PATH).toString());
     QPushButton* browseButton = new QPushButton(QString(0x2026));
     browseButton->setMaximumWidth(32);
     connect(browseButton, SIGNAL(clicked()), this, SLOT(onClickBrowse()));
@@ -47,7 +49,7 @@ StorageSettings::StorageSettings(QWidget *parent) :
     frameFolder->setFrameShape(QFrame::Box);
     frameFolder->setFrameShadow(QFrame::Sunken);
     QFormLayout* layoutFolder = new QFormLayout;
-    textFolderTemplate = new QLineEdit(settings.value("folder-template", "/%yyyy%-%MM%/%dd%/%name%/").toString());
+    textFolderTemplate = new QLineEdit(settings.value("folder-template", DEFAULT_FOLDER_TEMPLATE).toString());
     layoutFolder->addRow(tr("&Folder template"), textFolderTemplate);
     frameFolder->setLayout(layoutFolder);
     layoutMain->addRow(frameFolder);
@@ -56,9 +58,9 @@ StorageSettings::StorageSettings(QWidget *parent) :
     frameFile->setFrameShape(QFrame::Box);
     frameFile->setFrameShadow(QFrame::Sunken);
     QFormLayout* fileLayout = new QFormLayout;
-    fileLayout->addRow(tr("&Pictures template"), textImageTemplate = new QLineEdit(settings.value("image-template", "image-%study%-%nn%").toString()));
-    fileLayout->addRow(tr("&Clips template"), textClipTemplate = new QLineEdit(settings.value("clip-template", "clip-%study%-%nn%").toString()));
-    fileLayout->addRow(tr("&Video template"), textVideoTemplate = new QLineEdit(settings.value("video-template", "video-%study%").toString()));
+    fileLayout->addRow(tr("&Pictures template"), textImageTemplate = new QLineEdit(settings.value("image-template", DEFAULT_IMAGE_TEMPLATE).toString()));
+    fileLayout->addRow(tr("&Clips template"), textClipTemplate = new QLineEdit(settings.value("clip-template", DEFAULT_CLIP_TEMPLATE).toString()));
+    fileLayout->addRow(tr("&Video template"), textVideoTemplate = new QLineEdit(settings.value("video-template", DEFAULT_VIDEO_TEMPLATE).toString()));
     frameFile->setLayout(fileLayout);
     layoutMain->addRow(frameFile);
     layoutMain->addRow(new QLabel(tr("%yyyy%\t\tyear\n%mm%\t\tmonth\n%dd%\t\tday\n%hh%\t\thour\n%min%\t\tminute\n"

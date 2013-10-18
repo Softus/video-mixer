@@ -15,6 +15,7 @@
  */
 
 #include "mandatoryfieldgroup.h"
+#include "defaults.h"
 
 // No need for QDateEdit, QSpinBox, etc., since these always return values
 #include <QCheckBox>
@@ -27,7 +28,8 @@
 MandatoryFieldGroup::MandatoryFieldGroup(QObject *parent)
     : QObject(parent), okButton(nullptr)
 {
-    mandatoryFieldColor = QColor(QSettings().value("mandatory-field-color", "red").toString()).rgba();
+    mandatoryFieldColor = QColor(QSettings()
+        .value("mandatory-field-color", DEFAULT_MANDATORY_FIELD_COLOR).toString()).rgba();
 }
 
 void MandatoryFieldGroup::add(QWidget *widget)

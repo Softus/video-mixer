@@ -15,6 +15,7 @@
  */
 
 #include "dicomdevicesettings.h"
+#include "../defaults.h"
 #include <QCheckBox>
 #include <QDebug>
 #include <QFormLayout>
@@ -61,7 +62,7 @@ DicomDeviceSettings::DicomDeviceSettings(QWidget *parent) :
     spinPort->setValue(settings.value("local-port").toInt());
 
     mainLayout->addRow(nullptr, checkExport = new QCheckBox(tr("&Export video to DICOM")));
-    checkExport->setChecked(settings.value("dicom-export", true).toBool());
+    checkExport->setChecked(settings.value("dicom-export", DEFAULT_EXPORT_TO_DICOM).toBool());
     setLayout(mainLayout);
 }
 

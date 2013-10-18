@@ -11,7 +11,7 @@ class ClickFilter : public QObject
 {
     Q_OBJECT
 public:
-    ClickFilter();
+    ClickFilter() = default;
 protected:
     bool eventFilter(QObject *o, QEvent *e);
 };

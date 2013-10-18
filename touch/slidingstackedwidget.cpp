@@ -13,10 +13,6 @@ SlidingStackedWidget::SlidingStackedWidget(QWidget *parent)
     grabGesture(Qt::PanGesture, Qt::IgnoredGesturesPropagateToParent);
 }
 
-SlidingStackedWidget::~SlidingStackedWidget()
-{
-}
-
 bool SlidingStackedWidget::event(QEvent *e)
 {
     if (e->type() == QEvent::Gesture)

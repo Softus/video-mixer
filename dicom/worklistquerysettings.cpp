@@ -15,6 +15,7 @@
  */
 
 #include "worklistquerysettings.h"
+#include "../defaults.h"
 #include <QBoxLayout>
 #include <QCalendarWidget>
 #include <QCheckBox>
@@ -31,7 +32,7 @@ WorklistQuerySettings::WorklistQuerySettings(QWidget *parent) :
     QWidget(parent)
 {
     QSettings settings;
-    auto scheduledDate = settings.value("worklist-by-date", 1).toInt();
+    auto scheduledDate = settings.value("worklist-by-date", DEFAULT_WORKLIST_DATE_RANGE).toInt();
 
     QFrame *frameDate = new QFrame();
     frameDate->setFrameShape(QFrame::Box);
@@ -46,7 +47,7 @@ WorklistQuerySettings::WorklistQuerySettings(QWidget *parent) :
     spinDelta = new QSpinBox;
     spinDelta->setMaximum(365*10);
     spinDelta->setSuffix(tr(" day(s)"));
-    spinDelta->setValue(settings.value("worklist-delta", 30).toInt());
+    spinDelta->setValue(settings.value("worklist-delta", DEFAULT_WORKLIST_DAY_DELTA).toInt());
     layoutToday->addWidget(spinDelta);
     layoutToday->addStretch(1);
     layoutDate->addLayout(layoutToday);
