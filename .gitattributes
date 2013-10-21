@@ -120,5 +120,7 @@ touch/slidingstackedwidget_p.h -text
 touch/touch.pri -text
 /videoeditor.cpp -text
 /videoeditor.h -text
+/videoencodingprogressdialog.cpp -text
+/videoencodingprogressdialog.h -text
 /videosettings.cpp -text
 /videosettings.h -text

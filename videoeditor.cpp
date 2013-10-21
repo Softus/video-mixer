@@ -1,4 +1,5 @@
 #include "videoeditor.h"
+#include "videoencodingprogressdialog.h"
 #include "product.h"
 #include "defaults.h"
 #include "qwaitcursor.h"
@@ -20,9 +21,12 @@
 
 #include <QGlib/Connect>
 #include <QGlib/Error>
+#include <QGst/Buffer>
 #include <QGst/Bus>
 #include <QGst/ElementFactory>
 #include <QGst/Event>
+#include <QGst/Fourcc>
+#include <QGst/Pad>
 #include <QGst/Parse>
 #include <QGst/Query>
 #include <QGst/Ui/VideoWidget>
@@ -64,6 +68,8 @@ VideoEditor::VideoEditor(QWidget *parent)
     actionSave->setShortcut(QKeySequence::Save);
     auto actionSaveAs = barEditor->addAction(QIcon(":buttons/back"), tr("Save as").append(0x2026), this, SLOT(onSaveAsClick()));
     actionSaveAs->setShortcut(QKeySequence::SaveAs);
+    auto actionSnapshot = barEditor->addAction(QIcon(":buttons/camera"), tr("Snapshot"), this, SLOT(onSnapshotClick()));
+    actionSnapshot->setShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_H));
 
 #ifndef WITH_TOUCH
     layoutMain->addWidget(barEditor);
@@ -76,38 +82,37 @@ VideoEditor::VideoEditor(QWidget *parent)
 
     auto barMediaControls = new QToolBar(tr("Media"));
     barMediaControls->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    lblPos = new QLabel;
-    lblPos->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    lblPos->setAlignment(Qt::AlignLeft);
-    barMediaControls->addWidget(lblPos);
-    auto actionSeekBack = barMediaControls->addAction(QIcon(":buttons/rewind"), tr("Rewing"), this, SLOT(onSeekClick()));
+    lblStart = new QLabel;
+    lblStart->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    lblStart->setAlignment(Qt::AlignRight | Qt::AlignCenter);
+    lblStart->setText("00:00:00.000");
+    barMediaControls->addWidget(lblStart);
+    auto actionSetLower = barMediaControls->addAction(QIcon(":buttons/cutLeft"), tr("Head"), this, SLOT(onCutClick()));
+    actionSetLower->setData(-1);
+    actionSeekBack = barMediaControls->addAction(QIcon(":buttons/rewind"), tr("Rewing"), this, SLOT(onSeekClick()));
     actionSeekBack->setData(-40000000);
     actionSeekBack->setShortcut(QKeySequence(Qt::ShiftModifier | Qt::Key_Left));
-    auto actionPlayAll = barMediaControls->addAction(QIcon(":buttons/record"), tr("Play all"), this, SLOT(onPlayPauseClick()));
-    actionPlayAll->setShortcut(QKeySequence(Qt::ShiftModifier | Qt::Key_Space));
-    auto actionPlayCrop = barMediaControls->addAction(QIcon(":buttons/record"), tr("Play crop"), this, SLOT(onPlayPauseClick()));
-    actionPlayCrop->setShortcut(QKeySequence(Qt::Key_Space));
-    auto actionSeekFwd = barMediaControls->addAction(QIcon(":buttons/forward"),  tr("Forward"), this, SLOT(onSeekClick()));
+    actionPlay = barMediaControls->addAction(QIcon(":buttons/record"), tr("Play"), this, SLOT(onPlayPauseClick()));
+    actionPlay->setShortcut(QKeySequence(Qt::Key_Space));
+    actionSeekFwd = barMediaControls->addAction(QIcon(":buttons/forward"),  tr("Forward"), this, SLOT(onSeekClick()));
     actionSeekFwd->setData(+40000000);
     actionSeekFwd->setShortcut(QKeySequence(Qt::ShiftModifier | Qt::Key_Right));
-    lblRange = new QLabel;
-    lblRange->setAlignment(Qt::AlignRight);
-    lblRange->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    barMediaControls->addWidget(lblRange);
+    auto actionSetUpper = barMediaControls->addAction(QIcon(":buttons/cutRight"), tr("Tail"), this, SLOT(onCutClick()));
+    actionSetUpper->setData(+1);
+    lblStop = new QLabel;
+    lblStop->setAlignment(Qt::AlignLeft | Qt::AlignCenter);
+    lblStop->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    lblStop->setText("00:00:00.000");
+    barMediaControls->addWidget(lblStop);
     layoutMain->addWidget(barMediaControls, 0, Qt::AlignJustify);
 
-    sliderPos = new QSlider(Qt::Horizontal);
-    sliderPos->setTickInterval(SLIDER_SCALE / 100);
-    sliderPos->setMaximum(SLIDER_SCALE);
-    connect(sliderPos, SIGNAL(sliderMoved(int)), this, SLOT(setPosition(int)));
-    layoutMain->addWidget(sliderPos);
     sliderRange = new QxtSpanSlider(Qt::Horizontal);
-    sliderRange->setTickPosition(QSlider::TicksAbove);
+    sliderRange->setTickPosition(QSlider::TicksBelow);
     sliderRange->setTickInterval(SLIDER_SCALE / 100);
     sliderRange->setMaximum(SLIDER_SCALE);
     sliderRange->setUpperValue(SLIDER_SCALE);
-    connect(sliderRange, SIGNAL(lowerPositionChanged(int)), this, SLOT(setPosition(int)));
-    connect(sliderRange, SIGNAL(upperPositionChanged(int)), this, SLOT(setPosition(int)));
+    connect(sliderRange, SIGNAL(lowerPositionChanged(int)), this, SLOT(setLowerPosition(int)));
+    connect(sliderRange, SIGNAL(upperPositionChanged(int)), this, SLOT(setUpperPosition(int)));
     layoutMain->addWidget(sliderRange);
 
 #ifdef WITH_TOUCH
@@ -118,16 +123,10 @@ VideoEditor::VideoEditor(QWidget *parent)
     QSettings settings;
     restoreGeometry(settings.value("video-editor-geometry").toByteArray());
     setWindowState((Qt::WindowState)settings.value("video-editor-state").toInt());
+    setWindowTitle(tr("Video editor"));
 
     DamnQtMadeMeDoTheSunsetByHands(barEditor);
     DamnQtMadeMeDoTheSunsetByHands(barMediaControls);
-
-
-    // This timer is used to tell the ui to change its position slider & label
-    // every 100 ms, but only when the pipeline is playing
-    //
-    positionTimer = new QTimer(this);
-    connect(positionTimer, SIGNAL(timeout()), this, SLOT(onPositionChanged()));
 }
 
 VideoEditor::~VideoEditor()
@@ -150,9 +149,6 @@ void VideoEditor::closeEvent(QCloseEvent *evt)
 void VideoEditor::loadFile(const QString& filePath)
 {
     qDebug() << filePath;
-
-    sliderPos->setValue(0);
-    duration = 0LL;
 
     if (!pipeline)
     {
@@ -198,12 +194,23 @@ void VideoEditor::onBusMessage(const QGst::MessagePtr& message)
             //
             QGst::DurationQueryPtr queryLen = QGst::DurationQuery::create(QGst::FormatTime);
             duration = pipeline && pipeline->query(queryLen)? queryLen->duration(): 0LL;
+            auto text = QGst::ClockTime(duration).toTime().toString("hh:mm:ss.zzz");
+            lblStop->setText(text);
         }
         break;
-    case QGst::MessageEos: //End of stream. We reached the end of the file.
+    case QGst::MessageEos:
         if (pipeline)
         {
-            pipeline->setState(QGst::StateNull);
+            // Rewind to the start and pause the video
+            //
+            QGst::SeekEventPtr evt = QGst::SeekEvent::create(
+                 1.0, QGst::FormatTime, QGst::SeekFlagFlush,
+                 QGst::SeekTypeSet, 0,
+                 QGst::SeekTypeNone, QGst::ClockTime::None
+             );
+
+            pipeline->sendEvent(evt);
+            pipeline->setState(QGst::StatePaused);
         }
         break;
     case QGst::MessageElement:
@@ -250,39 +257,59 @@ void VideoEditor::onBusMessage(const QGst::MessagePtr& message)
 
 void VideoEditor::onStateChange(const QGst::StateChangedMessagePtr& message)
 {
+    qDebug() << message->typeName() << " " << message->source()->property("name").toString() << " " << message->oldState() << " => " << message->newState();
     if (message->source() == pipeline)
     {
-        if (message->newState() == QGst::StatePlaying)
+        if (message->oldState() == QGst::StateReady && message->newState() == QGst::StatePaused)
         {
-            positionTimer->start(20);
+            // Time to adjust framerate
+            //
+            gint numerator = 0, denominator = 0;
+            auto sink = videoWidget->videoSink();
+            if (sink)
+            {
+                auto pad = sink->getStaticPad("sink");
+                if (pad)
+                {
+                    auto caps = pad->negotiatedCaps();
+                    if (caps)
+                    {
+                        auto s = caps->internalStructure(0);
+                        gst_structure_get_fraction (s.data()->operator const GstStructure *(), "framerate", &numerator, &denominator);
+                    }
+                }
+            }
+
+            if (denominator > 0 && numerator > 0)
+            {
+                auto frameDuration = (GST_SECOND * denominator) / numerator + 1;
+                //qDebug() << "Framerate " << denominator << "/" << numerator << " duration" << frameDuration;
+                actionSeekFwd->setData((int)frameDuration);
+                actionSeekBack->setData((int)-frameDuration);
+            }
         }
-        else if (message->oldState() == QGst::StatePlaying)
-        {
-            positionTimer->stop();
-        }
+
+        // Make sure the play/pause button is in consistent state
+        //
+        actionPlay->setIcon(QIcon(message->newState() == QGst::StatePlaying? ":buttons/pause": ":buttons/record"));
+        actionPlay->setText(message->newState() == QGst::StatePlaying? tr("Pause"): tr("Play"));
     }
 }
 
-void VideoEditor::onPositionChanged()
+void VideoEditor::setLowerPosition(int position)
 {
-    if (pipeline)
-    {
-        //here we query the pipeline about its position
-        //and we request that the result is returned in time format
-        QGst::PositionQueryPtr queryPos = QGst::PositionQuery::create(QGst::FormatTime);
-        pipeline->query(queryPos);
-        lblPos->setText(QGst::ClockTime(queryPos->position()).toTime().toString("hh:mm:ss.zzz")
-            .append("\n").append(QGst::ClockTime(duration).toTime().toString("hh:mm:ss.zzz")));
-
-        if (duration)
-        {
-            sliderPos->setValue(queryPos->position() * SLIDER_SCALE / duration);
-        }
-    }
+    setPosition(position, lblStart);
 }
 
-void VideoEditor::setPosition(int position)
+void VideoEditor::setUpperPosition(int position)
 {
+    setPosition(position, lblStop);
+}
+
+void VideoEditor::setPosition(int position, QLabel* lbl)
+{
+    qint64 seek = 0LL;
+
     if (pipeline)
     {
         //here we query the pipeline about the content's duration
@@ -290,26 +317,33 @@ void VideoEditor::setPosition(int position)
         QGst::DurationQueryPtr queryLen = QGst::DurationQuery::create(QGst::FormatTime);
         pipeline->query(queryLen);
 
+        seek = queryLen->duration() * position / SLIDER_SCALE;
         if (queryLen->duration())
         {
             QGst::SeekEventPtr evt = QGst::SeekEvent::create(
                 1.0, QGst::FormatTime, QGst::SeekFlagFlush,
-                QGst::SeekTypeSet, queryLen->duration() * position / SLIDER_SCALE,
+                QGst::SeekTypeSet, seek,
                 QGst::SeekTypeNone, QGst::ClockTime::None
             );
 
             pipeline->sendEvent(evt);
         }
     }
+
+    auto text = QGst::ClockTime(seek).toTime().toString("hh:mm:ss.zzz");
+    lbl->setText(text);
 }
 
 void VideoEditor::onSaveClick()
 {
     QTemporaryFile tmpFile;
-    exportVideo(&tmpFile);
-    QFile::remove(filePath); // Make Microsoft (R) Windows (TM) happy
-    QFile::rename(tmpFile.fileName(), filePath);
-    tmpFile.setAutoRemove(false);
+    auto confirm = QMessageBox::question(this, tr("Video editor"), tr("Overwrite %1?").arg(filePath), QMessageBox::Yes, QMessageBox::No);
+    if (confirm == QMessageBox::Yes && exportVideo(&tmpFile))
+    {
+        QFile::remove(filePath); // Make Microsoft (R) Windows (TM) happy
+        QFile::rename(tmpFile.fileName(), filePath);
+        tmpFile.setAutoRemove(false);
+    }
 }
 
 void VideoEditor::onSaveAsClick()
@@ -318,8 +352,10 @@ void VideoEditor::onSaveAsClick()
     QFileDialog dlg(this);
     dlg.setAcceptMode(QFileDialog::AcceptSave);
     dlg.setFileMode(QFileDialog::AnyFile);
-    QStringList filters = dlg.nameFilters();
-    filters.insert(0, QString("*.").append(QFileInfo(filePath).suffix()));
+    auto filters = dlg.nameFilters();
+    auto suffix = QFileInfo(filePath).suffix();
+    filters.insert(0, QString("*.").append(suffix));
+    dlg.setDefaultSuffix(suffix);
     dlg.setNameFilters(filters);
     if (dlg.exec())
     {
@@ -335,7 +371,7 @@ void VideoEditor::onSaveAsClick()
     }
 }
 
-void VideoEditor::exportVideo(QFile* outFile)
+bool VideoEditor::exportVideo(QFile* outFile)
 {
     QSettings settings;
     auto encoder         = settings.value("video-encoder", DEFAULT_VIDEO_ENCODER).toString();
@@ -347,7 +383,7 @@ void VideoEditor::exportVideo(QFile* outFile)
     if (!outFile->open(QIODevice::WriteOnly))
     {
         // TODO
-        return;
+        return false;
     }
     qDebug() << outFile->fileName();
     qint64 start = duration * sliderRange->lowerValue() / SLIDER_SCALE;
@@ -356,7 +392,7 @@ void VideoEditor::exportVideo(QFile* outFile)
     try
     {
         auto pipeDef = QString("gnlfilesource location=\"%1\" start=%2 duration=%3 media-start=0 media-duration=%3 !"
-            " %4 %5 name=videoencoder %6 ! %7 ! fdsink fd=\"%8\"")
+            " %4 %5 name=videoencoder %6 ! %7 ! fdsink fd=%8")
             .arg(filePath).arg(start).arg(len).arg(fixColor, encoder, encoderParams, muxer).arg(outFile->handle());
         qDebug() << pipeDef;
         auto pipelineExport = QGst::Parse::launch(pipeDef).dynamicCast<QGst::Pipeline>();
@@ -376,16 +412,19 @@ void VideoEditor::exportVideo(QFile* outFile)
             videoEncoder->setProperty("bitrate", videoEncBitrate);
         }
 
-        //QGlib::connect(pipelineExport->bus(), "message", this, &ArchiveWindow::onBusMessage);
-        //pipelineExport->bus()->addSignalWatch();
         auto details = GstDebugGraphDetails(GST_DEBUG_GRAPH_SHOW_MEDIA_TYPE | GST_DEBUG_GRAPH_SHOW_NON_DEFAULT_PARAMS | GST_DEBUG_GRAPH_SHOW_STATES);
-        GST_DEBUG_BIN_TO_DOT_FILE_WITH_TS(pipeline.staticCast<QGst::Bin>(), details, qApp->applicationName().append(".video-edit-export").toUtf8());
+        GST_DEBUG_BIN_TO_DOT_FILE_WITH_TS(pipelineExport.staticCast<QGst::Bin>(), details, qApp->applicationName().append(".video-edit-export").toUtf8());
 
+        auto text = tr("Saving %1").arg(outFile->inherits("QTemporaryFile")? filePath: outFile->fileName());
+        VideoEncodingProgressDialog dlgProgress(pipelineExport, duration, this);
+        dlgProgress.setLabelText(text);
+        dlgProgress.setRange(sliderRange->lowerValue(), sliderRange->upperValue());
         pipelineExport->setState(QGst::StatePlaying);
-        pipelineExport->getState(nullptr, nullptr, GST_SECOND * 10); // 10 sec
-        QMessageBox::information(this, "Test", windowTitle(), QMessageBox::Ok);
+        auto retCode = dlgProgress.exec();
+
         pipelineExport->setState(QGst::StateNull);
         pipelineExport->getState(nullptr, nullptr, GST_SECOND * 10); // 10 sec
+        return retCode == QDialog::Accepted;
     }
     catch (QGlib::Error ex)
     {
@@ -393,14 +432,162 @@ void VideoEditor::exportVideo(QFile* outFile)
         qCritical() << msg;
         QMessageBox::critical(this, windowTitle(), msg, QMessageBox::Ok);
     }
+
+    return false;
 }
 
 void VideoEditor::onSeekClick()
 {
+    QGst::PositionQueryPtr queryPos = QGst::PositionQuery::create(QGst::FormatTime);
+    if (pipeline && pipeline->query(queryPos))
+    {
+        auto newPos = queryPos->position() + static_cast<QAction*>(sender())->data().toInt();
 
+        if (newPos >= 0 && newPos < duration)
+        {
+            QGst::SeekEventPtr evt = QGst::SeekEvent::create(
+                 1.0, QGst::FormatTime, QGst::SeekFlagFlush,
+                 QGst::SeekTypeSet, newPos,
+                 QGst::SeekTypeNone, QGst::ClockTime::None
+             );
+
+            pipeline->sendEvent(evt);
+        }
+    }
 }
 
 void VideoEditor::onPlayPauseClick()
 {
+    if (pipeline)
+    {
+        pipeline->setState(pipeline->currentState() == QGst::StatePlaying? QGst::StatePaused: QGst::StatePlaying);
+    }
+}
 
+void VideoEditor::onCutClick()
+{
+    QGst::PositionQueryPtr queryPos = QGst::PositionQuery::create(QGst::FormatTime);
+    if (pipeline && pipeline->query(queryPos))
+    {
+        auto value = queryPos->position() * SLIDER_SCALE / duration;
+        auto handle = static_cast<QAction*>(sender())->data().toInt();
+        auto text = QGst::ClockTime(queryPos->position()).toTime().toString("hh:mm:ss.zzz");
+        if (handle < 0)
+        {
+            sliderRange->setLowerValue(value);
+            lblStart->setText(text);
+        }
+        else if (handle > 0)
+        {
+            sliderRange->setUpperValue(value);
+            lblStop->setText(text);
+        }
+    }
+}
+
+void VideoEditor::onSnapshotClick()
+{
+    auto sink = videoWidget->videoSink();
+    if (!sink)
+    {
+        qDebug() << "The videoWidget has no videoSink";
+        return;
+    }
+
+    auto prop = sink->property("last-buffer");
+    if (!prop)
+    {
+        qDebug() << "The last-buffer property is missing from the video sink. Snapshot failed";
+        return;
+    }
+
+    QGst::BufferPtr buffer = prop.get<QGst::BufferPtr>();
+    if (!prop)
+    {
+        qDebug() << "The last-buffer property is not a QGst::BufferPtr. Snapshot failed";
+        return;
+    }
+
+    QImage img;
+    auto caps = buffer->caps();
+    qDebug() << caps << " size " << buffer->size();
+
+    auto structure = caps->internalStructure(0);
+    auto width = structure.data()->value("width").get<int>();
+    auto height = structure.data()->value("height").get<int>();
+
+    if (qstrcmp(structure.data()->name().toLatin1(), "video/x-raw-yuv") == 0)
+    {
+        QGst::Fourcc fourcc = structure->value("format").get<QGst::Fourcc>();
+        qDebug() << "fourcc: " << fourcc.value.as_integer;
+        if (fourcc.value.as_integer == QGst::Fourcc("I420").value.as_integer)
+        {
+            img = QImage(width/2, height/2, QImage::Format_RGB32);
+
+            auto data = buffer->data();
+
+            for (int y = 0; y < height; y += 2)
+            {
+                auto yLine = data + y*width;
+                auto uLine = data + width*height + y*width/4;
+                auto vLine = data + width*height*5/4 + y*width/4;
+
+                for (int x=0; x<width; x+=2)
+                {
+                    auto Y = 1.164*(yLine[x]-16);
+                    auto U = uLine[x/2]-128;
+                    auto V = vLine[x/2]-128;
+
+                    int b = qBound(0, int(Y + 2.018*U), 255);
+                    int g = qBound(0, int(Y - 0.813*V - 0.391*U), 255);
+                    int r = qBound(0, int(Y + 1.596*V), 255);
+
+                    img.setPixel(x/2,y/2,qRgb(r,g,b));
+                }
+            }
+        }
+        else
+        {
+            qDebug() << "Unsupported yuv pixel format";
+        }
+    }
+    else if (qstrcmp(structure.data()->name().toLatin1(), "video/x-raw-rgb") == 0)
+    {
+        auto bpp = structure.data()->value("bpp").get<int>();
+        qDebug() << "RGB " << bpp;
+
+        auto format = bpp == 32? QImage::Format_RGB32:
+                      bpp == 24? QImage::Format_RGB888:
+                      QImage::Format_Invalid;
+
+        if (format != QImage::Format_Invalid)
+        {
+            img = QImage(buffer->data(), width, height, format);
+        }
+        else
+        {
+            qDebug() << "Unsupported rgb bpp";
+        }
+    }
+
+    if (!img.isNull())
+    {
+        QWaitCursor wait(this);
+        QFileDialog dlg(this);
+        dlg.setAcceptMode(QFileDialog::AcceptSave);
+        dlg.setFileMode(QFileDialog::AnyFile);
+        auto filters = dlg.nameFilters();
+        filters.insert(0, "*.jpg");
+        dlg.setDefaultSuffix("jpg");
+        dlg.setNameFilters(filters);
+        if (dlg.exec())
+        {
+            img.save(dlg.selectedFiles().first(), "JPG");
+        }
+    }
+    else
+    {
+        QMessageBox::critical(this, tr("Video editor"),
+            tr("Unsupported video format:").append("\n\n").append(caps->toString()));
+    }
 }

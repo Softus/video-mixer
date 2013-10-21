@@ -40,6 +40,7 @@ class ArchiveWindow : public QWidget
 #ifdef WITH_DICOM
     QAction*               actionStore;
 #endif
+    QAction*               actionEdit;
     QAction*               actionPlay;
     QAction*               actionMode;
     QAction*               actionSeekBack;
@@ -80,6 +81,7 @@ public slots:
     void onSwitchModeClick(QAction* action);
     void onShowFolderClick();
     void onDeleteClick();
+    void onEditClick();
 #ifdef WITH_DICOM
     void onStoreClick();
 #endif

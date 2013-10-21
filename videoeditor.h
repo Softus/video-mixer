@@ -10,8 +10,6 @@
 QT_BEGIN_NAMESPACE
 class QFile;
 class QLabel;
-class QSlider;
-class QTimer;
 class QxtSpanSlider;
 QT_END_NAMESPACE
 
@@ -30,26 +28,30 @@ signals:
 
 public slots:
     void onPlayPauseClick();
-    void onPositionChanged();
+    void onCutClick();
     void onSaveAsClick();
     void onSaveClick();
+    void onSnapshotClick();
     void onSeekClick();
-    void setPosition(int position);
+    void setLowerPosition(int position);
+    void setUpperPosition(int position);
 
 private:
     QString                filePath;
-    QSlider*               sliderPos;
     QxtSpanSlider*         sliderRange;
-    QLabel*                lblPos;
-    QLabel*                lblRange;
+    QLabel*                lblStart;
+    QLabel*                lblStop;
+    QAction*               actionPlay;
+    QAction*               actionSeekBack;
+    QAction*               actionSeekFwd;
     QGst::Ui::VideoWidget* videoWidget;
     QGst::PipelinePtr      pipeline;
-    QTimer*                positionTimer;
     qint64                 duration;
 
     void onBusMessage(const QGst::MessagePtr& message);
     void onStateChange(const QGst::StateChangedMessagePtr& message);
-    void exportVideo(QFile* outFile);
+    bool exportVideo(QFile* outFile);
+    void setPosition(int position, QLabel* lbl);
 };
 
 #endif // VIDEOEDITOR_H

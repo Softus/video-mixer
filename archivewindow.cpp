@@ -39,6 +39,7 @@
 #include <QListWidget>
 #include <QMenu>
 #include <QMessageBox>
+#include <QProcess>
 #include <QPainter>
 #include <QPushButton>
 #include <QSettings>
@@ -106,6 +107,9 @@ ArchiveWindow::ArchiveWindow(QWidget *parent) :
     actionStore->setShortcut(Qt::Key_F5);
     actionStore->setEnabled(false);
 #endif
+    actionEdit = barArchive->addAction(QIcon(":buttons/edit"), tr("Edit"), this, SLOT(onEditClick()));
+    actionEdit->setShortcut(Qt::Key_F4);
+    actionEdit->setEnabled(false);
 
     auto spacer = new QWidget;
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
@@ -603,6 +607,32 @@ void ArchiveWindow::onStoreClick()
 }
 #endif
 
+void ArchiveWindow::onEditClick()
+{
+    if (!listFiles->currentItem())
+    {
+        // Nothing is selected. Should never be happend
+        //
+        return;
+    }
+
+    QSettings settings;
+    auto filePath = curr.absoluteFilePath(listFiles->currentItem()->text());
+    auto editorExecutable = settings.value("video-editor-app", qApp->applicationFilePath()).toString();
+    auto editorSwitches = settings.value("video-editor-switches", QStringList({"--edit-video"})).toStringList();
+    editorSwitches.append(filePath);
+
+    if (!QProcess::startDetached(editorExecutable, editorSwitches))
+    {
+        auto err = tr("Failed to launch ").append(editorExecutable);
+        for (auto arg : editorSwitches)
+        {
+            err.append(' ').append(arg);
+        }
+        QMessageBox::critical(this, tr("Archive"), err);
+    }
+}
+
 void ArchiveWindow::onPrevClick()
 {
     if (listFiles->currentRow() > 0)
@@ -778,6 +808,7 @@ void ArchiveWindow::onBusMessage(const QGst::MessagePtr& message)
             {
                 action->setVisible(isClip);
             }
+            actionEdit->setEnabled(isClip);
         }
         break;
 #ifdef QT_DEBUG

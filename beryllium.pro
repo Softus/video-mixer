@@ -61,7 +61,8 @@ SOURCES += aboutdialog.cpp \
     videosettings.cpp \
     libqxt/qxtlineedit.cpp \
     libqxt/qxtspanslider.cpp \
-    videoeditor.cpp
+    videoeditor.cpp \
+    videoencodingprogressdialog.cpp
 
 HEADERS += aboutdialog.h \
     archivewindow.h \
@@ -81,7 +82,8 @@ HEADERS += aboutdialog.h \
     libqxt/qxtspanslider.h \
     libqxt/qxtspanslider_p.h \
     videoeditor.h \
-    defaults.h
+    defaults.h \
+    videoencodingprogressdialog.h
 
 FORMS   +=
 
