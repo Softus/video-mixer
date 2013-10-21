@@ -33,7 +33,7 @@ PatientDialog::PatientDialog(QWidget *parent) :
     QDialog(parent)
 {
     QSettings settings;
-    auto listMandatory = settings.value("new-study-mandatory-fields", QStringList(DEFAULT_MANDATORY_FIELDS)).toStringList();
+    auto listMandatory = settings.value("new-study-mandatory-fields", DEFAULT_MANDATORY_FIELDS).toStringList();
 
     setWindowTitle(tr("New patient"));
     setMinimumSize(480, 240);
@@ -43,7 +43,7 @@ PatientDialog::PatientDialog(QWidget *parent) :
     layoutMain->addRow(tr("&Name"), textPatientName = new QxtLineEdit);
     layoutMain->addRow(tr("&Sex"), cbPatientSex = new QComboBox);
     cbPatientSex->setLineEdit(new QxtLineEdit);
-    cbPatientSex->addItems(QStringList({"", tr("female"), tr("male"), tr("other")}));
+    cbPatientSex->addItems(QStringList() << "" << tr("female") << tr("male") << tr("other"));
     QChar patientSexCodes[] = {'U', 'F', 'M', 'O'};
     for (int i = 0; i < cbPatientSex->count(); ++i)
     {

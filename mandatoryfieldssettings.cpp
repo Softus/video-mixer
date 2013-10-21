@@ -28,7 +28,7 @@ MandatoryFieldsSettings::MandatoryFieldsSettings(QWidget *parent) :
     QSettings settings;
     auto fieldLabels = QStringList() << tr("Patient ID") << tr("Name") << tr("Sex") << tr("Birthday") << tr("Physician") << tr("Study type");
     auto fieldNames = QStringList() << "PatientID" << "Name" << "Sex" << "Birthday" << "Physician" << "StudyType";
-    auto listMandatory = settings.value("new-study-mandatory-fields", QStringList(DEFAULT_MANDATORY_FIELDS)).toStringList();
+    auto listMandatory = settings.value("new-study-mandatory-fields", DEFAULT_MANDATORY_FIELDS).toStringList();
 
     auto layoutMain = new QVBoxLayout;
     layoutMain->setContentsMargins(4,0,4,0);

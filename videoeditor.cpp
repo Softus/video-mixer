@@ -176,6 +176,11 @@ void VideoEditor::loadFile(const QString& filePath)
         pipeline->setState(QGst::StatePaused);
         setWindowTitle(tr("Video editor - %1").arg(filePath));
         this->filePath = filePath;
+#ifdef Q_WS_WIN
+        // Replace back slashes with regular ones to make gnlfilesource work.
+        //
+        this->filePath = this->filePath.replace('\\','/');
+#endif
     }
 }
 
@@ -225,6 +230,7 @@ void VideoEditor::onBusMessage(const QGst::MessagePtr& message)
                 // At this time the video output finally has a sink, so set it up now
                 //
                 message->source()->setProperty("force-aspect-ratio", true);
+                message->source()->setProperty("enable-last-buffer", true);
                 videoWidget->update();
             }
         }
@@ -385,6 +391,7 @@ bool VideoEditor::exportVideo(QFile* outFile)
         // TODO
         return false;
     }
+    outFile->close();
     qDebug() << outFile->fileName();
     qint64 start = duration * sliderRange->lowerValue() / SLIDER_SCALE;
     qint64 len   = duration * sliderRange->upperValue() / SLIDER_SCALE - start;
@@ -392,8 +399,8 @@ bool VideoEditor::exportVideo(QFile* outFile)
     try
     {
         auto pipeDef = QString("gnlfilesource location=\"%1\" start=%2 duration=%3 media-start=0 media-duration=%3 !"
-            " %4 %5 name=videoencoder %6 ! %7 ! fdsink fd=%8")
-            .arg(filePath).arg(start).arg(len).arg(fixColor, encoder, encoderParams, muxer).arg(outFile->handle());
+            " %4 %5 name=videoencoder %6 ! %7 ! filesink location=\"%8\"")
+            .arg(filePath).arg(start).arg(len).arg(fixColor, encoder, encoderParams, muxer).arg(outFile->fileName());
         qDebug() << pipeDef;
         auto pipelineExport = QGst::Parse::launch(pipeDef).dynamicCast<QGst::Pipeline>();
 
@@ -487,87 +494,85 @@ void VideoEditor::onCutClick()
 
 void VideoEditor::onSnapshotClick()
 {
-    auto sink = videoWidget->videoSink();
-    if (!sink)
-    {
-        qDebug() << "The videoWidget has no videoSink";
-        return;
-    }
-
-    auto prop = sink->property("last-buffer");
-    if (!prop)
-    {
-        qDebug() << "The last-buffer property is missing from the video sink. Snapshot failed";
-        return;
-    }
-
-    QGst::BufferPtr buffer = prop.get<QGst::BufferPtr>();
-    if (!prop)
-    {
-        qDebug() << "The last-buffer property is not a QGst::BufferPtr. Snapshot failed";
-        return;
-    }
-
     QImage img;
-    auto caps = buffer->caps();
-    qDebug() << caps << " size " << buffer->size();
 
-    auto structure = caps->internalStructure(0);
-    auto width = structure.data()->value("width").get<int>();
-    auto height = structure.data()->value("height").get<int>();
-
-    if (qstrcmp(structure.data()->name().toLatin1(), "video/x-raw-yuv") == 0)
+    auto sink = videoWidget->videoSink();
+    if (sink)
     {
-        QGst::Fourcc fourcc = structure->value("format").get<QGst::Fourcc>();
-        qDebug() << "fourcc: " << fourcc.value.as_integer;
-        if (fourcc.value.as_integer == QGst::Fourcc("I420").value.as_integer)
+        auto prop = sink->property("last-buffer");
+        if (prop)
         {
-            img = QImage(width/2, height/2, QImage::Format_RGB32);
-
-            auto data = buffer->data();
-
-            for (int y = 0; y < height; y += 2)
+            qDebug() << prop.type();
+            auto buffer = prop.get<QGst::BufferPtr>();
+            if (buffer)
             {
-                auto yLine = data + y*width;
-                auto uLine = data + width*height + y*width/4;
-                auto vLine = data + width*height*5/4 + y*width/4;
+                auto caps = buffer->caps();
+                qDebug() << caps << " size " << buffer->size();
 
-                for (int x=0; x<width; x+=2)
+                auto structure = caps->internalStructure(0);
+                auto width = structure.data()->value("width").get<int>();
+                auto height = structure.data()->value("height").get<int>();
+
+                if (qstrcmp(structure.data()->name().toLatin1(), "video/x-raw-yuv") == 0)
                 {
-                    auto Y = 1.164*(yLine[x]-16);
-                    auto U = uLine[x/2]-128;
-                    auto V = vLine[x/2]-128;
+                    QGst::Fourcc fourcc = structure->value("format").get<QGst::Fourcc>();
+                    qDebug() << "fourcc: " << fourcc.value.as_integer;
+                    if (fourcc.value.as_integer == QGst::Fourcc("I420").value.as_integer)
+                    {
+                        img = QImage(width/2, height/2, QImage::Format_RGB32);
 
-                    int b = qBound(0, int(Y + 2.018*U), 255);
-                    int g = qBound(0, int(Y - 0.813*V - 0.391*U), 255);
-                    int r = qBound(0, int(Y + 1.596*V), 255);
+                        auto data = buffer->data();
 
-                    img.setPixel(x/2,y/2,qRgb(r,g,b));
+                        for (int y = 0; y < height; y += 2)
+                        {
+                            auto yLine = data + y*width;
+                            auto uLine = data + width*height + y*width/4;
+                            auto vLine = data + width*height*5/4 + y*width/4;
+
+                            for (int x=0; x<width; x+=2)
+                            {
+                                auto Y = 1.164*(yLine[x]-16);
+                                auto U = uLine[x/2]-128;
+                                auto V = vLine[x/2]-128;
+
+                                int b = qBound(0, int(Y + 2.018*U), 255);
+                                int g = qBound(0, int(Y - 0.813*V - 0.391*U), 255);
+                                int r = qBound(0, int(Y + 1.596*V), 255);
+
+                                img.setPixel(x/2,y/2,qRgb(r,g,b));
+                            }
+                        }
+                    }
+                    else
+                    {
+                        qDebug() << "Unsupported yuv pixel format";
+                    }
+                }
+                else if (qstrcmp(structure.data()->name().toLatin1(), "video/x-raw-rgb") == 0)
+                {
+                    auto bpp = structure.data()->value("bpp").get<int>();
+                    qDebug() << "RGB " << bpp;
+
+                    auto format = bpp == 32? QImage::Format_RGB32:
+                                  bpp == 24? QImage::Format_RGB888:
+                                  QImage::Format_Invalid;
+
+                    if (format != QImage::Format_Invalid)
+                    {
+                        img = QImage(buffer->data(), width, height, format);
+                    }
+                    else
+                    {
+                        qDebug() << "Unsupported rgb bpp";
+                    }
                 }
             }
         }
-        else
-        {
-            qDebug() << "Unsupported yuv pixel format";
-        }
     }
-    else if (qstrcmp(structure.data()->name().toLatin1(), "video/x-raw-rgb") == 0)
+
+    if (img.isNull())
     {
-        auto bpp = structure.data()->value("bpp").get<int>();
-        qDebug() << "RGB " << bpp;
-
-        auto format = bpp == 32? QImage::Format_RGB32:
-                      bpp == 24? QImage::Format_RGB888:
-                      QImage::Format_Invalid;
-
-        if (format != QImage::Format_Invalid)
-        {
-            img = QImage(buffer->data(), width, height, format);
-        }
-        else
-        {
-            qDebug() << "Unsupported rgb bpp";
-        }
+        img = QPixmap::grabWidget(videoWidget).toImage();
     }
 
     if (!img.isNull())
@@ -584,10 +589,5 @@ void VideoEditor::onSnapshotClick()
         {
             img.save(dlg.selectedFiles().first(), "JPG");
         }
-    }
-    else
-    {
-        QMessageBox::critical(this, tr("Video editor"),
-            tr("Unsupported video format:").append("\n\n").append(caps->toString()));
     }
 }

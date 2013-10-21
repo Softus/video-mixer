@@ -81,10 +81,15 @@ pixmaps/about.png -text
 pixmaps/back.png -text
 pixmaps/beryllium.png -text
 pixmaps/camera.png -text
+pixmaps/cut_left.png -text
+pixmaps/cut_right.png -text
 pixmaps/database.png -text
 pixmaps/delete.png -text
 pixmaps/details.png -text
 pixmaps/dicom.png -text
+pixmaps/edit.png -text
+pixmaps/file_save.png -text
+pixmaps/file_save_as.png -text
 pixmaps/film.png -text
 pixmaps/folder.png -text
 pixmaps/forward.png -text

@@ -619,13 +619,13 @@ void ArchiveWindow::onEditClick()
     QSettings settings;
     auto filePath = curr.absoluteFilePath(listFiles->currentItem()->text());
     auto editorExecutable = settings.value("video-editor-app", qApp->applicationFilePath()).toString();
-    auto editorSwitches = settings.value("video-editor-switches", QStringList({"--edit-video"})).toStringList();
+    auto editorSwitches = settings.value("video-editor-switches", QStringList() << "--edit-video").toStringList();
     editorSwitches.append(filePath);
 
     if (!QProcess::startDetached(editorExecutable, editorSwitches))
     {
         auto err = tr("Failed to launch ").append(editorExecutable);
-        for (auto arg : editorSwitches)
+        Q_FOREACH (auto arg, editorSwitches)
         {
             err.append(' ').append(arg);
         }

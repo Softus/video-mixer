@@ -9,7 +9,7 @@
 #define DEFAULT_VIDEOBITRATE          4000
 #define DEFAULT_VIDEO_ENCODER         "ffenc_mpeg2video"
 #define DEFAULT_MANDATORY_FIELD_COLOR "red"
-#define DEFAULT_MANDATORY_FIELDS      {"PatientID", "Name"}
+#define DEFAULT_MANDATORY_FIELDS      (QStringList() << "PatientID" << "Name")
 #define DEFAULT_IMAGE_TEMPLATE        "image-%study%-%nn%"
 #define DEFAULT_CLIP_TEMPLATE         "clip-%study%-%nn%"
 #define DEFAULT_VIDEO_TEMPLATE        "video-%study%"
