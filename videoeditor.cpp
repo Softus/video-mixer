@@ -64,9 +64,9 @@ VideoEditor::VideoEditor(QWidget *parent)
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     barEditor->addWidget(spacer);
 
-    auto actionSave = barEditor->addAction(QIcon(":buttons/back"), tr("Save"), this, SLOT(onSaveClick()));
+    auto actionSave = barEditor->addAction(QIcon(":buttons/file_save"), tr("Save"), this, SLOT(onSaveClick()));
     actionSave->setShortcut(QKeySequence::Save);
-    auto actionSaveAs = barEditor->addAction(QIcon(":buttons/back"), tr("Save as").append(0x2026), this, SLOT(onSaveAsClick()));
+    auto actionSaveAs = barEditor->addAction(QIcon(":buttons/file_save_as"), tr("Save as").append(0x2026), this, SLOT(onSaveAsClick()));
     actionSaveAs->setShortcut(QKeySequence::SaveAs);
     auto actionSnapshot = barEditor->addAction(QIcon(":buttons/camera"), tr("Snapshot"), this, SLOT(onSnapshotClick()));
     actionSnapshot->setShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_H));
@@ -87,8 +87,9 @@ VideoEditor::VideoEditor(QWidget *parent)
     lblStart->setAlignment(Qt::AlignRight | Qt::AlignCenter);
     lblStart->setText("00:00:00.000");
     barMediaControls->addWidget(lblStart);
-    auto actionSetLower = barMediaControls->addAction(QIcon(":buttons/cutLeft"), tr("Head"), this, SLOT(onCutClick()));
+    auto actionSetLower = barMediaControls->addAction(QIcon(":buttons/cut_left"), tr("Head"), this, SLOT(onCutClick()));
     actionSetLower->setData(-1);
+    actionSetLower->setShortcut(QKeySequence(Qt::AltModifier | Qt::Key_Left));
     actionSeekBack = barMediaControls->addAction(QIcon(":buttons/rewind"), tr("Rewing"), this, SLOT(onSeekClick()));
     actionSeekBack->setData(-40000000);
     actionSeekBack->setShortcut(QKeySequence(Qt::ShiftModifier | Qt::Key_Left));
@@ -97,8 +98,9 @@ VideoEditor::VideoEditor(QWidget *parent)
     actionSeekFwd = barMediaControls->addAction(QIcon(":buttons/forward"),  tr("Forward"), this, SLOT(onSeekClick()));
     actionSeekFwd->setData(+40000000);
     actionSeekFwd->setShortcut(QKeySequence(Qt::ShiftModifier | Qt::Key_Right));
-    auto actionSetUpper = barMediaControls->addAction(QIcon(":buttons/cutRight"), tr("Tail"), this, SLOT(onCutClick()));
+    auto actionSetUpper = barMediaControls->addAction(QIcon(":buttons/cut_right"), tr("Tail"), this, SLOT(onCutClick()));
     actionSetUpper->setData(+1);
+    actionSetUpper->setShortcut(QKeySequence(Qt::AltModifier | Qt::Key_Right));
     lblStop = new QLabel;
     lblStop->setAlignment(Qt::AlignLeft | Qt::AlignCenter);
     lblStop->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);

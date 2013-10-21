@@ -26,6 +26,11 @@
         <file alias="movie">pixmaps/movie.png</file>
         <file alias="dicom">pixmaps/dicom.png</file>
         <file alias="back">pixmaps/back.png</file>
+        <file alias="cut_left">pixmaps/cut_left.png</file>
+        <file alias="cut_right">pixmaps/cut_right.png</file>
+        <file alias="edit">pixmaps/edit.png</file>
+        <file alias="file_save">pixmaps/file_save.png</file>
+        <file alias="file_save_as">pixmaps/file_save_as.png</file>
     </qresource>
     <qresource prefix="/app">
         <file alias="product">pixmaps/beryllium.png</file>
