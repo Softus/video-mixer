@@ -782,6 +782,10 @@ void MainWindow::onClipFrame(const QGst::BufferPtr& buf)
         return;
     }
 
+    // Once we got an I-Frame, open second valve
+    //
+    setElementProperty("clipvalve", "drop", false);
+
     enableWidget(btnRecord, true);
     auto displayOverlay = pipeline->getElementByName("displayoverlay");
     if (displayOverlay)
@@ -791,16 +795,8 @@ void MainWindow::onClipFrame(const QGst::BufferPtr& buf)
         displayOverlay->setProperty("outline-color", 0xFF00FF00);
     }
 
-    // Once we got an I-Frame, open second valve
-    //
-    setElementProperty("clipvalve", "drop", false);
-
     if (!clipPreviewFileName.isEmpty())
     {
-        // Once an image will be ready, the valve will be turned off again.
-        //
-        enableWidget(btnSnapshot, false);
-
         // Take a picture for thumbnail
         //
         setElementProperty(imageSink, "location", clipPreviewFileName, QGst::StateReady);
@@ -808,6 +804,10 @@ void MainWindow::onClipFrame(const QGst::BufferPtr& buf)
         // Turn the valve on for a while.
         //
         imageValve->setProperty("drop-probability", 0.0);
+
+        // Once an image will be ready, the valve will be turned off again.
+        //
+        enableWidget(btnSnapshot, false);
     }
 }
 
@@ -818,11 +818,11 @@ void MainWindow::onVideoFrame(const QGst::BufferPtr& buf)
         return;
     }
 
-    enableWidget(btnStart, true);
-
     // Once we got an I-Frame, open second valve
     //
     setElementProperty("videovalve", "drop", false);
+
+    enableWidget(btnStart, true);
 }
 
 void MainWindow::onImageReady(const QGst::BufferPtr& buf)

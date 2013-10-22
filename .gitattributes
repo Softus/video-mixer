@@ -53,6 +53,7 @@ dicom/worklistquerysettings.h -text
 docs/changelog -text
 docs/copyright -text
 docs/license.rtf -text
+/fix_mpeg_sys_type_find.cpp -text
 libqxt/QxtLineEdit -text
 libqxt/QxtSpanSlider -text
 libqxt/qxtglobal.h -text

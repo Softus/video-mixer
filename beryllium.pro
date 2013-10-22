@@ -62,7 +62,8 @@ SOURCES += aboutdialog.cpp \
     libqxt/qxtlineedit.cpp \
     libqxt/qxtspanslider.cpp \
     videoeditor.cpp \
-    videoencodingprogressdialog.cpp
+    videoencodingprogressdialog.cpp \
+    fix_mpeg_sys_type_find.cpp
 
 HEADERS += aboutdialog.h \
     archivewindow.h \

@@ -36,6 +36,11 @@
 #include "videoeditor.h"
 #include "product.h"
 
+// The mpegps type finder is a bit broken,
+// this code fixes it.
+//
+extern void fix_mpeg_sys_type_find();
+
 int main(int argc, char *argv[])
 {
     int errCode = 0;
@@ -44,6 +49,7 @@ int main(int argc, char *argv[])
     // For example --gst-debug-level=5
     //
     QGst::init(&argc, &argv);
+    fix_mpeg_sys_type_find();
 
 #ifdef WITH_DICOM
     // Pass some arguments to dcmtk.
