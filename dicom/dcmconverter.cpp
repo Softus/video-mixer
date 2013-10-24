@@ -190,7 +190,7 @@ public:
             }
             else
             {
-                return makeOFCondition(0, 5, OF_error, "Unsupperted image format");
+                return makeOFCondition(0, 5, OF_error, "Unsupported image format");
             }
         }
         else

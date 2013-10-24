@@ -63,7 +63,8 @@ SOURCES += aboutdialog.cpp \
     libqxt/qxtspanslider.cpp \
     videoeditor.cpp \
     videoencodingprogressdialog.cpp \
-    fix_mpeg_sys_type_find.cpp
+    fix_mpeg_sys_type_find.cpp \
+    typedetect.cpp
 
 HEADERS += aboutdialog.h \
     archivewindow.h \
@@ -84,7 +85,8 @@ HEADERS += aboutdialog.h \
     libqxt/qxtspanslider_p.h \
     videoeditor.h \
     defaults.h \
-    videoencodingprogressdialog.h
+    videoencodingprogressdialog.h \
+    typedetect.h
 
 FORMS   +=
 

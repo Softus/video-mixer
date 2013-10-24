@@ -124,6 +124,8 @@ touch/slidingstackedwidget.cpp -text
 touch/slidingstackedwidget.h -text
 touch/slidingstackedwidget_p.h -text
 touch/touch.pri -text
+/typedetect.cpp -text
+/typedetect.h -text
 /videoeditor.cpp -text
 /videoeditor.h -text
 /videoencodingprogressdialog.cpp -text

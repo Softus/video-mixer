@@ -17,6 +17,7 @@
 #include "archivewindow.h"
 #include "defaults.h"
 #include "qwaitcursor.h"
+#include "typedetect.h"
 
 #ifdef WITH_DICOM
 #include "dicom/dcmclient.h"
@@ -61,14 +62,6 @@
 #include <QGst/Ui/VideoWidget>
 
 #include <gst/gstdebugutils.h>
-
-#if defined(UNICODE) || defined (_UNICODE)
-#include <MediaInfo/MediaInfo.h>
-#else
-#define UNICODE
-#include <MediaInfo/MediaInfo.h>
-#undef UNICODE
-#endif
 
 #define GALLERY_MODE 2
 
@@ -314,7 +307,6 @@ void ArchiveWindow::preparePathPopupMenu()
 void ArchiveWindow::updateList()
 {
     QWaitCursor wait(this);
-    MediaInfoLib::MediaInfo mi;
     QFileIconProvider fip;
 
     listFiles->setUpdatesEnabled(false);
@@ -367,8 +359,14 @@ void ArchiveWindow::updateList()
         }
         else
         {
-            if (mi.Open(fi.absoluteFilePath().toStdWString())
-                && QString::fromStdWString(mi.Get(MediaInfoLib::Stream_General, 0, __T("VideoCount"))) != "0")
+            QGst::StructurePtr str;
+            auto caps = TypeDetect(fi.absoluteFilePath());
+            if (caps)
+            {
+                str = caps->internalStructure(0);
+            }
+
+            if (str && str->name().startsWith("video/"))
             {
                 icon.addFile(":/buttons/movie");
             }

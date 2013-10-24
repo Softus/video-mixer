@@ -14,6 +14,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifdef WITH_TOUCH
+#include "touch/clickfilter.h"
+#endif
+
+#include "mainwindow.h"
+#include "videoeditor.h"
+#include "product.h"
+
 #include <QApplication>
 #include <QIcon>
 #include <QLocale>
@@ -27,14 +35,6 @@
 #include <dcmtk/ofstd/ofconapp.h>
 #include <dcmtk/oflog/oflog.h>
 #endif
-
-#ifdef WITH_TOUCH
-#include "touch/clickfilter.h"
-#endif
-
-#include "mainwindow.h"
-#include "videoeditor.h"
-#include "product.h"
 
 // The mpegps type finder is a bit broken,
 // this code fixes it.

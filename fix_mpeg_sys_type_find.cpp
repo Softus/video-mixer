@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2013 Irkutsk Diagnostic Center.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; version 2.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <gst/gstinfo.h>
 #include <gst/gsttypefind.h>
 #include <gst/gstutils.h>
@@ -24,7 +40,7 @@ static GstStaticCaps mpeg_sys_caps = GST_STATIC_CAPS ("video/mpeg, "
 #define IS_MPEG_PES_HEADER(data)        (IS_MPEG_HEADER (data) &&            \
                                          IS_MPEG_PES_CODE (((guint8 *)(data))[3]))
 
-#define MPEG2_MAX_PROBE_LENGTH (128 * 1024)     /* 128kB should be 64 packs of the
+#define MPEG2_MAX_PROBE_LENGTH (256 * 1024)     /* 128kB should be 64 packs of the
                                                  * most common 2kB pack size. */
 
 #define MPEG2_MIN_SYS_HEADERS 2
@@ -264,8 +280,7 @@ suggest:
         "systemstream", G_TYPE_BOOLEAN, TRUE,
         "mpegversion", G_TYPE_INT, mpegversion, NULL);
   }
-};
-
+}
 
 void fix_mpeg_sys_type_find()
 {

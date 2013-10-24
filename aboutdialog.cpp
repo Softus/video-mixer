@@ -25,6 +25,10 @@
 #include <gst/gst.h>
 #include <QGlib/Value>
 
+#ifdef WITH_DICOM
+#define HAVE_CONFIG_H
+#include <dcmtk/dcmdata/dcuid.h>
+
 #if defined(UNICODE) || defined (_UNICODE)
   #include <MediaInfo/MediaInfo.h>
 #else
@@ -35,16 +39,12 @@
   #include <MediaInfo/MediaInfo.h>
   #undef UNICODE
 #endif
-
-#ifdef WITH_DICOM
-#define HAVE_CONFIG_H
-#include <dcmtk/dcmdata/dcuid.h>
 #endif
 
-// Prior to 10.2.2 the QGlib::Value was not compatible with the QGlib::Error
+// Prior to 10.3 the QGlib::Value was not compatible with the QGlib::Error
 //
 #ifdef QGLIB_ERROR_H
-  #define QT_GST_VERSION_STR "0.10.2.2"
+  #define QT_GST_VERSION_STR "0.10.3"
 #else
   #define QT_GST_VERSION_STR "0.10.2"
 #endif
@@ -76,6 +76,11 @@ AboutDialog::AboutDialog(QWidget *parent) :
 
     layoutText->addWidget(new QLabel(tr("Based on:")));
 #ifdef WITH_DICOM
+    auto mediaInfoVer = QString::fromStdWString(MediaInfoLib::MediaInfo::Option_Static(__T("Info_Version")));
+    auto lblMediaInfo = new QLabel(tr("<a href=\"http://mediainfo.sourceforge.net/\">").append(mediaInfoVer.replace("- v", "")).append("</a>"));
+    lblMediaInfo->setOpenExternalLinks(true);
+    layoutText->addWidget(lblMediaInfo);
+
     auto lblDcmtk = new QLabel(tr("<a href=\"http://dcmtk.org/\">DCMTK ").append(OFFIS_DCMTK_VERSION_STRING).append("</a>"));
     lblDcmtk->setOpenExternalLinks(true);
     layoutText->addWidget(lblDcmtk);
@@ -85,10 +90,9 @@ AboutDialog::AboutDialog(QWidget *parent) :
     lblGstreamer->setOpenExternalLinks(true);
     layoutText->addWidget(lblGstreamer);
 
-    auto mediaInfoVer = QString::fromStdWString(MediaInfoLib::MediaInfo::Option_Static(__T("Info_Version")));
-    auto lblMediaInfo = new QLabel(tr("<a href=\"http://mediainfo.sourceforge.net/\">").append(mediaInfoVer.replace("- v", "")).append("</a>"));
-    lblMediaInfo->setOpenExternalLinks(true);
-    layoutText->addWidget(lblMediaInfo);
+    auto lblQtGstreamer = new QLabel(tr("<a href=\"http://gstreamer.freedesktop.org/modules/qt-gstreamer.html/\">QtGStreamer ").append(QT_GST_VERSION_STR).append("</a>"));
+    lblQtGstreamer->setOpenExternalLinks(true);
+    layoutText->addWidget(lblQtGstreamer);
 
     auto lblQt = new QLabel(tr("<a href=\"http://qt-project.org/\">Qt ").append(QT_VERSION_STR).append("</a>"));
     lblQt->setOpenExternalLinks(true);
@@ -97,10 +101,6 @@ AboutDialog::AboutDialog(QWidget *parent) :
     auto lblQxt = new QLabel(tr("<a href=\"http://libqxt.org/\">LibQxt ").append(QXT_VERSION_STR).append("</a>"));
     lblQxt->setOpenExternalLinks(true);
     layoutText->addWidget(lblQxt);
-
-    auto lblQtGstreamer = new QLabel(tr("<a href=\"http://gstreamer.freedesktop.org/modules/qt-gstreamer.html/\">QtGStreamer ").append(QT_GST_VERSION_STR).append("</a>"));
-    lblQtGstreamer->setOpenExternalLinks(true);
-    layoutText->addWidget(lblQtGstreamer);
 
     //
     // Media

@@ -358,13 +358,16 @@ void VideoEditor::onSaveAsClick()
 {
     QWaitCursor wait(this);
     QFileDialog dlg(this);
+    QFileInfo   fi(filePath);
+
     dlg.setAcceptMode(QFileDialog::AcceptSave);
     dlg.setFileMode(QFileDialog::AnyFile);
     auto filters = dlg.nameFilters();
-    auto suffix = QFileInfo(filePath).suffix();
+    auto suffix = fi.suffix();
     filters.insert(0, QString("*.").append(suffix));
     dlg.setDefaultSuffix(suffix);
     dlg.setNameFilters(filters);
+    dlg.setDirectory(fi.absolutePath());
     if (dlg.exec())
     {
         if (filePath == dlg.selectedFiles().first())
@@ -587,6 +590,7 @@ void VideoEditor::onSnapshotClick()
         filters.insert(0, "*.jpg");
         dlg.setDefaultSuffix("jpg");
         dlg.setNameFilters(filters);
+        dlg.setDirectory(QFileInfo(filePath).absolutePath());
         if (dlg.exec())
         {
             img.save(dlg.selectedFiles().first(), "JPG");
