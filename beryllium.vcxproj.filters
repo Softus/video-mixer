@@ -210,6 +210,12 @@
     <ClCompile Include="videoencodingprogressdialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="typedetect.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="fix_mpeg_sys_type_find.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="aboutdialog.h">
@@ -363,6 +369,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="defaults.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="typedetect.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

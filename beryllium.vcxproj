@@ -189,6 +189,7 @@
     <ClCompile Include="Debug\moc_videosettings.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="fix_mpeg_sys_type_find.cpp" />
     <ClCompile Include="GeneratedFiles\qrc_beryllium.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </PrecompiledHeader>
@@ -256,11 +257,13 @@
     <ClCompile Include="settings.cpp" />
     <ClCompile Include="storagesettings.cpp" />
     <ClCompile Include="studiessettings.cpp" />
+    <ClCompile Include="typedetect.cpp" />
     <ClCompile Include="videoeditor.cpp" />
     <ClCompile Include="videoencodingprogressdialog.cpp" />
     <ClCompile Include="videosettings.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="typedetect.h" />
     <CustomBuild Include="videoencodingprogressdialog.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing videoencodingprogressdialog.h...</Message>
