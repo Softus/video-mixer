@@ -501,75 +501,71 @@ void VideoEditor::onSnapshotClick()
 {
     QImage img;
 
-    auto sink = videoWidget->videoSink();
-    if (sink)
+    auto frame = pipeline->property("frame");
+    if (frame)
     {
-        auto prop = sink->property("last-buffer");
-        if (prop)
+        qDebug() << frame.type();
+        auto buffer = frame.get<QGst::BufferPtr>();
+        if (buffer)
         {
-            qDebug() << prop.type();
-            auto buffer = prop.get<QGst::BufferPtr>();
-            if (buffer)
+            auto caps = buffer->caps();
+            qDebug() << caps << " size " << buffer->size();
+
+            auto structure = caps->internalStructure(0);
+            auto width = structure.data()->value("width").get<int>();
+            auto height = structure.data()->value("height").get<int>();
+
+            if (qstrcmp(structure.data()->name().toLatin1(), "video/x-raw-yuv") == 0)
             {
-                auto caps = buffer->caps();
-                qDebug() << caps << " size " << buffer->size();
-
-                auto structure = caps->internalStructure(0);
-                auto width = structure.data()->value("width").get<int>();
-                auto height = structure.data()->value("height").get<int>();
-
-                if (qstrcmp(structure.data()->name().toLatin1(), "video/x-raw-yuv") == 0)
+                QGst::Fourcc fourcc = structure->value("format").get<QGst::Fourcc>();
+                qDebug() << "fourcc: " << fourcc.value.as_integer;
+                if (fourcc.value.as_integer == QGst::Fourcc("I420").value.as_integer)
                 {
-                    QGst::Fourcc fourcc = structure->value("format").get<QGst::Fourcc>();
-                    qDebug() << "fourcc: " << fourcc.value.as_integer;
-                    if (fourcc.value.as_integer == QGst::Fourcc("I420").value.as_integer)
+                    img = QImage(width/2, height/2, QImage::Format_RGB32);
+
+                    auto data = buffer->data();
+
+                    for (int y = 0; y < height; y += 2)
                     {
-                        img = QImage(width/2, height/2, QImage::Format_RGB32);
+                        auto yLine = data + y*width;
+                        auto uLine = data + width*height + y*width/4;
+                        auto vLine = data + width*height*5/4 + y*width/4;
 
-                        auto data = buffer->data();
-
-                        for (int y = 0; y < height; y += 2)
+                        for (int x=0; x<width; x+=2)
                         {
-                            auto yLine = data + y*width;
-                            auto uLine = data + width*height + y*width/4;
-                            auto vLine = data + width*height*5/4 + y*width/4;
+                            auto Y = 1.164*(yLine[x]-16);
+                            auto U = uLine[x/2]-128;
+                            auto V = vLine[x/2]-128;
 
-                            for (int x=0; x<width; x+=2)
-                            {
-                                auto Y = 1.164*(yLine[x]-16);
-                                auto U = uLine[x/2]-128;
-                                auto V = vLine[x/2]-128;
+                            int b = qBound(0, int(Y + 2.018*U), 255);
+                            int g = qBound(0, int(Y - 0.813*V - 0.391*U), 255);
+                            int r = qBound(0, int(Y + 1.596*V), 255);
 
-                                int b = qBound(0, int(Y + 2.018*U), 255);
-                                int g = qBound(0, int(Y - 0.813*V - 0.391*U), 255);
-                                int r = qBound(0, int(Y + 1.596*V), 255);
-
-                                img.setPixel(x/2,y/2,qRgb(r,g,b));
-                            }
+                            img.setPixel(x/2,y/2,qRgb(r,g,b));
                         }
                     }
-                    else
-                    {
-                        qDebug() << "Unsupported yuv pixel format";
-                    }
                 }
-                else if (qstrcmp(structure.data()->name().toLatin1(), "video/x-raw-rgb") == 0)
+                else
                 {
-                    auto bpp = structure.data()->value("bpp").get<int>();
-                    qDebug() << "RGB " << bpp;
+                    qDebug() << "Unsupported yuv pixel format";
+                }
+            }
+            else if (qstrcmp(structure.data()->name().toLatin1(), "video/x-raw-rgb") == 0)
+            {
+                auto bpp = structure.data()->value("bpp").get<int>();
+                qDebug() << "RGB " << bpp;
 
-                    auto format = bpp == 32? QImage::Format_RGB32:
-                                  bpp == 24? QImage::Format_RGB888:
-                                  QImage::Format_Invalid;
+                auto format = bpp == 32? QImage::Format_RGB32:
+                              bpp == 24? QImage::Format_RGB888:
+                              QImage::Format_Invalid;
 
-                    if (format != QImage::Format_Invalid)
-                    {
-                        img = QImage(buffer->data(), width, height, format);
-                    }
-                    else
-                    {
-                        qDebug() << "Unsupported rgb bpp";
-                    }
+                if (format != QImage::Format_Invalid)
+                {
+                    img = QImage(buffer->data(), width, height, format);
+                }
+                else
+                {
+                    qDebug() << "Unsupported rgb bpp";
                 }
             }
         }

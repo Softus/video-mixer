@@ -715,7 +715,8 @@ void ArchiveWindow::playMediaFile(const QFileInfo& fi)
     try
     {
 //      auto pipeDef = QString("filesrc location=\"%1\" ! decodebin ! autovideosink name=displaysink async=0").arg(fi.absoluteFilePath());
-        auto pipeDef = QString("uridecodebin uri=\"%1\" ! autovideosink name=displaysink async=0").arg(QUrl::fromLocalFile(fi.absoluteFilePath()).toString());
+//      auto pipeDef = QString("uridecodebin uri=\"%1\" ! autovideosink name=displaysink async=0").arg(QUrl::fromLocalFile(fi.absoluteFilePath()).toString());
+        auto pipeDef = QString("playbin2 uri=\"%1\"").arg(QUrl::fromLocalFile(fi.absoluteFilePath()).toString());
         pipeline = QGst::Parse::launch(pipeDef).dynamicCast<QGst::Pipeline>();
         auto hiddenVideoWidget = static_cast<QGst::Ui::VideoWidget*>(pagesWidget->widget(1 - pagesWidget->currentIndex()));
         hiddenVideoWidget->watchPipeline(pipeline);
