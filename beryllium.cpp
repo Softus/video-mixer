@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
     // If failed, then try to load from app data path
     //
     if (translator.load(app.applicationDirPath() + "/" PRODUCT_SHORT_NAME "_" + locale) ||
-        translator.load(app.applicationDirPath() + "../share/" PRODUCT_SHORT_NAME "/translations/" PRODUCT_SHORT_NAME "_" + locale))
+        translator.load(app.applicationDirPath() + "/../share/" PRODUCT_SHORT_NAME "/translations/" PRODUCT_SHORT_NAME "_" + locale))
     {
         app.installTranslator(&translator);
     }
