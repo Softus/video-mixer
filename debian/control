@@ -11,6 +11,6 @@ Build-Depends: libboost-dev,
 Package: beryllium
 Architecture: i386 amd64
 Pre-Depends: debconf (>= 1.1) | debconf-2.0
-Depends: ${shlibs:Depends}
+Depends: ${shlibs:Depends}, gstreamer0.10-ffmpeg
 Description: Beryllium DICOM edition
   Video and image capturing for medicine.

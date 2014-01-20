@@ -1,3 +1,9 @@
+beryllium (0.3.16) debian;
+
+  * Localization fix
+  
+ -- Pavel Bludov <pbludov@gmail.com>  Mon, 20 Jan 2014 14:42:12 +0900
+
 beryllium (0.3.15) debian;
 
   * Simple video editor (can only cut video head/tail)
