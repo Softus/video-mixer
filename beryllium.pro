@@ -64,7 +64,10 @@ SOURCES += aboutdialog.cpp \
     videoeditor.cpp \
     videoencodingprogressdialog.cpp \
     fix_mpeg_sys_type_find.cpp \
-    typedetect.cpp
+    typedetect.cpp \
+    hotkeyedit.cpp \
+    hotkeysettings.cpp \
+    mouseshortcut.cpp
 
 HEADERS += aboutdialog.h \
     archivewindow.h \
@@ -86,7 +89,10 @@ HEADERS += aboutdialog.h \
     videoeditor.h \
     defaults.h \
     videoencodingprogressdialog.h \
-    typedetect.h
+    typedetect.h \
+    hotkeyedit.h \
+    hotkeysettings.h \
+    mouseshortcut.h
 
 FORMS   +=
 

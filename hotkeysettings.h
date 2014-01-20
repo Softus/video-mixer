@@ -14,22 +14,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CLICKFILTER_H
-#define CLICKFILTER_H
+#ifndef HOTKEYSETTINGS_H
+#define HOTKEYSETTINGS_H
 
-#include <QObject>
+#include <QWidget>
 
-QT_BEGIN_NAMESPACE
-class QEvent;
-QT_END_NAMESPACE
+class HotKeyEdit;
 
-class ClickFilter : public QObject
+class HotKeySettings : public QWidget
 {
     Q_OBJECT
+    HotKeyEdit*  heStartStudy;
+    HotKeyEdit*  heTakeSnapshot;
+    HotKeyEdit*  heRepordPause;
+    HotKeyEdit*  heArchiveWindow;
+
 public:
-    ClickFilter() = default;
-protected:
-    bool eventFilter(QObject *o, QEvent *e);
+    Q_INVOKABLE explicit HotKeySettings(QWidget *parent = 0);
+    
+signals:
+    
+public slots:
+    void save();
 };
 
-#endif // CLICKFILTER_H
+#endif // HOTKEYSETTINGS_H

@@ -3,6 +3,9 @@
 
 #define DEFAULT_DISPLAY_SINK          "autovideosink"
 #define DEFAULT_FOLDER_TEMPLATE       "/%yyyy%-%MM%/%dd%/%name%/"
+#define DEFAULT_HOTKEY_START          (int)(Qt::AltModifier | Qt::Key_A)
+#define DEFAULT_HOTKEY_SNAPSHOT       (int)(Qt::AltModifier | Qt::Key_T)
+#define DEFAULT_HOTKEY_RECORD         (int)(Qt::AltModifier | Qt::Key_E)
 #define DEFAULT_OUTPUT_PATH           "/video"
 #define DEFAULT_RTP_PAYLOADER         "rtpmp2tpay"
 #define DEFAULT_RTP_SINK              "udpsink"

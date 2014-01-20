@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Irkutsk Diagnostic Center.
+ * Copyright (C) 2013-2014 Irkutsk Diagnostic Center.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -18,6 +18,7 @@
 #include "product.h"
 #include "aboutdialog.h"
 #include "archivewindow.h"
+#include "mouseshortcut.h"
 #include "qwaitcursor.h"
 #include "settings.h"
 #include "videosettings.h"
@@ -140,6 +141,23 @@ static void Dump(QGst::ElementPtr elm)
 }
 
 #endif
+
+static void updateShortcut(QToolButton* btn, int key)
+{
+    MouseShortcut::removeMouseShortcut(btn);
+
+    if (key > 0)
+    {
+        QKeySequence shortcut(key);
+        btn->setShortcut(shortcut);
+        btn->setToolTip(btn->text().remove("&") + " (" + shortcut.toString(QKeySequence::NativeText) + ")");
+    }
+    else if (key < 0)
+    {
+        auto ms = new MouseShortcut(key, btn);
+        btn->setToolTip(btn->text().remove("&") + " (" + ms->toString(QKeySequence::NativeText) + ")");
+    }
+}
 
 MainWindow::MainWindow(QWidget *parent) :
     QWidget(parent),
@@ -706,6 +724,10 @@ void MainWindow::updatePipeline()
     {
         archiveWindow->updateRoot();
     }
+
+    updateShortcut(btnStart,    settings.value("hotkey-start",    DEFAULT_HOTKEY_START).toInt());
+    updateShortcut(btnSnapshot, settings.value("hotkey-snapshot", DEFAULT_HOTKEY_SNAPSHOT).toInt());
+    updateShortcut(btnRecord,   settings.value("hotkey-record",   DEFAULT_HOTKEY_RECORD).toInt());
 
 #ifdef WITH_DICOM
     actionWorklist->setEnabled(!settings.value("mwl-server").toString().isEmpty());

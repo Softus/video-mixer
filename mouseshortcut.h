@@ -14,22 +14,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CLICKFILTER_H
-#define CLICKFILTER_H
+#ifndef MOUSESHORTCUT_H
+#define MOUSESHORTCUT_H
 
 #include <QObject>
+#include <QKeySequence>
 
 QT_BEGIN_NAMESPACE
 class QEvent;
+class QToolButton;
 QT_END_NAMESPACE
 
-class ClickFilter : public QObject
+class MouseShortcut : public QObject
 {
     Q_OBJECT
+    int m_key;
+
 public:
-    ClickFilter() = default;
+    static void removeMouseShortcut(QToolButton *parent);
+    static QString toString(int key, QKeySequence::SequenceFormat format = QKeySequence::PortableText);
+    QString toString(QKeySequence::SequenceFormat format = QKeySequence::PortableText) const;
+    explicit MouseShortcut(int key, QToolButton *parent);
+    ~MouseShortcut();
+
 protected:
     bool eventFilter(QObject *o, QEvent *e);
 };
 
-#endif // CLICKFILTER_H
+#endif // MOUSESHORTCUT_H

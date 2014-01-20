@@ -1,6 +1,7 @@
 beryllium (0.3.16) debian;
 
   * Localization fix
+  * Customizable hotkeys
   
  -- Pavel Bludov <pbludov@gmail.com>  Mon, 20 Jan 2014 14:42:12 +0900
 
