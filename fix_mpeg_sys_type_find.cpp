@@ -18,8 +18,7 @@
 #include <gst/gsttypefind.h>
 #include <gst/gstutils.h>
 
-//static const gchar *mpeg_sys_exts[] = { "mpe", "mpeg", "mpg", NULL };
-static gchar *mpeg_sys_exts[] = { "mpe", "mpeg", "mpg", NULL };
+static const gchar *mpeg_sys_exts[] = { "mpe", "mpeg", "mpg", NULL };
 
 /*** video/mpeg systemstream ***/
 static GstStaticCaps mpeg_sys_caps = GST_STATIC_CAPS ("video/mpeg, "
@@ -47,12 +46,12 @@ static GstStaticCaps mpeg_sys_caps = GST_STATIC_CAPS ("video/mpeg, "
 #define MPEG2_MAX_SYS_HEADERS 5
 
 static gboolean
-mpeg_sys_is_valid_pack (GstTypeFind * tf, const guint8 * data, guint len,
+mpeg_sys_is_valid_pack (GstTypeFind * /*tf*/, const guint8 * data, guint len,
     guint * pack_size)
 {
   /* Check the pack header @ offset for validity, assuming that the 4 byte header
    * itself has already been checked. */
-  guint8 stuff_len;
+  guint stuff_len;
 
   if (len < 12)
     return FALSE;
@@ -99,7 +98,7 @@ mpeg_sys_is_valid_pack (GstTypeFind * tf, const guint8 * data, guint len,
 }
 
 static gboolean
-mpeg_sys_is_valid_pes (GstTypeFind * tf, const guint8 * data, guint len,
+mpeg_sys_is_valid_pes (GstTypeFind * /*tf*/, const guint8 * data, guint len,
     guint * pack_size)
 {
   guint pes_packet_len;
@@ -127,7 +126,7 @@ mpeg_sys_is_valid_pes (GstTypeFind * tf, const guint8 * data, guint len,
 }
 
 static gboolean
-mpeg_sys_is_valid_sys (GstTypeFind * tf, const guint8 * data, guint len,
+mpeg_sys_is_valid_sys (GstTypeFind * /*tf*/, const guint8 * data, guint len,
     guint * pack_size)
 {
   guint sys_hdr_len;
@@ -166,7 +165,7 @@ mpeg_sys_is_valid_sys (GstTypeFind * tf, const guint8 * data, guint len,
  * very coarse upper bound.
  */
 static void
-mpeg_sys_type_find (GstTypeFind * tf, gpointer unused)
+mpeg_sys_type_find (GstTypeFind * tf, gpointer /*unused*/)
 {
   const guint8 *data, *data0, *first_sync, *end;
   gint mpegversion = 0;
@@ -267,7 +266,7 @@ suggest:
     guint prob;
 
     prob = GST_TYPE_FIND_POSSIBLE + (10 * (pack_headers + pes_headers));
-    prob = MIN (prob, GST_TYPE_FIND_MAXIMUM);
+    prob = MIN (prob, (guint)GST_TYPE_FIND_MAXIMUM);
 
     /* lower probability if the first packet wasn't right at the start */
     if (data0 != first_sync && prob >= 10)
@@ -285,5 +284,5 @@ suggest:
 void fix_mpeg_sys_type_find()
 {
     gst_type_find_register(nullptr, "video/mpegps", GST_RANK_NONE,
-        mpeg_sys_type_find, mpeg_sys_exts, MPEG_SYS_CAPS, NULL, NULL);
+        mpeg_sys_type_find, (gchar **)mpeg_sys_exts, MPEG_SYS_CAPS, NULL, NULL);
 }
