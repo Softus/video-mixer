@@ -52,8 +52,8 @@ DicomMppsMwlSettings::DicomMppsMwlSettings(QWidget *parent) :
 
     mainLayout->addRow(checkUseMpps = new QCheckBox(tr("MPPS F&unction")), cbMppsServer = new ComboBoxWithPopupSignal);
     connect(checkUseMpps, SIGNAL(toggled(bool)), this, SLOT(onUseToggle(bool)));
-    mainLayout->addRow(checkStartWithMpps = new QCheckBox(tr("&In progress is automatically sent when an examitaion has been started")));
-    mainLayout->addRow(checkCompleteWithMpps = new QCheckBox(tr("&Completed is automatically sent when an examitaion has been ended")));
+    mainLayout->addRow(checkStartWithMpps = new QCheckBox(tr("&In progress is automatically sent when an examinaion has been started")));
+    mainLayout->addRow(checkCompleteWithMpps = new QCheckBox(tr("&Completed is automatically sent when an examinaion has been ended")));
 
     QString mppsServer = settings.value("mpps-server").toString();
     if (mppsServer.isEmpty())
