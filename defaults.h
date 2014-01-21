@@ -1,11 +1,31 @@
+/*
+ * Copyright (C) 2013-2014 Irkutsk Diagnostic Center.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; version 2.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef BERYLLIUM_DEFAULTS_H
 #define BERYLLIUM_DEFAULTS_H
 
 #define DEFAULT_DISPLAY_SINK          "autovideosink"
 #define DEFAULT_FOLDER_TEMPLATE       "/%yyyy%-%MM%/%dd%/%name%/"
-#define DEFAULT_HOTKEY_START          (int)(Qt::AltModifier | Qt::Key_A)
-#define DEFAULT_HOTKEY_SNAPSHOT       (int)(Qt::AltModifier | Qt::Key_T)
+#define DEFAULT_HOTKEY_ABOUT          (int)(Qt::AltModifier | Qt::Key_Question)
+#define DEFAULT_HOTKEY_ARCHIVE        (int)(Qt::Key_F2)
 #define DEFAULT_HOTKEY_RECORD         (int)(Qt::AltModifier | Qt::Key_E)
+#define DEFAULT_HOTKEY_SETTINGS       (int)(Qt::Key_F9)
+#define DEFAULT_HOTKEY_SNAPSHOT       (int)(Qt::AltModifier | Qt::Key_T)
+#define DEFAULT_HOTKEY_START          (int)(Qt::AltModifier | Qt::Key_A)
+#define DEFAULT_HOTKEY_WORKLIST       (int)(Qt::Key_F3)
 #define DEFAULT_OUTPUT_PATH           "/video"
 #define DEFAULT_RTP_PAYLOADER         "rtpmp2tpay"
 #define DEFAULT_RTP_SINK              "udpsink"

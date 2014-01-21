@@ -47,6 +47,7 @@ class VideoSettings : public QWidget
 {
     Q_OBJECT
     QComboBox* listDevices;
+    QComboBox* listChannels;
     QComboBox* listFormats;
     QComboBox* listSizes;
     QComboBox* listVideoCodecs;
@@ -72,6 +73,7 @@ signals:
     
 public slots:
     void videoDeviceChanged(int index);
+    void inputChannelChanged(int index);
     void formatChanged(int index);
     void save();
 };

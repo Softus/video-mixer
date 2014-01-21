@@ -22,7 +22,8 @@
 
 QT_BEGIN_NAMESPACE
 class QEvent;
-class QToolButton;
+class QAbstractButton;
+class QAction;
 QT_END_NAMESPACE
 
 class MouseShortcut : public QObject
@@ -31,10 +32,11 @@ class MouseShortcut : public QObject
     int m_key;
 
 public:
-    static void removeMouseShortcut(QToolButton *parent);
+    static void removeMouseShortcut(QObject *parent);
     static QString toString(int key, QKeySequence::SequenceFormat format = QKeySequence::PortableText);
     QString toString(QKeySequence::SequenceFormat format = QKeySequence::PortableText) const;
-    explicit MouseShortcut(int key, QToolButton *parent);
+    MouseShortcut(int key, QAbstractButton *parent);
+    MouseShortcut(int key, QAction *parent);
     ~MouseShortcut();
 
 protected:

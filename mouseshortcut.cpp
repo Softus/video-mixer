@@ -18,9 +18,10 @@
 
 #include <QApplication>
 #include <QMouseEvent>
-#include <QToolButton>
+#include <QAbstractButton>
+#include <QAction>
 
-void MouseShortcut::removeMouseShortcut(QToolButton *parent)
+void MouseShortcut::removeMouseShortcut(QObject *parent)
 {
     // Remove any existent mouse shortcut
     Q_FOREACH(auto ch, parent->children())
@@ -87,7 +88,13 @@ QString MouseShortcut::toString(QKeySequence::SequenceFormat format) const
     return toString(m_key, format);
 }
 
-MouseShortcut::MouseShortcut(int key, QToolButton *parent) :
+MouseShortcut::MouseShortcut(int key, QAbstractButton *parent) :
+    QObject(parent), m_key(key)
+{
+    qApp->installEventFilter(this);
+}
+
+MouseShortcut::MouseShortcut(int key, QAction *parent) :
     QObject(parent), m_key(key)
 {
     qApp->installEventFilter(this);
@@ -107,7 +114,14 @@ bool MouseShortcut::eventFilter(QObject *o, QEvent *e)
 
         if (m_key == btn)
         {
-            static_cast<QToolButton*>(parent())->click();
+            if (parent()->inherits("QAction"))
+            {
+                static_cast<QAction*>(parent())->toggle();
+            }
+            else
+            {
+                static_cast<QAbstractButton*>(parent())->toggle();
+            }
             e->accept();
             return true;
         }

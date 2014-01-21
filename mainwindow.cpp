@@ -74,6 +74,7 @@
 // From Gstreamer SDK
 //
 #include <gst/gstdebugutils.h>
+#include <gst/interfaces/tuner.h>
 
 #if defined(Q_WS_WIN) && !defined(FILE_ATTRIBUTE_HIDDEN)
     #define FILE_ATTRIBUTE_HIDDEN 0x00000002
@@ -151,7 +152,10 @@ static void Dump(QGst::ElementPtr elm)
 
 #endif
 
-static void updateShortcut(QToolButton* btn, int key)
+// T == QAction | QAbstractButton
+//
+template <class T>
+static void updateShortcut(T* btn, int key)
 {
     MouseShortcut::removeMouseShortcut(btn);
 
@@ -305,11 +309,9 @@ QMenuBar* MainWindow::createMenuBar()
     mnu->addAction(actionAbout);
     actionAbout->setMenuRole(QAction::AboutRole);
 
-    actionArchive->setShortcut(Qt::Key_F2);
     mnu->addAction(actionArchive);
 
 #ifdef WITH_DICOM
-    actionWorklist->setShortcut(Qt::Key_F3);
     mnu->addAction(actionWorklist);
 #endif
     mnu->addSeparator();
@@ -321,7 +323,6 @@ QMenuBar* MainWindow::createMenuBar()
     actionFullVideo->setCheckable(true);
     actionFullVideo->setData("enable-video");
 
-    actionSettings->setShortcut(Qt::Key_F9);
     actionSettings->setMenuRole(QAction::PreferencesRole);
     mnu->addAction(actionSettings);
     mnu->addSeparator();
@@ -422,11 +423,12 @@ QString MainWindow::buildPipeline()
 {
     QSettings settings;
 
-    // v4l2src device=/dev/video1 ! video/x-raw-yuv,format=(fourcc)YUY2,width=(int)720,height=(int)576 ! ffmpegcolorspace
+    // v4l2src device=/dev/video1 name=(channel) ! video/x-raw-yuv,format=(fourcc)YUY2,width=(int)720,height=(int)576 ! ffmpegcolorspace
     //
     QString pipe;
 
     auto deviceDef = settings.value("device").toString();
+    auto inputChannel = settings.value("video-channel").toString();
     auto formatDef = settings.value("format").toString();
     auto sizeDef   = settings.value("size").toSize();
     auto srcDef    = settings.value("src").toString();
@@ -441,6 +443,14 @@ QString MainWindow::buildPipeline()
     else
     {
         pipe.append(PLATFORM_SPECIFIC_SOURCE);
+        if (!inputChannel.isEmpty())
+        {
+            // Hack: since channel name can't be set with attributes,
+            // we set element name instead. The one reason is to
+            // make the pipeline text do not match with older one.
+            //
+            pipe.append(" name=\"").append(inputChannel).append("\"");
+        }
         if (!deviceDef.isEmpty())
         {
             pipe.append(" " PLATFORM_SPECIFIC_PROPERTY "=\"").append(deviceDef).append("\"");
@@ -720,6 +730,27 @@ void MainWindow::updatePipeline()
         }
         pipelineDef = newPipelineDef;
         pipeline = createPipeline();
+        auto videoInputChannel = settings.value("video-channel").toString();
+        if (!videoInputChannel.isEmpty())
+        {
+            auto tuner = GST_TUNER(gst_bin_get_by_interface(pipeline.staticCast<QGst::Bin>(), GST_TYPE_TUNER));
+            if (tuner)
+            {
+                auto walk = (GList *)gst_tuner_list_channels(tuner);
+                while (walk)
+                {
+                    auto ch = GST_TUNER_CHANNEL(walk->data);
+                    if (0 == videoInputChannel.compare(ch->label))
+                    {
+                        gst_tuner_set_channel(tuner, ch);
+                        break;
+                    }
+                    walk = g_list_next (walk);
+                }
+
+                g_object_unref(tuner);
+            }
+        }
     }
 
     setElementProperty("rtpsink", "clients", settings.value("rtp-clients").toString(), QGst::StateReady);
@@ -748,9 +779,14 @@ void MainWindow::updatePipeline()
     updateShortcut(btnSnapshot, settings.value("hotkey-snapshot", DEFAULT_HOTKEY_SNAPSHOT).toInt());
     updateShortcut(btnRecord,   settings.value("hotkey-record",   DEFAULT_HOTKEY_RECORD).toInt());
 
+    updateShortcut(actionArchive,  settings.value("hotkey-archive",   DEFAULT_HOTKEY_ARCHIVE).toInt());
+    updateShortcut(actionSettings, settings.value("hotkey-settings",  DEFAULT_HOTKEY_SETTINGS).toInt());
+
 #ifdef WITH_DICOM
+    updateShortcut(actionWorklist, settings.value("hotkey-worklist",   DEFAULT_HOTKEY_WORKLIST).toInt());
     actionWorklist->setEnabled(!settings.value("mwl-server").toString().isEmpty());
 #endif
+    updateShortcut(actionAbout, settings.value("hotkey-about",  DEFAULT_HOTKEY_ABOUT).toInt());
 }
 
 void MainWindow::updateWindowTitle()

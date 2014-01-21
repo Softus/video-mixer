@@ -27,7 +27,11 @@ class HotKeySettings : public QWidget
     HotKeyEdit*  heStartStudy;
     HotKeyEdit*  heTakeSnapshot;
     HotKeyEdit*  heRepordPause;
-    HotKeyEdit*  heArchiveWindow;
+    HotKeyEdit*  heArchive;
+    HotKeyEdit*  heSettings;
+#ifdef WITH_DICOM
+    HotKeyEdit*  heWorklist;
+#endif
 
 public:
     Q_INVOKABLE explicit HotKeySettings(QWidget *parent = 0);

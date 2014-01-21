@@ -38,6 +38,7 @@
 #include <QGst/PropertyProbe>
 #include <QGst/Structure>
 #include <gst/gst.h>
+#include <gst/interfaces/tuner.h>
 
 VideoSettings::VideoSettings(QWidget *parent) :
     QWidget(parent)
@@ -47,6 +48,8 @@ VideoSettings::VideoSettings(QWidget *parent) :
 
     layout->addRow(tr("Video &device"), listDevices = new QComboBox());
     connect(listDevices, SIGNAL(currentIndexChanged(int)), this, SLOT(videoDeviceChanged(int)));
+    layout->addRow(tr("I&nput channel"), listChannels = new QComboBox());
+    connect(listChannels, SIGNAL(currentIndexChanged(int)), this, SLOT(inputChannelChanged(int)));
     layout->addRow(tr("Pixel &format"), listFormats = new QComboBox());
     connect(listFormats, SIGNAL(currentIndexChanged(int)), this, SLOT(formatChanged(int)));
     layout->addRow(tr("Frame &size"), listSizes = new QComboBox());
@@ -142,10 +145,29 @@ void VideoSettings::updateDeviceList()
                 src->getState(nullptr, nullptr, GST_SECOND * 10);
 
                 //qDebug() << deviceName << " caps:\n" << srcPad->caps()->toString();
+                QStringList channelsAndCaps;
+
+                // First entry will be caps
+                //
+                channelsAndCaps.append(srcPad->caps()->toString());
+
+                auto tuner = GST_TUNER(src);
+                if (tuner)
+                {
+                    auto walk = (GList *)gst_tuner_list_channels(tuner);
+                    while (walk)
+                    {
+                        auto ch = GST_TUNER_CHANNEL(walk->data);
+                        //gst_tuner_set_channel(tuner, ch);
+
+                        channelsAndCaps.append(ch->label);
+                        walk = g_list_next (walk);
+                    }
+                }
 
                 // Add the device and its caps to the combobox
                 //
-                listDevices->addItem(deviceName, srcPad->caps()->toString());
+                listDevices->addItem(deviceName, channelsAndCaps);
                 if (selectedDevice == deviceName)
                 {
                     listDevices->setCurrentIndex(listDevices->count() - 1);
@@ -162,10 +184,36 @@ void VideoSettings::updateDeviceList()
 
 void VideoSettings::videoDeviceChanged(int index)
 {
+    listChannels->clear();
+    listChannels->addItem(tr("(default)"));
+
+    auto channels = listDevices->itemData(index).toStringList();
+    if (index < 0 || channels.isEmpty())
+    {
+        return;
+    }
+
+    auto selectedChannel = QSettings().value("video-channel").toString();
+    auto caps = channels.at(0);
+
+    // From index 1 till end here is channels
+    //
+    for (int i = 1; i < channels.size(); ++i)
+    {
+        listChannels->addItem(channels.at(i), caps);
+        if (channels.at(i) == selectedChannel)
+        {
+            listChannels->setCurrentIndex(listChannels->count() - 1);
+        }
+    }
+}
+
+void VideoSettings::inputChannelChanged(int index)
+{
     listFormats->clear();
     listFormats->addItem(tr("(default)"));
 
-    QGst::CapsPtr caps = QGst::Caps::fromString(listDevices->itemData(index).toString());
+    QGst::CapsPtr caps = QGst::Caps::fromString(listChannels->itemData(index).toString());
 
     if (index < 0 || !caps)
     {
@@ -190,6 +238,7 @@ void VideoSettings::videoDeviceChanged(int index)
         }
     }
 }
+
 
 void VideoSettings::formatChanged(int index)
 {
@@ -233,6 +282,8 @@ void VideoSettings::save()
     QSettings settings;
     settings.setValue("device", listDevices->itemData(listDevices->currentIndex()).isNull()?
                         nullptr: listDevices->itemText(listDevices->currentIndex()));
+    settings.setValue("video-channel", listChannels->itemData(listChannels->currentIndex()).isNull()?
+                        nullptr: listChannels->itemText(listChannels->currentIndex()));
     settings.setValue("format", listFormats->itemData(listFormats->currentIndex()));
     settings.setValue("size", listSizes->itemData(listSizes->currentIndex()));
     settings.setValue("video-encoder", listVideoCodecs->itemData(listVideoCodecs->currentIndex()));

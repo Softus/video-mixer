@@ -29,12 +29,20 @@ HotKeySettings::HotKeySettings(QWidget *parent) :
     auto layoutMain = new QFormLayout;
     layoutMain->setContentsMargins(4,0,4,0);
 
-    layoutMain->addRow(tr("Start study"), heStartStudy = new HotKeyEdit());
+    layoutMain->addRow(tr("&Start study"), heStartStudy = new HotKeyEdit());
     heStartStudy->setKey(settings.value("hotkey-start", DEFAULT_HOTKEY_START).toInt());
-    layoutMain->addRow(tr("Take snapshot"), heTakeSnapshot = new HotKeyEdit());
+    layoutMain->addRow(tr("&Take snapshot"), heTakeSnapshot = new HotKeyEdit());
     heTakeSnapshot->setKey(settings.value("hotkey-snapshot", DEFAULT_HOTKEY_SNAPSHOT).toInt());
-    layoutMain->addRow(tr("Record/pause"), heRepordPause = new HotKeyEdit());
+    layoutMain->addRow(tr("&Record/pause"), heRepordPause = new HotKeyEdit());
     heRepordPause->setKey(settings.value("hotkey-record", DEFAULT_HOTKEY_RECORD).toInt());
+    layoutMain->addRow(tr("&Archive"), heArchive = new HotKeyEdit());
+    heArchive->setKey(settings.value("hotkey-archive", DEFAULT_HOTKEY_ARCHIVE).toInt());
+    layoutMain->addRow(tr("S&ettings"), heSettings = new HotKeyEdit());
+    heSettings->setKey(settings.value("hotkey-settings", DEFAULT_HOTKEY_SETTINGS).toInt());
+#ifdef WITH_DICOM
+    layoutMain->addRow(tr("&Worklist"), heWorklist = new HotKeyEdit());
+    heWorklist->setKey(settings.value("hotkey-worklist", DEFAULT_HOTKEY_WORKLIST).toInt());
+#endif
     setLayout(layoutMain);
 }
 
@@ -45,4 +53,9 @@ void HotKeySettings::save()
     settings.setValue("hotkey-record",   heRepordPause->key());
     settings.setValue("hotkey-snapshot", heTakeSnapshot->key());
     settings.setValue("hotkey-start",    heStartStudy->key());
+    settings.setValue("hotkey-settings", heSettings->key());
+    settings.setValue("hotkey-archive",  heArchive->key());
+#ifdef WITH_DICOM
+    settings.setValue("hotkey-worklist", heWorklist->key());
+#endif
 }
