@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Irkutsk Diagnostic Center.
+ * Copyright (C) 2013-2014 Irkutsk Diagnostic Center.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -118,7 +118,7 @@ AboutDialog::AboutDialog(QWidget *parent) :
     // Copyright & warranty
     //
 
-    auto lblCopyright = new QLabel(tr("<p>Copyright (C) 2013 <a href=\"%1\">%2</a>. All rights reserved.</p>")
+    auto lblCopyright = new QLabel(tr("<p>Copyright (C) 2013-2014 <a href=\"%1\">%2</a>. All rights reserved.</p>")
                                    .arg(PRODUCT_SITE_URL, tr("Irkutsk Diagnostic Center")/*ORGANIZATION_FULL_NAME*/));
     lblCopyright->setOpenExternalLinks(true);
     layoutText->addWidget(lblCopyright);
