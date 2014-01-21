@@ -200,6 +200,7 @@ ArchiveWindow::ArchiveWindow(QWidget *parent) :
     layoutMain->addWidget(player);
 
     listFiles = new QListWidget;
+    listFiles->setSelectionMode(QListWidget::ExtendedSelection);
 //    listFiles->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 //    listFiles->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     listFiles->setMovement(QListView::Static);
@@ -451,7 +452,7 @@ void ArchiveWindow::switchViewMode(int mode)
         listFiles->setMaximumHeight(176);
         listFiles->setMinimumHeight(144);
         listFiles->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-        listFiles->setSelectionMode(QListWidget::SingleSelection);
+        //listFiles->setSelectionMode(QListWidget::SingleSelection);
         listFiles->setWrapping(false);
         player->setVisible(true);
     }
@@ -462,7 +463,7 @@ void ArchiveWindow::switchViewMode(int mode)
         listFiles->setMaximumHeight(QWIDGETSIZE_MAX);
         listFiles->setMinimumSize(videoSize);
         listFiles->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-        listFiles->setSelectionMode(QListWidget::ExtendedSelection);
+        //listFiles->setSelectionMode(QListWidget::ExtendedSelection);
         listFiles->setWrapping(true);
     }
 
