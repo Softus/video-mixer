@@ -76,7 +76,9 @@ class MainWindow : public QWidget
     QString       pipelineDef;
 
     QString       patientId;
+    QString       patientSex;
     QString       patientName;
+    QString       patientBirthDate;
     QString       physician;
     QString       studyName;
 

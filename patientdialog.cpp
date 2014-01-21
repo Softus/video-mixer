@@ -134,6 +134,11 @@ QDate PatientDialog::patientBirthDate() const
     return dateBirthday->date();
 }
 
+QString PatientDialog::patientBirthDateStr() const
+{
+    return patientBirthDate().toString("yyyyMMdd");
+}
+
 QString PatientDialog::patientSex() const
 {
     return cbPatientSex->currentText();
@@ -184,6 +189,11 @@ void PatientDialog::setPatientSex(const QString& sex)
 void PatientDialog::setPatientBirthDate(const QDate& date)
 {
     dateBirthday->setDate(date);
+}
+
+void PatientDialog::setPatientBirthDateStr(const QString& dateStr)
+{
+    setPatientBirthDate(QDate::fromString(dateStr, "yyyyMMdd"));
 }
 
 void PatientDialog::setStudyName(const QString& name)

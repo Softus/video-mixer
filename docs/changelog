@@ -2,8 +2,16 @@ beryllium (0.3.16) debian;
 
   * Localization fix
   * Customizable hotkeys
+  * Reduced minimal size
+  * New command line options:
+  *   --patient-birthdate (-b)
+  *   --patient-id (-i)
+  *   --patient-name (-n)
+  *   --patient-sex (-s)
+  *   --physician (-p)
+  *   --study-name (-e)
   
- -- Pavel Bludov <pbludov@gmail.com>  Mon, 20 Jan 2014 14:42:12 +0900
+ -- Pavel Bludov <pbludov@gmail.com>  Tue, 21 Jan 2014 14:42:12 +0900
 
 beryllium (0.3.15) debian;
 

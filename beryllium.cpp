@@ -60,7 +60,13 @@ int main(int argc, char *argv[])
     OFConsoleApplication dcmtkApp(PRODUCT_SHORT_NAME);
     OFCommandLine cmd;
     OFLog::addOptions(cmd);
-    cmd.addOption("--edit-video","", 1);
+    cmd.addOption("--edit-video",      "-ev", 1, "filename", "Start in video editing mode");
+    cmd.addOption("--patient-birthdate","-b", 1, "yyyyMMdd", "Patient birth date");
+    cmd.addOption("--patient-id",       "-i", 1, "string", "Patient Id");
+    cmd.addOption("--patient-name",     "-n", 1, "string", "Patient name");
+    cmd.addOption("--patient-sex",      "-s", 1, "F|M", "Patient sex");
+    cmd.addOption("--physician",        "-p", 1, "string", "Physician name");
+    cmd.addOption("--study-name",       "-e", 1, "string", "Study name");
     dcmtkApp.parseCommandLine(cmd, argc, argv);
     OFLog::configureFromCommandLine(cmd, dcmtkApp);
 #endif
@@ -103,6 +109,8 @@ int main(int argc, char *argv[])
     // UI scope
     //
     int videoEditIdx = app.arguments().indexOf("--edit-video");
+    if (videoEditIdx < 0)
+        videoEditIdx = app.arguments().indexOf("-ev");
     if (videoEditIdx >= 0 && ++videoEditIdx < app.arguments().size())
     {
         VideoEditor wndEditor;

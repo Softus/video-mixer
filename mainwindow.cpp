@@ -85,6 +85,15 @@ static inline QBoxLayout::Direction bestDirection(const QSize &s)
     return s.width() >= s.height()? QBoxLayout::LeftToRight: QBoxLayout::TopToBottom;
 }
 
+static QString getCmdLineOption(const QString& longName, const QString& shortName)
+{
+    auto args = qApp->arguments();
+    auto idx = args.indexOf(longName);
+    if (idx < 0)
+        idx = args.indexOf(shortName);
+    return (idx >= 0 && ++idx < args.size())? args[idx]: "";
+}
+
 #ifdef QT_DEBUG
 
 static void Dump(QGst::ElementPtr elm)
@@ -188,13 +197,13 @@ MainWindow::MainWindow(QWidget *parent) :
     listImagesAndClips->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     listImagesAndClips->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     listImagesAndClips->setMinimumHeight(144); // 576/4
-    listImagesAndClips->setMaximumHeight(160);
+    listImagesAndClips->setMaximumHeight(176);
     listImagesAndClips->setIconSize(QSize(144,144));
     listImagesAndClips->setMovement(QListView::Static);
     listImagesAndClips->setWrapping(false);
 
     displayWidget = new QGst::Ui::VideoWidget();
-    displayWidget->setMinimumSize(712, 576);
+    displayWidget->setMinimumSize(352, 288);
     displayWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 #ifdef WITH_TOUCH
     mainStack = new SlidingStackedWidget();
@@ -236,7 +245,15 @@ MainWindow::MainWindow(QWidget *parent) :
     updateStartButton();
     updateRecordButton();
 
+    patientBirthDate = getCmdLineOption("--patient-birthdate","-b");
+    patientId        = getCmdLineOption("--patient-id",       "-i");
+    patientName      = getCmdLineOption("--patient-name",     "-n");
+    patientSex       = getCmdLineOption("--patient-sex",      "-s");
+    physician        = getCmdLineOption("--physician",        "-p");
+    studyName        = getCmdLineOption("--study-name",       "-e");
+
     updatePipeline();
+    updateOutputPath();
 
     if (settings.value("first-run", true).toBool())
     {
@@ -667,6 +684,8 @@ QString MainWindow::replace(QString str, int seqNo)
     return str
         .replace("%name%",      patientName,         Qt::CaseInsensitive)
         .replace("%id%",        patientId,           Qt::CaseInsensitive)
+        .replace("%sex%",       patientSex,          Qt::CaseInsensitive)
+        .replace("%birthdate%", patientBirthDate,    Qt::CaseInsensitive)
         .replace("%physician%", physician,           Qt::CaseInsensitive)
         .replace("%study%",     studyName,           Qt::CaseInsensitive)
         .replace("%yyyy%",      ts.toString("yyyy"), Qt::CaseInsensitive)
@@ -767,10 +786,7 @@ void MainWindow::updateOutputPath()
 {
     QSettings settings;
     auto tpl = settings.value("output-path", DEFAULT_OUTPUT_PATH).toString();
-    if (!patientId.isEmpty())
-    {
-        tpl.append(settings.value("folder-template", DEFAULT_FOLDER_TEMPLATE).toString());
-    }
+    tpl.append(settings.value("folder-template", DEFAULT_FOLDER_TEMPLATE).toString());
 
     outputPath.setPath(replace(tpl, ++studyNo));
 
@@ -1078,6 +1094,13 @@ void MainWindow::onStartClick()
 
 #endif
 
+    patientId.clear();
+    patientName.clear();
+    patientSex.clear();
+    patientBirthDate.clear();
+    physician.clear();
+    studyName.clear();
+
     setElementProperty(videoEncoderValve, "drop", true);
     setElementProperty("displayoverlay", "silent", true);
 
@@ -1285,7 +1308,6 @@ void MainWindow::onShowArchiveClick()
     }
 #endif
 
-    updateOutputPath();
     archiveWindow->setPath(outputPath.absolutePath());
 #ifdef WITH_TOUCH
     mainStack->slideInWidget(archiveWindow);
@@ -1340,7 +1362,6 @@ void MainWindow::onStartStudy()
     if (patient)
     {
         const char *str = nullptr;
-        auto trans = settings.value("translate-cyrillic", true).toBool();
         if (patient->findAndGetString(DCM_PatientID, str, true).good())
         {
             dlg.setPatientId(QString::fromUtf8(str));
@@ -1348,12 +1369,12 @@ void MainWindow::onStartStudy()
 
         if (patient->findAndGetString(DCM_PatientName, str, true).good())
         {
-            dlg.setPatientName(trans? translateToCyrillic(QString::fromUtf8(str)): QString::fromUtf8(str));
+            dlg.setPatientName(QString::fromUtf8(str));
         }
 
         if (patient->findAndGetString(DCM_PatientBirthDate, str, true).good())
         {
-            dlg.setPatientBirthDate(QDate::fromString(QString::fromUtf8(str), "yyyyMMdd"));
+            dlg.setPatientBirthDateStr(QString::fromUtf8(str));
         }
 
         if (patient->findAndGetString(DCM_PatientSex, str, true).good())
@@ -1363,7 +1384,7 @@ void MainWindow::onStartStudy()
 
         if (patient->findAndGetString(DCM_ScheduledPerformingPhysicianName, str, true).good())
         {
-            dlg.setPhysician(trans? translateToCyrillic(QString::fromUtf8(str)): QString::fromUtf8(str));
+            dlg.setPhysician(QString::fromUtf8(str));
         }
 
         if (patient->findAndGetString(DCM_ScheduledProcedureStepDescription, str, true).good())
@@ -1373,7 +1394,16 @@ void MainWindow::onStartStudy()
 
         dlg.setEditable(false);
     }
+    else
 #endif
+    {
+        dlg.setPatientId(patientId);
+        dlg.setPatientName(patientName);
+        dlg.setPatientSex(patientSex);
+        dlg.setPatientBirthDateStr(patientBirthDate);
+        dlg.setPhysician(physician);
+        dlg.setStudyName(studyName);
+    }
 
     switch (dlg.exec())
     {
@@ -1388,6 +1418,8 @@ void MainWindow::onStartStudy()
 
     patientId   = fixFileName(dlg.patientId());
     patientName = fixFileName(dlg.patientName());
+    patientSex  = fixFileName(dlg.patientSex());
+    patientBirthDate = fixFileName(dlg.patientBirthDateStr());
     physician   = fixFileName(dlg.physician());
     studyName   = fixFileName(dlg.studyName());
 
@@ -1411,7 +1443,7 @@ void MainWindow::onStartStudy()
         pendingPatient->putAndInsertString(DCM_SpecificCharacterSet, "ISO_IR 192");
         pendingPatient->putAndInsertString(DCM_PatientID, dlg.patientId().toUtf8());
         pendingPatient->putAndInsertString(DCM_PatientName, dlg.patientName().toUtf8());
-        pendingPatient->putAndInsertString(DCM_PatientBirthDate, dlg.patientBirthDate().toString("yyyyMMdd").toUtf8());
+        pendingPatient->putAndInsertString(DCM_PatientBirthDate, dlg.patientBirthDateStr().toUtf8());
         pendingPatient->putAndInsertString(DCM_PatientSex, QString().append(dlg.patientSexCode()).toUtf8());
 
         DcmItem* sps = nullptr;
