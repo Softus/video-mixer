@@ -24,6 +24,7 @@
 void MouseShortcut::removeMouseShortcut(QObject *parent)
 {
     // Remove any existent mouse shortcut
+    //
     Q_FOREACH(auto ch, parent->children())
     {
         if (ch->inherits("MouseShortcut"))
@@ -116,11 +117,11 @@ bool MouseShortcut::eventFilter(QObject *o, QEvent *e)
         {
             if (parent()->inherits("QAction"))
             {
-                static_cast<QAction*>(parent())->toggle();
+                static_cast<QAction*>(parent())->trigger();
             }
             else
             {
-                static_cast<QAbstractButton*>(parent())->toggle();
+                static_cast<QAbstractButton*>(parent())->click();
             }
             e->accept();
             return true;
