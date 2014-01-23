@@ -31,7 +31,7 @@ Beryllium DICOM edition.
 Video and image capturing for medicine.
 
 %prep
-%setup -qn %{name}
+%setup -c %{name}
  
 %build
 qmake PREFIX=%{_prefix} QMAKE_CFLAGS+="%optflags" QMAKE_CXXFLAGS+="%optflags";

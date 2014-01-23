@@ -54,7 +54,7 @@ Ubuntu | Debian)  echo "Building DEB package"
     dpkg-buildpackage -I.git -I*.sh -rfakeroot
     ;;
 "openSUSE project" | fedora | "SUSE LINUX")  echo "Building RPM package"
-    tar czf ../beryllium.tar.gz ../beryllium --exclude=.git --exclude=*.sh && rpmbuild -D"dicom $dicom" -D"debug $debug" -D"touch $touch" -ta ../beryllium.tar.gz
+    tar czf ../beryllium.tar.gz * --exclude=.git --exclude=*.sh && rpmbuild -D"dicom $dicom" -D"debug $debug" -D"touch $touch" -ta ../beryllium.tar.gz
     ;;
 *) echo "$distro is not supported yet"
    ;;
