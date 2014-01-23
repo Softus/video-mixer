@@ -117,14 +117,25 @@ bool MouseShortcut::eventFilter(QObject *o, QEvent *e)
         {
             if (parent()->inherits("QAction"))
             {
-                static_cast<QAction*>(parent())->trigger();
+                auto action = static_cast<QAction*>(parent());
+                auto widget = action->parentWidget();
+                if (!widget || widget->window() == qApp->activeWindow())
+                {
+                    action->trigger();
+                    e->accept();
+                    return true;
+                }
             }
-            else
+            else if (parent()->inherits("QAbstractButton"))
             {
-                static_cast<QAbstractButton*>(parent())->click();
+                auto btn = static_cast<QAbstractButton*>(parent());
+                if (btn->window() == qApp->activeWindow())
+                {
+                    btn->click();
+                    e->accept();
+                    return true;
+                }
             }
-            e->accept();
-            return true;
         }
     }
 
