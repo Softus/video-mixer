@@ -427,11 +427,11 @@ QString MainWindow::buildPipeline()
     //
     QString pipe;
 
-    auto deviceDef = settings.value("device").toString();
-    auto inputChannel = settings.value("video-channel").toString();
-    auto formatDef = settings.value("format").toString();
-    auto sizeDef   = settings.value("size").toSize();
-    auto srcDef    = settings.value("src").toString();
+    auto deviceDef      = settings.value("device").toString();
+    auto inputChannel   = settings.value("video-channel").toString();
+    auto formatDef      = settings.value("format").toString();
+    auto sizeDef        = settings.value("size").toSize();
+    auto srcDef         = settings.value("src").toString();
     auto srcFixColor    = settings.value("src-colorspace").toBool()? "! ffmpegcolorspace ": "";
     auto srcDeinterlace = settings.value("video-deinterlace").toBool();
     auto srcParams      = settings.value("src-parameters").toString();

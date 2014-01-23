@@ -1,4 +1,4 @@
-=== Debian/Ubuntu/Mint ===
+=== Ubuntu ===
 
 1. Install build dependecies
 	sudo apt-get install build-essential libqtgstreamer-dev libgstreamer-plugins-base0.10-dev libdcmtk2-dev libwrap0-dev libssl-dev
@@ -6,34 +6,20 @@
 2. Make Makefile:
 	qmake CONFIG+=dicom beryllium.pro
 
-- or -
-	qmake CONFIG+=debug CONFIG+=declarative_debug CONFIG+=dicom beryllium.pro
-
-for debug.
-
 3. Make Beryllium:
 	make
 
-=== Suse/Fedora/RedHat ===
+=== Suse ===
 
 1. Install build dependecies
-	sudo yum install qt-devel qt-gstreamer-devel dcmtk-devel openssl-devel
+
+        sudo zypper addrepo http://download.opensuse.org/repositories/multimedia:/libs/openSUSE_12.3/ opensuse-multimedia-libs
+        sudo zypper addrepo -f -n packman http://packman.inode.at/suse/openSUSE_12.3 packman
+
+        sudo zypper install make qt-devel qt-gstreamer-devel libQtGlib-devel dcmtk-devel tcp_wrappers-devel openssl-devel
 
 2. Make Makefile:
-
-replace line
-    LIBS += -ldcmnet -lwrap -li2d -ldcmdata -ldcmtls -loflog -lofstd -lssl
-with line
-    LIBS += -L/usr/lib/dcmtk -ldcmnet -llibi2d -ldcmdata -ldcmtls -loflog -lofstd -lssl
-
-(there is fedora.patch for that)
-
 	qmake-qt4 CONFIG+=dicom beryllium.pro
-
-- or -
-	qmake-qt4 CONFIG+=debug CONFIG+=declarative_debug CONFIG+=dicom beryllium.pro
-
-for debug.
 
 3. Make Beryllium:
 	make

@@ -94,20 +94,18 @@ void VideoSettings::updateGstList(const char* setting, const char* def, unsigned
     cb->clear();
     auto selectedCodec = QSettings().value(setting, def).toString();
 
-    GList* encoders = gst_element_factory_list_get_elements(type, GST_RANK_NONE);
-    for (GList* curr = encoders; curr; curr = curr->next)
+    auto elmList = gst_element_factory_list_get_elements(type, GST_RANK_NONE);
+    for (auto curr = elmList; curr; curr = curr->next)
     {
-        GstElementFactory *factory = (GstElementFactory *)curr->data;
-        QString longName(factory->details.longname);
-        QString codecName(factory->parent.name);
-        cb->addItem(longName, codecName);
-        if (selectedCodec == codecName)
+        auto factory = QGst::ElementFactoryPtr::wrap(GST_ELEMENT_FACTORY(curr->data), true);
+        cb->addItem(factory->longName(), factory->name());
+        if (selectedCodec == factory->name())
         {
             cb->setCurrentIndex(cb->count() - 1);
         }
     }
 
-    gst_plugin_feature_list_free(encoders);
+    gst_plugin_feature_list_free(elmList);
 }
 
 void VideoSettings::updateDeviceList()
@@ -154,14 +152,16 @@ void VideoSettings::updateDeviceList()
                 auto tuner = GST_TUNER(src);
                 if (tuner)
                 {
-                    auto walk = (GList *)gst_tuner_list_channels(tuner);
-                    while (walk)
+                    // The list is owned by the GstTuner and must not be freed.
+                    //
+                    auto channelList = gst_tuner_list_channels(tuner);
+                    while (channelList)
                     {
-                        auto ch = GST_TUNER_CHANNEL(walk->data);
+                        auto ch = GST_TUNER_CHANNEL(channelList->data);
                         //gst_tuner_set_channel(tuner, ch);
 
                         channelsAndCaps.append(ch->label);
-                        walk = g_list_next (walk);
+                        channelList = g_list_next(channelList);
                     }
                 }
 
@@ -173,7 +173,7 @@ void VideoSettings::updateDeviceList()
                     listDevices->setCurrentIndex(listDevices->count() - 1);
                 }
 
-                // Now switch back to Null state for next device
+                // Now switch the device back to Null state (release resources)
                 //
                 src->setState(QGst::StateNull);
                 src->getState(nullptr, nullptr, GST_SECOND * 10);
@@ -213,7 +213,7 @@ void VideoSettings::inputChannelChanged(int index)
     listFormats->clear();
     listFormats->addItem(tr("(default)"));
 
-    QGst::CapsPtr caps = QGst::Caps::fromString(listChannels->itemData(index).toString());
+    auto caps = QGst::Caps::fromString(listChannels->itemData(index).toString());
 
     if (index < 0 || !caps)
     {
@@ -223,14 +223,14 @@ void VideoSettings::inputChannelChanged(int index)
     auto selectedFormat = QSettings().value("format").toString();
     for (uint i = 0; i < caps->size(); ++i)
     {
-        QGst::StructurePtr s = caps->internalStructure(i);
-        QString format = s->value("format").toString();
-        QString formatName = format.isEmpty()? s->name(): s->name().append(",format=(fourcc)").append(format);
+        auto s = caps->internalStructure(i);
+        auto format = s->value("format").toString();
+        auto formatName = format.isEmpty()? s->name(): s->name().append(",format=(fourcc)").append(format);
         if (listFormats->findData(formatName) >= 0)
         {
             continue;
         }
-        QString displayName = format.isEmpty()? s->name(): s->name().append(" (").append(format).append(")");
+        auto displayName = format.isEmpty()? s->name(): s->name().append(" (").append(format).append(")");
         listFormats->addItem(displayName, formatName);
         if (formatName == selectedFormat)
         {
@@ -245,8 +245,8 @@ void VideoSettings::formatChanged(int index)
     listSizes->clear();
     listSizes->addItem(tr("(default)"));
 
-    QGst::CapsPtr caps = QGst::Caps::fromString(listDevices->itemData(listDevices->currentIndex()).toString());
-    QString selectedFormat = listFormats->itemData(index).toString();
+    auto caps = QGst::Caps::fromString(listDevices->itemData(listDevices->currentIndex()).toString());
+    auto selectedFormat = listFormats->itemData(index).toString();
     if (index < 0 || !caps || selectedFormat.isEmpty())
     {
         return;
@@ -255,9 +255,9 @@ void VideoSettings::formatChanged(int index)
     auto selectedSize = QSettings().value("size").toSize();
     for (uint i = 0; i < caps->size(); ++i)
     {
-        QGst::StructurePtr s = caps->internalStructure(i);
-        QString format = s->value("format").toString();
-        QString formatName = format.isEmpty()? s->name(): s->name().append(",format=(fourcc)").append(format);
+        auto s = caps->internalStructure(i);
+        auto format = s->value("format").toString();
+        auto formatName = format.isEmpty()? s->name(): s->name().append(",format=(fourcc)").append(format);
         if (selectedFormat != formatName)
         {
             continue;
@@ -277,23 +277,34 @@ void VideoSettings::formatChanged(int index)
     }
 }
 
+// Return nullptr for 'default', otherwise the text itself
+//
+static QString getListText(const QComboBox* cb)
+{
+    auto idx = cb->currentIndex();
+    return cb->itemData(idx).isNull()? nullptr: cb->itemText(idx);
+}
+
+static QVariant getListData(const QComboBox* cb)
+{
+    auto idx = cb->currentIndex();
+    return cb->itemData(idx);
+}
+
 void VideoSettings::save()
 {
     QSettings settings;
-    settings.setValue("device", listDevices->itemData(listDevices->currentIndex()).isNull()?
-                        nullptr: listDevices->itemText(listDevices->currentIndex()));
-    settings.setValue("video-channel", listChannels->itemData(listChannels->currentIndex()).isNull()?
-                        nullptr: listChannels->itemText(listChannels->currentIndex()));
-    settings.setValue("format", listFormats->itemData(listFormats->currentIndex()));
-    settings.setValue("size", listSizes->itemData(listSizes->currentIndex()));
-    settings.setValue("video-encoder", listVideoCodecs->itemData(listVideoCodecs->currentIndex()));
-    settings.setValue("video-muxer",   listVideoMuxers->itemData(listVideoMuxers->currentIndex()));
-    settings.setValue("rtp-payloader",   listRtpPayloaders->itemData(listRtpPayloaders->currentIndex()));
-    settings.setValue("image-encoder", listImageCodecs->itemData(listImageCodecs->currentIndex()));
-    settings.setValue("enable-video", checkRecordAll->isChecked());
-    settings.setValue("enable-rtp", checkEnableRtp->isChecked());
-    settings.setValue("rtp-clients", textRtpClients->text());
+    settings.setValue("device",        getListText(listDevices));
+    settings.setValue("video-channel", getListText(listChannels));
+    settings.setValue("format",        getListData(listFormats));
+    settings.setValue("size",          getListData(listSizes));
+    settings.setValue("video-encoder", getListData(listVideoCodecs));
+    settings.setValue("video-muxer",   getListData(listVideoMuxers));
+    settings.setValue("rtp-payloader", getListData(listRtpPayloaders));
+    settings.setValue("image-encoder", getListData(listImageCodecs));
+    settings.setValue("enable-video",  checkRecordAll->isChecked());
+    settings.setValue("enable-rtp",    checkEnableRtp->isChecked());
+    settings.setValue("rtp-clients",   textRtpClients->text());
+    settings.setValue("bitrate",       spinBitrate->value());
     settings.setValue("video-deinterlace", checkDeinterlace->isChecked());
-
-    settings.setValue("bitrate", spinBitrate->value());
 }
