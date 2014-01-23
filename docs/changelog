@@ -1,3 +1,9 @@
+beryllium (0.3.17) debian;
+
+  * Mouse hotkeys
+
+ -- Pavel Bludov <pbludov@gmail.com>  Thu, 23 Jan 2014 12:20:12 +0900
+
 beryllium (0.3.16) debian;
 
   * Localization fix

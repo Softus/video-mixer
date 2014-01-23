@@ -1,7 +1,7 @@
 Summary: Beryllium DICOM edition.
 Name: beryllium
 Provides: beryllium
-Version: 0.3.16
+Version: 0.3.17
 Release: 1
 License: LGPL-2.1+
 Source: %{name}.tar.gz
@@ -12,15 +12,16 @@ Packager: Beryllium team <beryllium@dc.baikal.ru>
 
 Requires: gstreamer-0_10-plugins-base >= 0.10.31, gstreamer-0_10-plugins-good >= 0.10.31
 Requires: gstreamer-0_10-plugins-bad >= 0.10.23, gstreamer-0_10-plugins-ugly >= 0.10.19
+Requires: gstreamer-0_10-plugins-ffmpeg, gstreamer-0_10-plugin-gnonlin
 Requires: libgstreamer-0_10-0 >= 0.10.31, libqt4 >= 4.7.0
 Requires: libQtGLib-2_0-0, libQtGStreamer-0_10-0, libstdc++6 >= 4.4.0
 
-BuildRequires: boost-devel, make, libqt4-devel
+BuildRequires: boost-devel, make, libqt4-devel, libQtGLib-devel, gstreamer-0_10-plugins-qt-devel
 
 %if %dicom == 1
-Requires: libdcmtk3_6, libopenssl1_0_0, libwrap0
+Requires: libdcmtk3_6, libopenssl1_0_0
 Requires: libmediainfo0, libzen0
-BuildRequires: dcmtk-devel, libmediainfo-devel
+BuildRequires: libmediainfo-devel, dcmtk-devel, tcp_wrappers-devel
 %endif
 
 %description
@@ -45,7 +46,7 @@ make install INSTALL_ROOT="%buildroot";
 %{_datadir}/applications/%{name}.desktop
 %dir %{_datadir}/%{name}/translations
 %{_datadir}/%{name}/translations/%{name}_ru.qm
-%{_iconsdir}/%{name}.png
+%{_datadir}/icons/%{name}.png
 %doc docs/*
 %{_mandir}/man1/%{name}.1.gz
 
