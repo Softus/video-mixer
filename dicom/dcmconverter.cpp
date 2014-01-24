@@ -65,6 +65,11 @@ public:
     {
     }
 
+    ~DcmConverter()
+    {
+        mi.Close();
+    }
+
     OFCondition readPixelData
         ( DcmDataset* dset
         , uchar*  pixData
@@ -74,10 +79,11 @@ public:
     {
         OFCondition cond;
 
-        if (!mi.Open(pixData, length))
+        if (!mi.Open_Buffer_Init(length))
         {
             return makeOFCondition(0, 2, OF_error, "Failed to open buffer");
         }
+        mi.Open_Buffer_Continue(pixData, length);
 
         qDebug() << QString::fromStdWString(mi.Inform());
 
@@ -141,7 +147,7 @@ public:
             }
             else
             {
-                return makeOFCondition(0, 4, OF_error, "Unsupperted color format");
+                return makeOFCondition(0, 4, OF_error, "Unsupported color format");
             }
 
             // Should only be written if Samples per Pixel > 1
