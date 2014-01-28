@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Irkutsk Diagnostic Center.
+ * Copyright (C) 2013-2014 Irkutsk Diagnostic Center.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -57,6 +57,7 @@ DicomDeviceSettings::DicomDeviceSettings(QWidget *parent) :
     mainLayout->addRow(tr("&IP address"), textIp);
 
     mainLayout->addRow(tr("AE &title"), textAet = new QLineEdit(settings.value("aet", localHost.toUpper()).toString()));
+    mainLayout->addRow(tr("&Modality"), textModality = new QLineEdit(settings.value("modality").toString()));
     mainLayout->addRow(tr("&Port"), spinPort = new QSpinBox);
     spinPort->setRange(0, 65535);
     spinPort->setValue(settings.value("local-port").toInt());
@@ -71,6 +72,7 @@ void DicomDeviceSettings::save()
     QSettings settings;
 
     settings.setValue("aet", textAet->text());
+    settings.setValue("modality", textModality->text());
     settings.setValue("local-port", spinPort->value());
     settings.setValue("dicom-export", checkExport->isChecked());
 }
