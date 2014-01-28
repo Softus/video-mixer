@@ -53,6 +53,11 @@ static void BuildCFindDataSet(DcmDataset& ds)
 {
     QSettings settings;
     QString modality = settings.value("worklist-modality").toString().toUpper();
+    if (modality.isEmpty())
+    {
+        modality = settings.value("modality").toString().toUpper();
+    }
+
     QString aet = settings.value("worklist-aet").toString();
     if (aet.isEmpty())
     {
