@@ -310,6 +310,8 @@ void ArchiveWindow::updateList()
     QWaitCursor wait(this);
     QFileIconProvider fip;
 
+    auto currText = listFiles->currentItem()? listFiles->currentItem()->text(): nullptr;
+
     listFiles->setUpdatesEnabled(false);
     listFiles->clear();
     auto filter = QDir::NoDot | QDir::AllEntries;
@@ -379,6 +381,10 @@ void ArchiveWindow::updateList()
 
         auto item = new QListWidgetItem(icon, fi.fileName(), listFiles);
         item->setToolTip(fi.absoluteFilePath());
+        if (item->text() == currText)
+        {
+            listFiles->setCurrentItem(item);
+        }
     }
 
     listFiles->setUpdatesEnabled(true);
@@ -398,19 +404,32 @@ void ArchiveWindow::onListRowChanged(int idx)
 {
     auto selectedSomething = listFiles->selectedItems().count() > 1 || (idx >= 0 && listFiles->item(idx)->text() != "..");
     actionDelete->setEnabled(selectedSomething);
+
 #ifdef WITH_DICOM
     actionStore->setEnabled(selectedSomething && QFile::exists(curr.absoluteFilePath(".patient.dcm"))
                             && !QSettings().value("storage-servers").toStringList().isEmpty());
 #endif
 
-    if (actionMode->data().toInt() == GALLERY_MODE && idx >= 0)
+    bool isVideo = false;
+    if (selectedSomething)
     {
         QFileInfo fi(curr.absoluteFilePath(listFiles->item(idx)->text()));
-        if (!fi.isDir())
+        auto caps = TypeDetect(fi.absoluteFilePath());
+        if (caps)
         {
-            playMediaFile(fi);
+            auto str = caps->internalStructure(0);
+            isVideo = str && str->name().startsWith("video/");
+        }
+
+        if (actionMode->data().toInt() == GALLERY_MODE && idx >= 0)
+        {
+            if (fi.isFile())
+            {
+                playMediaFile(fi);
+            }
         }
     }
+    actionEdit->setEnabled(isVideo);
 }
 
 void ArchiveWindow::onListItemDoubleClicked(QListWidgetItem* item)
@@ -689,12 +708,12 @@ void ArchiveWindow::stopMedia()
 
     if (pipeline)
     {
+        pipeline->setState(QGst::StateNull);
+        pipeline->getState(nullptr, nullptr, 1 * GST_SECOND); // 1 sec
         for (int i = 0; i < pagesWidget->count(); ++i)
         {
             static_cast<QGst::Ui::VideoWidget*>(pagesWidget->widget(i))->stopPipelineWatch();
         }
-        pipeline->setState(QGst::StateNull);
-        pipeline->getState(nullptr, nullptr, 1 * GST_SECOND); // 1 sec
         pipeline.clear();
         qApp->processEvents();
     }
@@ -705,7 +724,6 @@ void ArchiveWindow::playMediaFile(const QFileInfo& fi)
     if (actionMode->data().toInt() != GALLERY_MODE)
     {
         switchViewMode(GALLERY_MODE);
-        listFiles->setCurrentItem(listFiles->findItems(fi.fileName(), Qt::MatchExactly).first());
         return;
         //
         // Will get here again once switchig is done

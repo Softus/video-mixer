@@ -151,8 +151,8 @@ VideoEditor::~VideoEditor()
 {
     if (pipeline)
     {
-        videoWidget->stopPipelineWatch();
         pipeline->setState(QGst::StateNull);
+        videoWidget->stopPipelineWatch();
     }
 }
 

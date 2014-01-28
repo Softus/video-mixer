@@ -172,6 +172,16 @@ static void updateShortcut(T* btn, int key)
     }
 }
 
+class HorListWidget : public QListWidget
+{
+protected:
+    void wheelEvent(QWheelEvent *e)
+    {
+        QWheelEvent horEvent(e->pos(), e->delta(), e->buttons(), e->modifiers(), Qt::Horizontal);
+        QListWidget::wheelEvent(&horEvent);
+    }
+};
+
 MainWindow::MainWindow(QWidget *parent) :
     QWidget(parent),
     archiveWindow(nullptr),
@@ -196,7 +206,7 @@ MainWindow::MainWindow(QWidget *parent) :
 #ifndef WITH_TOUCH
     layoutMain->addWidget(createToolBar());
 #endif
-    listImagesAndClips = new QListWidget();
+    listImagesAndClips = new HorListWidget();
     listImagesAndClips->setViewMode(QListView::IconMode);
     listImagesAndClips->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     listImagesAndClips->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
