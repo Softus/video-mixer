@@ -55,6 +55,7 @@ class VideoSettings : public QWidget
     QComboBox* listRtpPayloaders;
     QComboBox* listImageCodecs;
     QCheckBox* checkRecordAll;
+    QSpinBox* spinFps;
     QSpinBox* spinBitrate;
     QLineEdit* textRtpClients;
     QCheckBox* checkEnableRtp;

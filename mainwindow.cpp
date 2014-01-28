@@ -401,27 +401,30 @@ QToolBar* MainWindow::createToolBar()
                  [video src]
                      |
                      V
-         +----[main splitter]-----+
-         |            |           |
+         +----[main splitter]------+
+         |            |            |
   [image valve]       |       [video valve]
-         |            |           |
-         V            V           V
- [image encoder]  [display]  [video encoder]
-        |                         |
-        V                         V
-  [image writer]      +----[video splitter]----+
-                      |           |            |
-                      V           V            V
-           [movie writer]  [clip valve]  [rtp sender]
-                                  |
-                                  V
-                          [clip writer]
+         |            |            |
+         V            V            V
+ [image encoder]  [display]   [video rate]
+        |                          |
+        V                          V
+  [image writer]             [video encoder]
+                                   |
+                                   V
+                       +----[video splitter]----+
+                       |           |            |
+                       V           V            V
+            [movie writer]   [clip valve]  [rtp sender]
+                                   |
+                                   V
+                            [clip writer]
 
 
 Sample:
     v4l2src ! autoconvert ! tee name=splitter
         ! autovideosink name=displaysink async=0 splitter.
-        ! valve name=encvalve drop=1 ! queue max-size-bytes=0 ! x264enc name=videoencoder ! tee name=videosplitter
+        ! valve name=encvalve drop=1 ! queue max-size-bytes=0 ! videorate max-rate=30/1 ! x264enc name=videoencoder ! tee name=videosplitter
                 ! identity  name=videoinspect drop-probability=1.0 ! queue ! valve name=videovalve drop=1 ! [mpegpsmux name=videomux ! filesink name=videosink] videosplitter.
                 ! queue ! rtph264pay ! udpsink name=rtpsink clients=127.0.0.1:5000 sync=0 videosplitter.
                 ! identity  name=clipinspect drop-probability=1.0 ! queue ! valve name=clipvalve ! [ mpegpsmux name=clipmux ! filesink name=clipsink] videosplitter.
@@ -513,6 +516,7 @@ QString MainWindow::buildPipeline()
     //
     auto outputPathDef      = settings.value("output-path",    DEFAULT_OUTPUT_PATH).toString();
     auto videoEncoderDef    = settings.value("video-encoder",  DEFAULT_VIDEO_ENCODER).toString();
+    auto videoMaxRate       = settings.value("video-max-fps",  DEFAULT_VIDEO_MAX_FPS).toString();
     auto videoFixColor      = settings.value(videoEncoderDef + "-colorspace").toBool()? "ffmpegcolorspace ! ": "";
     auto videoEncoderParams = settings.value(videoEncoderDef + "-parameters").toString();
     auto rtpPayDef          = settings.value("rtp-payloader",  DEFAULT_RTP_PAYLOADER).toString();
@@ -521,8 +525,15 @@ QString MainWindow::buildPipeline()
     auto rtpSinkParams      = settings.value(rtpSinkDef + "-parameters").toString();
     auto enableRtp          = !rtpSinkDef.isEmpty() && settings.value("enable-rtp").toBool();
 
-    pipe.append(" ! valve name=encvalve drop=1 ! queue max-size-bytes=0 ! ").append(videoFixColor)
-            .append(videoEncoderDef).append(" name=videoencoder ").append(videoEncoderParams);
+    pipe.append(" ! valve name=encvalve drop=1 ! queue max-size-bytes=0 ! ");
+
+    if (!videoMaxRate.isEmpty())
+    {
+        pipe.append("videorate skip-to-first=1 max-rate=").append(videoMaxRate).append(" ! ");
+    }
+
+    pipe.append(videoFixColor).append(videoEncoderDef).append(" name=videoencoder ").append(videoEncoderParams);
+
     if (enableRtp || enableVideo)
     {
         pipe.append(" ! tee name=videosplitter");

@@ -54,14 +54,21 @@ VideoSettings::VideoSettings(QWidget *parent) :
     connect(listFormats, SIGNAL(currentIndexChanged(int)), this, SLOT(formatChanged(int)));
     layout->addRow(tr("Frame &size"), listSizes = new QComboBox());
     layout->addRow(tr("Video &codec"), listVideoCodecs = new QComboBox());
+
+    layout->addRow(tr("M&ax rate"), spinFps = new QSpinBox());
+    spinFps->setRange(0, 200);
+    spinFps->setValue(settings.value("video-max-fps", DEFAULT_VIDEO_MAX_FPS).toInt());
+    spinFps->setSuffix(tr(" frames per second"));
+    spinFps->setToolTip(tr("0 for unlimited"));
+
     layout->addRow(tr("Video &bitrate"), spinBitrate = new QSpinBox());
     spinBitrate->setRange(300, 102400);
     spinBitrate->setSingleStep(100);
     spinBitrate->setSuffix(tr(" kbit per second"));
     spinBitrate->setValue(settings.value("bitrate", DEFAULT_VIDEOBITRATE).toInt());
-    checkDeinterlace = new QCheckBox(tr("De&interlace"));
+
+    layout->addRow(nullptr, checkDeinterlace = new QCheckBox(tr("De&interlace")));
     checkDeinterlace->setChecked(settings.value("video-deinterlace").toBool());
-    layout->addRow(nullptr, checkDeinterlace);
 
     layout->addRow(tr("Video &muxer"), listVideoMuxers = new QComboBox());
     layout->addRow(tr("&Image codec"), listImageCodecs = new QComboBox());
@@ -306,5 +313,6 @@ void VideoSettings::save()
     settings.setValue("enable-rtp",    checkEnableRtp->isChecked());
     settings.setValue("rtp-clients",   textRtpClients->text());
     settings.setValue("bitrate",       spinBitrate->value());
+    settings.setValue("video-max-fps",    spinFps->value());
     settings.setValue("video-deinterlace", checkDeinterlace->isChecked());
 }

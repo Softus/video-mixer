@@ -31,6 +31,7 @@
 #define DEFAULT_RTP_SINK              "udpsink"
 #define DEFAULT_VIDEOBITRATE          4000
 #define DEFAULT_VIDEO_ENCODER         "ffenc_mpeg2video"
+#define DEFAULT_VIDEO_MAX_FPS         30
 #define DEFAULT_MANDATORY_FIELD_COLOR "red"
 #define DEFAULT_MANDATORY_FIELDS      (QStringList() << "PatientID" << "Name")
 #define DEFAULT_IMAGE_TEMPLATE        "image-%study%-%nn%"
