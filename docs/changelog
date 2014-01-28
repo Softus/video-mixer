@@ -1,3 +1,10 @@
+beryllium (0.3.19) debian;
+
+  * Limit fps from the camera
+  * Configurable modality in device page
+
+ -- Pavel Bludov <pbludov@gmail.com>  Tue, 28 Jan 2014 18:45:00 +0900
+
 beryllium (0.3.18) debian;
 
   * Fix horizontal scrolling
