@@ -67,7 +67,8 @@ SOURCES += aboutdialog.cpp \
     typedetect.cpp \
     hotkeyedit.cpp \
     hotkeysettings.cpp \
-    mouseshortcut.cpp
+    mouseshortcut.cpp \
+    thumbnaillist.cpp
 
 HEADERS += aboutdialog.h \
     archivewindow.h \
@@ -92,7 +93,8 @@ HEADERS += aboutdialog.h \
     typedetect.h \
     hotkeyedit.h \
     hotkeysettings.h \
-    mouseshortcut.h
+    mouseshortcut.h \
+    thumbnaillist.h
 
 FORMS   +=
 

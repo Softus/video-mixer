@@ -124,6 +124,7 @@ void Settings::changePage(QListWidgetItem *current, QListWidgetItem *previous)
     if (!current)
         current = previous;
 
+    QWaitCursor wait(this);
     const QVariant& data = current->data(Qt::UserRole);
     if (data.type() == QVariant::UserType)
     {

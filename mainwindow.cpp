@@ -18,12 +18,13 @@
 #include "product.h"
 #include "aboutdialog.h"
 #include "archivewindow.h"
+#include "defaults.h"
 #include "mouseshortcut.h"
+#include "patientdialog.h"
 #include "qwaitcursor.h"
 #include "settings.h"
+#include "thumbnaillist.h"
 #include "videosettings.h"
-#include "patientdialog.h"
-#include "defaults.h"
 
 #ifdef WITH_DICOM
 #include "dicom/worklist.h"
@@ -172,16 +173,6 @@ static void updateShortcut(T* btn, int key)
     }
 }
 
-class HorListWidget : public QListWidget
-{
-protected:
-    void wheelEvent(QWheelEvent *e)
-    {
-        QWheelEvent horEvent(e->pos(), e->delta(), e->buttons(), e->modifiers(), Qt::Horizontal);
-        QListWidget::wheelEvent(&horEvent);
-    }
-};
-
 MainWindow::MainWindow(QWidget *parent) :
     QWidget(parent),
     archiveWindow(nullptr),
@@ -206,15 +197,15 @@ MainWindow::MainWindow(QWidget *parent) :
 #ifndef WITH_TOUCH
     layoutMain->addWidget(createToolBar());
 #endif
-    listImagesAndClips = new HorListWidget();
+    listImagesAndClips = new ThumbnailList();
     listImagesAndClips->setViewMode(QListView::IconMode);
     listImagesAndClips->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-    listImagesAndClips->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     listImagesAndClips->setMinimumHeight(144); // 576/4
     listImagesAndClips->setMaximumHeight(176);
     listImagesAndClips->setIconSize(QSize(144,144));
     listImagesAndClips->setMovement(QListView::Static);
-    listImagesAndClips->setWrapping(false);
+    connect(listImagesAndClips, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
+            this, SLOT(onThumbnailItemDoubleClicked(QListWidgetItem*)));
 
     displayWidget = new QGst::Ui::VideoWidget();
     displayWidget->setMinimumSize(352, 288);
@@ -1031,7 +1022,7 @@ void MainWindow::onElementMessage(const QGst::ElementMessagePtr& message)
         }
 
         auto existent = listImagesAndClips->findItems(QFileInfo(fileName).baseName(), Qt::MatchExactly);
-        auto item = !existent.isEmpty()? existent.at(0):
+        auto item = !existent.isEmpty()? existent.first():
             new QListWidgetItem(QFileInfo(fileName).baseName(), listImagesAndClips);
 
         item->setToolTip(toolTip);
@@ -1365,13 +1356,27 @@ void MainWindow::onShowArchiveClick()
     }
 #endif
 
-    archiveWindow->setPath(outputPath.absolutePath());
+    archiveWindow->setPath(outputPath.absolutePath(), false);
 #ifdef WITH_TOUCH
     mainStack->slideInWidget(archiveWindow);
 #else
     archiveWindow->show();
     archiveWindow->activateWindow();
 #endif
+}
+
+void MainWindow::onThumbnailItemDoubleClicked(QListWidgetItem* item)
+{
+    if (actionArchive->isEnabled())
+    {
+        // Popup the archive window
+        //
+        onShowArchiveClick();
+
+        // And select the file
+        //
+        archiveWindow->selectFile(item->text());
+    }
 }
 
 void MainWindow::onShowSettingsClick()

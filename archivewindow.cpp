@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Irkutsk Diagnostic Center.
+ * Copyright (C) 2013-2014 Irkutsk Diagnostic Center.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -17,6 +17,7 @@
 #include "archivewindow.h"
 #include "defaults.h"
 #include "qwaitcursor.h"
+#include "thumbnaillist.h"
 #include "typedetect.h"
 
 #ifdef WITH_DICOM
@@ -36,6 +37,8 @@
 #include <QDesktopServices>
 #include <QDir>
 #include <QFileIconProvider>
+#include <QFileSystemWatcher>
+#include <QFocusEvent>
 #include <QLabel>
 #include <QListWidget>
 #include <QMenu>
@@ -83,6 +86,9 @@ static void DamnQtMadeMeDoTheSunsetByHands(QToolBar* bar)
 ArchiveWindow::ArchiveWindow(QWidget *parent) :
     QWidget(parent)
 {
+    dirWatcher = new QFileSystemWatcher(this);
+    connect(dirWatcher, SIGNAL(directoryChanged(const QString &)), this, SLOT(onDirectoryChanged(const QString &)));
+
     auto layoutMain = new QVBoxLayout;
 
     auto barArchive = new QToolBar(tr("Archive"));
@@ -103,6 +109,9 @@ ArchiveWindow::ArchiveWindow(QWidget *parent) :
     actionEdit = barArchive->addAction(QIcon(":buttons/edit"), tr("Edit"), this, SLOT(onEditClick()));
     actionEdit->setShortcut(Qt::Key_F4);
     actionEdit->setEnabled(false);
+    actionUp = barArchive->addAction(QIcon(":/buttons/up"), tr("Up"), this, SLOT(onUpFolderClick()));
+    actionUp->setEnabled(false);
+    actionUp->setShortcut(Qt::Key_Backspace);
 
     auto spacer = new QWidget;
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
@@ -149,7 +158,7 @@ ArchiveWindow::ArchiveWindow(QWidget *parent) :
     auto btnPrev = new QToolButton;
     btnPrev->setIcon(QIcon(":buttons/prev"));
     btnPrev->setText(tr("Previous"));
-    btnPrev->setToolTip(btnPrev->text() + " (" + QKeySequence(Qt::Key_Right).toString(QKeySequence::NativeText) + ")");
+    btnPrev->setToolTip(btnPrev->text() + " (" + QKeySequence(Qt::Key_Left).toString() + ")");
     btnPrev->setMinimumHeight(200);
     btnPrev->setFocusPolicy(Qt::NoFocus);
     connect(btnPrev, SIGNAL(clicked()), this, SLOT(onPrevClick()));
@@ -171,7 +180,7 @@ ArchiveWindow::ArchiveWindow(QWidget *parent) :
     auto btnNext = new QToolButton;
     btnNext->setIcon(QIcon(":buttons/next"));
     btnNext->setText(tr("Next"));
-    btnNext->setToolTip(btnNext->text() + " (" + QKeySequence(Qt::Key_Left).toString(QKeySequence::NativeText) + ")");
+    btnNext->setToolTip(btnNext->text() + " (" + QKeySequence(Qt::Key_Right).toString() + ")");
     btnNext->setMinimumHeight(200);
     btnNext->setFocusPolicy(Qt::NoFocus);
     connect(btnNext, SIGNAL(clicked()), this, SLOT(onNextClick()));
@@ -199,7 +208,7 @@ ArchiveWindow::ArchiveWindow(QWidget *parent) :
     player->setLayout(playerLayout);
     layoutMain->addWidget(player);
 
-    listFiles = new QListWidget;
+    listFiles = new ThumbnailList;
     listFiles->setSelectionMode(QListWidget::ExtendedSelection);
 //    listFiles->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 //    listFiles->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -248,9 +257,40 @@ void ArchiveWindow::updateRoot()
     switchViewMode(settings.value("archive-mode").toInt());
 }
 
-void ArchiveWindow::setPath(const QString& path)
+void ArchiveWindow::setPath(const QString& path, bool async)
 {
-    curr.setPath(path);
+    if (curr.path() != path)
+    {
+        curr.setPath(path);
+        dirWatcher->removePaths(dirWatcher->directories());
+        dirWatcher->addPath(path);
+        if (async)
+        {
+            // Must be async when triggered from the path toolbar
+            // to avoid stack overflow
+            //
+            QTimer::singleShot(0, this, SLOT(updatePath()));
+        }
+        else
+        {
+            updatePath();
+        }
+        actionUp->setEnabled(root != curr);
+    }
+}
+
+void ArchiveWindow::onUpFolderClick()
+{
+    auto pathActions = barPath->actions();
+    auto size = pathActions.size();
+    if (size > 1)
+    {
+        pathActions.at(pathActions.size() - 2)->trigger();
+    }
+}
+
+void ArchiveWindow::onDirectoryChanged(const QString&)
+{
     QTimer::singleShot(0, this, SLOT(updatePath()));
 }
 
@@ -314,14 +354,7 @@ void ArchiveWindow::updateList()
 
     listFiles->setUpdatesEnabled(false);
     listFiles->clear();
-    auto filter = QDir::NoDot | QDir::AllEntries;
-
-    // No "parent folder" item in gallery mode and on the root
-    //
-    if (curr == root || actionMode->data().toInt() == GALLERY_MODE)
-    {
-        filter |= QDir::NoDotDot;
-    }
+    auto filter = QDir::NoDot | QDir::AllEntries | QDir::NoDotDot;
 
     foreach (QFileInfo fi, curr.entryInfoList(filter))
     {
@@ -392,12 +425,23 @@ void ArchiveWindow::updateList()
 
 void ArchiveWindow::selectPath(QAction* action)
 {
-    setPath(action->data().toString());
+    setPath(action->data().toString(), true /*must be asynchronous*/);
 }
 
 void ArchiveWindow::selectPath(bool)
 {
     selectPath(static_cast<QAction*>(sender()));
+}
+
+void ArchiveWindow::selectFile(const QString& fileName)
+{
+    auto items = listFiles->findItems(fileName, Qt::MatchStartsWith);
+    if (!items.isEmpty())
+    {
+        listFiles->clearSelection();
+        listFiles->scrollToItem(items.first());
+        listFiles->setCurrentItem(items.first());
+    }
 }
 
 void ArchiveWindow::onListRowChanged(int idx)
@@ -410,6 +454,8 @@ void ArchiveWindow::onListRowChanged(int idx)
                             && !QSettings().value("storage-servers").toStringList().isEmpty());
 #endif
 
+    stopMedia();
+
     bool isVideo = false;
     if (selectedSomething)
     {
@@ -419,11 +465,8 @@ void ArchiveWindow::onListRowChanged(int idx)
         {
             auto str = caps->internalStructure(0);
             isVideo = str && str->name().startsWith("video/");
-        }
 
-        if (actionMode->data().toInt() == GALLERY_MODE && idx >= 0)
-        {
-            if (fi.isFile())
+            if (fi.isFile() && actionMode->data().toInt() == GALLERY_MODE && idx >= 0)
             {
                 playMediaFile(fi);
             }
@@ -437,7 +480,7 @@ void ArchiveWindow::onListItemDoubleClicked(QListWidgetItem* item)
     QFileInfo fi(curr.absoluteFilePath(item->text()));
     if (fi.isDir())
     {
-        setPath(fi.absoluteFilePath());
+        setPath(fi.absoluteFilePath(), true);
     }
     else
     {
@@ -569,6 +612,7 @@ void ArchiveWindow::onDeleteClick()
             delete item;
         }
     }
+    listFiles->clearSelection();
 }
 
 #ifdef WITH_DICOM
@@ -706,6 +750,11 @@ void ArchiveWindow::stopMedia()
 {
     setWindowTitle(tr("Archive"));
 
+    foreach (auto action, barMediaControls->actions())
+    {
+        action->setVisible(false);
+    }
+
     if (pipeline)
     {
         pipeline->setState(QGst::StateNull);
@@ -715,7 +764,6 @@ void ArchiveWindow::stopMedia()
             static_cast<QGst::Ui::VideoWidget*>(pagesWidget->widget(i))->stopPipelineWatch();
         }
         pipeline.clear();
-        qApp->processEvents();
     }
 }
 

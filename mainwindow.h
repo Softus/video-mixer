@@ -34,6 +34,7 @@ QT_BEGIN_NAMESPACE
 class QBoxLayout;
 class QLabel;
 class QListWidget;
+class QListWidgetItem;
 class QMenuBar;
 class QResizeEvent;
 class QTimer;
@@ -152,6 +153,7 @@ private slots:
     void toggleSetting();
     void updatePipeline();
     void onEnableWidget(QWidget*, bool);
+    void onThumbnailItemDoubleClicked(QListWidgetItem* item);
 };
 
 #endif // MAINWINDOW_H
