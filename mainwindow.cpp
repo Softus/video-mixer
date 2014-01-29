@@ -527,7 +527,7 @@ QString MainWindow::buildPipeline()
 
     pipe.append(" ! valve name=encvalve drop=1 ! queue max-size-bytes=0 ! ");
 
-    if (!videoMaxRate.isEmpty())
+    if (videoMaxRate.toInt() > 0)
     {
         pipe.append("videorate skip-to-first=1 max-rate=").append(videoMaxRate).append(" ! ");
     }

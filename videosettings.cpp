@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Irkutsk Diagnostic Center.
+ * Copyright (C) 2013-2014 Irkutsk Diagnostic Center.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -313,6 +313,6 @@ void VideoSettings::save()
     settings.setValue("enable-rtp",    checkEnableRtp->isChecked());
     settings.setValue("rtp-clients",   textRtpClients->text());
     settings.setValue("bitrate",       spinBitrate->value());
-    settings.setValue("video-max-fps",    spinFps->value());
+    settings.setValue("video-max-fps", spinFps->value() > 0? spinFps->value(): QVariant());
     settings.setValue("video-deinterlace", checkDeinterlace->isChecked());
 }
