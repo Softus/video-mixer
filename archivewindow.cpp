@@ -83,8 +83,9 @@ static void DamnQtMadeMeDoTheSunsetByHands(QToolBar* bar)
     }
 }
 
-ArchiveWindow::ArchiveWindow(QWidget *parent) :
-    QWidget(parent)
+ArchiveWindow::ArchiveWindow(QWidget *parent)
+    : QWidget(parent)
+    , updateTimerId(0)
 {
     dirWatcher = new QFileSystemWatcher(this);
     connect(dirWatcher, SIGNAL(directoryChanged(const QString &)), this, SLOT(onDirectoryChanged(const QString &)));
@@ -249,6 +250,16 @@ void ArchiveWindow::closeEvent(QCloseEvent *evt)
     QWidget::closeEvent(evt);
 }
 
+void ArchiveWindow::timerEvent(QTimerEvent* evt)
+{
+    if (evt->timerId() == updateTimerId)
+    {
+        killTimer(updateTimerId);
+        updateTimerId = 0;
+        updatePath();
+    }
+}
+
 void ArchiveWindow::updateRoot()
 {
     QSettings settings;
@@ -257,25 +268,16 @@ void ArchiveWindow::updateRoot()
     switchViewMode(settings.value("archive-mode").toInt());
 }
 
-void ArchiveWindow::setPath(const QString& path, bool async)
+void ArchiveWindow::setPath(const QString& path)
 {
     if (curr.path() != path)
     {
         curr.setPath(path);
+        actionUp->setEnabled(root != curr);
+
         dirWatcher->removePaths(dirWatcher->directories());
         dirWatcher->addPath(path);
-        if (async)
-        {
-            // Must be async when triggered from the path toolbar
-            // to avoid stack overflow
-            //
-            QTimer::singleShot(0, this, SLOT(updatePath()));
-        }
-        else
-        {
-            updatePath();
-        }
-        actionUp->setEnabled(root != curr);
+        updatePath();
     }
 }
 
@@ -285,13 +287,16 @@ void ArchiveWindow::onUpFolderClick()
     auto size = pathActions.size();
     if (size > 1)
     {
-        pathActions.at(pathActions.size() - 2)->trigger();
+        auto currFolderName = curr.dirName();
+        setPath(pathActions.at(pathActions.size() - 2)->data().toString());
+        selectFile(currFolderName);
     }
 }
 
 void ArchiveWindow::onDirectoryChanged(const QString&)
 {
-    QTimer::singleShot(0, this, SLOT(updatePath()));
+    killTimer(updateTimerId);
+    updateTimerId = startTimer(200);
 }
 
 void ArchiveWindow::createSubDirMenu(QAction* parentAction)
@@ -301,7 +306,13 @@ void ArchiveWindow::createSubDirMenu(QAction* parentAction)
 
     foreach (auto subDir, dir.entryInfoList(QDir::NoDotAndDotDot | QDir::Dirs))
     {
-        menu->addAction(subDir.baseName(), this, SLOT(selectPath(bool)))->setData(subDir.absoluteFilePath());
+        auto action = menu->addAction(subDir.baseName());
+        action->setData(subDir.absoluteFilePath());
+
+        // setPath will destroy the menu that owns this action, so
+        // it must be queued.
+        //
+        connect(action, SIGNAL(triggered()), this, SLOT(selectPath()), Qt::QueuedConnection);
     }
 
     if (!menu->isEmpty())
@@ -333,7 +344,6 @@ void ArchiveWindow::updatePath()
     } while (dir != root && dir.cdUp());
 
     updateList();
-    listFiles->setCurrentRow(0);
 }
 
 void ArchiveWindow::preparePathPopupMenu()
@@ -408,7 +418,7 @@ void ArchiveWindow::updateList()
             }
             else
             {
-                icon = fip.icon(fi); // Should never be happen.
+                icon = fip.icon(fi); // Should never happen.
             }
         }
 
@@ -420,15 +430,19 @@ void ArchiveWindow::updateList()
         }
     }
 
+    if (listFiles->currentRow() < 0)
+    {
+        listFiles->setCurrentRow(0);
+    }
     listFiles->setUpdatesEnabled(true);
 }
 
 void ArchiveWindow::selectPath(QAction* action)
 {
-    setPath(action->data().toString(), true /*must be asynchronous*/);
+    setPath(action->data().toString());
 }
 
-void ArchiveWindow::selectPath(bool)
+void ArchiveWindow::selectPath()
 {
     selectPath(static_cast<QAction*>(sender()));
 }
@@ -480,7 +494,7 @@ void ArchiveWindow::onListItemDoubleClicked(QListWidgetItem* item)
     QFileInfo fi(curr.absoluteFilePath(item->text()));
     if (fi.isDir())
     {
-        setPath(fi.absoluteFilePath(), true);
+        setPath(fi.absoluteFilePath());
     }
     else
     {
@@ -582,6 +596,9 @@ void ArchiveWindow::onDeleteClick()
         items << listFiles->currentItem();
     }
 
+    listFiles->clearSelection();
+    listFiles->setCurrentRow(-1);
+
     int userChoice = QMessageBox::question(this, windowTitle(),
         items.count() == 1? tr("Are you sure to delete\n\n'%1'?").arg(items.first()->text()): tr("Are you sure to delete selected items?"),
         QMessageBox::Ok, QMessageBox::Cancel | QMessageBox::Default);
@@ -612,7 +629,6 @@ void ArchiveWindow::onDeleteClick()
             delete item;
         }
     }
-    listFiles->clearSelection();
 }
 
 #ifdef WITH_DICOM

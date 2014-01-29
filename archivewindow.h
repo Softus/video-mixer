@@ -54,6 +54,7 @@ class ArchiveWindow : public QWidget
     QDir                   root;
     QDir                   curr;
     QFileSystemWatcher*    dirWatcher;
+    int                    updateTimerId;
 
     void stopMedia();
     void playMediaFile(const QFileInfo &fi);
@@ -67,6 +68,7 @@ public:
     ~ArchiveWindow();
 protected:
     virtual void closeEvent(QCloseEvent *);
+    void timerEvent(QTimerEvent *);
 
 signals:
     
@@ -74,8 +76,7 @@ public slots:
     void updateRoot();
     void updatePath();
     void updateList();
-    void setPath(const QString& path, bool async);
-    void selectPath(bool);
+    void setPath(const QString& path);
     void selectFile(const QString& fileName);
     void onListRowChanged(int idx);
     void onListKey();
@@ -96,6 +97,7 @@ public slots:
     void preparePathPopupMenu();
 
 private slots:
+    void selectPath();
     void selectPath(QAction* action);
     void onSwitchModeClick(QAction* action);
     void onListItemDoubleClicked(QListWidgetItem* item);

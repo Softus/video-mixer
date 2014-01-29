@@ -1356,7 +1356,7 @@ void MainWindow::onShowArchiveClick()
     }
 #endif
 
-    archiveWindow->setPath(outputPath.absolutePath(), false);
+    archiveWindow->setPath(outputPath.absolutePath());
 #ifdef WITH_TOUCH
     mainStack->slideInWidget(archiveWindow);
 #else
