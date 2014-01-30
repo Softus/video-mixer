@@ -61,7 +61,7 @@ class VideoSettings : public QWidget
     QCheckBox* checkEnableRtp;
     QCheckBox* checkDeinterlace;
 
-    void updateDeviceList();
+    void updateDeviceList(const char *elmName, const char *propName);
     void updateGstList(const char* setting, const char* def, unsigned long long type, QComboBox* cb);
 
 public:

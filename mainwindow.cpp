@@ -435,6 +435,7 @@ QString MainWindow::buildPipeline()
     //
     QString pipe;
 
+    auto deviceType     = settings.value("device-type").toString();
     auto deviceDef      = settings.value("device").toString();
     auto inputChannel   = settings.value("video-channel").toString();
     auto formatDef      = settings.value("format").toString();
@@ -450,23 +451,46 @@ QString MainWindow::buildPipeline()
     }
     else
     {
-        pipe.append(PLATFORM_SPECIFIC_SOURCE);
-        if (!inputChannel.isEmpty())
-        {
-            // Hack: since channel name can't be set with attributes,
-            // we set element name instead. The one reason is to
-            // make the pipeline text do not match with older one.
-            //
-            pipe.append(" name=\"").append(inputChannel).append("\"");
-        }
-        if (!deviceDef.isEmpty())
-        {
-            pipe.append(" " PLATFORM_SPECIFIC_PROPERTY "=\"").append(deviceDef).append("\"");
-        }
+        pipe.append(deviceType);
+
         if (!srcParams.isEmpty())
         {
-            pipe.append(" ").append(srcParams);
+            pipe.append(' ').append(srcParams).append(' ');
         }
+
+        if (deviceType == "dv1394src")
+        {
+            // Special handling of dv video sources
+            //
+            if (inputChannel.toInt() > 0)
+            {
+                pipe.append(" channel=").append(inputChannel).append("");
+            }
+            if (!deviceDef.isEmpty())
+            {
+                pipe.append(" guid=\"").append(deviceDef).append("\"");
+            }
+
+            // Add dv demuxer & decoder
+            //
+            pipe.append(" ! dvdemux ! ffdec_dvvideo");
+        }
+        else
+        {
+            if (!inputChannel.isEmpty())
+            {
+                // Hack: since channel name can't be set with attributes,
+                // we set element name instead. The one reason is to
+                // make the pipeline text do not match with older one.
+                //
+                pipe.append(" name=\"").append(inputChannel).append("\"");
+            }
+            if (!deviceDef.isEmpty())
+            {
+                pipe.append(" " PLATFORM_SPECIFIC_PROPERTY "=\"").append(deviceDef).append("\"");
+            }
+        }
+
         if (srcDeinterlace)
         {
             pipe.append(" ! deinterlace");
