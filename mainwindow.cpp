@@ -77,6 +77,8 @@
 #include <gst/gstdebugutils.h>
 #include <gst/interfaces/tuner.h>
 
+#define SAFE_MODE_KEYS (Qt::AltModifier | Qt::ControlModifier | Qt::ShiftModifier)
+
 #if defined(Q_WS_WIN) && !defined(FILE_ATTRIBUTE_HIDDEN)
     #define FILE_ATTRIBUTE_HIDDEN 0x00000002
     extern "C" __declspec(dllimport) int __stdcall SetFileAttributesW(const wchar_t* lpFileName, quint32 dwFileAttributes);
@@ -256,15 +258,17 @@ MainWindow::MainWindow(QWidget *parent) :
     patientSex       = getCmdLineOption("--patient-sex",      "-s");
     physician        = getCmdLineOption("--physician",        "-p");
     studyName        = getCmdLineOption("--study-name",       "-e");
+    auto safeMode    = qApp->arguments().contains("--safe-mode");
+
+    if (qApp->queryKeyboardModifiers() == SAFE_MODE_KEYS
+        || safeMode || settings.value("safe-mode", true).toBool())
+    {
+        settings.setValue("safe-mode", false);
+        QTimer::singleShot(0, this, SLOT(onShowSettingsClick()));
+    }
 
     updatePipeline();
     updateOutputPath();
-
-    if (settings.value("first-run", true).toBool())
-    {
-        settings.setValue("first-run", false);
-        QTimer::singleShot(0, this, SLOT(onShowSettingsClick()));
-    }
 }
 
 MainWindow::~MainWindow()

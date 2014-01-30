@@ -774,7 +774,7 @@ void ArchiveWindow::stopMedia()
     if (pipeline)
     {
         pipeline->setState(QGst::StateNull);
-        pipeline->getState(nullptr, nullptr, 1 * GST_SECOND); // 1 sec
+        pipeline->getState(nullptr, nullptr, 10 * GST_SECOND); // 1 sec
         for (int i = 0; i < pagesWidget->count(); ++i)
         {
             static_cast<QGst::Ui::VideoWidget*>(pagesWidget->widget(i))->stopPipelineWatch();

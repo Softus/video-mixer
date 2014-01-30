@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Irkutsk Diagnostic Center.
+ * Copyright (C) 2013-2014 Irkutsk Diagnostic Center.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -22,6 +22,8 @@
 #include "videoeditor.h"
 #include "product.h"
 
+#include <signal.h>
+
 #include <QApplication>
 #include <QIcon>
 #include <QLocale>
@@ -41,9 +43,31 @@
 //
 extern void fix_mpeg_sys_type_find();
 
+volatile sig_atomic_t fatal_error_in_progress = 0;
+void sighandler(int signum)
+{
+    // Since this handler is established for more than one kind of signal,
+    // it might still get invoked recursively by delivery of some other kind
+    // of signal.  Use a static variable to keep track of that.
+    //
+    if (fatal_error_in_progress)
+    {
+        raise(signum);
+    }
+
+    fatal_error_in_progress = 1;
+    QSettings().setValue("safe-mode", true);
+
+    // Now call default signal handler which generates the core file.
+    //
+    SIG_DFL(signum);
+}
+
 int main(int argc, char *argv[])
 {
     int errCode = 0;
+
+    signal(SIGSEGV, sighandler);
 
     // Pass some arguments to gStreamer.
     // For example --gst-debug-level=5
@@ -67,6 +91,7 @@ int main(int argc, char *argv[])
     cmd.addOption("--patient-sex",      "-s", 1, "F|M", "Patient sex");
     cmd.addOption("--physician",        "-p", 1, "string", "Physician name");
     cmd.addOption("--study-name",       "-e", 1, "string", "Study name");
+    cmd.addOption("--safe-mode",     nullptr, "Run the program in safe mode");
     dcmtkApp.parseCommandLine(cmd, argc, argv);
     OFLog::configureFromCommandLine(cmd, dcmtkApp);
 #endif

@@ -1,3 +1,9 @@
+beryllium (0.3.21) debian;
+
+  * Crash handler & safe mode
+
+ -- Pavel Bludov <pbludov@gmail.com>  Thu, 30 Jan 2014 11:36:00 +0900
+
 beryllium (0.3.20) debian;
 
   * Archive window tweaks & fixes
