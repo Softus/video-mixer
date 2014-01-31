@@ -29,7 +29,7 @@ HotKeySettings::HotKeySettings(QWidget *parent) :
     auto layoutMain = new QFormLayout;
     layoutMain->setContentsMargins(4,0,4,0);
 
-    layoutMain->addRow(tr("&Start study"), heStartStudy = new HotKeyEdit());
+    layoutMain->addRow(tr("&Start/stop study"), heStartStudy = new HotKeyEdit());
     heStartStudy->setKey(settings.value("hotkey-start", DEFAULT_HOTKEY_START).toInt());
     layoutMain->addRow(tr("&Take snapshot"), heTakeSnapshot = new HotKeyEdit());
     heTakeSnapshot->setKey(settings.value("hotkey-snapshot", DEFAULT_HOTKEY_SNAPSHOT).toInt());

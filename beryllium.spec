@@ -41,14 +41,12 @@ make %{?_smp_mflags};
 make install INSTALL_ROOT="%buildroot";
 
 %files
-%{_bindir}/beryllium
-%dir %{_datadir}/%{name}
-%{_datadir}/applications/%{name}.desktop
-%dir %{_datadir}/%{name}/translations
-%{_datadir}/%{name}/translations/%{name}_ru.qm
-%{_datadir}/icons/%{name}.png
 %doc docs/*
 %{_mandir}/man1/%{name}.1.gz
+%{_bindir}/beryllium
+%{_datadir}/%{name}
+%{_datadir}/applications/%{name}.desktop
+%{_datadir}/icons/%{name}.png
 
 %changelog
 * Wed Sep 11 2013 Pavel Bludov <pbludov@gmail.com>
