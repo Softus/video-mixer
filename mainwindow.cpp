@@ -268,7 +268,7 @@ MainWindow::MainWindow(QWidget *parent) :
     }
 
     updatePipeline();
-    updateOutputPath();
+    updateOutputPath(false);
 }
 
 MainWindow::~MainWindow()
@@ -860,13 +860,28 @@ void MainWindow::updateWindowTitle()
     setWindowTitle(windowTitle);
 }
 
-void MainWindow::updateOutputPath()
+void MainWindow::updateOutputPath(bool needUnique)
 {
     QSettings settings;
     auto tpl = settings.value("output-path", DEFAULT_OUTPUT_PATH).toString();
     tpl.append(settings.value("folder-template", DEFAULT_FOLDER_TEMPLATE).toString());
 
     outputPath.setPath(replace(tpl, ++studyNo));
+
+    qDebug() << outputPath.absolutePath();
+    if (needUnique && outputPath.exists())
+    {
+        int cnt = 0;
+        QString alt;
+        do
+        {
+            alt = outputPath.absolutePath()
+                .append(" (").append(QString::number(++cnt)).append(')');
+        }
+        while (outputPath.exists(alt));
+        outputPath.setPath(alt);
+    }
+    qDebug() << outputPath.absolutePath();
 
     if (!outputPath.mkpath("."))
     {
@@ -1529,7 +1544,7 @@ void MainWindow::onStartStudy()
     physician   = fixFileName(dlg.physician());
     studyName   = fixFileName(dlg.studyName());
 
-    updateOutputPath();
+    updateOutputPath(true);
 
     // After updateOutputPath the outputPath is usable
     //

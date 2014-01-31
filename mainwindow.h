@@ -111,7 +111,7 @@ class MainWindow : public QWidget
     QGst::PipelinePtr createPipeline();
     void releasePipeline();
     void updateWindowTitle();
-    void updateOutputPath();
+    void updateOutputPath(bool needUnique);
     QString appendVideoTail(const QString& prefix, int idx);
     void removeVideoTail(const QString& prefix);
 
