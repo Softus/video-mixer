@@ -356,7 +356,7 @@ QToolBar* MainWindow::createToolBar()
     btnSnapshot->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     btnSnapshot->setFocusPolicy(Qt::NoFocus);
     btnSnapshot->setIcon(QIcon(":/buttons/camera"));
-    btnSnapshot->setText(tr("&Take snapshot"));
+    btnSnapshot->setText(tr("Take snapshot"));
     btnSnapshot->setMinimumWidth(175);
     connect(btnSnapshot, SIGNAL(clicked()), this, SLOT(onSnapshotClick()));
     bar->addWidget(btnSnapshot);
@@ -1321,9 +1321,11 @@ void MainWindow::onRecordClick()
 void MainWindow::updateStartButton()
 {
     QIcon icon(running? ":/buttons/stop": ":/buttons/start");
-    QString strOnOff(running? tr("End &study"): tr("Start &study"));
+    QString strOnOff(running? tr("End study"): tr("Start study"));
     btnStart->setIcon(icon);
+    auto shortcut = btnStart->shortcut(); // save the shortcut...
     btnStart->setText(strOnOff);
+    btnStart->setShortcut(shortcut); // ...and restore
 
     btnRecord->setEnabled(running);
     btnSnapshot->setEnabled(running);
@@ -1339,9 +1341,11 @@ void MainWindow::updateStartButton()
 void MainWindow::updateRecordButton()
 {
     QIcon icon(recording? ":/buttons/pause": ":/buttons/record");
-    QString strOnOff(recording? tr("Paus&e"): tr("R&ecord"));
+    QString strOnOff(recording? tr("Pause"): tr("Record"));
     btnRecord->setIcon(icon);
+    auto shortcut = btnRecord->shortcut(); // save the shortcut...
     btnRecord->setText(strOnOff);
+    btnRecord->setShortcut(shortcut); // ...and restore
 }
 
 void MainWindow::prepareSettingsMenu()
