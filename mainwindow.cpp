@@ -867,11 +867,9 @@ void MainWindow::updateOutputPath(bool needUnique)
     tpl.append(settings.value("folder-template", DEFAULT_FOLDER_TEMPLATE).toString());
 
     outputPath.setPath(replace(tpl, ++studyNo));
-
-    qDebug() << outputPath.absolutePath();
     if (needUnique && outputPath.exists())
     {
-        int cnt = 0;
+        int cnt = 1;
         QString alt;
         do
         {
@@ -881,7 +879,7 @@ void MainWindow::updateOutputPath(bool needUnique)
         while (outputPath.exists(alt));
         outputPath.setPath(alt);
     }
-    qDebug() << outputPath.absolutePath();
+    qDebug() << "Output path" << outputPath.absolutePath();
 
     if (!outputPath.mkpath("."))
     {
