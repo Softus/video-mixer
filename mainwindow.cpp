@@ -770,6 +770,8 @@ void MainWindow::updatePipeline()
         }
         pipelineDef = newPipelineDef;
         pipeline = createPipeline();
+        btnStart->setEnabled(pipeline);
+
         auto videoInputChannel = settings.value("video-channel").toString();
         if (!videoInputChannel.isEmpty())
         {
@@ -1076,11 +1078,20 @@ void MainWindow::onElementMessage(const QGst::ElementMessagePtr& message)
 
 bool MainWindow::startVideoRecord()
 {
+    if (!pipeline)
+    {
+        // How we get here?
+        //
+        QMessageBox::critical(this, windowTitle(), tr("Failed to start recording.\nPlease, adjust the video source settings."), QMessageBox::Ok);
+        return false;
+    }
+
     if (QSettings().value("enable-video").toBool())
     {
         auto videoFileName = appendVideoTail("video", ++studyNo);
         if (videoFileName.isEmpty())
         {
+            removeVideoTail("video");
             QMessageBox::critical(this, windowTitle(), tr("Failed to start recording.\nCheck the error log for details."), QMessageBox::Ok);
             return false;
         }
@@ -1297,6 +1308,7 @@ void MainWindow::onRecordClick()
         }
         else
         {
+            removeVideoTail("clip");
             QMessageBox::critical(this, windowTitle(), tr("Failed to start recording.\nCheck the error log for details."), QMessageBox::Ok);
         }
     }
@@ -1602,12 +1614,15 @@ void MainWindow::onStartStudy()
 
     setElementProperty(videoEncoderValve, "drop", !running);
 
-    auto displayOverlay = pipeline->getElementByName("displayoverlay");
-    if (displayOverlay)
+    if (pipeline)
     {
-        displayOverlay->setProperty("silent", !pipeline->getElementByName("videomux"));
-        displayOverlay->setProperty("color",  0xFFFF0000);
-        displayOverlay->setProperty("outline-color", 0xFFFF0000);
+        auto displayOverlay = pipeline->getElementByName("displayoverlay");
+        if (displayOverlay)
+        {
+            displayOverlay->setProperty("silent", !pipeline->getElementByName("videomux"));
+            displayOverlay->setProperty("color",  0xFFFF0000);
+            displayOverlay->setProperty("outline-color", 0xFFFF0000);
+        }
     }
 
     updateStartButton();
