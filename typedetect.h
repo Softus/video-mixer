@@ -17,8 +17,8 @@
 #ifndef TYPEDETECT_H
 #define TYPEDETECT_H
 
-#include <QGst/Caps>
+#include <QString>
 
-QGst::CapsPtr TypeDetect(const QString& filePath);
+QString TypeDetect(const QString& filePath);
 
 #endif // TYPEDETECT_H

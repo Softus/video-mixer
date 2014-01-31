@@ -407,12 +407,7 @@ void ArchiveWindow::updateList()
         {
             QGst::StructurePtr str;
             auto caps = TypeDetect(fi.absoluteFilePath());
-            if (caps)
-            {
-                str = caps->internalStructure(0);
-            }
-
-            if (str && str->name().startsWith("video/"))
+            if (caps.startsWith("video/"))
             {
                 icon.addFile(":/buttons/movie");
             }
@@ -475,11 +470,9 @@ void ArchiveWindow::onListRowChanged(int idx)
     {
         QFileInfo fi(curr.absoluteFilePath(listFiles->item(idx)->text()));
         auto caps = TypeDetect(fi.absoluteFilePath());
-        if (caps)
+        if (!caps.isEmpty())
         {
-            auto str = caps->internalStructure(0);
-            isVideo = str && str->name().startsWith("video/");
-
+            isVideo = caps.startsWith("video/");
             if (fi.isFile() && actionMode->data().toInt() == GALLERY_MODE && idx >= 0)
             {
                 playMediaFile(fi);

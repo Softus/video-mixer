@@ -31,7 +31,8 @@ class DicomDeviceSettings : public QWidget
     QLineEdit*    textAet;
     QLineEdit*    textModality;
     QSpinBox*     spinPort;
-    QCheckBox*    checkExport;
+    QCheckBox*    checkExportClips;
+    QCheckBox*    checkExportVideo;
 
 public:
     Q_INVOKABLE explicit DicomDeviceSettings(QWidget *parent = 0);

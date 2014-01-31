@@ -1,6 +1,12 @@
+beryllium (0.3.23) debian;
+
+  * Option to send video clips or entire log to DICOM servers
+
+ -- Pavel Bludov <pbludov@gmail.com>  Fri, 31 Jan 2014 13:15:00 +0900
+
 beryllium (0.3.22) debian;
 
-  * Sound notifications
+  * Output folder collision fix
 
  -- Pavel Bludov <pbludov@gmail.com>  Fri, 31 Jan 2014 10:14:00 +0900
 

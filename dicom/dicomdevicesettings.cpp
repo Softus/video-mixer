@@ -62,8 +62,10 @@ DicomDeviceSettings::DicomDeviceSettings(QWidget *parent) :
     spinPort->setRange(0, 65535);
     spinPort->setValue(settings.value("local-port").toInt());
 
-    mainLayout->addRow(nullptr, checkExport = new QCheckBox(tr("&Export video to DICOM")));
-    checkExport->setChecked(settings.value("dicom-export", DEFAULT_EXPORT_TO_DICOM).toBool());
+    mainLayout->addRow(nullptr, checkExportClips = new QCheckBox(tr("Export video &clips to DICOM")));
+    checkExportClips->setChecked(settings.value("dicom-export-clips", DEFAULT_EXPORT_CLIPS_TO_DICOM).toBool());
+    mainLayout->addRow(nullptr, checkExportVideo = new QCheckBox(tr("Export &video log to DICOM")));
+    checkExportVideo->setChecked(settings.value("dicom-export-video", DEFAULT_EXPORT_VIDEO_TO_DICOM).toBool());
     setLayout(mainLayout);
 }
 
@@ -74,5 +76,6 @@ void DicomDeviceSettings::save()
     settings.setValue("aet", textAet->text());
     settings.setValue("modality", textModality->text());
     settings.setValue("local-port", spinPort->value());
-    settings.setValue("dicom-export", checkExport->isChecked());
+    settings.setValue("dicom-export-clips", checkExportClips->isChecked());
+    settings.setValue("dicom-export-video", checkExportVideo->isChecked());
 }
