@@ -523,12 +523,12 @@ QString MainWindow::buildPipeline()
     auto rtpSinkParams      = settings.value(rtpSinkDef + "-parameters").toString();
     auto enableRtp          = !rtpSinkDef.isEmpty() && settings.value("enable-rtp").toBool();
 
-    pipe.append(" ! valve name=encvalve drop=1 ! queue max-size-bytes=0 ! ");
-
     if (videoMaxRate.toInt() > 0)
     {
-        pipe.append("videorate skip-to-first=1 max-rate=").append(videoMaxRate).append(" ! ");
+        pipe.append(" ! videorate skip-to-first=1 max-rate=").append(videoMaxRate);
     }
+
+    pipe.append(" ! valve name=encvalve drop=1 ! queue max-size-bytes=0 ! ");
 
     pipe.append(videoFixColor).append(videoEncoderDef).append(" name=videoencoder ").append(videoEncoderParams);
 
