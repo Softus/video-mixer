@@ -155,26 +155,6 @@ static void Dump(QGst::ElementPtr elm)
 
 #endif
 
-// T == QAction | QAbstractButton
-//
-template <class T>
-static void updateShortcut(T* btn, int key)
-{
-    MouseShortcut::removeMouseShortcut(btn);
-
-    if (key > 0)
-    {
-        QKeySequence shortcut(key);
-        btn->setShortcut(shortcut);
-        btn->setToolTip(btn->text().remove("&") + " (" + shortcut.toString(QKeySequence::NativeText) + ")");
-    }
-    else if (key < 0)
-    {
-        auto ms = new MouseShortcut(key, btn);
-        btn->setToolTip(btn->text().remove("&") + " (" + ms->toString(QKeySequence::NativeText) + ")");
-    }
-}
-
 MainWindow::MainWindow(QWidget *parent) :
     QWidget(parent),
     archiveWindow(nullptr),
@@ -190,7 +170,6 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     QSettings settings;
     updateWindowTitle();
-
     // This magic required for updating widgets from worker threads on Microsoft (R) Windows (TM)
     //
     connect(this, SIGNAL(enableWidget(QWidget*, bool)), this, SLOT(onEnableWidget(QWidget*, bool)), Qt::QueuedConnection);
@@ -1198,8 +1177,14 @@ void MainWindow::onStartClick()
     patientName.clear();
     patientSex.clear();
     patientBirthDate.clear();
-    physician.clear();
-    studyName.clear();
+    if (settings.value("reset-physician").toBool())
+    {
+        physician.clear();
+    }
+    if (settings.value("reset-study-name").toBool())
+    {
+        studyName.clear();
+    }
 
     setElementProperty(videoEncoderValve, "drop", true);
     setElementProperty("displayoverlay", "silent", true);
