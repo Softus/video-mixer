@@ -36,6 +36,23 @@ void MouseShortcut::removeMouseShortcut(QObject *parent)
 
 QString MouseShortcut::toString(int key, QKeySequence::SequenceFormat format)
 {
+    if (key == 0)
+    {
+        return tr("(not set)");
+    }
+
+    // It's a keyboard key, pass to defauls
+    //
+    if (key > 0)
+    {
+#if (QT_VERSION < QT_VERSION_CHECK(5, 1, 0))
+        // Remove the Keypad modifier due to QTBUG-4022
+        //
+        key &= ~Qt::KeypadModifier;
+#endif
+        return QKeySequence(key).toString();
+    }
+
     QStringList returnText;
 
     auto modifiers = key & Qt::MODIFIER_MASK & ~0x80000000;

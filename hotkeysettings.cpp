@@ -19,29 +19,45 @@
 #include "hotkeyedit.h"
 
 #include <QFormLayout>
+#include <QGroupBox>
 #include <QSettings>
+#include <QVBoxLayout>
 
 HotKeySettings::HotKeySettings(QWidget *parent) :
     QWidget(parent)
 {
     QSettings settings;
 
-    auto layoutMain = new QFormLayout;
+    auto layoutMain = new QVBoxLayout;
     layoutMain->setContentsMargins(4,0,4,0);
 
-    layoutMain->addRow(tr("&Start/stop study"), heStartStudy = new HotKeyEdit());
+    auto layoutCapture = new QFormLayout;
+    auto grCapture = new QGroupBox(tr("Capture window"));
+    grCapture->setLayout(layoutCapture);
+    layoutMain->addWidget(grCapture);
+    layoutCapture->addRow(tr("&Start/stop study"), heStartStudy = new HotKeyEdit());
     heStartStudy->setKey(settings.value("hotkey-start", DEFAULT_HOTKEY_START).toInt());
-    layoutMain->addRow(tr("&Take snapshot"), heTakeSnapshot = new HotKeyEdit());
+    layoutCapture->addRow(tr("&Take snapshot"), heTakeSnapshot = new HotKeyEdit());
     heTakeSnapshot->setKey(settings.value("hotkey-snapshot", DEFAULT_HOTKEY_SNAPSHOT).toInt());
-    layoutMain->addRow(tr("&Record/pause"), heRepordPause = new HotKeyEdit());
+    layoutCapture->addRow(tr("&Record/pause"), heRepordPause = new HotKeyEdit());
     heRepordPause->setKey(settings.value("hotkey-record", DEFAULT_HOTKEY_RECORD).toInt());
-    layoutMain->addRow(tr("&Archive"), heArchive = new HotKeyEdit());
+    layoutCapture->addRow(tr("Show &Archive"), heArchive = new HotKeyEdit());
     heArchive->setKey(settings.value("hotkey-archive", DEFAULT_HOTKEY_ARCHIVE).toInt());
-    layoutMain->addRow(tr("S&ettings"), heSettings = new HotKeyEdit());
+    layoutCapture->addRow(tr("Show S&ettings"), heSettings = new HotKeyEdit());
     heSettings->setKey(settings.value("hotkey-settings", DEFAULT_HOTKEY_SETTINGS).toInt());
+
 #ifdef WITH_DICOM
-    layoutMain->addRow(tr("&Worklist"), heWorklist = new HotKeyEdit());
+    layoutCapture->addRow(tr("Show &Worklist"), heWorklist = new HotKeyEdit());
     heWorklist->setKey(settings.value("hotkey-worklist", DEFAULT_HOTKEY_WORKLIST).toInt());
+
+    auto layoutWorklist = new QFormLayout;
+    auto grWorklist = new QGroupBox(tr("Worklist window"));
+    grWorklist->setLayout(layoutWorklist);
+    layoutMain->addWidget(grWorklist);
+    layoutWorklist->addRow(tr("Show &details"), heDetails = new HotKeyEdit());
+    heDetails->setKey(settings.value("hotkey-show-details", DEFAULT_HOTKEY_SHOW_DETAILS).toInt());
+    layoutWorklist->addRow(tr("Re&load worlist"), heRefresh = new HotKeyEdit());
+    heRefresh->setKey(settings.value("hotkey-refresh", DEFAULT_HOTKEY_REFRESH).toInt());
 #endif
     setLayout(layoutMain);
 }
@@ -56,6 +72,8 @@ void HotKeySettings::save()
     settings.setValue("hotkey-settings", heSettings->key());
     settings.setValue("hotkey-archive",  heArchive->key());
 #ifdef WITH_DICOM
-    settings.setValue("hotkey-worklist", heWorklist->key());
+    settings.setValue("hotkey-worklist",     heWorklist->key());
+    settings.setValue("hotkey-show-details", heDetails->key());
+    settings.setValue("hotkey-refresh",      heRefresh->key());
 #endif
 }

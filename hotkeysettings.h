@@ -31,6 +31,8 @@ class HotKeySettings : public QWidget
     HotKeyEdit*  heSettings;
 #ifdef WITH_DICOM
     HotKeyEdit*  heWorklist;
+    HotKeyEdit*  heRefresh;
+    HotKeyEdit*  heDetails;
 #endif
 
 public:
