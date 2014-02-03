@@ -92,6 +92,7 @@ int main(int argc, char *argv[])
     cmd.addOption("--physician",        "-p", 1, "string", "Physician name");
     cmd.addOption("--study-name",       "-e", 1, "string", "Study name");
     cmd.addOption("--safe-mode",     nullptr, "Run the program in safe mode");
+    cmd.addOption(nullptr,           "-sync", "Run the program in X synchronous mode."); // http://qt-project.org/doc/qt-4.8/debug.html
     dcmtkApp.parseCommandLine(cmd, argc, argv);
     OFLog::configureFromCommandLine(cmd, dcmtkApp);
 #endif
