@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?define ProductBuild     = "0.3" ?>
-<?define ProductRevision  = "14" ?>
+<?define ProductRevision  = "16" ?>
 <?define ProductName      = "Beryllium" ?>
 
 <?define Manufacturer    = "dc.baikal.ru" ?>
 <?define ProductVersion  = "$(var.ProductBuild).$(var.ProductRevision)" ?>
 <?define UpgradeCode     = "{B100D0FF-AF56-0000-0314-079500628307}" ?>
-<?define SrcDir32        = "$(var.SolutionDir)\Win32\$(var.Configuration)\" ?>
+<?define SrcDir32        = "$(var.SolutionDir)\$(var.Configuration)\" ?>
 <?define SrcDir64        = "$(var.SolutionDir)\X64\$(var.Configuration)\" ?>
 
 <?define RequiresAdmin    = "True" ?>
