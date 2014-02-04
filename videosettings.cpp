@@ -101,9 +101,11 @@ void VideoSettings::showEvent(QShowEvent *e)
     //
     updateDeviceList(PLATFORM_SPECIFIC_SOURCE, PLATFORM_SPECIFIC_PROPERTY);
 
-    // Populate firwire list
+#ifndef Q_WS_WIN
+    // Populate firewire list
     //
     updateDeviceList("dv1394src", "guid");
+#endif
 }
 
 void VideoSettings::updateGstList(const char* setting, const char* def, unsigned long long type, QComboBox* cb)

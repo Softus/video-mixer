@@ -1105,9 +1105,9 @@ void MainWindow::onStartClick()
     }
 
     int userChoice;
-#ifdef WITH_DICOM
     QSettings settings;
 
+#ifdef WITH_DICOM
     if (pendingPatient && !settings.value("storage-servers").toStringList().isEmpty())
     {
         userChoice = QMessageBox::question(this, windowTitle(),

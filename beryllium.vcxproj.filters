@@ -243,6 +243,15 @@
     <ClCompile Include="mouseshortcut.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="thumbnaillist.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_thumbnaillist.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_thumbnaillist.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="aboutdialog.h">
@@ -309,6 +318,9 @@
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="mouseshortcut.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="thumbnaillist.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>
