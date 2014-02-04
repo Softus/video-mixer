@@ -50,11 +50,11 @@ Settings::Settings(QWidget *parent, Qt::WindowFlags flags)
 {
     listWidget = new QListWidget;
     listWidget->setMovement(QListView::Static);
-    listWidget->setMaximumWidth(220);
+    listWidget->setMaximumWidth(280);
     listWidget->setSpacing(2);
 
     pagesWidget = new QStackedWidget;
-    pagesWidget->setMinimumSize(520, 400); // Storage settings is a big one
+    pagesWidget->setMinimumSize(640, 520); // Video source settings is a big one
 
     createPages();
     listWidget->setCurrentRow(0);
@@ -124,6 +124,7 @@ void Settings::changePage(QListWidgetItem *current, QListWidgetItem *previous)
     if (!current)
         current = previous;
 
+    QWaitCursor wait(this);
     const QVariant& data = current->data(Qt::UserRole);
     if (data.type() == QVariant::UserType)
     {

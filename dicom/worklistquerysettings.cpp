@@ -75,17 +75,6 @@ WorklistQuerySettings::WorklistQuerySettings(QWidget *parent) :
     QFormLayout* layoutMain = new QFormLayout;
     layoutMain->addRow(checkScheduledDate = new QCheckBox(tr("&Scheduled\ndate")), frameDate);
     checkScheduledDate->setChecked(scheduledDate > 0);
-    cbModality = new QComboBox;
-    cbModality->setEditable(true);
-    checkModality = new QCheckBox(tr("&Modality"));
-    auto modality = settings.value("worklist-modality").toString();
-    if (!modality.isEmpty())
-    {
-        checkModality->setChecked(true);
-        cbModality->addItem(modality);
-        cbModality->setCurrentIndex(0);
-    }
-    layoutMain->addRow(checkModality, cbModality);
 
     cbAeTitle = new QComboBox;
     cbAeTitle->setEditable(true);
@@ -98,6 +87,19 @@ WorklistQuerySettings::WorklistQuerySettings(QWidget *parent) :
         cbAeTitle->setCurrentIndex(0);
     }
     layoutMain->addRow(checkAeTitle, cbAeTitle);
+
+    cbModality = new QComboBox;
+    cbModality->setEditable(true);
+    checkModality = new QCheckBox(tr("&Modality"));
+    auto modality = settings.value("worklist-modality").toString();
+    if (!modality.isEmpty())
+    {
+        checkModality->setChecked(true);
+        cbModality->addItem(modality);
+        cbModality->setCurrentIndex(0);
+    }
+    layoutMain->addRow(checkModality, cbModality);
+
     setLayout(layoutMain);
 }
 

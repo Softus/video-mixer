@@ -22,7 +22,9 @@
 #define DEFAULT_HOTKEY_ABOUT          (int)(Qt::AltModifier | Qt::Key_Question)
 #define DEFAULT_HOTKEY_ARCHIVE        (int)(Qt::Key_F2)
 #define DEFAULT_HOTKEY_RECORD         (int)(Qt::AltModifier | Qt::Key_E)
+#define DEFAULT_HOTKEY_REFRESH        (int)(Qt::Key_F5)
 #define DEFAULT_HOTKEY_SETTINGS       (int)(Qt::Key_F9)
+#define DEFAULT_HOTKEY_SHOW_DETAILS   (int)(Qt::AltModifier | Qt::Key_Return)
 #define DEFAULT_HOTKEY_SNAPSHOT       (int)(Qt::AltModifier | Qt::Key_T)
 #define DEFAULT_HOTKEY_START          (int)(Qt::AltModifier | Qt::Key_A)
 #define DEFAULT_HOTKEY_WORKLIST       (int)(Qt::Key_F3)
@@ -31,6 +33,7 @@
 #define DEFAULT_RTP_SINK              "udpsink"
 #define DEFAULT_VIDEOBITRATE          4000
 #define DEFAULT_VIDEO_ENCODER         "ffenc_mpeg2video"
+#define DEFAULT_VIDEO_MAX_FPS         30
 #define DEFAULT_MANDATORY_FIELD_COLOR "red"
 #define DEFAULT_MANDATORY_FIELDS      (QStringList() << "PatientID" << "Name")
 #define DEFAULT_IMAGE_TEMPLATE        "image-%study%-%nn%"
@@ -42,8 +45,11 @@
 #define DEFAULT_VIDEO_MUXER           "mpegpsmux"
 
 #ifdef WITH_DICOM
-#define DEFAULT_EXPORT_TO_DICOM     true
-#define DEFAULT_TRANSLATE_CYRILLIC  true
+#define DEFAULT_EXPORT_CLIPS_TO_DICOM true
+#define DEFAULT_EXPORT_VIDEO_TO_DICOM false
+#define DEFAULT_TRANSLATE_CYRILLIC    true
+#define DEFAULT_WORKLIST_COLUMNS      (QStringList() << "0010,0020" << "0010,0010" \
+        << "0010,0030" << "0010,0040" << "0040,0007" << "0040,0002" << "0040,0003")
 #define DEFAULT_WORKLIST_DATE_RANGE 1
 #define DEFAULT_WORKLIST_DAY_DELTA  30
 #define DEFAULT_COMPLETE_WITH_MPPS  true

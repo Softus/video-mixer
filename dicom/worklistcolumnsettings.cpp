@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Irkutsk Diagnostic Center.
+ * Copyright (C) 2013-2014 Irkutsk Diagnostic Center.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -15,6 +15,8 @@
  */
 
 #include "worklistcolumnsettings.h"
+#include "../defaults.h"
+
 #include <QBoxLayout>
 #include <QTableWidget>
 #include <QSettings>
@@ -63,6 +65,11 @@ WorklistColumnSettings::WorklistColumnSettings(QWidget *parent) :
 
     QSettings settings;
     QStringList listChecked = settings.value("worklist-columns").toStringList();
+    if (listChecked.size() == 0)
+    {
+        // Defaults are id, name, bithday, sex, procedure description, date, time
+        listChecked = DEFAULT_WORKLIST_COLUMNS;
+    }
 
     size_t rows = sizeof(rowTags)/sizeof(rowTags[0]);
     listColumns->setUpdatesEnabled(false);

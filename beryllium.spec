@@ -1,7 +1,7 @@
 Summary: Beryllium DICOM edition.
 Name: beryllium
 Provides: beryllium
-Version: 0.3.16
+Version: 0.3.24
 Release: 1
 License: LGPL-2.1+
 Source: %{name}.tar.gz
@@ -10,16 +10,18 @@ URL: http://dc.baikal.ru/products/beryllium
 Vendor: Beryllium team <beryllium@dc.baikal.ru>
 Packager: Beryllium team <beryllium@dc.baikal.ru>
 
-Requires: libgstbase-0.10.so.0, libgstinterfaces-0.10.so.0, libgstreamer-0.10.so.0
-Requires: libQtGLib-2.0.so.0, libQtGStreamer-0.10.so.0, libQtGStreamerUi-0.10.so.0
-Requires: libQtCore.so.4, libQtGui.so.4 libQtNetwork.so.4
+Requires: gstreamer-0_10-plugins-base >= 0.10.31, gstreamer-0_10-plugins-good >= 0.10.31
+Requires: gstreamer-0_10-plugins-bad >= 0.10.23, gstreamer-0_10-plugins-ugly >= 0.10.19
+Requires: gstreamer-0_10-plugins-ffmpeg, gstreamer-0_10-plugin-gnonlin
+Requires: libgstreamer-0_10-0 >= 0.10.31, libqt4 >= 4.7.0
+Requires: libQtGLib-2_0-0, libQtGStreamer-0_10-0, libstdc++6 >= 4.4.0
 
-BuildRequires: boost-devel, make, libqt4-devel
+BuildRequires: boost-devel, make, libqt4-devel, libQtGLib-devel, gstreamer-0_10-plugins-qt-devel
 
 %if %dicom == 1
-Requires: libdcmdata.so.3.6, libdcmnet.so.3.6, libssl.so.1.0.0, libwrap.so.0
-Requires: libmediainfo.so.0, libzen.so.0
-BuildRequires: dcmtk-devel, libmediainfo-devel
+Requires: libdcmtk3_6, libopenssl1_0_0
+Requires: libmediainfo0, libzen0
+BuildRequires: libmediainfo-devel, dcmtk-devel, tcp_wrappers-devel
 %endif
 
 %description
@@ -29,7 +31,7 @@ Beryllium DICOM edition.
 Video and image capturing for medicine.
 
 %prep
-%setup -qn %{name}
+%setup -c %{name}
  
 %build
 qmake PREFIX=%{_prefix} QMAKE_CFLAGS+="%optflags" QMAKE_CXXFLAGS+="%optflags";
@@ -39,14 +41,12 @@ make %{?_smp_mflags};
 make install INSTALL_ROOT="%buildroot";
 
 %files
-%{_bindir}/beryllium
-%dir %{_datadir}/%{name}
-%{_datadir}/applications/%{name}.desktop
-%dir %{_datadir}/%{name}/translations
-%{_datadir}/%{name}/translations/%{name}_ru.qm
-%{_iconsdir}/%{name}.png
 %doc docs/*
 %{_mandir}/man1/%{name}.1.gz
+%{_bindir}/beryllium
+%{_datadir}/%{name}
+%{_datadir}/applications/%{name}.desktop
+%{_datadir}/icons/%{name}.png
 
 %changelog
 * Wed Sep 11 2013 Pavel Bludov <pbludov@gmail.com>

@@ -24,6 +24,7 @@
 void MouseShortcut::removeMouseShortcut(QObject *parent)
 {
     // Remove any existent mouse shortcut
+    //
     Q_FOREACH(auto ch, parent->children())
     {
         if (ch->inherits("MouseShortcut"))
@@ -35,6 +36,23 @@ void MouseShortcut::removeMouseShortcut(QObject *parent)
 
 QString MouseShortcut::toString(int key, QKeySequence::SequenceFormat format)
 {
+    if (key == 0)
+    {
+        return tr("(not set)");
+    }
+
+    // It's a keyboard key, pass to defauls
+    //
+    if (key > 0)
+    {
+#if (QT_VERSION < QT_VERSION_CHECK(5, 1, 0))
+        // Remove the Keypad modifier due to QTBUG-4022
+        //
+        key &= ~Qt::KeypadModifier;
+#endif
+        return QKeySequence(key).toString();
+    }
+
     QStringList returnText;
 
     auto modifiers = key & Qt::MODIFIER_MASK & ~0x80000000;
@@ -116,14 +134,25 @@ bool MouseShortcut::eventFilter(QObject *o, QEvent *e)
         {
             if (parent()->inherits("QAction"))
             {
-                static_cast<QAction*>(parent())->toggle();
+                auto action = static_cast<QAction*>(parent());
+                auto widget = action->parentWidget();
+                if (!widget || widget->window() == qApp->activeWindow())
+                {
+                    action->trigger();
+                    e->accept();
+                    return true;
+                }
             }
-            else
+            else if (parent()->inherits("QAbstractButton"))
             {
-                static_cast<QAbstractButton*>(parent())->toggle();
+                auto btn = static_cast<QAbstractButton*>(parent());
+                if (btn->window() == qApp->activeWindow())
+                {
+                    btn->click();
+                    e->accept();
+                    return true;
+                }
             }
-            e->accept();
-            return true;
         }
     }
 

@@ -34,6 +34,7 @@ QT_BEGIN_NAMESPACE
 class QBoxLayout;
 class QLabel;
 class QListWidget;
+class QListWidgetItem;
 class QMenuBar;
 class QResizeEvent;
 class QTimer;
@@ -110,7 +111,7 @@ class MainWindow : public QWidget
     QGst::PipelinePtr createPipeline();
     void releasePipeline();
     void updateWindowTitle();
-    void updateOutputPath();
+    void updateOutputPath(bool needUnique);
     QString appendVideoTail(const QString& prefix, int idx);
     void removeVideoTail(const QString& prefix);
 
@@ -152,6 +153,7 @@ private slots:
     void toggleSetting();
     void updatePipeline();
     void onEnableWidget(QWidget*, bool);
+    void onThumbnailItemDoubleClicked(QListWidgetItem* item);
 };
 
 #endif // MAINWINDOW_H

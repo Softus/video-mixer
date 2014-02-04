@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2013 Irkutsk Diagnostic Center.
+ * Copyright (C) 2013-2014 Irkutsk Diagnostic Center.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -37,6 +37,9 @@ QString translateToCyrillic(const QString& str)
     {
         switch (str[i].unicode())
         {
+        case '^':
+            ret.append(' '); // Заменяем шапку на пробел
+            break;
         case 'A':
             ret.append(L'А');
             break;
@@ -114,7 +117,7 @@ QString translateToCyrillic(const QString& str)
             ret.append(L'К').append(i < str.length() - 1 && str[i+1].isLower()? L'с': L'С');
             break;
         case 'C':
-            ret.append(next(str, i) == 'h'? ++i, L'Ч': L'К'); // Английская 'c' без 'h' не должна встрачаться.
+            ret.append(next(str, i) == 'h'? ++i, L'Ч': L'К'); // Английская 'c' без 'h' не должна встречаться.
             break;
         case 'Y':
             switch (next(str, i)) {
@@ -221,7 +224,7 @@ QString translateToCyrillic(const QString& str)
             ret.append(L'к').append(L'с');
             break;
         case 'с':
-            ret.append(next(str, i) == 'h'? ++i, L'ч': L'к'); // Английская 'c' без 'h' не должна встрачаться.
+            ret.append(next(str, i) == 'h'? ++i, L'ч': L'к'); // Английская 'c' без 'h' не должна встречаться.
             break;
         case 'y':
             switch (next(str, i)) {
@@ -252,7 +255,7 @@ QString translateToCyrillic(const QString& str)
             break;
 
         default:
-            ret.append(str[i]);
+            ret.append(str[i]); // Прочие символы без изменений
             break;
         }
     }

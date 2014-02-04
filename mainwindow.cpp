@@ -18,12 +18,13 @@
 #include "product.h"
 #include "aboutdialog.h"
 #include "archivewindow.h"
+#include "defaults.h"
 #include "mouseshortcut.h"
+#include "patientdialog.h"
 #include "qwaitcursor.h"
 #include "settings.h"
+#include "thumbnaillist.h"
 #include "videosettings.h"
-#include "patientdialog.h"
-#include "defaults.h"
 
 #ifdef WITH_DICOM
 #include "dicom/worklist.h"
@@ -75,6 +76,8 @@
 //
 #include <gst/gstdebugutils.h>
 #include <gst/interfaces/tuner.h>
+
+#define SAFE_MODE_KEYS (Qt::AltModifier | Qt::ControlModifier | Qt::ShiftModifier)
 
 #if defined(Q_WS_WIN) && !defined(FILE_ATTRIBUTE_HIDDEN)
     #define FILE_ATTRIBUTE_HIDDEN 0x00000002
@@ -152,26 +155,6 @@ static void Dump(QGst::ElementPtr elm)
 
 #endif
 
-// T == QAction | QAbstractButton
-//
-template <class T>
-static void updateShortcut(T* btn, int key)
-{
-    MouseShortcut::removeMouseShortcut(btn);
-
-    if (key > 0)
-    {
-        QKeySequence shortcut(key);
-        btn->setShortcut(shortcut);
-        btn->setToolTip(btn->text().remove("&") + " (" + shortcut.toString(QKeySequence::NativeText) + ")");
-    }
-    else if (key < 0)
-    {
-        auto ms = new MouseShortcut(key, btn);
-        btn->setToolTip(btn->text().remove("&") + " (" + ms->toString(QKeySequence::NativeText) + ")");
-    }
-}
-
 MainWindow::MainWindow(QWidget *parent) :
     QWidget(parent),
     archiveWindow(nullptr),
@@ -187,7 +170,6 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     QSettings settings;
     updateWindowTitle();
-
     // This magic required for updating widgets from worker threads on Microsoft (R) Windows (TM)
     //
     connect(this, SIGNAL(enableWidget(QWidget*, bool)), this, SLOT(onEnableWidget(QWidget*, bool)), Qt::QueuedConnection);
@@ -196,15 +178,15 @@ MainWindow::MainWindow(QWidget *parent) :
 #ifndef WITH_TOUCH
     layoutMain->addWidget(createToolBar());
 #endif
-    listImagesAndClips = new QListWidget();
+    listImagesAndClips = new ThumbnailList();
     listImagesAndClips->setViewMode(QListView::IconMode);
     listImagesAndClips->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-    listImagesAndClips->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     listImagesAndClips->setMinimumHeight(144); // 576/4
     listImagesAndClips->setMaximumHeight(176);
     listImagesAndClips->setIconSize(QSize(144,144));
     listImagesAndClips->setMovement(QListView::Static);
-    listImagesAndClips->setWrapping(false);
+    connect(listImagesAndClips, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
+            this, SLOT(onThumbnailItemDoubleClicked(QListWidgetItem*)));
 
     displayWidget = new QGst::Ui::VideoWidget();
     displayWidget->setMinimumSize(352, 288);
@@ -255,15 +237,17 @@ MainWindow::MainWindow(QWidget *parent) :
     patientSex       = getCmdLineOption("--patient-sex",      "-s");
     physician        = getCmdLineOption("--physician",        "-p");
     studyName        = getCmdLineOption("--study-name",       "-e");
+    auto safeMode    = qApp->arguments().contains("--safe-mode");
 
-    updatePipeline();
-    updateOutputPath();
-
-    if (settings.value("first-run", true).toBool())
+    if (qApp->queryKeyboardModifiers() == SAFE_MODE_KEYS
+        || safeMode || settings.value("safe-mode", true).toBool())
     {
-        settings.setValue("first-run", false);
+        settings.setValue("safe-mode", false);
         QTimer::singleShot(0, this, SLOT(onShowSettingsClick()));
     }
+
+    updatePipeline();
+    updateOutputPath(false);
 }
 
 MainWindow::~MainWindow()
@@ -351,7 +335,7 @@ QToolBar* MainWindow::createToolBar()
     btnSnapshot->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     btnSnapshot->setFocusPolicy(Qt::NoFocus);
     btnSnapshot->setIcon(QIcon(":/buttons/camera"));
-    btnSnapshot->setText(tr("&Take snapshot"));
+    btnSnapshot->setText(tr("Take snapshot"));
     btnSnapshot->setMinimumWidth(175);
     connect(btnSnapshot, SIGNAL(clicked()), this, SLOT(onSnapshotClick()));
     bar->addWidget(btnSnapshot);
@@ -391,27 +375,30 @@ QToolBar* MainWindow::createToolBar()
                  [video src]
                      |
                      V
-         +----[main splitter]-----+
-         |            |           |
+         +----[main splitter]------+
+         |            |            |
   [image valve]       |       [video valve]
-         |            |           |
-         V            V           V
- [image encoder]  [display]  [video encoder]
-        |                         |
-        V                         V
-  [image writer]      +----[video splitter]----+
-                      |           |            |
-                      V           V            V
-           [movie writer]  [clip valve]  [rtp sender]
-                                  |
-                                  V
-                          [clip writer]
+         |            |            |
+         V            V            V
+ [image encoder]  [display]   [video rate]
+        |                          |
+        V                          V
+  [image writer]             [video encoder]
+                                   |
+                                   V
+                       +----[video splitter]----+
+                       |           |            |
+                       V           V            V
+            [movie writer]   [clip valve]  [rtp sender]
+                                   |
+                                   V
+                            [clip writer]
 
 
 Sample:
     v4l2src ! autoconvert ! tee name=splitter
         ! autovideosink name=displaysink async=0 splitter.
-        ! valve name=encvalve drop=1 ! queue max-size-bytes=0 ! x264enc name=videoencoder ! tee name=videosplitter
+        ! valve name=encvalve drop=1 ! queue max-size-bytes=0 ! videorate max-rate=30/1 ! x264enc name=videoencoder ! tee name=videosplitter
                 ! identity  name=videoinspect drop-probability=1.0 ! queue ! valve name=videovalve drop=1 ! [mpegpsmux name=videomux ! filesink name=videosink] videosplitter.
                 ! queue ! rtph264pay ! udpsink name=rtpsink clients=127.0.0.1:5000 sync=0 videosplitter.
                 ! identity  name=clipinspect drop-probability=1.0 ! queue ! valve name=clipvalve ! [ mpegpsmux name=clipmux ! filesink name=clipsink] videosplitter.
@@ -427,11 +414,12 @@ QString MainWindow::buildPipeline()
     //
     QString pipe;
 
-    auto deviceDef = settings.value("device").toString();
-    auto inputChannel = settings.value("video-channel").toString();
-    auto formatDef = settings.value("format").toString();
-    auto sizeDef   = settings.value("size").toSize();
-    auto srcDef    = settings.value("src").toString();
+    auto deviceType     = settings.value("device-type").toString();
+    auto deviceDef      = settings.value("device").toString();
+    auto inputChannel   = settings.value("video-channel").toString();
+    auto formatDef      = settings.value("format").toString();
+    auto sizeDef        = settings.value("size").toSize();
+    auto srcDef         = settings.value("src").toString();
     auto srcFixColor    = settings.value("src-colorspace").toBool()? "! ffmpegcolorspace ": "";
     auto srcDeinterlace = settings.value("video-deinterlace").toBool();
     auto srcParams      = settings.value("src-parameters").toString();
@@ -442,23 +430,46 @@ QString MainWindow::buildPipeline()
     }
     else
     {
-        pipe.append(PLATFORM_SPECIFIC_SOURCE);
-        if (!inputChannel.isEmpty())
-        {
-            // Hack: since channel name can't be set with attributes,
-            // we set element name instead. The one reason is to
-            // make the pipeline text do not match with older one.
-            //
-            pipe.append(" name=\"").append(inputChannel).append("\"");
-        }
-        if (!deviceDef.isEmpty())
-        {
-            pipe.append(" " PLATFORM_SPECIFIC_PROPERTY "=\"").append(deviceDef).append("\"");
-        }
+        pipe.append(deviceType);
+
         if (!srcParams.isEmpty())
         {
-            pipe.append(" ").append(srcParams);
+            pipe.append(' ').append(srcParams).append(' ');
         }
+
+        if (deviceType == "dv1394src")
+        {
+            // Special handling of dv video sources
+            //
+            if (inputChannel.toInt() > 0)
+            {
+                pipe.append(" channel=").append(inputChannel).append("");
+            }
+            if (!deviceDef.isEmpty())
+            {
+                pipe.append(" guid=\"").append(deviceDef).append("\"");
+            }
+
+            // Add dv demuxer & decoder
+            //
+            pipe.append(" ! dvdemux ! ffdec_dvvideo");
+        }
+        else
+        {
+            if (!inputChannel.isEmpty())
+            {
+                // Hack: since channel name can't be set with attributes,
+                // we set element name instead. The one reason is to
+                // make the pipeline text do not match with older one.
+                //
+                pipe.append(" name=\"").append(inputChannel).append("\"");
+            }
+            if (!deviceDef.isEmpty())
+            {
+                pipe.append(" " PLATFORM_SPECIFIC_PROPERTY "=\"").append(deviceDef).append("\"");
+            }
+        }
+
         if (srcDeinterlace)
         {
             pipe.append(" ! deinterlace");
@@ -503,6 +514,7 @@ QString MainWindow::buildPipeline()
     //
     auto outputPathDef      = settings.value("output-path",    DEFAULT_OUTPUT_PATH).toString();
     auto videoEncoderDef    = settings.value("video-encoder",  DEFAULT_VIDEO_ENCODER).toString();
+    auto videoMaxRate       = settings.value("video-max-fps",  DEFAULT_VIDEO_MAX_FPS).toString();
     auto videoFixColor      = settings.value(videoEncoderDef + "-colorspace").toBool()? "ffmpegcolorspace ! ": "";
     auto videoEncoderParams = settings.value(videoEncoderDef + "-parameters").toString();
     auto rtpPayDef          = settings.value("rtp-payloader",  DEFAULT_RTP_PAYLOADER).toString();
@@ -511,8 +523,15 @@ QString MainWindow::buildPipeline()
     auto rtpSinkParams      = settings.value(rtpSinkDef + "-parameters").toString();
     auto enableRtp          = !rtpSinkDef.isEmpty() && settings.value("enable-rtp").toBool();
 
-    pipe.append(" ! valve name=encvalve drop=1 ! queue max-size-bytes=0 ! ").append(videoFixColor)
-            .append(videoEncoderDef).append(" name=videoencoder ").append(videoEncoderParams);
+    if (videoMaxRate.toInt() > 0)
+    {
+        pipe.append(" ! videorate skip-to-first=1 max-rate=").append(videoMaxRate);
+    }
+
+    pipe.append(" ! valve name=encvalve drop=1 ! queue max-size-bytes=0 ! ");
+
+    pipe.append(videoFixColor).append(videoEncoderDef).append(" name=videoencoder ").append(videoEncoderParams);
+
     if (enableRtp || enableVideo)
     {
         pipe.append(" ! tee name=videosplitter");
@@ -730,6 +749,8 @@ void MainWindow::updatePipeline()
         }
         pipelineDef = newPipelineDef;
         pipeline = createPipeline();
+        btnStart->setEnabled(pipeline);
+
         auto videoInputChannel = settings.value("video-channel").toString();
         if (!videoInputChannel.isEmpty())
         {
@@ -818,13 +839,26 @@ void MainWindow::updateWindowTitle()
     setWindowTitle(windowTitle);
 }
 
-void MainWindow::updateOutputPath()
+void MainWindow::updateOutputPath(bool needUnique)
 {
     QSettings settings;
     auto tpl = settings.value("output-path", DEFAULT_OUTPUT_PATH).toString();
     tpl.append(settings.value("folder-template", DEFAULT_FOLDER_TEMPLATE).toString());
 
     outputPath.setPath(replace(tpl, ++studyNo));
+    if (needUnique && outputPath.exists())
+    {
+        int cnt = 1;
+        QString alt;
+        do
+        {
+            alt = outputPath.absolutePath()
+                .append(" (").append(QString::number(++cnt)).append(')');
+        }
+        while (outputPath.exists(alt));
+        outputPath.setPath(alt);
+    }
+    qDebug() << "Output path" << outputPath.absolutePath();
 
     if (!outputPath.mkpath("."))
     {
@@ -1010,7 +1044,7 @@ void MainWindow::onElementMessage(const QGst::ElementMessagePtr& message)
         }
 
         auto existent = listImagesAndClips->findItems(QFileInfo(fileName).baseName(), Qt::MatchExactly);
-        auto item = !existent.isEmpty()? existent.at(0):
+        auto item = !existent.isEmpty()? existent.first():
             new QListWidgetItem(QFileInfo(fileName).baseName(), listImagesAndClips);
 
         item->setToolTip(toolTip);
@@ -1036,11 +1070,20 @@ void MainWindow::onElementMessage(const QGst::ElementMessagePtr& message)
 
 bool MainWindow::startVideoRecord()
 {
+    if (!pipeline)
+    {
+        // How we get here?
+        //
+        QMessageBox::critical(this, windowTitle(), tr("Failed to start recording.\nPlease, adjust the video source settings."), QMessageBox::Ok);
+        return false;
+    }
+
     if (QSettings().value("enable-video").toBool())
     {
         auto videoFileName = appendVideoTail("video", ++studyNo);
         if (videoFileName.isEmpty())
         {
+            removeVideoTail("video");
             QMessageBox::critical(this, windowTitle(), tr("Failed to start recording.\nCheck the error log for details."), QMessageBox::Ok);
             return false;
         }
@@ -1134,8 +1177,14 @@ void MainWindow::onStartClick()
     patientName.clear();
     patientSex.clear();
     patientBirthDate.clear();
-    physician.clear();
-    studyName.clear();
+    if (settings.value("reset-physician").toBool())
+    {
+        physician.clear();
+    }
+    if (settings.value("reset-study-name").toBool())
+    {
+        studyName.clear();
+    }
 
     setElementProperty(videoEncoderValve, "drop", true);
     setElementProperty("displayoverlay", "silent", true);
@@ -1257,6 +1306,7 @@ void MainWindow::onRecordClick()
         }
         else
         {
+            removeVideoTail("clip");
             QMessageBox::critical(this, windowTitle(), tr("Failed to start recording.\nCheck the error log for details."), QMessageBox::Ok);
         }
     }
@@ -1281,9 +1331,11 @@ void MainWindow::onRecordClick()
 void MainWindow::updateStartButton()
 {
     QIcon icon(running? ":/buttons/stop": ":/buttons/start");
-    QString strOnOff(running? tr("End &study"): tr("Start &study"));
+    QString strOnOff(running? tr("End study"): tr("Start study"));
     btnStart->setIcon(icon);
+    auto shortcut = btnStart->shortcut(); // save the shortcut...
     btnStart->setText(strOnOff);
+    btnStart->setShortcut(shortcut); // ...and restore
 
     btnRecord->setEnabled(running);
     btnSnapshot->setEnabled(running);
@@ -1299,9 +1351,11 @@ void MainWindow::updateStartButton()
 void MainWindow::updateRecordButton()
 {
     QIcon icon(recording? ":/buttons/pause": ":/buttons/record");
-    QString strOnOff(recording? tr("Paus&e"): tr("R&ecord"));
+    QString strOnOff(recording? tr("Pause"): tr("Record"));
     btnRecord->setIcon(icon);
+    auto shortcut = btnRecord->shortcut(); // save the shortcut...
     btnRecord->setText(strOnOff);
+    btnRecord->setShortcut(shortcut); // ...and restore
 }
 
 void MainWindow::prepareSettingsMenu()
@@ -1351,6 +1405,20 @@ void MainWindow::onShowArchiveClick()
     archiveWindow->show();
     archiveWindow->activateWindow();
 #endif
+}
+
+void MainWindow::onThumbnailItemDoubleClicked(QListWidgetItem* item)
+{
+    if (actionArchive->isEnabled())
+    {
+        // Popup the archive window
+        //
+        onShowArchiveClick();
+
+        // And select the file
+        //
+        archiveWindow->selectFile(item->text());
+    }
 }
 
 void MainWindow::onShowSettingsClick()
@@ -1459,7 +1527,7 @@ void MainWindow::onStartStudy()
     physician   = fixFileName(dlg.physician());
     studyName   = fixFileName(dlg.studyName());
 
-    updateOutputPath();
+    updateOutputPath(true);
 
     // After updateOutputPath the outputPath is usable
     //
@@ -1544,12 +1612,15 @@ void MainWindow::onStartStudy()
 
     setElementProperty(videoEncoderValve, "drop", !running);
 
-    auto displayOverlay = pipeline->getElementByName("displayoverlay");
-    if (displayOverlay)
+    if (pipeline)
     {
-        displayOverlay->setProperty("silent", !pipeline->getElementByName("videomux"));
-        displayOverlay->setProperty("color",  0xFFFF0000);
-        displayOverlay->setProperty("outline-color", 0xFFFF0000);
+        auto displayOverlay = pipeline->getElementByName("displayoverlay");
+        if (displayOverlay)
+        {
+            displayOverlay->setProperty("silent", !pipeline->getElementByName("videomux"));
+            displayOverlay->setProperty("color",  0xFFFF0000);
+            displayOverlay->setProperty("outline-color", 0xFFFF0000);
+        }
     }
 
     updateStartButton();

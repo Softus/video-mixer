@@ -16,13 +16,14 @@
 
 #include "typedetect.h"
 
-#include <QGst/Pipeline>
 #include <QGst/ElementFactory>
+#include <QGst/Pipeline>
+#include <QGst/Structure>
 
-QGst::CapsPtr TypeDetect(const QString& filePath)
+QString TypeDetect(const QString& filePath)
 {
     QGst::State   state;
-    QGst::CapsPtr ret;
+    QGst::CapsPtr caps;
     auto pipeline = QGst::Pipeline::create("typedetect");
     auto source   = QGst::ElementFactory::make("filesrc", "source");
     auto typefind = QGst::ElementFactory::make("typefind", "typefind");
@@ -40,10 +41,20 @@ QGst::CapsPtr TypeDetect(const QString& filePath)
             auto prop = typefind->property("caps");
             if (prop)
             {
-                ret = prop.get<QGst::CapsPtr>();
+                caps = prop.get<QGst::CapsPtr>();
             }
         }
         pipeline->setState(QGst::StateNull);
     }
-    return ret;
+
+    if (caps)
+    {
+        auto str = caps->internalStructure(0);
+        if (str)
+        {
+            return str->name();
+        }
+    }
+
+    return nullptr;
 }

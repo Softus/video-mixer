@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Irkutsk Diagnostic Center.
+ * Copyright (C) 2013-2014 Irkutsk Diagnostic Center.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -25,6 +25,7 @@
 #include <QGst/Pipeline>
 
 QT_BEGIN_NAMESPACE
+class QFileSystemWatcher;
 class QListWidget;
 class QListWidgetItem;
 class QStackedWidget;
@@ -45,14 +46,16 @@ class ArchiveWindow : public QWidget
     QAction*               actionMode;
     QAction*               actionSeekBack;
     QAction*               actionSeekFwd;
+    QAction*               actionUp;
     QListWidget*           listFiles;
     QStackedWidget*        pagesWidget;
     QWidget*               player;
     QGst::PipelinePtr      pipeline;
     QDir                   root;
     QDir                   curr;
+    QFileSystemWatcher*    dirWatcher;
+    int                    updateTimerId;
 
-    void updateList();
     void stopMedia();
     void playMediaFile(const QFileInfo &fi);
     void onBusMessage(const QGst::MessagePtr& message);
@@ -65,20 +68,19 @@ public:
     ~ArchiveWindow();
 protected:
     virtual void closeEvent(QCloseEvent *);
+    void timerEvent(QTimerEvent *);
 
 signals:
     
 public slots:
     void updateRoot();
     void updatePath();
+    void updateList();
     void setPath(const QString& path);
-    void selectPath(QAction* action);
-    void selectPath(bool);
-    void onListItemDoubleClicked(QListWidgetItem* item);
+    void selectFile(const QString& fileName);
     void onListRowChanged(int idx);
     void onListKey();
     void onSwitchModeClick();
-    void onSwitchModeClick(QAction* action);
     void onShowFolderClick();
     void onDeleteClick();
     void onEditClick();
@@ -93,6 +95,14 @@ public slots:
     void onSeekClick();
     void onPlayPauseClick();
     void preparePathPopupMenu();
+
+private slots:
+    void selectPath();
+    void selectPath(QAction* action);
+    void onSwitchModeClick(QAction* action);
+    void onListItemDoubleClicked(QListWidgetItem* item);
+    void onDirectoryChanged(const QString&);
+    void onUpFolderClick();
 };
 
 #endif // ARCHIVEWINDOW_H

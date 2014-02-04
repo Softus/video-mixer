@@ -33,14 +33,7 @@ HotKeyEdit::HotKeyEdit(QWidget *parent)
 
 void HotKeyEdit::updateText()
 {
-    qDebug() << m_key << " " <<
-    (0 == m_key? tr("(not set)"):
-        0  < m_key? QKeySequence(m_key).toString():
-        MouseShortcut::toString(m_key));
-
-    setText(0 == m_key? tr("(not set)"):
-        0  < m_key? QKeySequence(m_key).toString():
-        MouseShortcut::toString(m_key));
+    setText(MouseShortcut::toString(m_key));
 }
 
 void HotKeyEdit::setKey(int key)

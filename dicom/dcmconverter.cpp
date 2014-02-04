@@ -65,6 +65,11 @@ public:
     {
     }
 
+    ~DcmConverter()
+    {
+        mi.Close();
+    }
+
     OFCondition readPixelData
         ( DcmDataset* dset
         , uchar*  pixData
@@ -74,10 +79,11 @@ public:
     {
         OFCondition cond;
 
-        if (!mi.Open(pixData, length))
+        if (!mi.Open_Buffer_Init(length))
         {
             return makeOFCondition(0, 2, OF_error, "Failed to open buffer");
         }
+        mi.Open_Buffer_Continue(pixData, length);
 
         qDebug() << QString::fromStdWString(mi.Inform());
 
@@ -120,29 +126,32 @@ public:
         if (cond.bad())
           return cond;
 
-        if (getStr(__T("ColorSpace")) == "YUV")
+        auto subsampling = getStr(__T("ChromaSubsampling"));
+        if (subsampling == "4:2:0")
         {
+            cond = dset->putAndInsertString(DCM_PhotometricInterpretation, "YBR_FULL");
+            if (cond.bad())
+              return cond;
+
             cond = dset->putAndInsertUint16(DCM_SamplesPerPixel, 3);
             if (cond.bad())
               return cond;
 
-            auto subsampling = getStr(__T("ChromaSubsampling"));
-            if (subsampling == "4:2:0")
-            {
-                cond = dset->putAndInsertString(DCM_PhotometricInterpretation, "YBR_FULL");
-                if (cond.bad())
-                  return cond;
-            }
-            else if (subsampling == "4:2:2")
-            {
-                cond = dset->putAndInsertString(DCM_PhotometricInterpretation, "YBR_FULL_422");
-                if (cond.bad())
-                  return cond;
-            }
-            else
-            {
-                return makeOFCondition(0, 4, OF_error, "Unsupperted color format");
-            }
+            // Should only be written if Samples per Pixel > 1
+            //
+            cond = dset->putAndInsertUint16(DCM_PlanarConfiguration, 0);
+            if (cond.bad())
+              return cond;
+        }
+        else if (subsampling == "4:2:2")
+        {
+            cond = dset->putAndInsertString(DCM_PhotometricInterpretation, "YBR_FULL_422");
+            if (cond.bad())
+              return cond;
+
+            cond = dset->putAndInsertUint16(DCM_SamplesPerPixel, 3);
+            if (cond.bad())
+              return cond;
 
             // Should only be written if Samples per Pixel > 1
             //
@@ -156,7 +165,7 @@ public:
             if (cond.bad())
               return cond;
 
-            cond = dset->putAndInsertString(DCM_PhotometricInterpretation, "MONOCHROME2");
+            cond = dset->putAndInsertString(DCM_PhotometricInterpretation, "MONOCHROME1");
             if (cond.bad())
               return cond;
         }

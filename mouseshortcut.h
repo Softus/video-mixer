@@ -43,4 +43,29 @@ protected:
     bool eventFilter(QObject *o, QEvent *e);
 };
 
+// T == QAction | QAbstractButton
+//
+template <class T>
+static void updateShortcut(T* btn, int key)
+{
+    MouseShortcut::removeMouseShortcut(btn);
+
+    if (key > 0)
+    {
+        btn->setShortcut(QKeySequence(key));
+        btn->setToolTip(btn->text().remove("&") + " (" + MouseShortcut::toString(key) + ")");
+    }
+    else if (key < 0)
+    {
+        // Will be deleted with parent, or explicitly via removeMouseShortcut
+        //
+        new MouseShortcut(key, btn);
+        btn->setToolTip(btn->text().remove("&") + " (" + MouseShortcut::toString(key) + ")");
+    }
+    else
+    {
+        btn->setToolTip(btn->text().remove("&"));
+    }
+}
+
 #endif // MOUSESHORTCUT_H

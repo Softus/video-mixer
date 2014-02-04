@@ -17,6 +17,7 @@
 #include "worklist.h"
 #include "detailsdialog.h"
 #include "dcmclient.h"
+#include "mouseshortcut.h"
 #include "transcyrillic.h"
 #include "../defaults.h"
 #include "../qwaitcursor.h"
@@ -60,7 +61,7 @@ Worklist::Worklist(QWidget *parent) :
     if (cols.size() == 0)
     {
         // Defaults are id, name, bithday, sex, procedure description, date, time
-        cols << "0010,0020" << "0010,0010" << "0010,0030" << "0010,0040" << "0040,0007" << "0040,0002" << "0040,0003";
+        cols = DEFAULT_WORKLIST_COLUMNS;
     }
 
     table = new QTableWidget(0, cols.size());
@@ -106,6 +107,10 @@ Worklist::Worklist(QWidget *parent) :
     restoreGeometry(settings.value("worklist-geometry").toByteArray());
     setWindowState((Qt::WindowState)settings.value("worklist-state").toInt());
     table->horizontalHeader()->restoreState(settings.value("worklist-columns-width").toByteArray());
+
+    updateShortcut(actionDetail,     settings.value("hotkey-show-details", DEFAULT_HOTKEY_SHOW_DETAILS).toInt());
+    updateShortcut(actionStartStudy, settings.value("hotkey-start",        DEFAULT_HOTKEY_START).toInt());
+    updateShortcut(actionLoad,       settings.value("hotkey-refresh",      DEFAULT_HOTKEY_REFRESH).toInt());
 
     setAttribute(Qt::WA_DeleteOnClose, false);
 }

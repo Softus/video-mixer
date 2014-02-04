@@ -15,10 +15,11 @@
  */
 
 #include "../product.h"
-#include "worklist.h"
 #include "dcmclient.h"
 #include "dcmconverter.h"
 #include "defaults.h"
+#include "worklist.h"
+#include "typedetect.h"
 
 #include <dcmtk/dcmdata/dcdeftag.h>
 #include <dcmtk/dcmdata/dcdicent.h>
@@ -53,6 +54,11 @@ static void BuildCFindDataSet(DcmDataset& ds)
 {
     QSettings settings;
     QString modality = settings.value("worklist-modality").toString().toUpper();
+    if (modality.isEmpty())
+    {
+        modality = settings.value("modality").toString().toUpper();
+    }
+
     QString aet = settings.value("worklist-aet").toString();
     if (aet.isEmpty())
     {
@@ -666,6 +672,9 @@ void DcmClient::sendToServer(QWidget* parent, DcmDataset* dsPatient, const QFile
 {
     QProgressDialog pdlg(parent);
     progressDlg = &pdlg;
+    QSettings settings;
+    auto allowClips = settings.value("dicom-export-clips", DEFAULT_EXPORT_CLIPS_TO_DICOM).toBool();
+    auto allowVideo = settings.value("dicom-export-video", DEFAULT_EXPORT_VIDEO_TO_DICOM).toBool();
 
     pdlg.setRange(0, listFiles.count());
     pdlg.setMinimumDuration(0);
@@ -678,22 +687,41 @@ void DcmClient::sendToServer(QWidget* parent, DcmDataset* dsPatient, const QFile
     {
         for (auto i = 0; !pdlg.wasCanceled() && i < listFiles.count(); ++i)
         {
-            if (QFile::exists(listFiles[i].dir().filePath(listFiles[i].completeBaseName())))
+            auto file = listFiles[i];
+            auto dir = file.dir();
+            auto filePath = file.absoluteFilePath();
+            if (QFile::exists(dir.filePath(file.completeBaseName())))
             {
                 // Skip clip thumbnail
                 //
                 continue;
             }
 
+            if ((!allowClips || !allowVideo) && TypeDetect(filePath).startsWith("video/"))
+            {
+                auto thumbnailFileTemplate = QStringList(file.fileName() + ".*");
+                auto isClip = !dir.entryList(thumbnailFileTemplate).isEmpty();
+
+                if (isClip && !allowClips)
+                {
+                    qDebug() << "Clip" << filePath << "skipped";
+                    continue;
+                }
+                if (!isClip && !allowVideo)
+                {
+                    qDebug() << "Video log" << filePath << "skipped";
+                    continue;
+                }
+            }
+
             pdlg.setValue(i);
-            pdlg.setLabelText(tr("Storing '%1' to '%2'").arg(listFiles[i].fileName(), server));
+            pdlg.setLabelText(tr("Storing '%1' to '%2'").arg(file.fileName(), server));
             qApp->processEvents();
 
-            auto file = listFiles[i].absoluteFilePath();
-            if (!sendToServer(server, dsPatient, seriesUID, seriesNo, file, i))
+            if (!sendToServer(server, dsPatient, seriesUID, seriesNo, filePath, i))
             {
                 if (QMessageBox::Yes != QMessageBox::critical(&pdlg, parent->windowTitle(),
-                      tr("Faild to send '%1' to '%2':\n%3\nContinue?").arg(file, server, lastError()),
+                      tr("Failed to send '%1' to '%2':\n%3\nContinue?").arg(filePath, server, lastError()),
                       QMessageBox::Yes, QMessageBox::No))
                 {
                     // The user choose to cancel

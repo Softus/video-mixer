@@ -198,12 +198,24 @@ void PatientDialog::setPatientBirthDateStr(const QString& dateStr)
 
 void PatientDialog::setStudyName(const QString& name)
 {
-    cbStudyType->setEditText(name);
+    auto idx = cbStudyType->findText(name);
+    cbStudyType->setCurrentIndex(idx);
+
+    if (idx < 0)
+    {
+        cbStudyType->setEditText(name);
+    }
 }
 
-void PatientDialog::setPhysician(const QString& physician)
+void PatientDialog::setPhysician(const QString& name)
 {
-    cbPhysician->setEditText(physician);
+    auto idx = cbPhysician->findText(name);
+    cbPhysician->setCurrentIndex(idx);
+
+    if (idx < 0)
+    {
+        cbPhysician->setEditText(name);
+    }
 }
 
 inline static void setEditableCb(QComboBox* cb, bool editable)

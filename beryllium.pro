@@ -67,7 +67,8 @@ SOURCES += aboutdialog.cpp \
     typedetect.cpp \
     hotkeyedit.cpp \
     hotkeysettings.cpp \
-    mouseshortcut.cpp
+    mouseshortcut.cpp \
+    thumbnaillist.cpp
 
 HEADERS += aboutdialog.h \
     archivewindow.h \
@@ -92,7 +93,8 @@ HEADERS += aboutdialog.h \
     typedetect.h \
     hotkeyedit.h \
     hotkeysettings.h \
-    mouseshortcut.h
+    mouseshortcut.h \
+    thumbnaillist.h
 
 FORMS   +=
 
@@ -111,8 +113,10 @@ unix {
 	man.path = $$PREFIX/share/man/man1
 	translations.files = beryllium_ru.qm
 	translations.path = $$PREFIX/share/beryllium/translations
+        sound.files = sound/*
+        sound.path = $$PREFIX/share/beryllium/sound
 
-	INSTALLS += translations shortcut icon man
+        INSTALLS += translations sound shortcut icon man
 }
 
 include (touch/touch.pri)

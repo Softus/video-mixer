@@ -55,7 +55,7 @@ public:
 
     void setPatientSex(const QString& sex);
     void setStudyName(const QString& name);
-    void setPhysician(const QString& physician);
+    void setPhysician(const QString& name);
     void savePatientFile(const QString& outputPath);
     void setEditable(bool editable);
 

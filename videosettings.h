@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Irkutsk Diagnostic Center.
+ * Copyright (C) 2013-2014 Irkutsk Diagnostic Center.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -55,12 +55,13 @@ class VideoSettings : public QWidget
     QComboBox* listRtpPayloaders;
     QComboBox* listImageCodecs;
     QCheckBox* checkRecordAll;
+    QSpinBox* spinFps;
     QSpinBox* spinBitrate;
     QLineEdit* textRtpClients;
     QCheckBox* checkEnableRtp;
     QCheckBox* checkDeinterlace;
 
-    void updateDeviceList();
+    void updateDeviceList(const char *elmName, const char *propName);
     void updateGstList(const char* setting, const char* def, unsigned long long type, QComboBox* cb);
 
 public:

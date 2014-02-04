@@ -1,3 +1,53 @@
+beryllium (0.3.24) debian;
+
+  * 0.3.19 regression fix (still video log)
+
+ -- Pavel Bludov <pbludov@gmail.com>  Mon, 1 Feb 2014 16:26:00 +0900
+
+beryllium (0.3.23) debian;
+
+  * Option to send video clips or entire log to DICOM servers
+
+ -- Pavel Bludov <pbludov@gmail.com>  Fri, 31 Jan 2014 13:15:00 +0900
+
+beryllium (0.3.22) debian;
+
+  * Output folder collision fix
+
+ -- Pavel Bludov <pbludov@gmail.com>  Fri, 31 Jan 2014 10:14:00 +0900
+
+beryllium (0.3.21) debian;
+
+  * Crash handler & safe mode
+
+ -- Pavel Bludov <pbludov@gmail.com>  Thu, 30 Jan 2014 11:36:00 +0900
+
+beryllium (0.3.20) debian;
+
+  * Archive window tweaks & fixes
+
+ -- Pavel Bludov <pbludov@gmail.com>  Wed, 29 Jan 2014 13:19:00 +0900
+
+beryllium (0.3.19) debian;
+
+  * Limit fps from the camera
+  * Configurable modality in device page
+
+ -- Pavel Bludov <pbludov@gmail.com>  Tue, 28 Jan 2014 18:45:00 +0900
+
+beryllium (0.3.18) debian;
+
+  * Fix horizontal scrolling
+  * Fix archive window toolbar
+
+ -- Pavel Bludov <pbludov@gmail.com>  Tue, 28 Jan 2014 11:45:00 +0900
+
+beryllium (0.3.17) debian;
+
+  * Mouse hotkeys
+
+ -- Pavel Bludov <pbludov@gmail.com>  Thu, 23 Jan 2014 12:20:12 +0900
+
 beryllium (0.3.16) debian;
 
   * Localization fix

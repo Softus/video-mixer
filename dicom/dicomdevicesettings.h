@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Irkutsk Diagnostic Center.
+ * Copyright (C) 2013-2014 Irkutsk Diagnostic Center.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -29,8 +29,10 @@ class DicomDeviceSettings : public QWidget
 {
     Q_OBJECT
     QLineEdit*    textAet;
+    QLineEdit*    textModality;
     QSpinBox*     spinPort;
-    QCheckBox*    checkExport;
+    QCheckBox*    checkExportClips;
+    QCheckBox*    checkExportVideo;
 
 public:
     Q_INVOKABLE explicit DicomDeviceSettings(QWidget *parent = 0);
