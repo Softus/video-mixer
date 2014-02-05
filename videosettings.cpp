@@ -217,16 +217,18 @@ void VideoSettings::updateDeviceList(const char* elmName, const char* propName)
 void VideoSettings::videoDeviceChanged(int index)
 {
     listChannels->clear();
-    listChannels->addItem(tr("(default)"));
 
     auto channels = listDevices->itemData(index).toStringList();
-    if (index < 0 || channels.isEmpty())
+    if (index < 0 || channels.size() < 3)
     {
+        listChannels->addItem(tr("(default)"));
         return;
     }
 
-    auto selectedChannel = QSettings().value("video-channel").toString();
     auto caps = channels.at(2);
+    auto selectedChannel = QSettings().value("video-channel").toString();
+
+    listChannels->addItem(tr("(default)"), caps);
 
     // From index 3 till end here is channels
     //
@@ -277,7 +279,7 @@ void VideoSettings::formatChanged(int index)
     listSizes->clear();
     listSizes->addItem(tr("(default)"));
 
-    auto caps = QGst::Caps::fromString(listDevices->itemData(listDevices->currentIndex()).toString());
+    auto caps = QGst::Caps::fromString(listChannels->itemData(listChannels->currentIndex()).toString());
     auto selectedFormat = listFormats->itemData(index).toString();
     if (index < 0 || !caps || selectedFormat.isEmpty())
     {
@@ -296,7 +298,7 @@ void VideoSettings::formatChanged(int index)
         }
 
         QSize size(s->value("width").toInt(), s->value("height").toInt());
-        if (listSizes->findData(size) >= 0)
+        if (listSizes->findData(size) >= 0 || size.width() <= 0 || size.height() <= 0)
         {
             continue;
         }

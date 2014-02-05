@@ -432,11 +432,6 @@ QString MainWindow::buildPipeline()
     {
         pipe.append(deviceType);
 
-        if (!srcParams.isEmpty())
-        {
-            pipe.append(' ').append(srcParams).append(' ');
-        }
-
         if (deviceType == "dv1394src")
         {
             // Special handling of dv video sources
@@ -449,10 +444,6 @@ QString MainWindow::buildPipeline()
             {
                 pipe.append(" guid=\"").append(deviceDef).append("\"");
             }
-
-            // Add dv demuxer & decoder
-            //
-            pipe.append(" ! dvdemux ! ffdec_dvvideo");
         }
         else
         {
@@ -470,6 +461,11 @@ QString MainWindow::buildPipeline()
             }
         }
 
+        if (!srcParams.isEmpty())
+        {
+            pipe.append(' ').append(srcParams);
+        }
+
         if (srcDeinterlace)
         {
             pipe.append(" ! deinterlace");
@@ -483,6 +479,13 @@ QString MainWindow::buildPipeline()
         {
             pipe = pipe.append(",width=(int)%1,height=(int)%2").arg(sizeDef.width()).arg(sizeDef.height());
         }
+    }
+
+    if (deviceType == "dv1394src" || formatDef.split(',').first() == "video/x-dv")
+    {
+        // Add dv demuxer & decoder for DV sources
+        //
+        pipe.append(" ! dvdemux ! ffdec_dvvideo");
     }
 
     pipe.append(srcFixColor);
