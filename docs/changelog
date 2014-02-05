@@ -3,7 +3,7 @@ beryllium (0.3.25) debian;
   * Select all button in archive window
   * Mark files sent to DICOM with overlays
 
--- Pavel Bludov <pbludov@gmail.com>  Tue, 2 Feb 2014 14:18:52 +0900
+ -- Pavel Bludov <pbludov@gmail.com>  Tue, 5 Feb 2014 14:18:52 +0900
 
 beryllium (0.3.24) debian;
 
