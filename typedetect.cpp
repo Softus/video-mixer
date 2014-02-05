@@ -18,68 +18,43 @@
 #include "product.h"
 #include <gio/gio.h>
 
+#include <QSettings>
+#include <QUrl>
+
 #include <QGst/ElementFactory>
 #include <QGst/Pipeline>
 #include <QGst/Structure>
 
-// Copied from gfile.c from GIO library
-//
-static char *
-hex_unescape_string (const char *str,
-                     int        *out_len,
-                     gboolean   *free_return)
-{
-  int i;
-  char *unescaped_str, *p;
-  unsigned char c;
-  int len;
-
-  len = strlen (str);
-
-  if (strchr (str, '\\') == NULL)
-    {
-      if (out_len)
-    *out_len = len;
-      *free_return = FALSE;
-      return (char *)str;
-    }
-
-  unescaped_str = (char*)g_malloc (len + 1);
-
-  p = unescaped_str;
-  for (i = 0; i < len; i++)
-    {
-      if (str[i] == '\\' &&
-      str[i+1] == 'x' &&
-      len - i >= 4)
-    {
-      c =
-        (g_ascii_xdigit_value (str[i+2]) << 4) |
-        g_ascii_xdigit_value (str[i+3]);
-      *p++ = c;
-      i += 3;
-    }
-      else
-    *p++ = str[i];
-    }
-  *p++ = 0;
-
-  if (out_len)
-    *out_len = p - unescaped_str;
-  *free_return = TRUE;
-  return unescaped_str;
-}
-
 bool SetFileExtAttribute(const QString& filePath, const QString& name, const QString& value)
 {
+    auto encodedValue = QUrl::toPercentEncoding(value);
+
     bool ret = false;
     auto file = g_file_new_for_path(filePath.toLocal8Bit());
     if (file)
     {
+        GError* err = nullptr;
         QString attr("xattr::" PRODUCT_NAMESPACE ".");
         attr.append(name);
         ret = g_file_set_attribute_string (file, attr.toLocal8Bit(),
-            value.toUtf8(), G_FILE_QUERY_INFO_NONE, nullptr, nullptr);
+            encodedValue.data(), G_FILE_QUERY_INFO_NONE, nullptr, &err);
+
+        if (err)
+        {
+#ifdef Q_WS_WIN
+            // Backup route for windows
+            //
+            if (err->domain == G_IO_ERROR && err->code == G_IO_ERROR_NOT_SUPPORTED)
+            {
+                QSettings settings(filePath + ":" + PRODUCT_NAMESPACE, QSettings::IniFormat);
+                settings.setValue(name, encodedValue);
+                settings.sync();
+                ret = (settings.status() == QSettings::NoError);
+            }
+#endif
+            g_error_free(err);
+        }
+
         g_object_unref(file);
     }
     return ret;
@@ -87,35 +62,39 @@ bool SetFileExtAttribute(const QString& filePath, const QString& name, const QSt
 
 QString GetFileExtAttribute(const QString& filePath, const QString& name)
 {
-    QString ret;
+    QByteArray encodedValue;
     auto file = g_file_new_for_path(filePath.toLocal8Bit());
     if (file)
     {
         QString attr("xattr::" PRODUCT_NAMESPACE ".");
         attr.append(name);
-        GError* err;
 
         auto info = g_file_query_info(file, attr.toLocal8Bit(),
-            G_FILE_QUERY_INFO_NONE, nullptr, &err);
+            G_FILE_QUERY_INFO_NONE, nullptr, nullptr);
 
         if (info)
         {
             auto value = g_file_info_get_attribute_string(info, attr.toLocal8Bit());
             if (value)
             {
-                gboolean freeUnescaped = false;
-                auto unescaped = hex_unescape_string(value, nullptr, &freeUnescaped);
-                ret = QString::fromUtf8(unescaped);
-                if (freeUnescaped)
-                {
-                    g_free(unescaped);
-                }
+                encodedValue.append(value);
             }
             g_object_unref(info);
         }
+
+#ifdef Q_WS_WIN
+        if (encodedValue.isNull())
+        {
+            // Backup route for windows
+            //
+            QSettings settings(filePath + ":" + PRODUCT_NAMESPACE, QSettings::IniFormat);
+            encodedValue = settings.value(name).toByteArray();
+        }
+#endif
+
         g_object_unref(file);
     }
-    return ret;
+    return QUrl::fromPercentEncoding(encodedValue);
 }
 
 QString TypeDetect(const QString& filePath)
