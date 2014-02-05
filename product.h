@@ -29,5 +29,6 @@
 #define ORGANIZATION_SHORT_NAME "irk-dc" // lowercase, no spaces
 
 #define SITE_UID_ROOT           "9.9.999.0.1" // TODO: request real one
+#define PRODUCT_NAMESPACE       "com." ORGANIZATION_SHORT_NAME "." PRODUCT_SHORT_NAME
 
 #endif // PRODUCT_H

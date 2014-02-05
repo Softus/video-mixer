@@ -21,4 +21,7 @@
 
 QString TypeDetect(const QString& filePath);
 
+QString GetFileExtAttribute(const QString& filePath, const QString &name);
+bool    SetFileExtAttribute(const QString& filePath, const QString &name, const QString &value);
+
 #endif // TYPEDETECT_H

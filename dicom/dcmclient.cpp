@@ -668,13 +668,14 @@ bool DcmClient::sendToServer(const QString& server, DcmDataset* dsPatient, const
     return cond.good();
 }
 
-void DcmClient::sendToServer(QWidget* parent, DcmDataset* dsPatient, const QFileInfoList& listFiles, const QString& seriesUID)
+void DcmClient::sendToServer(QWidget* parent, DcmDataset* dsPatient,
+    const QFileInfoList& listFiles, const QString& seriesUID, bool force)
 {
     QProgressDialog pdlg(parent);
     progressDlg = &pdlg;
     QSettings settings;
-    auto allowClips = settings.value("dicom-export-clips", DEFAULT_EXPORT_CLIPS_TO_DICOM).toBool();
-    auto allowVideo = settings.value("dicom-export-video", DEFAULT_EXPORT_VIDEO_TO_DICOM).toBool();
+    auto allowClips = force || settings.value("dicom-export-clips", DEFAULT_EXPORT_CLIPS_TO_DICOM).toBool();
+    auto allowVideo = force || settings.value("dicom-export-video", DEFAULT_EXPORT_VIDEO_TO_DICOM).toBool();
 
     pdlg.setRange(0, listFiles.count());
     pdlg.setMinimumDuration(0);
@@ -720,6 +721,7 @@ void DcmClient::sendToServer(QWidget* parent, DcmDataset* dsPatient, const QFile
 
             if (!sendToServer(server, dsPatient, seriesUID, seriesNo, filePath, i))
             {
+                SetFileExtAttribute(filePath, "dicom-status", lastError());
                 if (QMessageBox::Yes != QMessageBox::critical(&pdlg, parent->windowTitle(),
                       tr("Failed to send '%1' to '%2':\n%3\nContinue?").arg(filePath, server, lastError()),
                       QMessageBox::Yes, QMessageBox::No))
@@ -728,6 +730,10 @@ void DcmClient::sendToServer(QWidget* parent, DcmDataset* dsPatient, const QFile
                     //
                     break;
                 }
+            }
+            else
+            {
+                SetFileExtAttribute(filePath, "dicom-status", "ok");
             }
         }
     }

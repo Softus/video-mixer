@@ -115,9 +115,9 @@ class MainWindow : public QWidget
     QString appendVideoTail(const QString& prefix, int idx);
     void removeVideoTail(const QString& prefix);
 
-    void onBusMessage(const QGst::MessagePtr& message);
-    void onStateChangedMessage(const QGst::StateChangedMessagePtr& message);
-    void onElementMessage(const QGst::ElementMessagePtr& message);
+    void onBusMessage(const QGst::MessagePtr& msg);
+    void onElementMessage(const QGst::ElementMessagePtr& msg);
+    void onStateChangedMessage(const QGst::StateChangedMessagePtr& msg);
 
     void onImageReady(const QGst::BufferPtr&);
     void onClipFrame(const QGst::BufferPtr&);

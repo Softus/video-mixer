@@ -37,7 +37,7 @@ unix {
     else {
         PKGCONFIG += QtGLib-2.0 QtGStreamer-0.10 QtGStreamerUi-0.10
     }
-    PKGCONFIG += gstreamer-0.10 gstreamer-base-0.10 gstreamer-interfaces-0.10
+    PKGCONFIG += gstreamer-0.10 gstreamer-base-0.10 gstreamer-interfaces-0.10 gio-2.0
 
     # libmediainfo.pc adds UNICODE, but dcmtk isn't compatible with wchar,
     # so we can't use pkgconfig for this library

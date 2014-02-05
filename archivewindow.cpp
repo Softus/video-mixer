@@ -104,7 +104,7 @@ ArchiveWindow::ArchiveWindow(QWidget *parent)
 
 #ifdef WITH_DICOM
     actionStore = barArchive->addAction(QIcon(":buttons/dicom"), tr("Dicom"), this, SLOT(onStoreClick()));
-    actionStore->setShortcut(Qt::Key_F5);
+    actionStore->setShortcut(Qt::Key_F6);
     actionStore->setEnabled(false);
 #endif
     actionEdit = barArchive->addAction(QIcon(":buttons/edit"), tr("Edit"), this, SLOT(onEditClick()));
@@ -417,8 +417,36 @@ void ArchiveWindow::updateList()
             }
         }
 
+        auto toolTip = fi.absoluteFilePath();
+
+#ifdef WITH_DICOM
+        auto dicomStatus = GetFileExtAttribute(fi.absoluteFilePath(), "dicom-status");
+        if (!dicomStatus.isEmpty())
+        {
+            QPixmap pmOverlay;
+            if (dicomStatus == "ok")
+            {
+                pmOverlay.load(":/buttons/database");
+                toolTip += tr("\nThe file was uploaded to a DICOM server");
+            }
+            else
+            {
+                pmOverlay = style()->standardPixmap(QStyle::SP_MessageBoxCritical);
+                toolTip += dicomStatus;
+            }
+            pm = icon.pixmap(listFiles->iconSize());
+            QPainter painter(&pm);
+            painter.setOpacity(0.75);
+            auto rect = pm.rect();
+            rect.setBottom(rect.top() + rect.height() / 4);
+            rect.setRight(rect.left() + rect.width() / 4);
+            painter.drawPixmap(rect, pmOverlay);
+            icon.addPixmap(pm);
+        }
+#endif
+
         auto item = new QListWidgetItem(icon, fi.fileName(), listFiles);
-        item->setToolTip(fi.absoluteFilePath());
+        item->setToolTip(toolTip);
         if (item->text() == currText)
         {
             listFiles->setCurrentItem(item);
@@ -673,7 +701,7 @@ void ArchiveWindow::onStoreClick()
         DcmClient client; // UID_SecondaryCaptureImageStorage | UID_VideoEndoscopicImageStorage | UID_RawDataStorage
         char seriesUID[100] = {0};
         dcmGenerateUniqueIdentifier(seriesUID, SITE_SERIES_UID_ROOT);
-        client.sendToServer(this, &patientDs, files, seriesUID);
+        client.sendToServer(this, &patientDs, files, seriesUID, true);
     }
 }
 #endif

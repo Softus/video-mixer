@@ -377,10 +377,10 @@ QToolBar* MainWindow::createToolBar()
                      V
          +----[main splitter]------+
          |            |            |
-  [image valve]       |       [video valve]
+  [image valve]       |       [video rate]
          |            |            |
          V            V            V
- [image encoder]  [display]   [video rate]
+ [image encoder]  [display]   [video valve]
         |                          |
         V                          V
   [image writer]             [video encoder]
@@ -542,7 +542,8 @@ QString MainWindow::buildPipeline()
         if (enableRtp)
         {
             pipe.append(" ! queue ! ").append(rtpPayDef).append(" ").append(rtpPayParams)
-                .append(" ! ").append(rtpSinkDef).append(" clients=127.0.0.1:5000 sync=0 name=rtpsink ").append(rtpSinkParams).append(" videosplitter. ");
+                .append(" ! ").append(rtpSinkDef).append(" clients=127.0.0.1:5000 sync=0 name=rtpsink ")
+                .append(rtpSinkParams).append(" videosplitter. ");
         }
     }
 
@@ -562,7 +563,8 @@ QString MainWindow::buildPipeline()
     {
         pipe.append(" ! identity name=imagevalve drop-probability=1.0 ! ")
             .append(imageEncoderFixColor).append(imageEncoderDef).append(" ").append(imageEncoderParams).append(" ! ")
-            .append(imageSinkDef).append("  name=imagesink post-messages=1 async=0 sync=0 location=").append(outputPathDef).append("/image splitter.");
+            .append(imageSinkDef).append("  name=imagesink post-messages=1 async=0 sync=0 location=")
+            .append(outputPathDef).append("/image splitter.");
     }
 
     return pipe;
@@ -625,7 +627,8 @@ QGst::PipelinePtr MainWindow::createPipeline()
             qCritical() << "Element videoencoder not found";
         }
 
-        auto details = GstDebugGraphDetails(GST_DEBUG_GRAPH_SHOW_MEDIA_TYPE | GST_DEBUG_GRAPH_SHOW_NON_DEFAULT_PARAMS | GST_DEBUG_GRAPH_SHOW_STATES);
+        auto flags = GST_DEBUG_GRAPH_SHOW_MEDIA_TYPE | GST_DEBUG_GRAPH_SHOW_NON_DEFAULT_PARAMS | GST_DEBUG_GRAPH_SHOW_STATES;
+        auto details = GstDebugGraphDetails(flags);
         GST_DEBUG_BIN_TO_DOT_FILE_WITH_TS(pl.staticCast<QGst::Bin>(), details, qApp->applicationName().toUtf8());
 
         // The pipeline will start once it reaches paused state without an error
@@ -948,27 +951,27 @@ void MainWindow::errorGlib(const QGlib::ObjectPtr& obj, const QGlib::Error& ex)
     QMessageBox::critical(this, windowTitle(), msg, QMessageBox::Ok);
 }
 
-void MainWindow::onBusMessage(const QGst::MessagePtr& message)
+void MainWindow::onBusMessage(const QGst::MessagePtr& msg)
 {
     //qDebug() << message->typeName() << " " << message->source()->property("name").toString();
 
-    switch (message->type())
+    switch (msg->type())
     {
     case QGst::MessageStateChanged:
-        onStateChangedMessage(message.staticCast<QGst::StateChangedMessage>());
+        onStateChangedMessage(msg.staticCast<QGst::StateChangedMessage>());
         break;
     case QGst::MessageElement:
-        onElementMessage(message.staticCast<QGst::ElementMessage>());
+        onElementMessage(msg.staticCast<QGst::ElementMessage>());
         break;
     case QGst::MessageError:
-        errorGlib(message->source(), message.staticCast<QGst::ErrorMessage>()->error());
+        errorGlib(msg->source(), msg.staticCast<QGst::ErrorMessage>()->error());
         break;
 #ifdef QT_DEBUG
     case QGst::MessageInfo:
-        qDebug() << message->source()->property("name").toString() << " " << message.staticCast<QGst::InfoMessage>()->error();
+        qDebug() << msg->source()->property("name").toString() << " " << msg.staticCast<QGst::InfoMessage>()->error();
         break;
     case QGst::MessageWarning:
-        qDebug() << message->source()->property("name").toString() << " " << message.staticCast<QGst::WarningMessage>()->error();
+        qDebug() << msg->source()->property("name").toString() << " " << msg.staticCast<QGst::WarningMessage>()->error();
         break;
     case QGst::MessageEos:
     case QGst::MessageNewClock:
@@ -977,7 +980,7 @@ void MainWindow::onBusMessage(const QGst::MessagePtr& message)
     case QGst::MessageAsyncDone:
         break;
     default:
-        qDebug() << message->type();
+        qDebug() << msg->type();
         break;
 #else
     default: // Make the compiler happy
@@ -986,18 +989,18 @@ void MainWindow::onBusMessage(const QGst::MessagePtr& message)
     }
 }
 
-void MainWindow::onStateChangedMessage(const QGst::StateChangedMessagePtr& message)
+void MainWindow::onStateChangedMessage(const QGst::StateChangedMessagePtr& msg)
 {
 //  qDebug() << message->oldState() << " => " << message->newState();
 
     // The pipeline will not start by itself since 2 of 3 renders are in NULL state
     // We need to kick off the display renderer to start the capture
     //
-    if (message->oldState() == QGst::StateReady && message->newState() == QGst::StatePaused)
+    if (msg->oldState() == QGst::StateReady && msg->newState() == QGst::StatePaused)
     {
-        message->source().staticCast<QGst::Element>()->setState(QGst::StatePlaying);
+        msg->source().staticCast<QGst::Element>()->setState(QGst::StatePlaying);
     }
-    else if (message->newState() == QGst::StateNull && message->source() == pipeline)
+    else if (msg->newState() == QGst::StateNull && msg->source() == pipeline)
     {
         // The display area of the main window is filled with some garbage.
         // We need to redraw the contents.
@@ -1006,22 +1009,22 @@ void MainWindow::onStateChangedMessage(const QGst::StateChangedMessagePtr& messa
     }
 }
 
-void MainWindow::onElementMessage(const QGst::ElementMessagePtr& message)
+void MainWindow::onElementMessage(const QGst::ElementMessagePtr& msg)
 {
-    const QGst::StructurePtr s = message->internalStructure();
+    const QGst::StructurePtr s = msg->internalStructure();
     if (!s)
     {
         qDebug() << "Got empty QGst::MessageElement";
         return;
     }
 
-    if (s->name() == "GstMultiFileSink" && message->source() == imageSink)
+    if (s->name() == "GstMultiFileSink" && msg->source() == imageSink)
     {
         QString fileName = s->value("filename").toString();
         QString toolTip = fileName;
         QPixmap pm;
 
-        auto lastBuffer = message->source()->property("last-buffer").get<QGst::BufferPtr>();
+        auto lastBuffer = msg->source()->property("last-buffer").get<QGst::BufferPtr>();
         bool ok = lastBuffer && pm.loadFromData(lastBuffer->data(), lastBuffer->size());
 
         // If we can not load from the buffer, try to load from the file
@@ -1060,12 +1063,12 @@ void MainWindow::onElementMessage(const QGst::ElementMessagePtr& message)
     {
         // At this time the video output finally has a sink, so set it up now
         //
-        message->source()->setProperty("force-aspect-ratio", true);
+        msg->source()->setProperty("force-aspect-ratio", true);
         displayWidget->update();
         return;
     }
 
-    qDebug() << "Got unknown message " << s->name() << " from " << message->source()->property("name").toString();
+    qDebug() << "Got unknown message " << s->name() << " from " << msg->source()->property("name").toString();
 }
 
 bool MainWindow::startVideoRecord()
@@ -1074,7 +1077,8 @@ bool MainWindow::startVideoRecord()
     {
         // How we get here?
         //
-        QMessageBox::critical(this, windowTitle(), tr("Failed to start recording.\nPlease, adjust the video source settings."), QMessageBox::Ok);
+        QMessageBox::critical(this, windowTitle(),
+            tr("Failed to start recording.\nPlease, adjust the video source settings."), QMessageBox::Ok);
         return false;
     }
 
@@ -1084,7 +1088,8 @@ bool MainWindow::startVideoRecord()
         if (videoFileName.isEmpty())
         {
             removeVideoTail("video");
-            QMessageBox::critical(this, windowTitle(), tr("Failed to start recording.\nCheck the error log for details."), QMessageBox::Ok);
+            QMessageBox::critical(this, windowTitle(),
+                tr("Failed to start recording.\nCheck the error log for details."), QMessageBox::Ok);
             return false;
         }
 
@@ -1104,34 +1109,15 @@ void MainWindow::onStartClick()
         return;
     }
 
-    int userChoice;
     QSettings settings;
+    auto userChoice = QMessageBox::question(this, windowTitle(),
+       tr("End the study?"), QMessageBox::Yes | QMessageBox::Default, QMessageBox::No);
 
-#ifdef WITH_DICOM
-    if (pendingPatient && !settings.value("storage-servers").toStringList().isEmpty())
+    if (userChoice == QMessageBox::No)
     {
-        userChoice = QMessageBox::question(this, windowTitle(),
-           tr("Send study results to the server?"), tr("Continue the study"), tr ("Don't sent"), tr("Send"), 2, 0);
-
-        if (userChoice == 0)
-        {
-            // Continue the study
-            //
-            return;
-        }
-    }
-    else
-#endif
-    {
-        userChoice = QMessageBox::question(this, windowTitle(),
-           tr("End the study?"), QMessageBox::Yes | QMessageBox::Default, QMessageBox::No);
-
-        if (userChoice == QMessageBox::No)
-        {
-            // Don't end the study
-            //
-            return;
-        }
+        // Don't end the study
+        //
+        return;
     }
 
     QWaitCursor wait(this);
@@ -1145,7 +1131,6 @@ void MainWindow::onStartClick()
     updateWindowTitle();
 
 #ifdef WITH_DICOM
-
     if (pendingPatient)
     {
         char seriesUID[100] = {0};
@@ -1159,18 +1144,11 @@ void MainWindow::onStartClick()
                 QMessageBox::critical(this, windowTitle(), client.lastError());
             }
         }
-
-        if (userChoice == 2)
-        {
-            DcmClient client;
-            client.sendToServer(this, pendingPatient, outputPath.entryInfoList(QDir::Files | QDir::Readable), seriesUID);
-        }
     }
 
     delete pendingPatient;
     pendingPatient = nullptr;
     pendingSOPInstanceUID.clear();
-
 #endif
 
     patientId.clear();
@@ -1191,6 +1169,10 @@ void MainWindow::onStartClick()
 
     updateStartButton();
     displayWidget->update();
+
+    // Open the archive window after end of study
+    //
+    QTimer::singleShot(0, this, SLOT(onShowArchiveClick()));
 }
 
 void MainWindow::onSnapshotClick()
