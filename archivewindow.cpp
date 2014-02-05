@@ -432,7 +432,7 @@ void ArchiveWindow::updateList()
             if (dicomStatus == "ok")
             {
                 pmOverlay.load(":/buttons/database");
-                toolTip += tr("The file was uploaded to a DICOM server");
+                toolTip += tr("The file was uploaded to a storage server");
             }
             else
             {
