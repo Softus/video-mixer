@@ -37,6 +37,7 @@ class ArchiveWindow : public QWidget
     Q_OBJECT
     QToolBar*              barPath;
     QToolBar*              barMediaControls;
+    QAction*               actionSelectAll;
     QAction*               actionDelete;
 #ifdef WITH_DICOM
     QAction*               actionStore;
@@ -103,6 +104,7 @@ private slots:
     void onListItemDoubleClicked(QListWidgetItem* item);
     void onDirectoryChanged(const QString&);
     void onUpFolderClick();
+    void onSelectAllClick();
 };
 
 #endif // ARCHIVEWINDOW_H

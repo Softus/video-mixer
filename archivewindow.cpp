@@ -98,6 +98,7 @@ ArchiveWindow::ArchiveWindow(QWidget *parent)
     auto actionBack = barArchive->addAction(QIcon(":buttons/back"), tr("Back"), this, SLOT(onBackToMainWindowClick()));
     actionBack->setShortcut(Qt::Key_Back);
 #endif
+
     actionDelete = barArchive->addAction(QIcon(":buttons/delete"), tr("Delete"), this, SLOT(onDeleteClick()));
     actionDelete->setShortcut(Qt::Key_Delete);
     actionDelete->setEnabled(false);
@@ -107,6 +108,8 @@ ArchiveWindow::ArchiveWindow(QWidget *parent)
     actionStore->setShortcut(Qt::Key_F6);
     actionStore->setEnabled(false);
 #endif
+    actionSelectAll = barArchive->addAction(QIcon(":buttons/select_all"), tr("Select all"), this, SLOT(onSelectAllClick()));
+    actionSelectAll->setShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_A));
     actionEdit = barArchive->addAction(QIcon(":buttons/edit"), tr("Edit"), this, SLOT(onEditClick()));
     actionEdit->setShortcut(Qt::Key_F4);
     actionEdit->setEnabled(false);
@@ -423,18 +426,20 @@ void ArchiveWindow::updateList()
         auto dicomStatus = GetFileExtAttribute(fi.absoluteFilePath(), "dicom-status");
         if (!dicomStatus.isEmpty())
         {
+            toolTip += "\n";
+
             QPixmap pmOverlay;
             if (dicomStatus == "ok")
             {
                 pmOverlay.load(":/buttons/database");
-                toolTip += tr("\nThe file was uploaded to a DICOM server");
+                toolTip += tr("The file was uploaded to a DICOM server");
             }
             else
             {
                 pmOverlay = style()->standardPixmap(QStyle::SP_MessageBoxCritical);
                 toolTip += dicomStatus;
             }
-            pm = icon.pixmap(listFiles->iconSize());
+            pm = icon.pixmap(icon.availableSizes().first());
             QPainter painter(&pm);
             painter.setOpacity(0.75);
             auto rect = pm.rect();
@@ -599,6 +604,11 @@ void static removeFileOrFolder(const QString& path)
         removeFileOrFolder(dir.absoluteFilePath(file));
     }
     dir.rmdir(path);
+}
+
+void ArchiveWindow::onSelectAllClick()
+{
+    listFiles->selectAll();
 }
 
 void ArchiveWindow::onDeleteClick()
