@@ -1251,14 +1251,22 @@ QString MainWindow::appendVideoTail(const QString& prefix, int idx)
     // Manually increment video/clip file name
     //
     QString videoExt = getExt(muxDef);
-    QString clipFileName = replace(settings.value(prefix + "-template", prefix + "-%study%-%nn%").toString(), idx).append(videoExt);
+    QString clipFileName = replace(settings.value(prefix + "-template", prefix + "-%study%-%nn%").toString(), idx)
+            .append("%02d").append(videoExt);
     auto absPath = outputPath.absoluteFilePath(clipFileName);
+    auto maxSize = settings.value("video-max-file-size", DEFAULT_VIDEO_MAX_FILE_SIZE).toLongLong() * 1024 * 1024;
     sink->setProperty("location", absPath);
+    sink->setProperty("next-file", 4);
+    sink->setProperty("max-file-size", maxSize);
+
     mux->setState(QGst::StatePaused);
     sink->setState(QGst::StatePaused);
     valve->setProperty("drop", true);
     inspect->setProperty("drop-probability", 0.0);
-    return absPath;
+
+    // Replace '%02d' with '00' to get the real clip name
+    //
+    return absPath.replace("%02d","00");
 }
 
 void MainWindow::removeVideoTail(const QString& prefix)

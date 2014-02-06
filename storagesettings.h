@@ -21,6 +21,7 @@
 
 QT_BEGIN_NAMESPACE
 class QLineEdit;
+class QSpinBox;
 QT_END_NAMESPACE
 
 class StorageSettings : public QWidget
@@ -31,7 +32,7 @@ class StorageSettings : public QWidget
     QLineEdit* textImageTemplate;
     QLineEdit* textClipTemplate;
     QLineEdit* textVideoTemplate;
-
+    QSpinBox*  spinMaxVideoSize;
 public:
     Q_INVOKABLE explicit StorageSettings(QWidget *parent = 0);
     

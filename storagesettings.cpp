@@ -26,6 +26,7 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QSettings>
+#include <QSpinBox>
 
 StorageSettings::StorageSettings(QWidget *parent) :
     QWidget(parent)
@@ -61,6 +62,11 @@ StorageSettings::StorageSettings(QWidget *parent) :
     fileLayout->addRow(tr("&Pictures template"), textImageTemplate = new QLineEdit(settings.value("image-template", DEFAULT_IMAGE_TEMPLATE).toString()));
     fileLayout->addRow(tr("&Clips template"), textClipTemplate = new QLineEdit(settings.value("clip-template", DEFAULT_CLIP_TEMPLATE).toString()));
     fileLayout->addRow(tr("&Video template"), textVideoTemplate = new QLineEdit(settings.value("video-template", DEFAULT_VIDEO_TEMPLATE).toString()));
+    fileLayout->addRow(tr("&Split files by"), spinMaxVideoSize = new QSpinBox);
+    spinMaxVideoSize->setSuffix(tr(" Mb"));
+    spinMaxVideoSize->setRange(1, 1024*1024);
+    spinMaxVideoSize->setValue(settings.value("video-max-file-size", DEFAULT_VIDEO_MAX_FILE_SIZE).toInt());
+
     frameFile->setLayout(fileLayout);
     layoutMain->addRow(frameFile);
     layoutMain->addRow(new QLabel(tr("%yyyy%\t\tyear\n%mm%\t\tmonth\n%dd%\t\tday\n%hh%\t\thour\n%min%\t\tminute\n"
@@ -91,4 +97,5 @@ void StorageSettings::save()
     settings.setValue("image-template", textImageTemplate->text());
     settings.setValue("clip-template", textClipTemplate->text());
     settings.setValue("video-template", textVideoTemplate->text());
+    settings.setValue("video-max-file-size", spinMaxVideoSize->value());
 }
