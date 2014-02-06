@@ -394,7 +394,7 @@ void ArchiveWindow::updateList()
     listFiles->clear();
     auto filter = QDir::NoDot | QDir::AllEntries | QDir::NoDotDot;
 
-    foreach (QFileInfo fi, curr.entryInfoList(filter))
+    foreach (QFileInfo fi, curr.entryInfoList(filter, QDir::Time))
     {
         QIcon icon;
         QPixmap pm;
