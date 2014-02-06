@@ -1,3 +1,14 @@
+beryllium (0.3.27) debian;
+
+  * Option to show start dialog (--auto-start, -a)
+  * Support for cameras with ranged resolution
+  * The option "Send videos as raw data" implemented
+  * New attributes: StudyDescription, PerforminPhysicianName
+  * Clear thumbnail list in capture window on end of study
+  * Restore scrollbar in icon mode in archive window
+
+ -- Pavel Bludov <pbludov@gmail.com>  Wed, 6 Feb 2014 17:33:00 +0900
+
 beryllium (0.3.26) debian;
 
   * Mark files sent to DICOM with overlays
