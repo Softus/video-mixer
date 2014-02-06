@@ -84,7 +84,7 @@ void HotKeyEdit::keyPressEvent(QKeyEvent *event)
     //
     key |= event->modifiers();
 
-    setKey(QKeySequence(key));
+    setKey(key);
     emit keyChanged(m_key);
 }
 
