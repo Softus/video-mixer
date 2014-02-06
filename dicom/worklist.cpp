@@ -32,6 +32,7 @@
 #include <QDateTime>
 #include <QDebug>
 #include <QHeaderView>
+#include <QKeyEvent>
 #include <QMessageBox>
 #include <QPushButton>
 #include <QSettings>
@@ -66,6 +67,7 @@ Worklist::Worklist(QWidget *parent) :
 
     table = new QTableWidget(0, cols.size());
     connect(table, SIGNAL(itemDoubleClicked(QTableWidgetItem*)), this, SLOT(onCellDoubleClicked(QTableWidgetItem*)));
+    connect(table, SIGNAL(currentItemChanged(QTableWidgetItem*,QTableWidgetItem*)), this, SLOT(onCurrentItemChanged(QTableWidgetItem*,QTableWidgetItem*)));
 
     for (auto i = 0; i < cols.size(); ++i)
     {
@@ -200,6 +202,48 @@ void Worklist::closeEvent(QCloseEvent *e)
     QWidget::closeEvent(e);
 }
 
+void Worklist::keyPressEvent(QKeyEvent *e)
+{
+    Qt::Key key;
+    if (e->key() == Qt::Key_VolumeUp)
+    {
+        key = Qt::Key_Up;
+    }
+    else if (e->key() == Qt::Key_VolumeDown)
+    {
+        key = Qt::Key_Down;
+    }
+    else
+    {
+        QWidget::keyPressEvent(e);
+        return;
+    }
+
+    QKeyEvent evt(QEvent::KeyPress, key, e->modifiers(), e->text(), e->isAutoRepeat(), e->count());
+    QWidget::keyPressEvent(&evt);
+}
+
+void Worklist::keyReleaseEvent(QKeyEvent *e)
+{
+    Qt::Key key;
+    if (e->key() == Qt::Key_VolumeUp)
+    {
+        key = Qt::Key_Up;
+    }
+    else if (e->key() == Qt::Key_VolumeDown)
+    {
+        key = Qt::Key_Down;
+    }
+    else
+    {
+        QWidget::keyReleaseEvent(e);
+        return;
+    }
+
+    QKeyEvent evt(QEvent::KeyRelease, key, e->modifiers(), e->text(), e->isAutoRepeat(), e->count());
+    QWidget::keyReleaseEvent(&evt);
+}
+
 void Worklist::onLoadClick()
 {
     QWaitCursor wait(this);
@@ -235,8 +279,8 @@ void Worklist::onLoadClick()
         }
     }
 
-    actionDetail->setEnabled(table->rowCount() > 0);
-    actionStartStudy->setEnabled(table->rowCount() > 0);
+    actionDetail->setEnabled(table->currentRow() >= 0);
+    actionStartStudy->setEnabled(table->currentRow() >= 0);
 
     table->setSortingEnabled(true);
     table->scrollToItem(table->currentItem());
@@ -250,9 +294,12 @@ void Worklist::onShowDetailsClick()
 {
     QWaitCursor wait(this);
     int row = table->currentRow();
-    auto ds = table->item(row, 0)->data(Qt::UserRole).value<DcmDataset>();
-    DetailsDialog dlg(&ds, this);
-    dlg.exec();
+    if (row >= 0)
+    {
+        auto ds = table->item(row, 0)->data(Qt::UserRole).value<DcmDataset>();
+        DetailsDialog dlg(&ds, this);
+        dlg.exec();
+    }
 }
 
 void Worklist::onCellDoubleClicked(QTableWidgetItem* item)
@@ -260,6 +307,12 @@ void Worklist::onCellDoubleClicked(QTableWidgetItem* item)
     table->setCurrentItem(item);
     //onShowDetailsClick();
     onStartStudyClick();
+}
+
+void Worklist::onCurrentItemChanged(QTableWidgetItem *current, QTableWidgetItem *)
+{
+    actionDetail->setEnabled(current != nullptr);
+    actionStartStudy->setEnabled(current != nullptr);
 }
 
 void Worklist::onStartStudyClick()
