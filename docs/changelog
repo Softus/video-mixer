@@ -2,6 +2,10 @@ beryllium (0.3.25) debian;
 
   * Select all button in archive window
   * Mark files sent to DICOM with overlays
+  * 0.3.16 Regression fix (camera resolution unselectable)
+  * Worklist may crash if data/time columns are absent
+  * Volume Up/Down keys works as Up/Down keys in lists
+  * Automatically open and close archive window
 
  -- Pavel Bludov <pbludov@gmail.com>  Tue, 5 Feb 2014 14:18:52 +0900
 

@@ -100,16 +100,14 @@ ArchiveWindow::ArchiveWindow(QWidget *parent)
 #endif
 
     actionDelete = barArchive->addAction(QIcon(":buttons/delete"), tr("Delete"), this, SLOT(onDeleteClick()));
-    actionDelete->setShortcut(Qt::Key_Delete);
+    actionDelete->setShortcut(Qt::Key_Meta);
     actionDelete->setEnabled(false);
 
 #ifdef WITH_DICOM
-    actionStore = barArchive->addAction(QIcon(":buttons/dicom"), tr("Dicom"), this, SLOT(onStoreClick()));
+    actionStore = barArchive->addAction(QIcon(":buttons/dicom"), tr("Send to DICOM"), this, SLOT(onStoreClick()));
     actionStore->setShortcut(Qt::Key_F6);
     actionStore->setEnabled(false);
 #endif
-    actionSelectAll = barArchive->addAction(QIcon(":buttons/select_all"), tr("Select all"), this, SLOT(onSelectAllClick()));
-    actionSelectAll->setShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_A));
     actionEdit = barArchive->addAction(QIcon(":buttons/edit"), tr("Edit"), this, SLOT(onEditClick()));
     actionEdit->setShortcut(Qt::Key_F4);
     actionEdit->setEnabled(false);
@@ -358,6 +356,33 @@ void ArchiveWindow::preparePathPopupMenu()
     }
 }
 
+static QString addDicomStatusOverlay(const QString& filePath, QIcon& icon)
+{
+    auto dicomStatus = GetFileExtAttribute(filePath, "dicom-status");
+    if (!dicomStatus.isEmpty())
+    {
+        QPixmap pmOverlay;
+        if (dicomStatus == "ok")
+        {
+            pmOverlay.load(":/buttons/database");
+        }
+        else
+        {
+            pmOverlay = QMessageBox::standardIcon(QMessageBox::Critical);
+        }
+        auto pm = icon.pixmap(icon.availableSizes().first());
+        QPainter painter(&pm);
+        painter.setOpacity(0.75);
+        auto rect = pm.rect();
+        rect.setBottom(rect.top() + rect.height() / 4);
+        rect.setRight(rect.left() + rect.width() / 4);
+        painter.drawPixmap(rect, pmOverlay);
+        icon.addPixmap(pm);
+    }
+
+    return dicomStatus;
+}
+
 void ArchiveWindow::updateList()
 {
     QWaitCursor wait(this);
@@ -387,7 +412,8 @@ void ArchiveWindow::updateList()
         }
         else if (pm.load(fi.absoluteFilePath()))
         {
-            if (QFile::exists(curr.absoluteFilePath(fi.completeBaseName())))
+            auto clipFilePath = curr.absoluteFilePath(fi.completeBaseName());
+            if (QFile::exists(clipFilePath))
             {
                 auto clip = listFiles->findItems(fi.completeBaseName(), Qt::MatchExactly);
                 if (!clip.isEmpty())
@@ -399,6 +425,7 @@ void ArchiveWindow::updateList()
                     painter.setOpacity(0.75);
                     painter.drawPixmap(pm.rect(), pmOverlay);
                     icon.addPixmap(pm);
+                    addDicomStatusOverlay(clipFilePath,  icon);
                     clip.first()->setIcon(icon);
                     clip.first()->setData(Qt::UserRole, fi.absoluteFilePath());
                 }
@@ -423,30 +450,15 @@ void ArchiveWindow::updateList()
         auto toolTip = fi.absoluteFilePath();
 
 #ifdef WITH_DICOM
-        auto dicomStatus = GetFileExtAttribute(fi.absoluteFilePath(), "dicom-status");
+        auto dicomStatus = addDicomStatusOverlay(fi.absoluteFilePath(),  icon);
         if (!dicomStatus.isEmpty())
         {
-            toolTip += "\n";
-
-            QPixmap pmOverlay;
             if (dicomStatus == "ok")
             {
-                pmOverlay.load(":/buttons/database");
-                toolTip += tr("The file was uploaded to a storage server");
+                dicomStatus = tr("The file was uploaded to a storage server");
             }
-            else
-            {
-                pmOverlay = style()->standardPixmap(QStyle::SP_MessageBoxCritical);
-                toolTip += dicomStatus;
-            }
-            pm = icon.pixmap(icon.availableSizes().first());
-            QPainter painter(&pm);
-            painter.setOpacity(0.75);
-            auto rect = pm.rect();
-            rect.setBottom(rect.top() + rect.height() / 4);
-            rect.setRight(rect.left() + rect.width() / 4);
-            painter.drawPixmap(rect, pmOverlay);
-            icon.addPixmap(pm);
+
+            toolTip += "\n" + dicomStatus;
         }
 #endif
 
@@ -606,11 +618,6 @@ void static removeFileOrFolder(const QString& path)
     dir.rmdir(path);
 }
 
-void ArchiveWindow::onSelectAllClick()
-{
-    listFiles->selectAll();
-}
-
 void ArchiveWindow::onDeleteClick()
 {
     auto items = listFiles->selectedItems();
@@ -665,53 +672,35 @@ void ArchiveWindow::onDeleteClick()
 #ifdef WITH_DICOM
 void ArchiveWindow::onStoreClick()
 {
-    auto items = listFiles->selectedItems();
-
-    if (items.isEmpty())
-    {
-        if (!listFiles->currentItem())
-        {
-            // Nothing is selected. Should never be happend
-            //
-            return;
-        }
-
-        items << listFiles->currentItem();
-    }
-
     DcmDataset patientDs;
     auto cond = patientDs.loadFile((const char*)curr.absoluteFilePath(".patient.dcm").toLocal8Bit());
     if (cond.bad())
     {
-        QMessageBox::critical(this, windowTitle(), tr("Failed to load patient dataset:\n\n%1").arg(QString::fromLocal8Bit(cond.text())));
+        QMessageBox::critical(this, windowTitle(),
+            tr("Failed to load patient dataset:\n\n%1").arg(QString::fromLocal8Bit(cond.text())));
         return;
     }
 
     int userChoice = QMessageBox::question(this, windowTitle(),
-        items.count() == 1? tr("Are you sure to send '%1' to storage servers?").arg(items.first()->text()): tr("Are you sure to send selected items to storage servers?"),
-        QMessageBox::Ok, QMessageBox::Cancel | QMessageBox::Default);
+        tr("Are you sure to send the result to storage servers?"), QMessageBox::Ok, QMessageBox::Cancel);
 
     if (QMessageBox::Ok == userChoice)
     {
-        QFileInfoList files;
         QWaitCursor wait(this);
-
-        foreach (auto item, items)
-        {
-            if (item->text() == "..")
-            {
-                // User definitelly does not want this folder to be sent
-                //
-                continue;
-            }
-
-            files << QFileInfo(curr, item->text());
-        }
+        QFileInfoList files = curr.entryInfoList(QDir::Files);
 
         DcmClient client; // UID_SecondaryCaptureImageStorage | UID_VideoEndoscopicImageStorage | UID_RawDataStorage
         char seriesUID[100] = {0};
         dcmGenerateUniqueIdentifier(seriesUID, SITE_SERIES_UID_ROOT);
-        client.sendToServer(this, &patientDs, files, seriesUID, true);
+        if (client.sendToServer(this, &patientDs, files, seriesUID))
+        {
+            int userChoice = QMessageBox::information(this, windowTitle(),
+                tr("All files were successfully stored."), QMessageBox::Close | QMessageBox::Ok, QMessageBox::Close);
+            if (QMessageBox::Close == userChoice)
+            {
+                hide();
+            }
+        }
     }
 }
 #endif
