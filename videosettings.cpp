@@ -33,6 +33,7 @@
 #include <QGlib/ParamSpec>
 #include <QGst/Caps>
 #include <QGst/ElementFactory>
+#include <QGst/IntRange>
 #include <QGst/Pad>
 #include <QGst/Parse>
 #include <QGst/Pipeline>
@@ -273,6 +274,34 @@ void VideoSettings::inputChannelChanged(int index)
     }
 }
 
+static QGst::IntRange getRange(const QGlib::Value value)
+{
+    // First, try extract a single int value (more common)
+    //
+    bool ok = false;
+    int intValue = value.toInt(&ok);
+    if (ok)
+    {
+        return QGst::IntRange(intValue, intValue);
+    }
+
+    // If failed, try extract a range value
+    //
+    return ok? QGst::IntRange(intValue, intValue): value.get<QGst::IntRange>();
+}
+
+void VideoSettings::addFrameSize(const QSize& size, const QSize& selectedSize)
+{
+    if (listSizes->findData(size) < 0)
+    {
+        QString name = tr("%1x%2").arg(size.width()).arg(size.height());
+        listSizes->addItem(name, size);
+        if (size == selectedSize)
+        {
+            listSizes->setCurrentIndex(listSizes->count() - 1);
+        }
+    }
+}
 
 void VideoSettings::formatChanged(int index)
 {
@@ -297,17 +326,24 @@ void VideoSettings::formatChanged(int index)
             continue;
         }
 
-        QSize size(s->value("width").toInt(), s->value("height").toInt());
-        if (listSizes->findData(size) >= 0 || size.width() <= 0 || size.height() <= 0)
+        QGst::IntRange widthRange = getRange(s->value("width"));
+        QGst::IntRange heightRange = getRange(s->value("height"));
+
+        if (widthRange.end <= 0 || heightRange.end <= 0)
         {
             continue;
         }
-        QString name = tr("%1x%2").arg(size.width()).arg(size.height());
-        listSizes->addItem(name, size);
-        if (size == selectedSize)
+
+        while (widthRange.start < widthRange.end && heightRange.start < heightRange.end)
         {
-            listSizes->setCurrentIndex(listSizes->count() - 1);
+            addFrameSize(QSize(widthRange.start, heightRange.start), selectedSize);
+            widthRange.start <<= 1;
+            heightRange.start <<= 1;
         }
+
+        // Last one
+        //
+        addFrameSize(QSize(widthRange.end, heightRange.end), selectedSize);
     }
 }
 

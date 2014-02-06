@@ -237,10 +237,11 @@ MainWindow::MainWindow(QWidget *parent) :
     patientSex       = getCmdLineOption("--patient-sex",      "-s");
     physician        = getCmdLineOption("--physician",        "-p");
     studyName        = getCmdLineOption("--study-name",       "-e");
-    auto safeMode    = qApp->arguments().contains("--safe-mode");
+    auto safeMode    = qApp->queryKeyboardModifiers() == SAFE_MODE_KEYS ||
+                       qApp->arguments().contains("--safe-mode") ||
+                       settings.value("safe-mode", true).toBool();
 
-    if (qApp->queryKeyboardModifiers() == SAFE_MODE_KEYS
-        || safeMode || settings.value("safe-mode", true).toBool())
+    if (safeMode)
     {
         settings.setValue("safe-mode", false);
         QTimer::singleShot(0, this, SLOT(onShowSettingsClick()));
@@ -248,6 +249,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
     updatePipeline();
     updateOutputPath(false);
+
+    if (btnStart->isEnabled() &&
+        (qApp->arguments().contains("--auto-start") || qApp->arguments().contains("-a")))
+    {
+        QTimer::singleShot(0, this, SLOT(onStartClick()));
+    }
 }
 
 MainWindow::~MainWindow()
@@ -373,16 +380,22 @@ QToolBar* MainWindow::createToolBar()
   The pipeline is:
 
                  [video src]
-                     |
-                     V
+                      |
+                      V
+          [video decoder, for DV/JPEG]
+                      |
+                      V
+                [deinterlace]
+                      |
+                      V
          +----[main splitter]------+
          |            |            |
   [image valve]       |       [video rate]
          |            |            |
          V            V            V
  [image encoder]  [display]   [video valve]
-        |                          |
-        V                          V
+         |                         |
+         V                         V
   [image writer]             [video encoder]
                                    |
                                    V
@@ -396,7 +409,7 @@ QToolBar* MainWindow::createToolBar()
 
 
 Sample:
-    v4l2src ! autoconvert ! tee name=splitter
+    v4l2src [! dvdemux ! ffdec_dvvideo | ! jpegdec] [! ffmpegcolorspace] [! deinterlace] ! tee name=splitter
         ! autovideosink name=displaysink async=0 splitter.
         ! valve name=encvalve drop=1 ! queue max-size-bytes=0 ! videorate max-rate=30/1 ! x264enc name=videoencoder ! tee name=videosplitter
                 ! identity  name=videoinspect drop-probability=1.0 ! queue ! valve name=videovalve drop=1 ! [mpegpsmux name=videomux ! filesink name=videosink] videosplitter.
@@ -420,8 +433,8 @@ QString MainWindow::buildPipeline()
     auto formatDef      = settings.value("format").toString();
     auto sizeDef        = settings.value("size").toSize();
     auto srcDef         = settings.value("src").toString();
-    auto srcFixColor    = settings.value("src-colorspace").toBool()? "! ffmpegcolorspace ": "";
-    auto srcDeinterlace = settings.value("video-deinterlace").toBool();
+    auto srcFixColor    = settings.value("src-colorspace").toBool()? "! ffmpegcolorspace": "";
+    auto srcDeinterlace = settings.value("video-deinterlace").toBool()? "! deinterlace": "";
     auto srcParams      = settings.value("src-parameters").toString();
 
     if (!srcDef.isEmpty())
@@ -465,11 +478,6 @@ QString MainWindow::buildPipeline()
         {
             pipe.append(' ').append(srcParams);
         }
-
-        if (srcDeinterlace)
-        {
-            pipe.append(" ! deinterlace");
-        }
     }
 
     if (!formatDef.isEmpty())   
@@ -481,14 +489,19 @@ QString MainWindow::buildPipeline()
         }
     }
 
-    if (deviceType == "dv1394src" || formatDef.split(',').first() == "video/x-dv")
+    auto formatType = formatDef.split(',').first();
+    if (formatType == "image/jpeg")
+    {
+        pipe.append(" ! jpegdec");
+    }
+    else if (deviceType == "dv1394src" || formatType == "video/x-dv")
     {
         // Add dv demuxer & decoder for DV sources
         //
         pipe.append(" ! dvdemux ! ffdec_dvvideo");
     }
 
-    pipe.append(srcFixColor);
+    pipe.append(srcDeinterlace).append(srcFixColor);
 
     // v4l2src ... ! tee name=splitter ! ffmpegcolorspace ! ximagesink splitter.");
     //
