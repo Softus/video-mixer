@@ -56,7 +56,7 @@ HotKeySettings::HotKeySettings(QWidget *parent) :
     layoutMain->addWidget(grWorklist);
     layoutWorklist->addRow(tr("Show &details"), heDetails = new HotKeyEdit());
     heDetails->setKey(settings.value("hotkey-show-details", DEFAULT_HOTKEY_SHOW_DETAILS).toInt());
-    layoutWorklist->addRow(tr("Re&load worlist"), heRefresh = new HotKeyEdit());
+    layoutWorklist->addRow(tr("Re&load worklist"), heRefresh = new HotKeyEdit());
     heRefresh->setKey(settings.value("hotkey-refresh", DEFAULT_HOTKEY_REFRESH).toInt());
 #endif
     setLayout(layoutMain);
