@@ -133,6 +133,8 @@ static void BuildCStoreDataSet(/*const*/ DcmDataset& patientDs, DcmDataset& cSto
     }
 
     CopyPatientData(&patientDs, &cStoreDs);
+    patientDs.findAndInsertCopyOfElement(DCM_PerformingPhysicianName, &cStoreDs);
+    patientDs.findAndInsertCopyOfElement(DCM_StudyDescription, &cStoreDs);
 
     patientDs.findAndInsertCopyOfElement(DCM_StudyInstanceUID, &cStoreDs);
     cStoreDs.putAndInsertString(DCM_SeriesInstanceUID, seriesUID.toUtf8());
@@ -222,11 +224,10 @@ static QString BuildNSetDataSet(/*const*/ DcmDataset& patientDs, DcmDataset& nSe
     nSetDs.findOrCreateSequenceItem(DCM_PerformedSeriesSequence, pss);
     if (pss)
     {
-        pss->insertEmptyElement(DCM_PerformingPhysicianName);
-//      pss->putAndInsertString(DCM_ProtocolName, "SOME PROTOCOL"); // Is it required?
-        pss->insertEmptyElement(DCM_OperatorsName);
-
+        patientDs.findAndInsertCopyOfElement(DCM_PerformingPhysicianName, pss);
         patientDs.findAndInsertCopyOfElement(DCM_StudyInstanceUID, pss);
+
+        pss->insertEmptyElement(DCM_OperatorsName);
         pss->putAndInsertString(DCM_SeriesInstanceUID, seriesUID);
         pss->insertEmptyElement(DCM_SeriesDescription);
         pss->insertEmptyElement(DCM_RetrieveAETitle);

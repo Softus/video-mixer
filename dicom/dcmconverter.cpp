@@ -174,7 +174,7 @@ public:
 
         if (type == MediaInfoLib::Stream_Image)
         {
-            cond = dset->putAndInsertString(DCM_SOPClassUID, UID_SecondaryCaptureImageStorage);
+            cond = dset->putAndInsertString(DCM_SOPClassUID, UID_VLEndoscopicImageStorage);
             if (cond.bad())
               return cond;
 
@@ -204,10 +204,6 @@ public:
         }
         else
         {
-            cond = dset->putAndInsertString(DCM_SOPClassUID, UID_VideoEndoscopicImageStorage);
-            if (cond.bad())
-              return cond;
-
             auto frameRate = getStr(__T("FrameRate")).toDouble();
 
             cond = dset->putAndInsertString(DCM_CineRate, QString::number((Uint16)(frameRate + 0.5)).toUtf8());
@@ -230,9 +226,17 @@ public:
             if (QSettings().value("store-video-as-binary", DEFAULT_STORE_VIDEO_AS_BINARY).toBool())
             {
                 ts = EXS_LittleEndianImplicit;
+
+                cond = dset->putAndInsertString(DCM_SOPClassUID, UID_RawDataStorage);
+                if (cond.bad())
+                  return cond;
             }
             else
             {
+                cond = dset->putAndInsertString(DCM_SOPClassUID, UID_VideoEndoscopicImageStorage);
+                if (cond.bad())
+                  return cond;
+
                 auto codecProfile = getStr(__T("Codec_Profile"));
                 if (0 == codec.compare("MPEG-2V", Qt::CaseInsensitive))
                 {

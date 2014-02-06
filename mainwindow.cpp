@@ -1534,14 +1534,6 @@ void MainWindow::onStartStudy()
         pendingPatient->putAndInsertString(DCM_PatientName, dlg.patientName().toUtf8());
         pendingPatient->putAndInsertString(DCM_PatientBirthDate, dlg.patientBirthDateStr().toUtf8());
         pendingPatient->putAndInsertString(DCM_PatientSex, QString().append(dlg.patientSexCode()).toUtf8());
-
-        DcmItem* sps = nullptr;
-        pendingPatient->findOrCreateSequenceItem(DCM_ScheduledProcedureStepSequence, sps);
-        if (sps)
-        {
-            sps->putAndInsertString(DCM_ScheduledPerformingPhysicianName, dlg.physician().toUtf8());
-            sps->putAndInsertString(DCM_ScheduledProcedureStepDescription, dlg.studyName().toUtf8());
-        }
     }
 
     OFString studyInstanceUID;
@@ -1550,6 +1542,9 @@ void MainWindow::onStartStudy()
     {
         pendingPatient->putAndInsertString(DCM_StudyInstanceUID, dcmGenerateUniqueIdentifier(uuid, SITE_STUDY_UID_ROOT));
     }
+
+    pendingPatient->putAndInsertString(DCM_PerformingPhysicianName, dlg.physician().toUtf8());
+    pendingPatient->putAndInsertString(DCM_StudyDescription, dlg.studyName().toUtf8());
 
 #if __BYTE_ORDER == __LITTLE_ENDIAN
     const E_TransferSyntax writeXfer = EXS_LittleEndianImplicit;
