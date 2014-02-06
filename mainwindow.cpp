@@ -1189,6 +1189,11 @@ void MainWindow::onStartClick()
     // Open the archive window after end of study
     //
     QTimer::singleShot(0, this, SLOT(onShowArchiveClick()));
+
+    // Clear the capture list
+    //
+    listImagesAndClips->clear();
+    imageNo = clipNo = 0;
 }
 
 void MainWindow::onSnapshotClick()
