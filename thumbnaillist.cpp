@@ -11,8 +11,15 @@ ThumbnailList::ThumbnailList(QWidget *parent) :
 
 void ThumbnailList::wheelEvent(QWheelEvent *e)
 {
-    QWheelEvent horEvent(e->pos(), e->delta(), e->buttons(), e->modifiers(), Qt::Horizontal);
-    QListWidget::wheelEvent(&horEvent);
+    if (verticalScrollBarPolicy() == Qt::ScrollBarAlwaysOff)
+    {
+        QWheelEvent horEvent(e->pos(), e->delta(), e->buttons(), e->modifiers(), Qt::Horizontal);
+        QListWidget::wheelEvent(&horEvent);
+    }
+    else
+    {
+        QListWidget::wheelEvent(e);
+    }
 }
 
 void ThumbnailList::keyPressEvent(QKeyEvent *e)

@@ -582,6 +582,8 @@ void ArchiveWindow::switchViewMode(int mode)
     }
 
     listFiles->setIconSize(mode == QListView::ListMode? QSize(32, 32): QSize(144, 144));
+    listFiles->setVerticalScrollBarPolicy(
+        mode == QListView::IconMode? Qt::ScrollBarAsNeeded: Qt::ScrollBarAlwaysOff);
 
     updateList();
 }
