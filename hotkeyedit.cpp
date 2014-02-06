@@ -90,7 +90,10 @@ void HotKeyEdit::keyPressEvent(QKeyEvent *event)
 
 void HotKeyEdit::handleMousePressEvent(QMouseEvent *evt)
 {
-    if (!m_ignoreNextMoseEvent)
+    // 'Unknown' mouse buttons still generates the event,
+    // but no buttons specified with it. Just ignore them.
+    //
+    if (!m_ignoreNextMoseEvent && evt->buttons())
     {
         setKey(0x80000000 | evt->modifiers() | evt->buttons());
         emit keyChanged(m_key);
