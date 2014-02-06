@@ -58,7 +58,6 @@ protected:
     virtual void closeEvent(QCloseEvent *);
     virtual void showEvent(QShowEvent *);
     virtual void keyPressEvent(QKeyEvent *e);
-    virtual void keyReleaseEvent(QKeyEvent *e);
 
 signals:
     void startStudy(DcmDataset* patient);

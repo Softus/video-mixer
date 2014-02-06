@@ -204,44 +204,16 @@ void Worklist::closeEvent(QCloseEvent *e)
 
 void Worklist::keyPressEvent(QKeyEvent *e)
 {
-    Qt::Key key;
     if (e->key() == Qt::Key_VolumeUp)
     {
-        key = Qt::Key_Up;
+        table->setCurrentCell(table->currentRow() - 1, table->currentColumn());
     }
     else if (e->key() == Qt::Key_VolumeDown)
     {
-        key = Qt::Key_Down;
-    }
-    else
-    {
-        QWidget::keyPressEvent(e);
-        return;
+        table->setCurrentCell(table->currentRow() + 1, table->currentColumn());
     }
 
-    QKeyEvent evt(QEvent::KeyPress, key, e->modifiers(), e->text(), e->isAutoRepeat(), e->count());
-    QWidget::keyPressEvent(&evt);
-}
-
-void Worklist::keyReleaseEvent(QKeyEvent *e)
-{
-    Qt::Key key;
-    if (e->key() == Qt::Key_VolumeUp)
-    {
-        key = Qt::Key_Up;
-    }
-    else if (e->key() == Qt::Key_VolumeDown)
-    {
-        key = Qt::Key_Down;
-    }
-    else
-    {
-        QWidget::keyReleaseEvent(e);
-        return;
-    }
-
-    QKeyEvent evt(QEvent::KeyRelease, key, e->modifiers(), e->text(), e->isAutoRepeat(), e->count());
-    QWidget::keyReleaseEvent(&evt);
+    QWidget::keyPressEvent(e);
 }
 
 void Worklist::onLoadClick()
