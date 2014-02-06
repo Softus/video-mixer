@@ -11,6 +11,8 @@ public:
 
 protected:
     void wheelEvent(QWheelEvent *e);
+    void keyPressEvent(QKeyEvent *e);
+    void keyReleaseEvent(QKeyEvent *e);
 };
 
 #endif // HORLISTWIDGET_H
