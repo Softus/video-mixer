@@ -21,7 +21,8 @@
 #define DEFAULT_FOLDER_TEMPLATE       "/%yyyy%-%MM%/%dd%/%name%/"
 #define DEFAULT_HOTKEY_ABOUT          (int)(Qt::AltModifier | Qt::Key_Question)
 #define DEFAULT_HOTKEY_ARCHIVE        (int)(Qt::Key_F2)
-#define DEFAULT_HOTKEY_RECORD         (int)(Qt::AltModifier | Qt::Key_E)
+#define DEFAULT_HOTKEY_RECORD_START   (int)(Qt::AltModifier | Qt::Key_R)
+#define DEFAULT_HOTKEY_RECORD_STOP    (int)(Qt::AltModifier | Qt::Key_E)
 #define DEFAULT_HOTKEY_REFRESH        (int)(Qt::Key_F5)
 #define DEFAULT_HOTKEY_SETTINGS       (int)(Qt::Key_F9)
 #define DEFAULT_HOTKEY_SHOW_DETAILS   (int)(Qt::AltModifier | Qt::Key_Return)
@@ -44,6 +45,8 @@
 #define DEFAULT_VIDEO_MUXER           "mpegpsmux"
 #define DEFAULT_VIDEO_MAX_FPS         30
 #define DEFAULT_VIDEO_MAX_FILE_SIZE   1024
+#define DEFAULT_VIDEO_RECORD_LIMIT    10
+#define DEFAULT_VIDEO_RECORD_NOTIFY   2
 
 #ifdef WITH_DICOM
 #define DEFAULT_EXPORT_CLIPS_TO_DICOM true

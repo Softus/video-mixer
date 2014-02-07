@@ -55,7 +55,8 @@ class MainWindow : public QWidget
     // UI
     //
     QToolButton* btnStart;
-    QToolButton* btnRecord;
+    QToolButton* btnRecordStart;
+    QToolButton* btnRecordStop;
     QToolButton* btnSnapshot;
     QAction*     actionAbout;
     QAction*     actionSettings;
@@ -87,11 +88,14 @@ class MainWindow : public QWidget
     int           imageNo;
     int           clipNo;
     int           studyNo;
+    int           recordTimerId;
+    int           recordLimit;
+    int           recordNotify;
+    int           countdown;
 
     QMenuBar* createMenuBar();
     QToolBar* createToolBar();
     void updateStartButton();
-    void updateRecordButton();
 
     // State machine
     //
@@ -134,7 +138,8 @@ public:
     ~MainWindow();
 
 protected:
-    virtual void closeEvent(QCloseEvent *);
+    virtual void closeEvent(QCloseEvent*);
+    virtual void timerEvent(QTimerEvent*);
 signals:
     void enableWidget(QWidget*, bool);
 
@@ -150,7 +155,8 @@ private slots:
     void onShowSettingsClick();
     void onStartClick();
     void onSnapshotClick();
-    void onRecordClick();
+    void onRecordStartClick();
+    void onRecordStopClick();
     void prepareSettingsMenu();
     void toggleSetting();
     void updatePipeline();

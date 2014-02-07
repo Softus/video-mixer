@@ -1,3 +1,10 @@
+beryllium (0.3.28) debian;
+
+  * Dedicated output folder for video logs
+  * Timeout for clips recording
+
+ -- Pavel Bludov <pbludov@gmail.com>  Fri, 7 Feb 2014 11:35:00 +0900
+
 beryllium (0.3.27) debian;
 
   * Option to show start dialog (--auto-start, -a)
@@ -7,7 +14,7 @@ beryllium (0.3.27) debian;
   * Clear thumbnail list in capture window on end of study
   * Restore scrollbar in icon mode in archive window
 
- -- Pavel Bludov <pbludov@gmail.com>  Wed, 6 Feb 2014 17:33:00 +0900
+ -- Pavel Bludov <pbludov@gmail.com>  Thu, 6 Feb 2014 17:33:00 +0900
 
 beryllium (0.3.26) debian;
 
@@ -17,7 +24,7 @@ beryllium (0.3.26) debian;
   * Volume Up/Down keys works as Up/Down keys in lists
   * Automatically open and close archive window
 
- -- Pavel Bludov <pbludov@gmail.com>  Wed, 6 Feb 2014 13:36:00 +0900
+ -- Pavel Bludov <pbludov@gmail.com>  Thu, 6 Feb 2014 13:36:00 +0900
 
 beryllium (0.3.24) debian;
 

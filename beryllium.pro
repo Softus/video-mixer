@@ -15,7 +15,7 @@
 isEmpty(PREFIX):  PREFIX   = /usr/local
 DEFINES   += PREFIX=$$PREFIX
 
-QT       += core gui
+QT       += core gui multimedia
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets opengl
 INCLUDEPATH += libqxt
 
@@ -68,7 +68,8 @@ SOURCES += aboutdialog.cpp \
     hotkeyedit.cpp \
     hotkeysettings.cpp \
     mouseshortcut.cpp \
-    thumbnaillist.cpp
+    thumbnaillist.cpp \
+    videorecordsettings.cpp
 
 HEADERS += aboutdialog.h \
     archivewindow.h \
@@ -94,7 +95,8 @@ HEADERS += aboutdialog.h \
     hotkeyedit.h \
     hotkeysettings.h \
     mouseshortcut.h \
-    thumbnaillist.h
+    thumbnaillist.h \
+    videorecordsettings.h
 
 FORMS   +=
 

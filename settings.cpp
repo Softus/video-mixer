@@ -21,6 +21,7 @@
 #include "physicianssettings.h"
 #include "storagesettings.h"
 #include "studiessettings.h"
+#include "videorecordsettings.h"
 #include "videosettings.h"
 
 #ifdef WITH_DICOM
@@ -104,6 +105,7 @@ void Settings::createPages()
 #endif
 
     createPage(tr("Video source"), VideoSettings::staticMetaObject);
+    createPage(tr("Video recording"), VideoRecordSettings::staticMetaObject);
     createPage(tr("Storage"), StorageSettings::staticMetaObject);
     createPage(tr("Physicians"), PhysiciansSettings::staticMetaObject);
     createPage(tr("Studies"), StudiesSettings::staticMetaObject);

@@ -26,7 +26,8 @@ class HotKeySettings : public QWidget
     Q_OBJECT
     HotKeyEdit*  heStartStudy;
     HotKeyEdit*  heTakeSnapshot;
-    HotKeyEdit*  heRepordPause;
+    HotKeyEdit*  heRecordStart;
+    HotKeyEdit*  heRecordStop;
     HotKeyEdit*  heArchive;
     HotKeyEdit*  heSettings;
 #ifdef WITH_DICOM

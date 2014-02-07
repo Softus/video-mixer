@@ -57,6 +57,7 @@
 #include <QPainter>
 #include <QResizeEvent>
 #include <QSettings>
+#include <QSound>
 #include <QTimer>
 #include <QToolBar>
 #include <QToolButton>
@@ -165,6 +166,10 @@ MainWindow::MainWindow(QWidget *parent) :
     imageNo(0),
     clipNo(0),
     studyNo(0),
+    recordTimerId(0),
+    recordLimit(0),
+    recordNotify(0),
+    countdown(0),
     running(false),
     recording(false)
 {
@@ -229,7 +234,6 @@ MainWindow::MainWindow(QWidget *parent) :
     setWindowState((Qt::WindowState)settings.value("mainwindow-state").toInt());
 
     updateStartButton();
-    updateRecordButton();
 
     patientBirthDate = getCmdLineOption("--patient-birthdate","-b");
     patientId        = getCmdLineOption("--patient-id",       "-i");
@@ -292,6 +296,25 @@ void MainWindow::closeEvent(QCloseEvent *evt)
     QWidget::closeEvent(evt);
 }
 
+void MainWindow::timerEvent(QTimerEvent* evt)
+{
+    if (evt->timerId() == recordTimerId)
+    {
+        if (--countdown == 0)
+        {
+            onRecordStopClick();
+        }
+        else
+        {
+            if (countdown == recordNotify)
+            {
+                QSound::play(qApp->applicationDirPath() + "/../share/" PRODUCT_SHORT_NAME "/sound/notify.wav");
+            }
+            setElementProperty("displayoverlay", "text", QString::number(countdown));
+        }
+    }
+}
+
 QMenuBar* MainWindow::createMenuBar()
 {
     auto mnuBar = new QMenuBar();
@@ -347,12 +370,23 @@ QToolBar* MainWindow::createToolBar()
     connect(btnSnapshot, SIGNAL(clicked()), this, SLOT(onSnapshotClick()));
     bar->addWidget(btnSnapshot);
 
-    btnRecord = new QToolButton();
-    btnRecord->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    btnRecord->setFocusPolicy(Qt::NoFocus);
-    btnRecord->setMinimumWidth(175);
-    connect(btnRecord, SIGNAL(clicked()), this, SLOT(onRecordClick()));
-    bar->addWidget(btnRecord);
+    btnRecordStart = new QToolButton();
+    btnRecordStart->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    btnRecordStart->setFocusPolicy(Qt::NoFocus);
+    btnRecordStart->setIcon(QIcon(":/buttons/record"));
+    btnRecordStart->setText(tr("Record"));
+    btnRecordStart->setMinimumWidth(175);
+    connect(btnRecordStart, SIGNAL(clicked()), this, SLOT(onRecordStartClick()));
+    bar->addWidget(btnRecordStart);
+
+    btnRecordStop = new QToolButton();
+    btnRecordStop->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    btnRecordStop->setFocusPolicy(Qt::NoFocus);
+    btnRecordStop->setIcon(QIcon(":/buttons/pause"));
+    btnRecordStop->setText(tr("Pause"));
+    btnRecordStop->setMinimumWidth(175);
+    connect(btnRecordStop, SIGNAL(clicked()), this, SLOT(onRecordStopClick()));
+    bar->addWidget(btnRecordStop);
 
     QWidget* spacer = new QWidget;
     spacer->setMinimumWidth(1);
@@ -817,7 +851,8 @@ void MainWindow::updatePipeline()
 
     updateShortcut(btnStart,    settings.value("hotkey-start",    DEFAULT_HOTKEY_START).toInt());
     updateShortcut(btnSnapshot, settings.value("hotkey-snapshot", DEFAULT_HOTKEY_SNAPSHOT).toInt());
-    updateShortcut(btnRecord,   settings.value("hotkey-record",   DEFAULT_HOTKEY_RECORD).toInt());
+    updateShortcut(btnRecordStart, settings.value("hotkey-record-start", DEFAULT_HOTKEY_RECORD_START).toInt());
+    updateShortcut(btnRecordStop,  settings.value("hotkey-record-start", DEFAULT_HOTKEY_RECORD_STOP).toInt());
 
     updateShortcut(actionArchive,  settings.value("hotkey-archive",   DEFAULT_HOTKEY_ARCHIVE).toInt());
     updateShortcut(actionSettings, settings.value("hotkey-settings",  DEFAULT_HOTKEY_SETTINGS).toInt());
@@ -827,6 +862,9 @@ void MainWindow::updatePipeline()
     actionWorklist->setEnabled(!settings.value("mwl-server").toString().isEmpty());
 #endif
     updateShortcut(actionAbout, settings.value("hotkey-about",  DEFAULT_HOTKEY_ABOUT).toInt());
+
+    recordLimit = settings.value("clip-limit").toBool()? settings.value("clip-countdown").toInt(): 0;
+    recordNotify = settings.value("notify-clip-limit").toBool()? settings.value("notify-clip-countdown").toInt(): 0;
 }
 
 void MainWindow::updateWindowTitle()
@@ -940,11 +978,19 @@ void MainWindow::onClipFrame(const QGst::BufferPtr& buf)
     //
     setElementProperty("clipvalve", "drop", false);
 
-    enableWidget(btnRecord, true);
+    if (recordLimit > 0 && recordTimerId == 0)
+    {
+        countdown = recordLimit;
+        recordTimerId = startTimer(1000);
+    }
+
+    enableWidget(btnRecordStart, true);
+    enableWidget(btnRecordStop, true);
     auto displayOverlay = pipeline->getElementByName("displayoverlay");
     if (displayOverlay)
     {
         displayOverlay->setProperty("silent", false);
+        displayOverlay->setProperty("text", countdown > 0? QString::number(countdown): "*");
         displayOverlay->setProperty("color",  0xFF00FF00);
         displayOverlay->setProperty("outline-color", 0xFF00FF00);
     }
@@ -1166,10 +1212,9 @@ void MainWindow::onStartClick()
     QWaitCursor wait(this);
     if (recording)
     {
-        onRecordClick();
+        onRecordStopClick();
     }
     running = recording = false;
-    updateRecordButton();
     removeVideoTail("video");
     updateWindowTitle();
 
@@ -1327,7 +1372,7 @@ void MainWindow::removeVideoTail(const QString& prefix)
     pipeline->remove(sink);
 }
 
-void MainWindow::onRecordClick()
+void MainWindow::onRecordStartClick()
 {
     if (!recording)
     {
@@ -1339,31 +1384,45 @@ void MainWindow::onRecordClick()
 
             // Until the real clip recording starts, we should disable this button
             //
-            btnRecord->setEnabled(false);
+            btnRecordStart->setEnabled(false);
             recording = true;
         }
         else
         {
             removeVideoTail("clip");
-            QMessageBox::critical(this, windowTitle(), tr("Failed to start recording.\nCheck the error log for details."), QMessageBox::Ok);
+            QMessageBox::critical(this, windowTitle(),
+                tr("Failed to start recording.\nCheck the error log for details."), QMessageBox::Ok);
         }
     }
     else
     {
-        removeVideoTail("clip");
-        clipPreviewFileName.clear();
-        recording = false;
+        // Extend recording time
+        //
+        countdown = recordLimit;
+    }
+}
 
-        auto displayOverlay = pipeline->getElementByName("displayoverlay");
-        if (displayOverlay)
-        {
-            displayOverlay->setProperty("silent", !pipeline->getElementByName("videomux"));
-            displayOverlay->setProperty("color",  0xFFFF0000);
-            displayOverlay->setProperty("outline-color", 0xFFFF0000);
-        }
+void MainWindow::onRecordStopClick()
+{
+    removeVideoTail("clip");
+    clipPreviewFileName.clear();
+    recording = false;
+    countdown = 0;
+    if (recordTimerId)
+    {
+        killTimer(recordTimerId);
+        recordTimerId = 0;
     }
 
-    updateRecordButton();
+    auto displayOverlay = pipeline->getElementByName("displayoverlay");
+    if (displayOverlay)
+    {
+        displayOverlay->setProperty("silent", !pipeline->getElementByName("videomux"));
+        displayOverlay->setProperty("color",  0xFFFF0000);
+        displayOverlay->setProperty("text",  "*");
+        displayOverlay->setProperty("outline-color", 0xFFFF0000);
+    }
+    btnRecordStop->setEnabled(false);
 }
 
 void MainWindow::updateStartButton()
@@ -1375,7 +1434,8 @@ void MainWindow::updateStartButton()
     btnStart->setText(strOnOff);
     btnStart->setShortcut(shortcut); // ...and restore
 
-    btnRecord->setEnabled(running);
+    btnRecordStart->setEnabled(running);
+    btnRecordStop->setEnabled(running && recording);
     btnSnapshot->setEnabled(running);
     actionSettings->setEnabled(!running);
 #ifdef WITH_DICOM
@@ -1384,16 +1444,6 @@ void MainWindow::updateStartButton()
         worklist->setDisabled(running);
     }
 #endif
-}
-
-void MainWindow::updateRecordButton()
-{
-    QIcon icon(recording? ":/buttons/pause": ":/buttons/record");
-    QString strOnOff(recording? tr("Pause"): tr("Record"));
-    btnRecord->setIcon(icon);
-    auto shortcut = btnRecord->shortcut(); // save the shortcut...
-    btnRecord->setText(strOnOff);
-    btnRecord->setShortcut(shortcut); // ...and restore
 }
 
 void MainWindow::prepareSettingsMenu()
