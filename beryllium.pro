@@ -15,8 +15,8 @@
 isEmpty(PREFIX):  PREFIX   = /usr/local
 DEFINES   += PREFIX=$$PREFIX
 
-QT       += core gui multimedia
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets opengl
+QT       += core gui
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets opengl multimedia
 INCLUDEPATH += libqxt
 
 DISTRO = $$system(cat /proc/version)
