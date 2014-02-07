@@ -12,15 +12,15 @@ VideoRecordSettings::VideoRecordSettings(QWidget *parent) :
     QSettings settings;
     auto layoutMain = new QFormLayout;
     layoutMain->addRow(checkLimit = new QCheckBox(tr("&Limit clips to")), spinCountdown = new QSpinBox);
-    checkLimit->setChecked(settings.value("clip-limit", DEFAULT_VIDEO_RECORD_LIMIT).toBool());
+    checkLimit->setChecked(settings.value("clip-limit").toBool());
     spinCountdown->setSuffix(tr(" seconds"));
     spinCountdown->setRange(1, 3600);
-    spinCountdown->setValue(settings.value("clip-countdown").toInt());
+    spinCountdown->setValue(settings.value("clip-countdown", DEFAULT_VIDEO_RECORD_LIMIT).toInt());
     layoutMain->addRow(checkNotify = new QCheckBox(tr("&Play a sound on")), spinNotify = new QSpinBox);
-    checkNotify->setChecked(settings.value("notify-clip-limit", DEFAULT_VIDEO_RECORD_NOTIFY).toBool());
+    checkNotify->setChecked(settings.value("notify-clip-limit").toBool());
     spinNotify->setSuffix(tr(" seconds before stopping"));
     spinNotify->setRange(1, 3600);
-    spinNotify->setValue(settings.value("notify-clip-countdown").toInt());
+    spinNotify->setValue(settings.value("notify-clip-countdown", DEFAULT_VIDEO_RECORD_NOTIFY).toInt());
 
     setLayout(layoutMain);
 }
