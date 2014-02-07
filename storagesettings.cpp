@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Irkutsk Diagnostic Center.
+ * Copyright (C) 2013-2014 Irkutsk Diagnostic Center.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -18,62 +18,81 @@
 #include "qwaitcursor.h"
 #include "defaults.h"
 
-#include <QHBoxLayout>
 #include <QFileDialog>
 #include <QFormLayout>
-#include <QFrame>
+#include <QGroupBox>
+#include <QHBoxLayout>
 #include <QLabel>
-#include <QLineEdit>
 #include <QPushButton>
 #include <QSettings>
 #include <QSpinBox>
+#include <QxtLineEdit>
 
 StorageSettings::StorageSettings(QWidget *parent) :
     QWidget(parent)
 {
     QSettings settings;
-    QFormLayout* layoutMain = new QFormLayout;
+    auto layoutMain = new QVBoxLayout;
+    auto layoutImages = new QFormLayout;
 
-    QHBoxLayout* layoutPath = new QHBoxLayout;
+    auto grpImages = new QGroupBox(tr("Images and clips"));
+    auto layoutPath = new QHBoxLayout;
     textOutputPath = new QLineEdit(settings.value("output-path", DEFAULT_OUTPUT_PATH).toString());
-    QPushButton* browseButton = new QPushButton(QString(0x2026));
-    browseButton->setMaximumWidth(32);
+    auto browseButton = new QPushButton(tr("Browse").append(QString(0x2026)));
     connect(browseButton, SIGNAL(clicked()), this, SLOT(onClickBrowse()));
-    QLabel* lblPath = new QLabel(tr("&Output path"));
+    auto lblPath = new QLabel(tr("&Output path"));
     lblPath->setBuddy(textOutputPath);
     layoutPath->addWidget(lblPath);
     layoutPath->addWidget(textOutputPath, 1);
     layoutPath->addWidget(browseButton);
-    layoutMain->addRow(layoutPath);
+    layoutImages->addRow(layoutPath);
 
-    QFrame *frameFolder = new QFrame;
-    frameFolder->setFrameShape(QFrame::Box);
-    frameFolder->setFrameShadow(QFrame::Sunken);
-    QFormLayout* layoutFolder = new QFormLayout;
     textFolderTemplate = new QLineEdit(settings.value("folder-template", DEFAULT_FOLDER_TEMPLATE).toString());
-    layoutFolder->addRow(tr("&Folder template"), textFolderTemplate);
-    frameFolder->setLayout(layoutFolder);
-    layoutMain->addRow(frameFolder);
+    layoutImages->addRow(tr("&Folder template"), textFolderTemplate);
 
-    QFrame *frameFile = new QFrame;
-    frameFile->setFrameShape(QFrame::Box);
-    frameFile->setFrameShadow(QFrame::Sunken);
-    QFormLayout* fileLayout = new QFormLayout;
-    fileLayout->addRow(tr("&Pictures template"), textImageTemplate = new QLineEdit(settings.value("image-template", DEFAULT_IMAGE_TEMPLATE).toString()));
-    fileLayout->addRow(tr("&Clips template"), textClipTemplate = new QLineEdit(settings.value("clip-template", DEFAULT_CLIP_TEMPLATE).toString()));
-    fileLayout->addRow(tr("&Video template"), textVideoTemplate = new QLineEdit(settings.value("video-template", DEFAULT_VIDEO_TEMPLATE).toString()));
-    fileLayout->addRow(tr("&Split files by"), spinMaxVideoSize = new QSpinBox);
+    layoutImages->addRow(tr("&Pictures template"), textImageTemplate = new QLineEdit(settings.value("image-template", DEFAULT_IMAGE_TEMPLATE).toString()));
+    layoutImages->addRow(tr("&Clips template"), textClipTemplate = new QLineEdit(settings.value("clip-template", DEFAULT_CLIP_TEMPLATE).toString()));
+
+    grpImages->setLayout(layoutImages);
+    layoutMain->addWidget(grpImages);
+
+    auto grpVideo = new QGroupBox(tr("Video logs"));
+    auto layoutVideoLog = new QFormLayout;
+
+    auto layoutVideoPath = new QHBoxLayout;
+    textVideoOutputPath = new QxtLineEdit(settings.value("video-output-path").toString());
+    textVideoOutputPath->setSampleText(tr("(share with images and clips)"));
+    auto browseVideoButton = new QPushButton(tr("Browse").append(QString(0x2026)));
+    connect(browseVideoButton, SIGNAL(clicked()), this, SLOT(onClickVideoBrowse()));
+    auto lblVideoPath = new QLabel(tr("O&utput path"));
+    lblVideoPath->setBuddy(textVideoOutputPath);
+    layoutVideoPath->addWidget(lblVideoPath);
+    layoutVideoPath->addWidget(textVideoOutputPath, 1);
+    layoutVideoPath->addWidget(browseVideoButton);
+    layoutVideoLog->addRow(layoutVideoPath);
+    textVideoFolderTemplate = new QxtLineEdit(settings.value("video-folder-template").toString());
+    textVideoFolderTemplate->setSampleText(tr("(share with images and clips)"));
+    layoutVideoLog->addRow(tr("Fol&der template"), textVideoFolderTemplate);
+    layoutVideoLog->addRow(tr("&Video template"), textVideoTemplate = new QLineEdit(settings.value("video-template", DEFAULT_VIDEO_TEMPLATE).toString()));
+    layoutVideoLog->addRow(tr("&Split files by"), spinMaxVideoSize = new QSpinBox);
     spinMaxVideoSize->setSuffix(tr(" Mb"));
     spinMaxVideoSize->setRange(1, 1024*1024);
     spinMaxVideoSize->setValue(settings.value("video-max-file-size", DEFAULT_VIDEO_MAX_FILE_SIZE).toInt());
+    grpVideo->setLayout(layoutVideoLog);
 
-    frameFile->setLayout(fileLayout);
-    layoutMain->addRow(frameFile);
-    layoutMain->addRow(new QLabel(tr("%yyyy%\t\tyear\n%mm%\t\tmonth\n%dd%\t\tday\n%hh%\t\thour\n%min%\t\tminute\n"
-                                     "%id%\t\tpatient id, if specified\n%name%\tpatient name, if specified\n"
-                                     "%sex%\t\tpatient sex, if specified\n%birthdate%\tpatient birthdate, if specified\n"
-                                     "%physician%\tphysician name, if specified\n%study%\tstudy name\n"
-                                     "%nn%\t\tsequential number")));
+    layoutMain->addWidget(grpVideo);
+
+    auto grpLegend = new QGroupBox(tr("Substitutes"));
+    auto layoutLegend = new QVBoxLayout;
+    layoutLegend->addWidget(new QLabel(tr("%yyyy%\t\tyear\t\t\t%mm%\t\tmonth\n"
+                                        "%dd%\t\tday\t\t\t%hh%\t\thour\n"
+                                        "%min%\t\tminute\t\t\t%nn%\t\tsequential number\n"
+                                        "%id%\t\tpatient id\t\t%name%\tpatient name\n"
+                                        "%sex%\t\tpatient sex\t\t%birthdate%\tpatient birthdate\n"
+                                        "%physician%\tphysician name\t\t%study%\tstudy name"
+                                     )));
+    grpLegend->setLayout(layoutLegend);
+    layoutMain->addWidget(grpLegend);
     setLayout(layoutMain);
 }
 
@@ -85,7 +104,19 @@ void StorageSettings::onClickBrowse()
     dlg.selectFile(textOutputPath->text());
     if (dlg.exec())
     {
-        textOutputPath->setText(dlg.selectedFiles().at(0));
+        textOutputPath->setText(dlg.selectedFiles().first());
+    }
+}
+
+void StorageSettings::onClickVideoBrowse()
+{
+    QWaitCursor wait(this);
+    QFileDialog dlg(this);
+    dlg.setFileMode(QFileDialog::DirectoryOnly);
+    dlg.selectFile(textVideoOutputPath->text());
+    if (dlg.exec())
+    {
+        textVideoOutputPath->setText(dlg.selectedFiles().first());
     }
 }
 
@@ -93,7 +124,9 @@ void StorageSettings::save()
 {
     QSettings settings;
     settings.setValue("output-path", textOutputPath->text());
+    settings.setValue("video-output-path", textVideoOutputPath->text());
     settings.setValue("folder-template", textFolderTemplate->text());
+    settings.setValue("video-folder-template", textVideoFolderTemplate->text());
     settings.setValue("image-template", textImageTemplate->text());
     settings.setValue("clip-template", textClipTemplate->text());
     settings.setValue("video-template", textVideoTemplate->text());

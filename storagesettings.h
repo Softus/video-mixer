@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Irkutsk Diagnostic Center.
+ * Copyright (C) 2013-2014 Irkutsk Diagnostic Center.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -21,26 +21,32 @@
 
 QT_BEGIN_NAMESPACE
 class QLineEdit;
+class QxtLineEdit;
 class QSpinBox;
 QT_END_NAMESPACE
 
 class StorageSettings : public QWidget
 {
     Q_OBJECT
-    QLineEdit* textOutputPath;
-    QLineEdit* textFolderTemplate;
-    QLineEdit* textImageTemplate;
-    QLineEdit* textClipTemplate;
-    QLineEdit* textVideoTemplate;
-    QSpinBox*  spinMaxVideoSize;
+    QLineEdit*   textOutputPath;
+    QxtLineEdit* textVideoOutputPath;
+    QLineEdit*   textFolderTemplate;
+    QxtLineEdit* textVideoFolderTemplate;
+    QLineEdit*   textImageTemplate;
+    QLineEdit*   textClipTemplate;
+    QLineEdit*   textVideoTemplate;
+    QSpinBox*    spinMaxVideoSize;
 public:
     Q_INVOKABLE explicit StorageSettings(QWidget *parent = 0);
     
 signals:
     
 public slots:
-    void onClickBrowse();
     void save();
+
+private slots:
+    void onClickBrowse();
+    void onClickVideoBrowse();
 };
 
 #endif // STORAGESETTINGS_H

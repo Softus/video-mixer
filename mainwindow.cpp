@@ -858,33 +858,60 @@ void MainWindow::updateWindowTitle()
     setWindowTitle(windowTitle);
 }
 
-void MainWindow::updateOutputPath(bool needUnique)
+QDir MainWindow::checkPath(const QString tpl, bool needUnique)
 {
-    QSettings settings;
-    auto tpl = settings.value("output-path", DEFAULT_OUTPUT_PATH).toString();
-    tpl.append(settings.value("folder-template", DEFAULT_FOLDER_TEMPLATE).toString());
+    QDir dir(tpl);
 
-    outputPath.setPath(replace(tpl, ++studyNo));
-    if (needUnique && outputPath.exists())
+    if (needUnique && dir.exists())
     {
         int cnt = 1;
         QString alt;
         do
         {
-            alt = outputPath.absolutePath()
+            alt = dir.absolutePath()
                 .append(" (").append(QString::number(++cnt)).append(')');
         }
-        while (outputPath.exists(alt));
-        outputPath.setPath(alt);
+        while (dir.exists(alt));
+        dir.setPath(alt);
     }
-    qDebug() << "Output path" << outputPath.absolutePath();
+    qDebug() << "Output path" << dir.absolutePath();
 
-    if (!outputPath.mkpath("."))
+    if (!dir.mkpath("."))
     {
-        QString msg = tr("Failed to create '%1'").arg(outputPath.absolutePath());
+        QString msg = tr("Failed to create '%1'").arg(dir.absolutePath());
         qCritical() << msg;
         QMessageBox::critical(this, windowTitle(), msg, QMessageBox::Ok);
     }
+
+    return dir;
+}
+
+void MainWindow::updateOutputPath(bool needUnique)
+{
+    QSettings settings;
+
+    auto root = settings.value("output-path", DEFAULT_OUTPUT_PATH).toString();
+    auto tpl = settings.value("folder-template", DEFAULT_FOLDER_TEMPLATE).toString();
+    auto path = replace(root + tpl, ++studyNo);
+    outputPath = checkPath(path, needUnique);
+
+    auto videoRoot = settings.value("video-output-path").toString();
+    if (videoRoot.isEmpty())
+    {
+        videoRoot = root;
+    }
+    auto videoTpl = settings.value("video-folder-template").toString();
+    if (videoTpl.isEmpty())
+    {
+        videoTpl = tpl;
+    }
+
+    auto videoPath = replace(videoRoot + videoTpl, studyNo);
+
+    // If video path is same as images path, omit checkPath,
+    // since it is already checked.
+    //
+    videoOutputPath = (videoPath == path)? outputPath: checkPath(videoPath, needUnique);
 }
 
 void MainWindow::releasePipeline()
@@ -1100,7 +1127,7 @@ bool MainWindow::startVideoRecord()
 
     if (QSettings().value("enable-video").toBool())
     {
-        auto videoFileName = appendVideoTail("video", ++studyNo);
+        auto videoFileName = appendVideoTail(videoOutputPath, "video", studyNo);
         if (videoFileName.isEmpty())
         {
             removeVideoTail("video");
@@ -1212,7 +1239,7 @@ void MainWindow::onSnapshotClick()
     btnSnapshot->setEnabled(false);
 }
 
-QString MainWindow::appendVideoTail(const QString& prefix, int idx)
+QString MainWindow::appendVideoTail(const QDir& dir, const QString& prefix, int idx)
 {
     QSettings settings;
     auto muxDef  = settings.value("video-muxer",    DEFAULT_VIDEO_MUXER).toString(); // no prefix- here, muxer must be equal
@@ -1258,7 +1285,7 @@ QString MainWindow::appendVideoTail(const QString& prefix, int idx)
     QString videoExt = getExt(muxDef);
     QString clipFileName = replace(settings.value(prefix + "-template", prefix + "-%study%-%nn%").toString(), idx)
             .append("%02d").append(videoExt);
-    auto absPath = outputPath.absoluteFilePath(clipFileName);
+    auto absPath = dir.absoluteFilePath(clipFileName);
     auto maxSize = settings.value("video-max-file-size", DEFAULT_VIDEO_MAX_FILE_SIZE).toLongLong() * 1024 * 1024;
     sink->setProperty("location", absPath);
     sink->setProperty("next-file", 4);
@@ -1305,7 +1332,7 @@ void MainWindow::onRecordClick()
     if (!recording)
     {
         QString imageExt = getExt(QSettings().value("image-encoder", DEFAULT_IMAGE_ENCODER).toString());
-        auto clipFileName = appendVideoTail("clip", ++clipNo);
+        auto clipFileName = appendVideoTail(outputPath, "clip", ++clipNo);
         if (!clipFileName.isEmpty())
         {
             clipPreviewFileName = clipFileName.append(imageExt);

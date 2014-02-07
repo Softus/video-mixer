@@ -73,6 +73,7 @@ class MainWindow : public QWidget
     QGst::Ui::VideoWidget* displayWidget;
     QListWidget*  listImagesAndClips;
     QDir          outputPath;
+    QDir          videoOutputPath;
     QString       clipPreviewFileName;
     QString       pipelineDef;
 
@@ -111,8 +112,9 @@ class MainWindow : public QWidget
     QGst::PipelinePtr createPipeline();
     void releasePipeline();
     void updateWindowTitle();
+    QDir checkPath(const QString tpl, bool needUnique);
     void updateOutputPath(bool needUnique);
-    QString appendVideoTail(const QString& prefix, int idx);
+    QString appendVideoTail(const QDir &dir, const QString& prefix, int idx);
     void removeVideoTail(const QString& prefix);
 
     void onBusMessage(const QGst::MessagePtr& msg);
