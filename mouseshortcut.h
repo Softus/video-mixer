@@ -61,6 +61,7 @@ static void updateShortcut(T* btn, int key)
         //
         new MouseShortcut(key, btn);
         btn->setToolTip(btn->text().remove("&") + " (" + MouseShortcut::toString(key) + ")");
+        btn->setShortcut(0);
     }
     else
     {
