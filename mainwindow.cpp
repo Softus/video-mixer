@@ -461,7 +461,7 @@ QString MainWindow::buildPipeline()
     //
     QString pipe;
 
-    auto deviceType     = settings.value("device-type").toString();
+    auto deviceType     = settings.value("device-type", PLATFORM_SPECIFIC_SOURCE).toString();
     auto deviceDef      = settings.value("device").toString();
     auto inputChannel   = settings.value("video-channel").toString();
     auto formatDef      = settings.value("format").toString();
