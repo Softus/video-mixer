@@ -171,7 +171,8 @@ void VideoEditor::loadFile(const QString& filePath)
     if (!pipeline)
     {
         pipeline = QGst::ElementFactory::make("playbin2").dynamicCast<QGst::Pipeline>();
-        if (pipeline) {
+        if (pipeline)
+        {
             //let the video widget watch the pipeline for new video sinks
             videoWidget->watchPipeline(pipeline);
 

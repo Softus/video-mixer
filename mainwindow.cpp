@@ -23,6 +23,7 @@
 #include "patientdialog.h"
 #include "qwaitcursor.h"
 #include "settings.h"
+#include "sound.h"
 #include "thumbnaillist.h"
 #include "videosettings.h"
 
@@ -57,7 +58,6 @@
 #include <QPainter>
 #include <QResizeEvent>
 #include <QSettings>
-#include <QSound>
 #include <QTimer>
 #include <QToolBar>
 #include <QToolButton>
@@ -251,6 +251,8 @@ MainWindow::MainWindow(QWidget *parent) :
         QTimer::singleShot(0, this, SLOT(onShowSettingsClick()));
     }
 
+    sound = new Sound(this);
+
     updatePipeline();
     updateOutputPath(false);
 
@@ -308,7 +310,7 @@ void MainWindow::timerEvent(QTimerEvent* evt)
         {
             if (countdown == recordNotify)
             {
-                QSound::play(qApp->applicationDirPath() + "/../share/" PRODUCT_SHORT_NAME "/sound/notify.wav");
+                sound->play(qApp->applicationDirPath() + "/../share/" PRODUCT_SHORT_NAME "/sound/notify.wav");
             }
             setElementProperty("displayoverlay", "text", QString::number(countdown));
         }
@@ -1273,6 +1275,8 @@ void MainWindow::onSnapshotClick()
     QSettings settings;
     QString imageExt = getExt(settings.value("image-encoder", DEFAULT_IMAGE_ENCODER).toString());
     QString imageFileName = replace(settings.value("image-template", DEFAULT_IMAGE_TEMPLATE).toString(), ++imageNo).append(imageExt);
+
+    sound->play(qApp->applicationDirPath() + "/../share/" PRODUCT_SHORT_NAME "/sound/shutter2.wav");
 
     setElementProperty(imageSink, "location", outputPath.absoluteFilePath(imageFileName), QGst::StateReady);
 

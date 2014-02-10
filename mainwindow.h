@@ -42,11 +42,12 @@ class QToolBar;
 class QToolButton;
 QT_END_NAMESPACE
 
-class Worklist;
 class ArchiveWindow;
 class DcmDataset;
 class SlidingStackedWidget;
-typedef struct _cairo cairo_t;
+class Sound;
+class Worklist;
+//typedef struct _cairo cairo_t;
 
 class MainWindow : public QWidget
 {
@@ -92,6 +93,7 @@ class MainWindow : public QWidget
     int           recordLimit;
     int           recordNotify;
     int           countdown;
+    Sound*        sound;
 
     QMenuBar* createMenuBar();
     QToolBar* createToolBar();
