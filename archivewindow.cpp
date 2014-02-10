@@ -833,7 +833,7 @@ void ArchiveWindow::playMediaFile(const QFileInfo& fi)
         GST_DEBUG_BIN_TO_DOT_FILE_WITH_TS(pipeline.staticCast<QGst::Bin>(), details, qApp->applicationName().append(".archive").toUtf8());
         setWindowTitle(tr("Archive - %1").arg(fi.fileName()));
     }
-    catch (QGlib::Error ex)
+    catch (const QGlib::Error& ex)
     {
         const QString msg = ex.message();
         qCritical() << msg;

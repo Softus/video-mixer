@@ -38,6 +38,7 @@ public:
     }
 #else
     QWaitCursor(QWidget*)
+        : parent(parent)
     {
     }
 #endif

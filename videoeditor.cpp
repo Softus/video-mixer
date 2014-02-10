@@ -454,7 +454,7 @@ bool VideoEditor::exportVideo(QFile* outFile)
         pipelineExport->getState(nullptr, nullptr, GST_SECOND * 10); // 10 sec
         return retCode == QDialog::Accepted;
     }
-    catch (QGlib::Error ex)
+    catch (const QGlib::Error& ex)
     {
         const QString msg = ex.message();
         qCritical() << msg;

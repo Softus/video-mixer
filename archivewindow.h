@@ -68,7 +68,7 @@ public:
     ~ArchiveWindow();
 protected:
     virtual void closeEvent(QCloseEvent *);
-    void timerEvent(QTimerEvent *);
+    virtual void timerEvent(QTimerEvent *);
 
 signals:
     

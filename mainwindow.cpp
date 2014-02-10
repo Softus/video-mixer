@@ -633,7 +633,7 @@ QGst::PipelinePtr MainWindow::createPipeline()
     {
         pl = QGst::Parse::launch(pipelineDef).dynamicCast<QGst::Pipeline>();
     }
-    catch (QGlib::Error ex)
+    catch (const QGlib::Error& ex)
     {
         errorGlib(pl, ex);
     }
