@@ -144,7 +144,7 @@ int main(int argc, char *argv[])
 #ifdef WITH_TOUCH
         ClickFilter filter;
         wndEditor.installEventFilter(&filter);
-        wndEditor.grabGesture(Qt::TapGesture);
+        wndEditor.grabGesture(Qt::TapAndHoldGesture);
 #endif
         wndEditor.show();
         wndEditor.loadFile(app.arguments().at(videoEditIdx));
@@ -156,7 +156,7 @@ int main(int argc, char *argv[])
 #ifdef WITH_TOUCH
         ClickFilter filter;
         wnd.installEventFilter(&filter);
-        wnd.grabGesture(Qt::TapGesture);
+        wnd.grabGesture(Qt::TapAndHoldGesture);
 #endif
         wnd.show();
         errCode = app.exec();

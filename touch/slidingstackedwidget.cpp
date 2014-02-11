@@ -17,6 +17,7 @@
 #include "slidingstackedwidget.h"
 #include "slidingstackedwidget_p.h"
 
+#include <QDebug>
 #include <QGestureEvent>
 #include <QPanGesture>
 #include <QParallelAnimationGroup>
@@ -100,11 +101,16 @@ void SlidingStackedWidget::slideInWidget(QWidget* widget)
     slideInIdx(indexOf(widget));
 }
 
+void SlidingStackedWidget::slideInWidget(const QString& objectName)
+{
+    slideInWidget(findChild<QWidget*>(objectName));
+}
+
 void SlidingStackedWidget::slideInIdx(int idx)
 {
     Q_D(SlidingStackedWidget);
     bool rightToLeft = idx > currentIndex();
-
+    qDebug() << idx  << currentIndex();
     if (idx >= count())
     {
         idx = 0;
@@ -120,6 +126,7 @@ void SlidingStackedWidgetPrivate::slideInWgt(QWidget* next, bool rightToLeft)
 {
     Q_Q(SlidingStackedWidget);
     auto curr = q->currentWidget();
+    qDebug() << next->objectName() << curr->objectName();
     if (next == curr)
     {
         return;

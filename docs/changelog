@@ -1,3 +1,9 @@
+beryllium (0.4.0) debian;
+
+  * Tablet (touch) version
+
+ -- Pavel Bludov <pbludov@gmail.com>  Tue, Feb 11 12:12:00 2014 +0900
+
 beryllium (0.3.28) debian;
 
   * Dedicated output folder for video logs

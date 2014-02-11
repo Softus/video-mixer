@@ -163,7 +163,6 @@ private slots:
     void toggleSetting();
     void updatePipeline();
     void onEnableWidget(QWidget*, bool);
-    void onThumbnailItemDoubleClicked(QListWidgetItem* item);
 };
 
 #endif // MAINWINDOW_H

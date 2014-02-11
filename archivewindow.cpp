@@ -700,7 +700,11 @@ void ArchiveWindow::onStoreClick()
                 tr("All files were successfully stored."), QMessageBox::Close | QMessageBox::Ok, QMessageBox::Close);
             if (QMessageBox::Close == userChoice)
             {
+#ifdef WITH_TOUCH
+                onBackToMainWindowClick();
+#else
                 hide();
+#endif
             }
         }
     }
@@ -1000,7 +1004,7 @@ void ArchiveWindow::onBackToMainWindowClick()
     auto stackWidget = static_cast<SlidingStackedWidget*>(parent()->qt_metacast("SlidingStackedWidget"));
     if (stackWidget)
     {
-        stackWidget->slideInIdx(stackWidget->property("MainWidget").toInt());
+        stackWidget->slideInWidget("Main");
     }
 }
 #endif

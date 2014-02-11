@@ -101,6 +101,7 @@ Worklist::Worklist(QWidget *parent) :
     layoutMain->addWidget(table);
 #ifdef WITH_TOUCH
     layoutMain->addWidget(createToolBar());
+    table->viewport()->ungrabGesture(Qt::PanGesture);
 #endif
     setLayout(layoutMain);
 
@@ -303,7 +304,7 @@ void Worklist::onBackToMainWindowClick()
     auto stackWidget = static_cast<SlidingStackedWidget*>(parent()->qt_metacast("SlidingStackedWidget"));
     if (stackWidget)
     {
-        stackWidget->slideInIdx(stackWidget->property("MainWidget").toInt());
+        stackWidget->slideInWidget("Main");
     }
 }
 #endif

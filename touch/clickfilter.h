@@ -18,6 +18,7 @@
 #define CLICKFILTER_H
 
 #include <QObject>
+#include <QMouseEvent>
 
 QT_BEGIN_NAMESPACE
 class QEvent;
@@ -27,9 +28,11 @@ class ClickFilter : public QObject
 {
     Q_OBJECT
 public:
-    ClickFilter() = default;
+    ClickFilter();
 protected:
     bool eventFilter(QObject *o, QEvent *e);
+private:
+    QMouseEvent me;
 };
 
 #endif // CLICKFILTER_H

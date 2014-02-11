@@ -20,26 +20,25 @@
 #include <QGestureEvent>
 #include <QWidget>
 
-static bool sendLeftMouseEvent(QEvent::Type type, QWidget* widget, const QPoint& pt)
+ClickFilter::ClickFilter()
+    : me(QEvent::MouseButtonDblClick, QPoint(), QPoint(), Qt::LeftButton, Qt::LeftButton, Qt::NoModifier)
 {
-    QMouseEvent me(type, widget->mapFromGlobal(pt), pt, Qt::LeftButton, Qt::LeftButton, Qt::NoModifier);
-    //QSpontaneKeyEvent::setSpontaneous(&me);
-    return qApp->notify(widget, &me);
 }
 
 bool ClickFilter::eventFilter(QObject *o, QEvent *e)
 {
     if (e->type() == QEvent::Gesture)
     {
-        auto tapGesture = static_cast<QTapGesture*>(static_cast<QGestureEvent*>(e)->gesture(Qt::TapGesture));
+        auto tapGesture = static_cast<QTapAndHoldGesture*>(static_cast<QGestureEvent*>(e)->gesture(Qt::TapAndHoldGesture));
         if (tapGesture && tapGesture->state() == Qt::GestureFinished)
         {
             auto pt = tapGesture->hotSpot().toPoint();
             auto widget = QApplication::widgetAt(pt);
             if (widget)
             {
-                return sendLeftMouseEvent(QEvent::MouseButtonPress, widget, pt) &&
-                    sendLeftMouseEvent(QEvent::MouseButtonRelease, widget, pt);
+                me = QMouseEvent(QEvent::MouseButtonDblClick, widget->mapFromGlobal(pt), pt, Qt::LeftButton, Qt::LeftButton, Qt::NoModifier);
+                //QSpontaneKeyEvent::setSpontaneous(&me);
+                return qApp->notify(widget, &me);
             }
         }
     }

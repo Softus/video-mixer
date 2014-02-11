@@ -59,6 +59,7 @@ public slots:
     void slideInNext();
     void slideInPrev();
     void slideInWidget(QWidget* widget);
+    void slideInWidget(const QString& objectName);
     void slideInIdx(int idx);
 
 Q_SIGNALS:

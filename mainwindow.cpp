@@ -190,8 +190,6 @@ MainWindow::MainWindow(QWidget *parent) :
     listImagesAndClips->setMaximumHeight(176);
     listImagesAndClips->setIconSize(QSize(144,144));
     listImagesAndClips->setMovement(QListView::Static);
-    connect(listImagesAndClips, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
-            this, SLOT(onThumbnailItemDoubleClicked(QListWidgetItem*)));
 
     displayWidget = new QGst::Ui::VideoWidget();
     displayWidget->setMinimumSize(352, 288);
@@ -203,6 +201,7 @@ MainWindow::MainWindow(QWidget *parent) :
 #ifdef WITH_DICOM
     worklist = new Worklist();
     connect(worklist, SIGNAL(startStudy(DcmDataset*)), this, SLOT(onStartStudy(DcmDataset*)));
+    worklist->setObjectName("Worklist");
     mainStack->addWidget(worklist);
 #endif
     auto studyLayout = new QVBoxLayout;
@@ -212,12 +211,13 @@ MainWindow::MainWindow(QWidget *parent) :
     auto studyWidget = new QWidget;
     studyWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     studyWidget->setLayout(studyLayout);
+    studyWidget->setObjectName("Main");
     mainStack->addWidget(studyWidget);
     mainStack->setCurrentWidget(studyWidget);
-    mainStack->setProperty("MainWidget", mainStack->indexOf(studyWidget));
 
     archiveWindow = new ArchiveWindow();
     archiveWindow->updateRoot();
+    archiveWindow->setObjectName("Archive");
     mainStack->addWidget(archiveWindow);
 #else
     layoutMain->addWidget(displayWidget);
@@ -1499,20 +1499,6 @@ void MainWindow::onShowArchiveClick()
 #endif
 }
 
-void MainWindow::onThumbnailItemDoubleClicked(QListWidgetItem* item)
-{
-    if (actionArchive->isEnabled())
-    {
-        // Popup the archive window
-        //
-        onShowArchiveClick();
-
-        // And select the file
-        //
-        archiveWindow->selectFile(item->text());
-    }
-}
-
 void MainWindow::onShowSettingsClick()
 {
     Settings dlg(this);
@@ -1541,12 +1527,16 @@ void MainWindow::onStartStudy(DcmDataset* patient)
 void MainWindow::onStartStudy()
 #endif
 {
+    QWaitCursor wait(this);
+
     // Switch focus to the main window
     //
-    show();
     activateWindow();
-
-    QWaitCursor wait(this);
+#ifdef WITH_TOUCH
+    mainStack->slideInWidget("Main");
+#else
+    show();
+#endif
 
     QSettings settings;
     listImagesAndClips->clear();
