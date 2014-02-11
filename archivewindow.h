@@ -67,7 +67,9 @@ public:
     explicit ArchiveWindow(QWidget *parent = 0);
     ~ArchiveWindow();
 protected:
-    virtual void closeEvent(QCloseEvent *);
+#ifndef WITH_TOUCH
+    virtual void hideEvent(QHideEvent *);
+#endif
     virtual void timerEvent(QTimerEvent *);
 
 signals:

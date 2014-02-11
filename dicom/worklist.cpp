@@ -107,8 +107,10 @@ Worklist::Worklist(QWidget *parent) :
 
     setMinimumSize(640, 480);
 
+#ifndef WITH_TOUCH
     restoreGeometry(settings.value("worklist-geometry").toByteArray());
     setWindowState((Qt::WindowState)settings.value("worklist-state").toInt());
+#endif
     table->horizontalHeader()->restoreState(settings.value("worklist-columns-width").toByteArray());
 
     updateShortcut(actionDetail,     settings.value("hotkey-show-details", DEFAULT_HOTKEY_SHOW_DETAILS).toInt());
@@ -196,12 +198,19 @@ void Worklist::closeEvent(QCloseEvent *e)
         activeConnection->abort();
         activeConnection = nullptr;
     }
+    QWidget::closeEvent(e);
+}
+
+#ifndef WITH_TOUCH
+void Worklist::hideEvent(QHideEvent *e)
+{
     QSettings settings;
     settings.setValue("worklist-geometry", saveGeometry());
     settings.setValue("worklist-state", (int)windowState() & ~Qt::WindowMinimized);
     settings.setValue("worklist-columns-width", table->horizontalHeader()->saveState());
-    QWidget::closeEvent(e);
+    QWidget::hideEvent(e);
 }
+#endif
 
 void Worklist::keyPressEvent(QKeyEvent *e)
 {

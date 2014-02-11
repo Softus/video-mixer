@@ -56,8 +56,11 @@ public:
 
 protected:
     virtual void closeEvent(QCloseEvent *);
-    virtual void showEvent(QShowEvent *);
+#ifndef WITH_TOUCH
+    virtual void hideEvent(QHideEvent *);
+#endif
     virtual void keyPressEvent(QKeyEvent *e);
+    virtual void showEvent(QShowEvent *);
 
 signals:
     void startStudy(DcmDataset* patient);

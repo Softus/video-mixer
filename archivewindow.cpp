@@ -228,11 +228,12 @@ ArchiveWindow::ArchiveWindow(QWidget *parent)
 #endif
     setLayout(layoutMain);
 
+#ifndef WITH_TOUCH
     QSettings settings;
     restoreGeometry(settings.value("archive-geometry").toByteArray());
     setWindowState((Qt::WindowState)settings.value("archive-state").toInt());
-
     setAttribute(Qt::WA_DeleteOnClose, false);
+#endif
 
     DamnQtMadeMeDoTheSunsetByHands(barArchive);
     DamnQtMadeMeDoTheSunsetByHands(barMediaControls);
@@ -243,13 +244,15 @@ ArchiveWindow::~ArchiveWindow()
     stopMedia();
 }
 
-void ArchiveWindow::closeEvent(QCloseEvent *evt)
+#ifndef WITH_TOUCH
+void ArchiveWindow::hideEvent(QHideEvent *evt)
 {
     QSettings settings;
     settings.setValue("archive-geometry", saveGeometry());
     settings.setValue("archive-state", (int)windowState() & ~Qt::WindowMinimized);
-    QWidget::closeEvent(evt);
+    QWidget::hideEvent(evt);
 }
+#endif
 
 void ArchiveWindow::timerEvent(QTimerEvent* evt)
 {
