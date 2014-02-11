@@ -15,7 +15,7 @@
 isEmpty(PREFIX):  PREFIX   = /usr/local
 DEFINES   += PREFIX=$$PREFIX
 
-QT       += core gui
+QT       += core gui dbus
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets opengl
 INCLUDEPATH += libqxt
 

@@ -22,6 +22,7 @@
 #include <QBoxLayout>
 #include <QComboBox>
 #include <QDateEdit>
+#include <QDBusInterface>
 #include <QDebug>
 #include <QFormLayout>
 #include <QxtLineEdit>
@@ -111,12 +112,27 @@ PatientDialog::PatientDialog(QWidget *parent) :
     }
 }
 
-void PatientDialog::done(int result)
+void PatientDialog::showEvent(QShowEvent *)
+{
+    QSettings settings;
+    if (settings.value("show-onboard").toBool())
+    {
+        QDBusInterface("org.onboard.Onboard", "/org/onboard/Onboard/Keyboard",
+                       "org.onboard.Onboard.Keyboard").call( "Show");
+    }
+}
+
+void PatientDialog::hideEvent(QHideEvent *)
 {
     QSettings settings;
     settings.setValue("new-patient-geometry", saveGeometry());
     settings.setValue("new-patient-state", (int)windowState() & ~Qt::WindowMinimized);
-    QDialog::done(result);
+
+    if (settings.value("show-onboard").toBool())
+    {
+        QDBusInterface("org.onboard.Onboard", "/org/onboard/Onboard/Keyboard",
+                       "org.onboard.Onboard.Keyboard").call( "Hide");
+    }
 }
 
 QString PatientDialog::patientId() const

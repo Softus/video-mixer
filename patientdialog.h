@@ -60,7 +60,8 @@ public:
     void setEditable(bool editable);
 
 protected:
-    virtual void done(int);
+    virtual void showEvent(QShowEvent *);
+    virtual void hideEvent(QHideEvent *);
 
 signals:
 
