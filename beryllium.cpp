@@ -110,6 +110,7 @@ int main(int argc, char *argv[])
     // At this time it is safe to use QSettings
     //
     QSettings settings;
+    bool fullScreen = settings.value("show-fullscreen").toBool();
 
     // Override some style sheets
     //
@@ -146,7 +147,7 @@ int main(int argc, char *argv[])
         wndEditor.installEventFilter(&filter);
         wndEditor.grabGesture(Qt::TapAndHoldGesture);
 #endif
-        wndEditor.show();
+        fullScreen? wndEditor.showFullScreen(): wndEditor.showMaximized();
         wndEditor.loadFile(app.arguments().at(videoEditIdx));
         errCode = app.exec();
     }
@@ -158,7 +159,7 @@ int main(int argc, char *argv[])
         wnd.installEventFilter(&filter);
         wnd.grabGesture(Qt::TapAndHoldGesture);
 #endif
-        wnd.show();
+        fullScreen? wnd.showFullScreen(): wnd.showMaximized();
         errCode = app.exec();
     }
 
