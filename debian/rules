@@ -4,7 +4,7 @@ builddir:
 	mkdir -p builddir
 
 builddir/Makefile: builddir
-	cd builddir && qmake CONFIG+=dicom PREFIX=/usr ../$(APPNAME).pro
+        cd builddir && qmake PREFIX=/usr ../$(APPNAME).pro
 
 build: build-stamp
 

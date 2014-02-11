@@ -42,7 +42,7 @@ HotKeySettings::HotKeySettings(QWidget *parent) :
     layoutCapture->addRow(tr("&Record"), heRecordStart = new HotKeyEdit());
     heRecordStart->setKey(settings.value("hotkey-record-start", DEFAULT_HOTKEY_RECORD_START).toInt());
     layoutCapture->addRow(tr("&Pause"), heRecordStop = new HotKeyEdit());
-    heRecordStart->setKey(settings.value("hotkey-record-stop", DEFAULT_HOTKEY_RECORD_STOP).toInt());
+    heRecordStop->setKey(settings.value("hotkey-record-stop", DEFAULT_HOTKEY_RECORD_STOP).toInt());
     layoutCapture->addRow(tr("Show &Archive"), heArchive = new HotKeyEdit());
     heArchive->setKey(settings.value("hotkey-archive", DEFAULT_HOTKEY_ARCHIVE).toInt());
     layoutCapture->addRow(tr("Show S&ettings"), heSettings = new HotKeyEdit());
