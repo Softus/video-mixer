@@ -35,7 +35,7 @@ Video and image capturing for medicine.
  
 %build
 qmake PREFIX=%{_prefix} QMAKE_CFLAGS+="%optflags" QMAKE_CXXFLAGS+="%optflags";
-make %{?_smp_mflags};
+make %{?_smp_mflags}; -j 4
 
 %install
 make install INSTALL_ROOT="%buildroot";
