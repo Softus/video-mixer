@@ -1550,9 +1550,12 @@ void MainWindow::onStartStudy()
     {
         dlg.readPatientData(patient);
     }
+    else
 #endif
+    {
+        updateStartDialog();
+    }
 
-    updateStartDialog();
     switch (dlg.exec())
     {
 #ifdef WITH_DICOM

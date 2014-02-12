@@ -589,22 +589,22 @@ Continue?</source>
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="mainwindow.cpp" line="419"/>
+        <location filename="mainwindow.cpp" line="421"/>
         <source>&amp;Archive</source>
         <translation>&amp;Архив</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="416"/>
+        <location filename="mainwindow.cpp" line="418"/>
         <source>&amp;Worlkist</source>
         <translation>&amp;Рабочий лист</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="422"/>
+        <location filename="mainwindow.cpp" line="424"/>
         <source>&amp;Preferences</source>
         <translation>&amp;Настройки</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="374"/>
+        <location filename="mainwindow.cpp" line="376"/>
         <source>Main</source>
         <oldsource>main</oldsource>
         <translation>Главная</translation>
@@ -614,51 +614,52 @@ Continue?</source>
         <translation type="obsolete">Сделать &amp;снимок</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="420"/>
+        <location filename="mainwindow.cpp" line="422"/>
         <source>Show studies archive</source>
         <translation>Открыть архив исследований</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="423"/>
+        <location filename="mainwindow.cpp" line="425"/>
         <source>Edit settings</source>
         <translation>Открыть окно настроек</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="426"/>
+        <location filename="mainwindow.cpp" line="428"/>
         <source>About %1</source>
         <oldsource>About berillyum</oldsource>
         <translation>О программе %1</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="899"/>
-        <location filename="mainwindow.cpp" line="904"/>
-        <location filename="mainwindow.cpp" line="909"/>
-        <location filename="mainwindow.cpp" line="914"/>
+        <location filename="mainwindow.cpp" line="902"/>
+        <location filename="mainwindow.cpp" line="907"/>
+        <location filename="mainwindow.cpp" line="912"/>
+        <location filename="mainwindow.cpp" line="917"/>
+        <location filename="mainwindow.cpp" line="922"/>
         <source> - </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="941"/>
+        <location filename="mainwindow.cpp" line="949"/>
         <source>Failed to create &apos;%1&apos;</source>
         <translation>Не удалось создать &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1193"/>
+        <location filename="mainwindow.cpp" line="1201"/>
         <source>Failed to start recording.
 Please, adjust the video source settings.</source>
         <translation>Невозможно начать запись.
 Проверьте настройки видео.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1204"/>
-        <location filename="mainwindow.cpp" line="1359"/>
+        <location filename="mainwindow.cpp" line="1212"/>
+        <location filename="mainwindow.cpp" line="1367"/>
         <source>Failed to start recording.
 Check the error log for details.</source>
         <translation>Невозможно начать запись.
 Проверьте журнал ожибок.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1521"/>
+        <location filename="mainwindow.cpp" line="1531"/>
         <source>Failed to start a study.
 Another study is in progress.</source>
         <translation>Невозможно начать исследование.
@@ -681,27 +682,27 @@ Another study is in progress.</source>
         <translation type="obsolete">Отправить</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1221"/>
+        <location filename="mainwindow.cpp" line="1229"/>
         <source>End the study?</source>
         <translation>Завершить исследование?</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1396"/>
+        <location filename="mainwindow.cpp" line="1404"/>
         <source>End study</source>
         <translation>Завершить исследование</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1396"/>
+        <location filename="mainwindow.cpp" line="1404"/>
         <source>Start study</source>
         <translation>Начать исследование</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="405"/>
+        <location filename="mainwindow.cpp" line="407"/>
         <source>Pause</source>
         <translation>Пауза</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="396"/>
+        <location filename="mainwindow.cpp" line="398"/>
         <source>Record</source>
         <translation>Запись</translation>
     </message>
@@ -722,37 +723,37 @@ Another study is in progress.</source>
         <translation type="obsolete">З&amp;апись</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="340"/>
+        <location filename="mainwindow.cpp" line="342"/>
         <source>&amp;Menu</source>
         <translation>&amp;Меню</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="425"/>
+        <location filename="mainwindow.cpp" line="427"/>
         <source>A&amp;bout %1</source>
         <translation>&amp;О %1</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="351"/>
+        <location filename="mainwindow.cpp" line="353"/>
         <source>&amp;Enable RTP streaming</source>
         <translation>Включить RTP &amp;поток</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="355"/>
+        <location filename="mainwindow.cpp" line="357"/>
         <source>&amp;Record entire study</source>
         <translation>Записывать исследование &amp;целиком</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="362"/>
+        <location filename="mainwindow.cpp" line="364"/>
         <source>E&amp;xit</source>
         <translation>В&amp;ыход</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="387"/>
+        <location filename="mainwindow.cpp" line="389"/>
         <source>Take snapshot</source>
         <translation>Сделать снимок</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1146"/>
+        <location filename="mainwindow.cpp" line="1154"/>
         <source>Failed to load image %1</source>
         <translation>Не удалось загрузить снимок %1</translation>
     </message>
@@ -775,28 +776,33 @@ Another study is in progress.</source>
     </message>
     <message>
         <location filename="mandatoryfieldssettings.cpp" line="29"/>
+        <source>Accession number</source>
+        <translation>Код исследования</translation>
+    </message>
+    <message>
+        <location filename="mandatoryfieldssettings.cpp" line="30"/>
         <source>Name</source>
         <translation>Имя</translation>
     </message>
     <message>
-        <location filename="mandatoryfieldssettings.cpp" line="29"/>
+        <location filename="mandatoryfieldssettings.cpp" line="30"/>
         <source>Sex</source>
         <translation>Пол</translation>
     </message>
     <message>
-        <location filename="mandatoryfieldssettings.cpp" line="29"/>
+        <location filename="mandatoryfieldssettings.cpp" line="30"/>
         <source>Birthday</source>
         <translation>Дата рождения</translation>
     </message>
     <message>
-        <location filename="mandatoryfieldssettings.cpp" line="29"/>
+        <location filename="mandatoryfieldssettings.cpp" line="30"/>
         <source>Physician</source>
         <translation>Врач</translation>
     </message>
     <message>
-        <location filename="mandatoryfieldssettings.cpp" line="29"/>
+        <location filename="mandatoryfieldssettings.cpp" line="30"/>
         <source>Study type</source>
-        <translation>Исследование</translation>
+        <translation>Вид исследования</translation>
     </message>
 </context>
 <context>
@@ -991,72 +997,77 @@ Another study is in progress.</source>
     <message>
         <location filename="startstudydialog.cpp" line="49"/>
         <source>Patient data</source>
-        <translation type="unfinished"></translation>
+        <translation>Данные пациента</translation>
     </message>
     <message>
         <location filename="startstudydialog.cpp" line="53"/>
+        <source>&amp;Accession number</source>
+        <translation>К&amp;од исследования</translation>
+    </message>
+    <message>
+        <location filename="startstudydialog.cpp" line="54"/>
         <source>&amp;Patient ID</source>
         <translation>&amp;Карта пациента</translation>
     </message>
     <message>
-        <location filename="startstudydialog.cpp" line="54"/>
+        <location filename="startstudydialog.cpp" line="55"/>
         <source>&amp;Name</source>
         <translation>&amp;ФИО</translation>
     </message>
     <message>
-        <location filename="startstudydialog.cpp" line="55"/>
+        <location filename="startstudydialog.cpp" line="56"/>
         <source>&amp;Sex</source>
         <translation>&amp;Пол</translation>
     </message>
     <message>
-        <location filename="startstudydialog.cpp" line="57"/>
+        <location filename="startstudydialog.cpp" line="58"/>
         <source>female</source>
         <translation>женский</translation>
     </message>
     <message>
-        <location filename="startstudydialog.cpp" line="57"/>
+        <location filename="startstudydialog.cpp" line="58"/>
         <source>male</source>
         <translation>мужской</translation>
     </message>
     <message>
-        <location filename="startstudydialog.cpp" line="57"/>
+        <location filename="startstudydialog.cpp" line="58"/>
         <source>other</source>
         <translation>иной</translation>
     </message>
     <message>
-        <location filename="startstudydialog.cpp" line="65"/>
+        <location filename="startstudydialog.cpp" line="66"/>
         <source>&amp;Birthday</source>
         <translation>Дата &amp;рождения</translation>
     </message>
     <message>
-        <location filename="startstudydialog.cpp" line="67"/>
+        <location filename="startstudydialog.cpp" line="68"/>
         <source>MM/dd/yyyy</source>
         <translation>dd/MM/yyyy</translation>
     </message>
     <message>
-        <location filename="startstudydialog.cpp" line="69"/>
+        <location filename="startstudydialog.cpp" line="70"/>
         <source>P&amp;hysician</source>
         <translation>&amp;Врач</translation>
     </message>
     <message>
-        <location filename="startstudydialog.cpp" line="75"/>
+        <location filename="startstudydialog.cpp" line="76"/>
         <source>Study &amp;type</source>
         <translation>&amp;Исследование</translation>
     </message>
     <message>
-        <location filename="startstudydialog.cpp" line="87"/>
+        <location filename="startstudydialog.cpp" line="88"/>
         <source>Show work list</source>
         <translation>Открыть рабочий лист</translation>
     </message>
     <message>
-        <location filename="startstudydialog.cpp" line="96"/>
+        <location filename="startstudydialog.cpp" line="97"/>
         <source>Cancel</source>
         <translation>Отменить</translation>
     </message>
     <message>
-        <location filename="startstudydialog.cpp" line="100"/>
+        <location filename="startstudydialog.cpp" line="101"/>
         <source>Start</source>
-        <translation type="unfinished"></translation>
+        <translation>Начать</translation>
     </message>
     <message>
         <source>Start study</source>
