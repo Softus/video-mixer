@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Irkutsk Diagnostic Center.
+ * Copyright (C) 2013-2014 Irkutsk Diagnostic Center.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -47,7 +47,7 @@ class DcmDataset;
 class SlidingStackedWidget;
 class Sound;
 class Worklist;
-//typedef struct _cairo cairo_t;
+class StartStudyDialog;
 
 class MainWindow : public QWidget
 {
@@ -55,6 +55,7 @@ class MainWindow : public QWidget
 
     // UI
     //
+    StartStudyDialog *dlgStart;
     QToolButton* btnStart;
     QToolButton* btnRecordStart;
     QToolButton* btnRecordStop;
@@ -134,10 +135,13 @@ class MainWindow : public QWidget
     void setElementProperty(const char* elm, const char* prop = nullptr, const QGlib::Value& value = nullptr, QGst::State minimumState = QGst::StatePlaying);
     void setElementProperty(QGst::ElementPtr& elm, const char* prop = nullptr, const QGlib::Value& value = nullptr, QGst::State minimumState = QGst::StatePlaying);
     bool startVideoRecord();
+    void updateStartDialog();
 
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
+
+    static bool switchToRunningInstance();
 
 protected:
     virtual void closeEvent(QCloseEvent*);
@@ -164,6 +168,8 @@ private slots:
     void toggleSetting();
     void updatePipeline();
     void onEnableWidget(QWidget*, bool);
+
+    friend class MainWindowDBusAdaptor;
 };
 
 #endif // MAINWINDOW_H

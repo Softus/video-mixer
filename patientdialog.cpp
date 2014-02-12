@@ -30,13 +30,13 @@
 #include <QPushButton>
 #include <QSettings>
 
-PatientDialog::PatientDialog(QWidget *parent) :
+StartStudyDialog::StartStudyDialog(QWidget *parent) :
     QDialog(parent)
 {
     QSettings settings;
     auto listMandatory = settings.value("new-study-mandatory-fields", DEFAULT_MANDATORY_FIELDS).toStringList();
 
-    setWindowTitle(tr("New patient"));
+    setWindowTitle(tr("New study"));
     setMinimumSize(480, 240);
 
     auto layoutMain = new QFormLayout;
@@ -59,11 +59,13 @@ PatientDialog::PatientDialog(QWidget *parent) :
     layoutMain->addRow(tr("P&hysician"), cbPhysician = new QComboBox);
     cbPhysician->setLineEdit(new QxtLineEdit);
     cbPhysician->addItems(QSettings().value("physicians").toStringList());
+    cbPhysician->setCurrentIndex(0); // Select first, if any
     cbPhysician->setEditable(true);
 
     layoutMain->addRow(tr("Study &type"), cbStudyType = new QComboBox);
     cbStudyType->setLineEdit(new QxtLineEdit);
     cbStudyType->addItems(QSettings().value("studies").toStringList());
+    cbStudyType->setCurrentIndex(0); // Select first, if any
     cbStudyType->setEditable(true);
 
     auto layoutBtns = new QHBoxLayout;
@@ -112,7 +114,7 @@ PatientDialog::PatientDialog(QWidget *parent) :
     }
 }
 
-void PatientDialog::showEvent(QShowEvent *)
+void StartStudyDialog::showEvent(QShowEvent *)
 {
     QSettings settings;
     if (settings.value("show-onboard").toBool())
@@ -122,7 +124,7 @@ void PatientDialog::showEvent(QShowEvent *)
     }
 }
 
-void PatientDialog::hideEvent(QHideEvent *)
+void StartStudyDialog::hideEvent(QHideEvent *)
 {
     QSettings settings;
     settings.setValue("new-patient-geometry", saveGeometry());
@@ -135,58 +137,58 @@ void PatientDialog::hideEvent(QHideEvent *)
     }
 }
 
-QString PatientDialog::patientId() const
+QString StartStudyDialog::patientId() const
 {
     return textPatientId->text();
 }
 
-QString PatientDialog::patientName() const
+QString StartStudyDialog::patientName() const
 {
     return textPatientName->text();
 }
 
-QDate PatientDialog::patientBirthDate() const
+QDate StartStudyDialog::patientBirthDate() const
 {
     return dateBirthday->date();
 }
 
-QString PatientDialog::patientBirthDateStr() const
+QString StartStudyDialog::patientBirthDateStr() const
 {
     return patientBirthDate().toString("yyyyMMdd");
 }
 
-QString PatientDialog::patientSex() const
+QString StartStudyDialog::patientSex() const
 {
     return cbPatientSex->currentText();
 }
 
-QChar PatientDialog::patientSexCode() const
+QChar StartStudyDialog::patientSexCode() const
 {
     auto idx = cbPatientSex->currentIndex();
     return idx < 0? '\x0': cbPatientSex->itemData(idx).toChar();
 }
 
-QString PatientDialog::studyName() const
+QString StartStudyDialog::studyName() const
 {
     return cbStudyType->currentText();
 }
 
-QString PatientDialog::physician() const
+QString StartStudyDialog::physician() const
 {
     return cbPhysician->currentText();
 }
 
-void PatientDialog::setPatientId(const QString& id)
+void StartStudyDialog::setPatientId(const QString& id)
 {
     textPatientId->setText(id);
 }
 
-void PatientDialog::setPatientName(const QString& name)
+void StartStudyDialog::setPatientName(const QString& name)
 {
     textPatientName->setText(name);
 }
 
-void PatientDialog::setPatientSex(const QString& sex)
+void StartStudyDialog::setPatientSex(const QString& sex)
 {
     // For 'Female' search for text, for 'F' search for data
     //
@@ -202,17 +204,17 @@ void PatientDialog::setPatientSex(const QString& sex)
     }
 }
 
-void PatientDialog::setPatientBirthDate(const QDate& date)
+void StartStudyDialog::setPatientBirthDate(const QDate& date)
 {
     dateBirthday->setDate(date);
 }
 
-void PatientDialog::setPatientBirthDateStr(const QString& dateStr)
+void StartStudyDialog::setPatientBirthDateStr(const QString& dateStr)
 {
     setPatientBirthDate(QDate::fromString(dateStr, "yyyyMMdd"));
 }
 
-void PatientDialog::setStudyName(const QString& name)
+void StartStudyDialog::setStudyName(const QString& name)
 {
     auto idx = cbStudyType->findText(name);
     cbStudyType->setCurrentIndex(idx);
@@ -223,7 +225,7 @@ void PatientDialog::setStudyName(const QString& name)
     }
 }
 
-void PatientDialog::setPhysician(const QString& name)
+void StartStudyDialog::setPhysician(const QString& name)
 {
     auto idx = cbPhysician->findText(name);
     cbPhysician->setCurrentIndex(idx);
@@ -246,17 +248,7 @@ inline static void setEditableCb(QComboBox* cb, bool editable)
     cb->setEditable(editable);
 }
 
-void PatientDialog::setEditable(bool editable)
-{
-    textPatientId->setReadOnly(!editable);
-    textPatientName->setReadOnly(!editable);
-    dateBirthday->setReadOnly(!editable);
-    setEditableCb(cbPatientSex, editable);
-    setEditableCb(cbPhysician, editable);
-    setEditableCb(cbStudyType, editable);
-}
-
-void PatientDialog::savePatientFile(const QString& outputPath)
+void StartStudyDialog::savePatientFile(const QString& outputPath)
 {
     QSettings settings(outputPath, QSettings::IniFormat);
 
@@ -270,7 +262,7 @@ void PatientDialog::savePatientFile(const QString& outputPath)
     settings.endGroup();
 }
 
-void PatientDialog::onShowWorklist()
+void StartStudyDialog::onShowWorklist()
 {
     done(SHOW_WORKLIST_RESULT);
 }

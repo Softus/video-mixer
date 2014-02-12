@@ -45,6 +45,7 @@
 
 #include <QApplication>
 #include <QBoxLayout>
+#include <QDBusInterface>
 #include <QDesktopServices>
 #include <QDebug>
 #include <QDir>
@@ -158,6 +159,7 @@ static void Dump(QGst::ElementPtr elm)
 
 MainWindow::MainWindow(QWidget *parent) :
     QWidget(parent),
+    dlgStart(nullptr),
     archiveWindow(nullptr),
 #ifdef WITH_DICOM
     pendingPatient(nullptr),
@@ -277,6 +279,21 @@ MainWindow::~MainWindow()
     delete worklist;
     worklist = nullptr;
 #endif
+}
+
+bool MainWindow::switchToRunningInstance()
+{
+    auto msg = QDBusInterface(PRODUCT_NAMESPACE, "/com/irkdc/Beryllium/Main", "com.irkdc.beryllium.Main")
+         .call("startStudy"
+            , getCmdLineOption("--patient-id",       "-i")
+            , getCmdLineOption("--patient-name",     "-n")
+            , getCmdLineOption("--patient-sex",      "-s")
+            , getCmdLineOption("--patient-birthdate","-b")
+            , getCmdLineOption("--physician",        "-p")
+            , getCmdLineOption("--study-name",       "-e")
+            , qApp->arguments().contains("--auto-start") || qApp->arguments().contains("-a")
+            );
+    return msg.type() == QDBusMessage::ReplyMessage && msg.arguments().first().toBool();
 }
 
 void MainWindow::closeEvent(QCloseEvent *evt)
@@ -905,7 +922,7 @@ QDir MainWindow::checkPath(const QString tpl, bool needUnique)
 {
     QDir dir(tpl);
 
-    if (needUnique && dir.exists())
+    if (needUnique && dir.exists() && !dir.entryList(QDir::NoDotAndDotDot | QDir::AllEntries).isEmpty())
     {
         int cnt = 1;
         QString alt;
@@ -914,7 +931,7 @@ QDir MainWindow::checkPath(const QString tpl, bool needUnique)
             alt = dir.absolutePath()
                 .append(" (").append(QString::number(++cnt)).append(')');
         }
-        while (dir.exists(alt));
+        while (dir.exists(alt) && !dir.entryList(QDir::NoDotAndDotDot | QDir::AllEntries).isEmpty());
         dir.setPath(alt);
     }
     qDebug() << "Output path" << dir.absolutePath();
@@ -1465,6 +1482,22 @@ void MainWindow::onEnableWidget(QWidget* widget, bool enable)
     widget->setEnabled(enable);
 }
 
+void MainWindow::updateStartDialog()
+{
+    if (!patientId.isEmpty())
+        dlgStart->setPatientId(patientId);
+    if (!patientName.isEmpty())
+        dlgStart->setPatientName(patientName);
+    if (!patientSex.isEmpty())
+        dlgStart->setPatientSex(patientSex);
+    if (!patientBirthDate.isEmpty())
+        dlgStart->setPatientBirthDateStr(patientBirthDate);
+    if (!physician.isEmpty())
+        dlgStart->setPhysician(physician);
+    if (!studyName.isEmpty())
+        dlgStart->setStudyName(studyName);
+}
+
 #ifdef WITH_DICOM
 void MainWindow::onStartStudy(DcmDataset* patient)
 #else
@@ -1476,17 +1509,31 @@ void MainWindow::onStartStudy()
     // Switch focus to the main window
     //
     activateWindow();
+
 #ifdef WITH_TOUCH
     mainStack->slideInWidget("Main");
 #else
     show();
 #endif
 
+    if (running)
+    {
+        QMessageBox::warning(this, windowTitle(), tr("Failed to start a study.\nAnother study is in progress."));
+        return;
+    }
+
+    if (dlgStart)
+    {
+        updateStartDialog();
+        return;
+    }
+
     QSettings settings;
     listImagesAndClips->clear();
     imageNo = clipNo = 0;
 
-    PatientDialog dlg(this);
+    StartStudyDialog dlg(this);
+    dlgStart = &dlg;
 
 #ifdef WITH_DICOM
     if (patient)
@@ -1494,47 +1541,37 @@ void MainWindow::onStartStudy()
         const char *str = nullptr;
         if (patient->findAndGetString(DCM_PatientID, str, true).good())
         {
-            dlg.setPatientId(QString::fromUtf8(str));
+            patientId = QString::fromUtf8(str);
         }
 
         if (patient->findAndGetString(DCM_PatientName, str, true).good())
         {
-            dlg.setPatientName(QString::fromUtf8(str));
+            patientName = QString::fromUtf8(str);
         }
 
         if (patient->findAndGetString(DCM_PatientBirthDate, str, true).good())
         {
-            dlg.setPatientBirthDateStr(QString::fromUtf8(str));
+            patientBirthDate = QString::fromUtf8(str);
         }
 
         if (patient->findAndGetString(DCM_PatientSex, str, true).good())
         {
-            dlg.setPatientSex(QString::fromUtf8(str));
+            patientSex = QString::fromUtf8(str);
         }
 
         if (patient->findAndGetString(DCM_ScheduledPerformingPhysicianName, str, true).good())
         {
-            dlg.setPhysician(QString::fromUtf8(str));
+            physician = QString::fromUtf8(str);
         }
 
         if (patient->findAndGetString(DCM_ScheduledProcedureStepDescription, str, true).good())
         {
-            dlg.setStudyName(QString::fromUtf8(str));
+            studyName = QString::fromUtf8(str);
         }
-
-        dlg.setEditable(false);
     }
-    else
 #endif
-    {
-        dlg.setPatientId(patientId);
-        dlg.setPatientName(patientName);
-        dlg.setPatientSex(patientSex);
-        dlg.setPatientBirthDateStr(patientBirthDate);
-        dlg.setPhysician(physician);
-        dlg.setStudyName(studyName);
-    }
 
+    updateStartDialog();
     switch (dlg.exec())
     {
 #ifdef WITH_DICOM
@@ -1543,6 +1580,7 @@ void MainWindow::onStartStudy()
         // passthrouht
 #endif
     case QDialog::Rejected:
+        dlgStart = nullptr;
         return;
     }
 
@@ -1600,10 +1638,12 @@ void MainWindow::onStartStudy()
     if (cond.bad())
     {
         QMessageBox::critical(this, windowTitle(), QString::fromLocal8Bit(cond.text()));
-        return;
     }
 #ifdef Q_WS_WIN
-    SetFileAttributesW(localPatientInfoFile.toStdWString().c_str(), FILE_ATTRIBUTE_HIDDEN);
+    else
+    {
+        SetFileAttributesW(localPatientInfoFile.toStdWString().c_str(), FILE_ATTRIBUTE_HIDDEN);
+    }
 #endif
 
     if (settings.value("start-with-mpps", true).toBool() && !settings.value("mpps-server").toString().isEmpty())
@@ -1613,7 +1653,6 @@ void MainWindow::onStartStudy()
         if (pendingSOPInstanceUID.isNull())
         {
             QMessageBox::critical(this, windowTitle(), client.lastError());
-            return;
         }
         pendingPatient->putAndInsertString(DCM_SOPInstanceUID, pendingSOPInstanceUID.toUtf8());
     }
@@ -1630,7 +1669,6 @@ void MainWindow::onStartStudy()
 #endif
 
     running = startVideoRecord();
-
     setElementProperty(videoEncoderValve, "drop", !running);
 
     if (pipeline)
@@ -1647,6 +1685,7 @@ void MainWindow::onStartStudy()
     updateStartButton();
     updateWindowTitle();
     displayWidget->update();
+    dlgStart = nullptr;
 }
 
 void MainWindow::onStopStudy()

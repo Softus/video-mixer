@@ -28,7 +28,7 @@ class QDateEdit;
 class QLineEdit;
 QT_END_NAMESPACE
 
-class PatientDialog : public QDialog
+class StartStudyDialog : public QDialog
 {
     Q_OBJECT
     QLineEdit* textPatientId;
@@ -39,7 +39,7 @@ class PatientDialog : public QDialog
     QComboBox* cbStudyType;
 
 public:
-    explicit PatientDialog(QWidget *parent = 0);
+    explicit StartStudyDialog(QWidget *parent = 0);
     QString patientId() const;
     QString patientName() const;
     QDate   patientBirthDate() const;
@@ -57,7 +57,6 @@ public:
     void setStudyName(const QString& name);
     void setPhysician(const QString& name);
     void savePatientFile(const QString& outputPath);
-    void setEditable(bool editable);
 
 protected:
     virtual void showEvent(QShowEvent *);

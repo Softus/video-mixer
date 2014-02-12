@@ -19,12 +19,14 @@
 #endif
 
 #include "mainwindow.h"
+#include "mainwindowdbusadaptor.h"
 #include "videoeditor.h"
 #include "product.h"
 
 #include <signal.h>
 
 #include <QApplication>
+#include <QDBusConnection>
 #include <QIcon>
 #include <QLocale>
 #include <QSettings>
@@ -101,6 +103,7 @@ int main(int argc, char *argv[])
     // QT init
     //
     QApplication::setAttribute(Qt::AA_DontShowIconsInMenus);
+    QApplication::setAttribute(Qt::AA_X11InitThreads);
     QApplication app(argc, argv);
     app.setOrganizationName(ORGANIZATION_SHORT_NAME);
     app.setApplicationName(PRODUCT_SHORT_NAME);
@@ -147,20 +150,34 @@ int main(int argc, char *argv[])
         wndEditor.installEventFilter(&filter);
         wndEditor.grabGesture(Qt::TapAndHoldGesture);
 #endif
-        fullScreen? wndEditor.showFullScreen(): wndEditor.showMaximized();
+        fullScreen? wndEditor.showFullScreen(): wndEditor.show();
         wndEditor.loadFile(app.arguments().at(videoEditIdx));
         errCode = app.exec();
     }
     else
     {
-        MainWindow wnd;
-#ifdef WITH_TOUCH
-        ClickFilter filter;
-        wnd.installEventFilter(&filter);
-        wnd.grabGesture(Qt::TapAndHoldGesture);
-#endif
-        fullScreen? wnd.showFullScreen(): wnd.showMaximized();
-        errCode = app.exec();
+        auto bus = QDBusConnection::sessionBus();
+
+        // Failed to register our service.
+        // Another instance is running, or DBus is complitelly broken.
+        //
+        if (bus.registerService(PRODUCT_NAMESPACE) || !MainWindow::switchToRunningInstance())
+        {
+            MainWindow wnd;
+
+            // connect to DBus and register as an object
+            //
+            new MainWindowDBusAdaptor(&wnd);
+            bus.registerObject("/com/irkdc/Beryllium/Main", &wnd);
+
+    #ifdef WITH_TOUCH
+            ClickFilter filter;
+            wnd.installEventFilter(&filter);
+            wnd.grabGesture(Qt::TapAndHoldGesture);
+    #endif
+            fullScreen? wnd.showFullScreen(): wnd.show();
+            errCode = app.exec();
+        }
     }
 
     QGst::cleanup();

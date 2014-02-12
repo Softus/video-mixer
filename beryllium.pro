@@ -70,7 +70,8 @@ SOURCES += aboutdialog.cpp \
     mouseshortcut.cpp \
     thumbnaillist.cpp \
     videorecordsettings.cpp \
-    sound.cpp
+    sound.cpp \
+    mainwindowdbusadaptor.cpp
 
 HEADERS += aboutdialog.h \
     archivewindow.h \
@@ -98,7 +99,8 @@ HEADERS += aboutdialog.h \
     mouseshortcut.h \
     thumbnaillist.h \
     videorecordsettings.h \
-    sound.h
+    sound.h \
+    mainwindowdbusadaptor.h
 
 FORMS   +=
 
