@@ -33,6 +33,7 @@
 
 #define PRODUCT_MODALITY        "ES"
 
-#define PRODUCT_SOP_CLASS_UID   UID_VLEndoscopicImageStorage
+#define PRODUCT_SOP_CLASS_UID_IMAGE   UID_VLEndoscopicImageStorage
+#define PRODUCT_SOP_CLASS_UID_VIDEO   UID_VideoEndoscopicImageStorage
 
 #endif // PRODUCT_H

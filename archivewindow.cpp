@@ -687,7 +687,7 @@ void ArchiveWindow::onStoreClick()
     }
 
     int userChoice = QMessageBox::question(this, windowTitle(),
-        tr("Are you sure to send the result to storage servers?"), QMessageBox::Ok, QMessageBox::Cancel);
+        tr("Are you sure to send the result to storage servers?"), QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Ok);
 
     if (QMessageBox::Ok == userChoice)
     {
