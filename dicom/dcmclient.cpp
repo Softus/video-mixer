@@ -56,7 +56,11 @@ static void BuildCFindDataSet(DcmDataset& ds)
     QString modality = settings.value("worklist-modality").toString().toUpper();
     if (modality.isEmpty())
     {
+#ifdef PRODUCT_MODALITY
+        modality = PRODUCT_MODALITY;
+#else
         modality = settings.value("modality").toString().toUpper();
+#endif
     }
 
     QString aet = settings.value("worklist-aet").toString();
@@ -125,7 +129,11 @@ static void BuildCFindDataSet(DcmDataset& ds)
 static void BuildCStoreDataSet(/*const*/ DcmDataset& patientDs, DcmDataset& cStoreDs, const QString& seriesUID)
 {
     auto now = QDateTime::currentDateTime();
-    auto modality = QSettings().value("modality").toString().toUpper();
+#ifdef PRODUCT_MODALITY
+    auto modality = PRODUCT_MODALITY;
+#else
+    auto modality = QSettings().value("modality").toString().toUpper().toUtf8();
+#endif
 
     if (patientDs.findAndInsertCopyOfElement(DCM_SpecificCharacterSet, &cStoreDs).bad())
     {
@@ -144,14 +152,18 @@ static void BuildCStoreDataSet(/*const*/ DcmDataset& patientDs, DcmDataset& cSto
 
     cStoreDs.putAndInsertString(DCM_Manufacturer, ORGANIZATION_FULL_NAME);
     cStoreDs.putAndInsertString(DCM_ManufacturerModelName, PRODUCT_FULL_NAME);
-    cStoreDs.putAndInsertString(DCM_Modality, modality.toUtf8());
+    cStoreDs.putAndInsertString(DCM_Modality, modality);
 }
 
 static void BuildNCreateDataSet(/*const*/ DcmDataset& patientDs, DcmDataset& nCreateDs)
 {
     QDateTime now = QDateTime::currentDateTime();
     QSettings settings;
-    QString modality = settings.value("modality").toString().toUpper();
+#ifdef PRODUCT_MODALITY
+    auto modality = PRODUCT_MODALITY;
+#else
+    auto modality = settings.value("modality").toString().toUpper().toUtf8();
+#endif
     QString aet = settings.value("aet", qApp->applicationName().toUpper()).toString();
 
     nCreateDs.putAndInsertString(DCM_SpecificCharacterSet, "ISO_IR 192"); // UTF-8
@@ -178,7 +190,7 @@ static void BuildNCreateDataSet(/*const*/ DcmDataset& patientDs, DcmDataset& nCr
     nCreateDs.insertEmptyElement(DCM_PerformedProcedureStepEndDate);
     nCreateDs.insertEmptyElement(DCM_PerformedProcedureStepEndTime);
 
-    nCreateDs.putAndInsertString(DCM_Modality, modality.toUtf8());
+    nCreateDs.putAndInsertString(DCM_Modality, modality);
     patientDs.findAndInsertCopyOfElement(DCM_StudyID, &nCreateDs);
     nCreateDs.insertEmptyElement(DCM_PerformedProtocolCodeSequence);
     nCreateDs.insertEmptyElement(DCM_PerformedSeriesSequence);

@@ -174,7 +174,7 @@ public:
 
         if (type == MediaInfoLib::Stream_Image)
         {
-            cond = dset->putAndInsertString(DCM_SOPClassUID, UID_VLEndoscopicImageStorage);
+            cond = dset->putAndInsertString(DCM_SOPClassUID, PRODUCT_SOP_CLASS_UID);
             if (cond.bad())
               return cond;
 
@@ -233,7 +233,7 @@ public:
             }
             else
             {
-                cond = dset->putAndInsertString(DCM_SOPClassUID, UID_VideoEndoscopicImageStorage);
+                cond = dset->putAndInsertString(DCM_SOPClassUID, PRODUCT_SOP_CLASS_UID);
                 if (cond.bad())
                   return cond;
 

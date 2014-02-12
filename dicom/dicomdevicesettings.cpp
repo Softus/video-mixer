@@ -16,6 +16,7 @@
 
 #include "dicomdevicesettings.h"
 #include "../defaults.h"
+#include "../product.h"
 #include <QCheckBox>
 #include <QDebug>
 #include <QFormLayout>
@@ -57,7 +58,13 @@ DicomDeviceSettings::DicomDeviceSettings(QWidget *parent) :
     mainLayout->addRow(tr("&IP address"), textIp);
 
     mainLayout->addRow(tr("AE &title"), textAet = new QLineEdit(settings.value("aet", localHost.toUpper()).toString()));
-    mainLayout->addRow(tr("&Modality"), textModality = new QLineEdit(settings.value("modality").toString()));
+    mainLayout->addRow(tr("&Modality"), textModality = new QLineEdit);
+#ifdef PRODUCT_MODALITY
+    textModality->setText(PRODUCT_MODALITY);
+    textModality->setReadOnly(true);
+#else
+    textModality->setText(settings.value("modality").toString());
+#endif
     mainLayout->addRow(tr("&Port"), spinPort = new QSpinBox);
     spinPort->setRange(0, 65535);
     spinPort->setValue(settings.value("local-port").toInt());
@@ -74,7 +81,9 @@ void DicomDeviceSettings::save()
     QSettings settings;
 
     settings.setValue("aet", textAet->text());
+#ifndef PRODUCT_MODALITY
     settings.setValue("modality", textModality->text());
+#endif
     settings.setValue("local-port", spinPort->value());
     settings.setValue("dicom-export-clips", checkExportClips->isChecked());
     settings.setValue("dicom-export-video", checkExportVideo->isChecked());

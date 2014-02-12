@@ -854,7 +854,7 @@ void MainWindow::updatePipeline()
     updateShortcut(btnStart,    settings.value("hotkey-start",    DEFAULT_HOTKEY_START).toInt());
     updateShortcut(btnSnapshot, settings.value("hotkey-snapshot", DEFAULT_HOTKEY_SNAPSHOT).toInt());
     updateShortcut(btnRecordStart, settings.value("hotkey-record-start", DEFAULT_HOTKEY_RECORD_START).toInt());
-    updateShortcut(btnRecordStop,  settings.value("hotkey-record-start", DEFAULT_HOTKEY_RECORD_STOP).toInt());
+    updateShortcut(btnRecordStop,  settings.value("hotkey-record-stop",  DEFAULT_HOTKEY_RECORD_STOP).toInt());
 
     updateShortcut(actionArchive,  settings.value("hotkey-archive",   DEFAULT_HOTKEY_ARCHIVE).toInt());
     updateShortcut(actionSettings, settings.value("hotkey-settings",  DEFAULT_HOTKEY_SETTINGS).toInt());

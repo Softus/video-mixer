@@ -31,4 +31,8 @@
 #define SITE_UID_ROOT           "9.9.999.0.1" // TODO: request real one
 #define PRODUCT_NAMESPACE       "com." ORGANIZATION_SHORT_NAME "." PRODUCT_SHORT_NAME
 
+#define PRODUCT_MODALITY        "ES"
+
+#define PRODUCT_SOP_CLASS_UID   UID_VLEndoscopicImageStorage
+
 #endif // PRODUCT_H
