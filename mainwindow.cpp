@@ -469,8 +469,8 @@ QString MainWindow::buildPipeline()
     auto formatDef      = settings.value("format").toString();
     auto sizeDef        = settings.value("size").toSize();
     auto srcDef         = settings.value("src").toString();
-    auto srcFixColor    = settings.value("src-colorspace").toBool()? "! ffmpegcolorspace": "";
-    auto srcDeinterlace = settings.value("video-deinterlace").toBool()? "! deinterlace": "";
+    auto srcFixColor    = settings.value("src-colorspace").toBool()? " ! ffmpegcolorspace": "";
+    auto srcDeinterlace = settings.value("video-deinterlace").toBool()? " ! deinterlace": "";
     auto srcParams      = settings.value("src-parameters").toString();
 
     if (!srcDef.isEmpty())
@@ -537,7 +537,7 @@ QString MainWindow::buildPipeline()
         pipe.append(" ! dvdemux ! ffdec_dvvideo");
     }
 
-    pipe.append(srcDeinterlace).append(srcFixColor);
+    pipe.append(srcFixColor).append(srcDeinterlace);
 
     // v4l2src ... ! tee name=splitter ! ffmpegcolorspace ! ximagesink splitter.");
     //
@@ -548,13 +548,12 @@ QString MainWindow::buildPipeline()
     pipe.append(" ! tee name=splitter");
     if (!displaySinkDef.isEmpty())
     {
-        pipe.append(" ! textoverlay name=displayoverlay silent=1 shadow=0 halignment=right valignment=top text=* xpad=2 ypad=0 font-desc=16");
         if (displayFixColor)
         {
             pipe.append(" ! ffmpegcolorspace");
         }
-
-        pipe.append(" ! " ).append(displaySinkDef).append(" name=displaysink async=0 ").append(displayParams).append(" splitter.");
+        pipe.append(" ! textoverlay name=displayoverlay silent=1 shadow=0 halignment=right valignment=top text=* xpad=2 ypad=0 font-desc=16")
+            .append(" ! " ).append(displaySinkDef).append(" name=displaysink async=0 ").append(displayParams).append(" splitter.");
     }
 
     // ... ! tee name=splitter ! ximagesink splitter. ! valve name=encvalve ! ffmpegcolorspace ! x264enc
@@ -567,7 +566,7 @@ QString MainWindow::buildPipeline()
     auto outputPathDef      = settings.value("output-path",    DEFAULT_OUTPUT_PATH).toString();
     auto videoEncoderDef    = settings.value("video-encoder",  DEFAULT_VIDEO_ENCODER).toString();
     auto videoMaxRate       = settings.value("video-max-fps",  DEFAULT_VIDEO_MAX_FPS).toString();
-    auto videoFixColor      = settings.value(videoEncoderDef + "-colorspace").toBool()? "ffmpegcolorspace ! ": "";
+    auto videoFixColor      = settings.value(videoEncoderDef + "-colorspace").toBool()? " ! ffmpegcolorspace": "";
     auto videoEncoderParams = settings.value(videoEncoderDef + "-parameters").toString();
     auto rtpPayDef          = settings.value("rtp-payloader",  DEFAULT_RTP_PAYLOADER).toString();
     auto rtpPayParams       = settings.value(rtpPayDef + "-parameters").toString();
@@ -580,9 +579,9 @@ QString MainWindow::buildPipeline()
         pipe.append(" ! videorate skip-to-first=1 max-rate=").append(videoMaxRate);
     }
 
-    pipe.append(" ! valve name=encvalve drop=1 ! queue max-size-bytes=0 ! ");
+    pipe.append(" ! valve name=encvalve drop=1 ! queue max-size-bytes=0");
 
-    pipe.append(videoFixColor).append(videoEncoderDef).append(" name=videoencoder ").append(videoEncoderParams);
+    pipe.append(videoFixColor).append(" ! ").append(videoEncoderDef).append(" name=videoencoder ").append(videoEncoderParams);
 
     if (enableRtp || enableVideo)
     {
@@ -1056,6 +1055,7 @@ void MainWindow::onBusMessage(const QGst::MessagePtr& msg)
         break;
     case QGst::MessageError:
         errorGlib(msg->source(), msg.staticCast<QGst::ErrorMessage>()->error());
+        onStopStudy();
         break;
 #ifdef QT_DEBUG
     case QGst::MessageInfo:
@@ -1183,10 +1183,6 @@ bool MainWindow::startVideoRecord()
                 tr("Failed to start recording.\nCheck the error log for details."), QMessageBox::Ok);
             return false;
         }
-
-        // Until the real clip recording starts, we should disable this button
-        //
-        btnStart->setEnabled(false);
     }
 
     return true;
@@ -1197,77 +1193,21 @@ void MainWindow::onStartClick()
     if (!running)
     {
         onStartStudy();
-        return;
     }
-
-    QSettings settings;
-    auto userChoice = QMessageBox::question(this, windowTitle(),
-       tr("End the study?"), QMessageBox::Yes | QMessageBox::Default, QMessageBox::No);
-
-    if (userChoice == QMessageBox::No)
+    else
     {
-        // Don't end the study
-        //
-        return;
-    }
+        auto userChoice = QMessageBox::question(this, windowTitle(),
+           tr("End the study?"), QMessageBox::Yes | QMessageBox::Default, QMessageBox::No);
 
-    QWaitCursor wait(this);
-    if (recording)
-    {
-        onRecordStopClick();
-    }
-    running = recording = false;
-    removeVideoTail("video");
-    updateWindowTitle();
-
-#ifdef WITH_DICOM
-    if (pendingPatient)
-    {
-        char seriesUID[100] = {0};
-        dcmGenerateUniqueIdentifier(seriesUID, SITE_SERIES_UID_ROOT);
-
-        if (!pendingSOPInstanceUID.isEmpty() && settings.value("complete-with-mpps", true).toBool())
+        if (userChoice == QMessageBox::Yes)
         {
-            DcmClient client(UID_ModalityPerformedProcedureStepSOPClass);
-            if (!client.nSetRQ(seriesUID, pendingPatient, pendingSOPInstanceUID))
-            {
-                QMessageBox::critical(this, windowTitle(), client.lastError());
-            }
+            onStopStudy();
+
+            // Open the archive window after end of study
+            //
+            QTimer::singleShot(0, this, SLOT(onShowArchiveClick()));
         }
     }
-
-    delete pendingPatient;
-    pendingPatient = nullptr;
-    pendingSOPInstanceUID.clear();
-#endif
-
-    patientId.clear();
-    patientName.clear();
-    patientSex.clear();
-    patientBirthDate.clear();
-    if (settings.value("reset-physician").toBool())
-    {
-        physician.clear();
-    }
-    if (settings.value("reset-study-name").toBool())
-    {
-        studyName.clear();
-    }
-
-    setElementProperty(videoEncoderValve, "drop", true);
-    setElementProperty("displayoverlay", "silent", true);
-
-    updateStartButton();
-    displayWidget->update();
-
-    // Open the archive window after end of study
-    //
-    QTimer::singleShot(0, this, SLOT(onShowArchiveClick()));
-
-    // Clear the capture list
-    //
-    listImagesAndClips->clear();
-    imageNo = clipNo = 0;
 }
 
 void MainWindow::onSnapshotClick()
@@ -1703,6 +1643,66 @@ void MainWindow::onStartStudy()
     updateStartButton();
     updateWindowTitle();
     displayWidget->update();
+}
+
+void MainWindow::onStopStudy()
+{
+    QSettings settings;
+    QWaitCursor wait(this);
+
+    if (recording)
+    {
+        onRecordStopClick();
+    }
+
+    running = recording = false;
+    removeVideoTail("video");
+    updateWindowTitle();
+
+#ifdef WITH_DICOM
+    if (pendingPatient)
+    {
+        char seriesUID[100] = {0};
+        dcmGenerateUniqueIdentifier(seriesUID, SITE_SERIES_UID_ROOT);
+
+        if (!pendingSOPInstanceUID.isEmpty() && settings.value("complete-with-mpps", true).toBool())
+        {
+            DcmClient client(UID_ModalityPerformedProcedureStepSOPClass);
+            if (!client.nSetRQ(seriesUID, pendingPatient, pendingSOPInstanceUID))
+            {
+                QMessageBox::critical(this, windowTitle(), client.lastError());
+            }
+        }
+    }
+
+    delete pendingPatient;
+    pendingPatient = nullptr;
+    pendingSOPInstanceUID.clear();
+#endif
+
+    patientId.clear();
+    patientName.clear();
+    patientSex.clear();
+    patientBirthDate.clear();
+    if (settings.value("reset-physician").toBool())
+    {
+        physician.clear();
+    }
+    if (settings.value("reset-study-name").toBool())
+    {
+        studyName.clear();
+    }
+
+    setElementProperty(videoEncoderValve, "drop", true);
+    setElementProperty("displayoverlay", "silent", true);
+
+    updateStartButton();
+    displayWidget->update();
+
+    // Clear the capture list
+    //
+    listImagesAndClips->clear();
+    imageNo = clipNo = 0;
 }
 
 #ifdef WITH_DICOM

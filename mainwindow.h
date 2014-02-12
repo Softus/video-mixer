@@ -152,6 +152,7 @@ private slots:
 #else
     void onStartStudy();
 #endif
+    void onStopStudy();
     void onShowAboutClick();
     void onShowArchiveClick();
     void onShowSettingsClick();
