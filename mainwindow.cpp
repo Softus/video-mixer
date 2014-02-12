@@ -469,8 +469,8 @@ QString MainWindow::buildPipeline()
     auto formatDef      = settings.value("format").toString();
     auto sizeDef        = settings.value("size").toSize();
     auto srcDef         = settings.value("src").toString();
-    auto srcFixColor    = settings.value("src-colorspace").toBool()? " ! ffmpegcolorspace": "";
-    auto srcDeinterlace = settings.value("video-deinterlace").toBool()? " ! deinterlace": "";
+    auto srcFixColor    = settings.value("src-colorspace").toBool();
+    auto srcDeinterlace = settings.value("video-deinterlace").toBool();
     auto srcParams      = settings.value("src-parameters").toString();
 
     if (!srcDef.isEmpty())
@@ -536,8 +536,14 @@ QString MainWindow::buildPipeline()
         //
         pipe.append(" ! dvdemux ! ffdec_dvvideo");
     }
+    else if (formatType == "video/x-raw-rgb")
+    {
+        // Force colorspace conversion for RGB-only cameras
+        //
+        srcFixColor = true;
+    }
 
-    pipe.append(srcFixColor).append(srcDeinterlace);
+    pipe.append(srcFixColor? " ! ffmpegcolorspace": "").append(srcDeinterlace? " ! deinterlace": "");
 
     // v4l2src ... ! tee name=splitter ! ffmpegcolorspace ! ximagesink splitter.");
     //
@@ -548,11 +554,8 @@ QString MainWindow::buildPipeline()
     pipe.append(" ! tee name=splitter");
     if (!displaySinkDef.isEmpty())
     {
-        if (displayFixColor)
-        {
-            pipe.append(" ! ffmpegcolorspace");
-        }
-        pipe.append(" ! textoverlay name=displayoverlay silent=1 shadow=0 halignment=right valignment=top text=* xpad=2 ypad=0 font-desc=16")
+        pipe.append(displayFixColor? " ! ffmpegcolorspace": "")
+            .append(" ! textoverlay name=displayoverlay silent=1 shadow=0 halignment=right valignment=top text=* xpad=2 ypad=0 font-desc=16")
             .append(" ! " ).append(displaySinkDef).append(" name=displaysink async=0 ").append(displayParams).append(" splitter.");
     }
 
@@ -566,7 +569,7 @@ QString MainWindow::buildPipeline()
     auto outputPathDef      = settings.value("output-path",    DEFAULT_OUTPUT_PATH).toString();
     auto videoEncoderDef    = settings.value("video-encoder",  DEFAULT_VIDEO_ENCODER).toString();
     auto videoMaxRate       = settings.value("video-max-fps",  DEFAULT_VIDEO_MAX_FPS).toString();
-    auto videoFixColor      = settings.value(videoEncoderDef + "-colorspace").toBool()? " ! ffmpegcolorspace": "";
+    auto videoFixColor      = settings.value(videoEncoderDef + "-colorspace").toBool();
     auto videoEncoderParams = settings.value(videoEncoderDef + "-parameters").toString();
     auto rtpPayDef          = settings.value("rtp-payloader",  DEFAULT_RTP_PAYLOADER).toString();
     auto rtpPayParams       = settings.value(rtpPayDef + "-parameters").toString();
@@ -581,7 +584,8 @@ QString MainWindow::buildPipeline()
 
     pipe.append(" ! valve name=encvalve drop=1 ! queue max-size-bytes=0");
 
-    pipe.append(videoFixColor).append(" ! ").append(videoEncoderDef).append(" name=videoencoder ").append(videoEncoderParams);
+    pipe.append(videoFixColor? " ! ffmpegcolorspace": "")
+        .append(" ! ").append(videoEncoderDef).append(" name=videoencoder ").append(videoEncoderParams);
 
     if (enableRtp || enableVideo)
     {
@@ -606,15 +610,15 @@ QString MainWindow::buildPipeline()
     // ... ! tee name=splitter ... splitter. ! identity name=imagevalve ! jpegenc ! multifilesink splitter.
     //
     auto imageEncoderDef = settings.value("image-encoder", DEFAULT_IMAGE_ENCODER).toString();
-    auto imageEncoderFixColor = settings.value(imageEncoderDef + "-colorspace", false).toBool()?
-                "ffmpegcolorspace ! ": "";
+    auto imageEncoderFixColor = settings.value(imageEncoderDef + "-colorspace", false).toBool();
     auto imageEncoderParams = settings.value(imageEncoderDef + "-parameters").toString();
     auto imageSinkDef       = settings.value("image-sink", DEFAULT_IMAGE_SINK).toString();
     if (!imageSinkDef.isEmpty())
     {
-        pipe.append(" ! identity name=imagevalve drop-probability=1.0 ! ")
-            .append(imageEncoderFixColor).append(imageEncoderDef).append(" ").append(imageEncoderParams).append(" ! ")
-            .append(imageSinkDef).append("  name=imagesink post-messages=1 async=0 sync=0 location=")
+        pipe.append(" ! identity name=imagevalve drop-probability=1.0")
+            .append(imageEncoderFixColor? " ! ffmpegcolorspace": "")
+            .append(" ! ").append(imageEncoderDef).append(" ").append(imageEncoderParams)
+            .append(" ! ").append(imageSinkDef).append(" name=imagesink post-messages=1 async=0 sync=0 location=")
             .append(outputPathDef).append("/image splitter.");
     }
 
