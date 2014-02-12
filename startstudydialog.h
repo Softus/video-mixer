@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Irkutsk Diagnostic Center.
+ * Copyright (C) 2013-2014 Irkutsk Diagnostic Center.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -27,10 +27,12 @@ class QComboBox;
 class QDateEdit;
 class QLineEdit;
 QT_END_NAMESPACE
+class DcmDataset;
 
 class StartStudyDialog : public QDialog
 {
     Q_OBJECT
+    QLineEdit* textAccessionNumber;
     QLineEdit* textPatientId;
     QLineEdit* textPatientName;
     QComboBox* cbPatientSex;
@@ -39,7 +41,13 @@ class StartStudyDialog : public QDialog
     QComboBox* cbStudyType;
 
 public:
-    explicit StartStudyDialog(QWidget *parent = 0);
+    explicit StartStudyDialog(bool noWorklist = false, QWidget *parent = 0);
+
+#ifdef WITH_DICOM
+    void readPatientData(DcmDataset* patient);
+    void savePatientData(DcmDataset* patient);
+#endif
+    QString accessionNumber() const;
     QString patientId() const;
     QString patientName() const;
     QDate   patientBirthDate() const;
@@ -48,6 +56,7 @@ public:
     QChar   patientSexCode() const;
     QString studyName() const;
     QString physician() const;
+    void setAccessionNumber(const QString& accessionNumber);
     void setPatientId(const QString& id);
     void setPatientName(const QString& name);
     void setPatientBirthDate(const QDate& date);

@@ -53,7 +53,6 @@ SOURCES += aboutdialog.cpp \
     mainwindow.cpp \
     mandatoryfieldgroup.cpp \
     mandatoryfieldssettings.cpp \
-    patientdialog.cpp \
     physicianssettings.cpp \
     settings.cpp \
     storagesettings.cpp \
@@ -71,7 +70,8 @@ SOURCES += aboutdialog.cpp \
     thumbnaillist.cpp \
     videorecordsettings.cpp \
     sound.cpp \
-    mainwindowdbusadaptor.cpp
+    mainwindowdbusadaptor.cpp \
+    startstudydialog.cpp
 
 HEADERS += aboutdialog.h \
     archivewindow.h \
@@ -79,7 +79,6 @@ HEADERS += aboutdialog.h \
     mainwindow.h \
     mandatoryfieldgroup.h \
     mandatoryfieldssettings.h \
-    patientdialog.h \
     physicianssettings.h \
     product.h \
     qwaitcursor.h \
@@ -100,7 +99,8 @@ HEADERS += aboutdialog.h \
     thumbnaillist.h \
     videorecordsettings.h \
     sound.h \
-    mainwindowdbusadaptor.h
+    mainwindowdbusadaptor.h \
+    startstudydialog.h
 
 FORMS   +=
 

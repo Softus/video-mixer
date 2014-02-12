@@ -1,3 +1,10 @@
+beryllium (0.4.2) debian;
+
+  * New field: Accession number
+  * Dedicated archive window
+
+ -- Pavel Bludov <pbludov@gmail.com>  Wed, 12 Feb 2014 19:12:00 +0900
+
 beryllium (0.4.1) debian;
 
   * D-Bus support. One method: startStudy(id,name,sex,bd,phys,study)

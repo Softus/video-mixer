@@ -33,8 +33,9 @@ class VideoEditor : public QWidget
 {
     Q_OBJECT
 public:
-    explicit VideoEditor(QWidget *parent = 0);
+    explicit VideoEditor(const QString& filePath = QString(), QWidget *parent = 0);
     ~VideoEditor();
+    void loadFile();
     void loadFile(const QString& filePath);
 
 protected:

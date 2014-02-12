@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Irkutsk Diagnostic Center.
+ * Copyright (C) 2013-2014 Irkutsk Diagnostic Center.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -14,10 +14,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "patientdialog.h"
+#include "startstudydialog.h"
 #include "product.h"
 #include "defaults.h"
 #include "mandatoryfieldgroup.h"
+
+#ifdef WITH_DICOM
+// From DCMTK SDK
+//
+#define HAVE_CONFIG_H
+#include <dcmtk/config/osconfig.h>   /* make sure OS specific configuration is included first */
+#include <dcmtk/dcmdata/dcdatset.h>
+#include <dcmtk/dcmdata/dcuid.h>
+#include <dcmtk/dcmdata/dcdeftag.h>
+#endif
 
 #include <QBoxLayout>
 #include <QComboBox>
@@ -30,16 +40,17 @@
 #include <QPushButton>
 #include <QSettings>
 
-StartStudyDialog::StartStudyDialog(QWidget *parent) :
+StartStudyDialog::StartStudyDialog(bool noWorklist, QWidget *parent) :
     QDialog(parent)
 {
     QSettings settings;
     auto listMandatory = settings.value("new-study-mandatory-fields", DEFAULT_MANDATORY_FIELDS).toStringList();
 
-    setWindowTitle(tr("New study"));
+    setWindowTitle(tr("Patient data"));
     setMinimumSize(480, 240);
 
     auto layoutMain = new QFormLayout;
+    layoutMain->addRow(tr("&Accession number"), textAccessionNumber = new QxtLineEdit);
     layoutMain->addRow(tr("&Patient ID"), textPatientId = new QxtLineEdit);
     layoutMain->addRow(tr("&Name"), textPatientName = new QxtLineEdit);
     layoutMain->addRow(tr("&Sex"), cbPatientSex = new QComboBox);
@@ -71,11 +82,14 @@ StartStudyDialog::StartStudyDialog(QWidget *parent) :
     auto layoutBtns = new QHBoxLayout;
 
 #ifdef WITH_DICOM
-    auto btnWorklist = new QPushButton(QIcon(":buttons/show_worklist"), nullptr);
-    btnWorklist->setToolTip(tr("Show work list"));
-    connect(btnWorklist, SIGNAL(clicked()), this, SLOT(onShowWorklist()));
-    layoutBtns->addWidget(btnWorklist);
-    btnWorklist->setEnabled(!settings.value("mwl-server").toString().isEmpty());
+    if (!noWorklist)
+    {
+        auto btnWorklist = new QPushButton(QIcon(":buttons/show_worklist"), nullptr);
+        btnWorklist->setToolTip(tr("Show work list"));
+        connect(btnWorklist, SIGNAL(clicked()), this, SLOT(onShowWorklist()));
+        layoutBtns->addWidget(btnWorklist);
+        btnWorklist->setEnabled(!settings.value("mwl-server").toString().isEmpty());
+    }
 #endif
 
     layoutBtns->addStretch(1);
@@ -84,7 +98,7 @@ StartStudyDialog::StartStudyDialog(QWidget *parent) :
     connect(btnReject, SIGNAL(clicked()), this, SLOT(reject()));
     layoutBtns->addWidget(btnReject);
 
-    auto btnStart = new QPushButton(tr("Start study"));
+    auto btnStart = new QPushButton(tr("Start"));
     connect(btnStart, SIGNAL(clicked()), this, SLOT(accept()));
     btnStart->setDefault(true);
     layoutBtns->addWidget(btnStart);
@@ -98,6 +112,8 @@ StartStudyDialog::StartStudyDialog(QWidget *parent) :
     if (!listMandatory.isEmpty())
     {
         auto group = new MandatoryFieldGroup(this);
+        if (listMandatory.contains("AccessionNumber"))
+            group->add(textAccessionNumber);
         if (listMandatory.contains("PatientID"))
             group->add(textPatientId);
         if (listMandatory.contains("Name"))
@@ -135,6 +151,11 @@ void StartStudyDialog::hideEvent(QHideEvent *)
         QDBusInterface("org.onboard.Onboard", "/org/onboard/Onboard/Keyboard",
                        "org.onboard.Onboard.Keyboard").call( "Hide");
     }
+}
+
+QString StartStudyDialog::accessionNumber() const
+{
+    return textAccessionNumber->text();
 }
 
 QString StartStudyDialog::patientId() const
@@ -176,6 +197,11 @@ QString StartStudyDialog::studyName() const
 QString StartStudyDialog::physician() const
 {
     return cbPhysician->currentText();
+}
+
+void StartStudyDialog::setAccessionNumber(const QString& accessionNumber)
+{
+    textAccessionNumber->setText(accessionNumber);
 }
 
 void StartStudyDialog::setPatientId(const QString& id)
@@ -236,23 +262,12 @@ void StartStudyDialog::setPhysician(const QString& name)
     }
 }
 
-inline static void setEditableCb(QComboBox* cb, bool editable)
-{
-    if (!editable)
-    {
-        auto text = cb->currentText();
-        cb->clear();
-        cb->addItem(text);
-        cb->setCurrentIndex(0);
-    }
-    cb->setEditable(editable);
-}
-
 void StartStudyDialog::savePatientFile(const QString& outputPath)
 {
     QSettings settings(outputPath, QSettings::IniFormat);
 
     settings.beginGroup(PRODUCT_SHORT_NAME);
+    settings.setValue("accession-number", textAccessionNumber->text());
     settings.setValue("patient-id", textPatientId->text());
     settings.setValue("name", textPatientName->text());
     settings.setValue("sex", cbPatientSex->currentText());
@@ -266,3 +281,72 @@ void StartStudyDialog::onShowWorklist()
 {
     done(SHOW_WORKLIST_RESULT);
 }
+
+#ifdef WITH_DICOM
+void StartStudyDialog::readPatientData(DcmDataset* patient)
+{
+    if (!patient)
+        return;
+
+    const char *str = nullptr;
+    if (patient->findAndGetString(DCM_AccessionNumber, str, true).good())
+    {
+        setAccessionNumber(QString::fromUtf8(str));
+    }
+
+    if (patient->findAndGetString(DCM_PatientID, str, true).good())
+    {
+        setPatientId(QString::fromUtf8(str));
+    }
+
+    if (patient->findAndGetString(DCM_PatientName, str, true).good())
+    {
+        setPatientName(QString::fromUtf8(str));
+    }
+
+    if (patient->findAndGetString(DCM_PatientBirthDate, str, true).good())
+    {
+        setPatientBirthDateStr(QString::fromUtf8(str));
+    }
+
+    if (patient->findAndGetString(DCM_PatientSex, str, true).good())
+    {
+        setPatientSex(QString::fromUtf8(str));
+    }
+
+    if (patient->findAndGetString(DCM_ScheduledPerformingPhysicianName, str, true).good())
+    {
+        setPhysician(QString::fromUtf8(str));
+    }
+
+    if (patient->findAndGetString(DCM_ScheduledProcedureStepDescription, str, true).good())
+    {
+        setStudyName(QString::fromUtf8(str));
+    }
+}
+
+void StartStudyDialog::savePatientData(DcmDataset* patient)
+{
+    if (!patient)
+        return;
+
+    OFString studyInstanceUID;
+    char uuid[100] = {0};
+    if (patient->findAndGetOFString(DCM_StudyInstanceUID, studyInstanceUID).bad() || studyInstanceUID.length() == 0)
+    {
+        patient->putAndInsertString(DCM_StudyInstanceUID, dcmGenerateUniqueIdentifier(uuid, SITE_STUDY_UID_ROOT));
+    }
+
+    patient->putAndInsertString(DCM_SpecificCharacterSet, "ISO_IR 192");
+    patient->putAndInsertString(DCM_AccessionNumber, accessionNumber().toUtf8());
+    patient->putAndInsertString(DCM_PatientID, patientId().toUtf8());
+    patient->putAndInsertString(DCM_PatientName, patientName().toUtf8());
+    patient->putAndInsertString(DCM_PatientBirthDate, patientBirthDateStr().toUtf8());
+    patient->putAndInsertString(DCM_PatientSex, QString().append(patientSexCode()).toUtf8());
+    patient->putAndInsertString(DCM_PerformingPhysicianName, physician().toUtf8());
+    patient->putAndInsertString(DCM_StudyDescription, studyName().toUtf8());
+    patient->putAndInsertString(DCM_SeriesDescription, studyName().toUtf8());
+    patient->putAndInsertString(DCM_SOPInstanceUID, dcmGenerateUniqueIdentifier(uuid, SITE_INSTANCE_UID_ROOT));
+}
+
+#endif

@@ -31,12 +31,15 @@ bool MainWindowDBusAdaptor::busy()
 }
 
 bool MainWindowDBusAdaptor::startStudy
-    ( const QString &id, const QString &name
+    ( const QString &accessionNumber
+    , const QString &id, const QString &name
     , const QString &sex, const QString &birthdate
     , const QString &physician, const QString &studyName
     , bool autoStart
     )
 {
+    if (!accessionNumber.isEmpty())
+        wnd->accessionNumber = accessionNumber;
     if (!id.isEmpty())
         wnd->patientId = id;
     if (!name.isEmpty())

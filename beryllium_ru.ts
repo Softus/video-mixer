@@ -87,35 +87,35 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
 <context>
     <name>ArchiveWindow</name>
     <message>
-        <location filename="archivewindow.cpp" line="95"/>
-        <location filename="archivewindow.cpp" line="739"/>
-        <location filename="archivewindow.cpp" line="796"/>
+        <location filename="archivewindow.cpp" line="98"/>
+        <location filename="archivewindow.cpp" line="749"/>
+        <location filename="archivewindow.cpp" line="806"/>
         <source>Archive</source>
         <oldsource>archive</oldsource>
         <translation>Архив</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="102"/>
+        <location filename="archivewindow.cpp" line="108"/>
         <source>Delete</source>
         <translation>Удалить</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="141"/>
+        <location filename="archivewindow.cpp" line="146"/>
         <source>File browser</source>
         <translation>Проводник</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="128"/>
+        <location filename="archivewindow.cpp" line="133"/>
         <source>List</source>
         <translation>Список</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="98"/>
+        <location filename="archivewindow.cpp" line="103"/>
         <source>Back</source>
         <translation>Обратно</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="107"/>
+        <location filename="archivewindow.cpp" line="113"/>
         <source>Send to DICOM</source>
         <oldsource>Dicom</oldsource>
         <translation>Отправить в DICOM</translation>
@@ -125,99 +125,97 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
         <translation type="obsolete">Выбрать все</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="111"/>
+        <location filename="archivewindow.cpp" line="116"/>
         <source>Edit</source>
         <translation>Правка</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="114"/>
+        <location filename="archivewindow.cpp" line="119"/>
         <source>Up</source>
         <translation>Вверх</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="131"/>
+        <location filename="archivewindow.cpp" line="136"/>
         <source>Icons</source>
         <translation>Значки</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="134"/>
+        <location filename="archivewindow.cpp" line="139"/>
         <source>Gallery</source>
         <translation>Галерея</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="148"/>
+        <location filename="archivewindow.cpp" line="153"/>
         <source>Path</source>
         <oldsource>path</oldsource>
         <translation>Путь</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="159"/>
-        <location filename="archivewindow.cpp" line="162"/>
+        <location filename="archivewindow.cpp" line="164"/>
+        <location filename="archivewindow.cpp" line="167"/>
         <source>Previous</source>
         <oldsource>Prev</oldsource>
         <translation>Предыдущий</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="181"/>
-        <location filename="archivewindow.cpp" line="184"/>
+        <location filename="archivewindow.cpp" line="186"/>
+        <location filename="archivewindow.cpp" line="189"/>
         <source>Next</source>
         <oldsource>next</oldsource>
         <translation>Следующий</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="194"/>
+        <location filename="archivewindow.cpp" line="199"/>
         <source>Media</source>
         <oldsource>media</oldsource>
         <translation>Медия</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="195"/>
+        <location filename="archivewindow.cpp" line="200"/>
         <source>Rewing</source>
         <translation>Отмотать назад</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="199"/>
-        <location filename="archivewindow.cpp" line="1000"/>
+        <location filename="archivewindow.cpp" line="204"/>
+        <location filename="archivewindow.cpp" line="1010"/>
         <source>Play</source>
         <translation>Воспроизвести</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="202"/>
+        <location filename="archivewindow.cpp" line="207"/>
         <source>Forward</source>
         <translation>Перемотать вперёд</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="461"/>
+        <location filename="archivewindow.cpp" line="466"/>
         <source>The file was uploaded to a storage server</source>
         <oldsource>The file was uploaded to a DICOM server</oldsource>
         <translation>Файл был загружен в хранилище</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="646"/>
+        <location filename="archivewindow.cpp" line="650"/>
         <source>Are you sure to delete
 
 &apos;%1&apos;?</source>
         <translation>Вы действительно хотите удалить &apos;%1&apos;?</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="646"/>
+        <location filename="archivewindow.cpp" line="650"/>
         <source>Are you sure to delete selected items?</source>
         <translation>Вы действительно хотите удалить выбранные объекты?</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="685"/>
         <source>Failed to load patient dataset:
 
 %1</source>
-        <translation>Не удалось загрузить датасет %1</translation>
+        <translation type="obsolete">Не удалось загрузить датасет %1</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="690"/>
         <source>Are you sure to send the result to storage servers?</source>
-        <translation>Вы действительно хотите отправить результат в хранилище?</translation>
+        <translation type="obsolete">Вы действительно хотите отправить результат в хранилище?</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="703"/>
+        <location filename="archivewindow.cpp" line="707"/>
         <source>All files were successfully stored.</source>
         <translation>Все файлы были успешно сохранены.</translation>
     </message>
@@ -230,17 +228,17 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
         <translation type="obsolete">Вы действительно хотите отправить выбранные объекты в хранилище?</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="734"/>
+        <location filename="archivewindow.cpp" line="744"/>
         <source>Failed to launch </source>
         <translation>Ошибка при выполнении </translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="841"/>
+        <location filename="archivewindow.cpp" line="851"/>
         <source>Archive - %1</source>
         <translation>Архив - %1</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="1000"/>
+        <location filename="archivewindow.cpp" line="1010"/>
         <source>Pause</source>
         <translation>Пауза</translation>
     </message>
@@ -248,22 +246,22 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
 <context>
     <name>DcmClient</name>
     <message>
-        <location filename="dicom/dcmclient.cpp" line="290"/>
+        <location filename="dicom/dcmclient.cpp" line="291"/>
         <source>Required settings parameter %1 is missing</source>
         <translation>Необходимый параметр %1 не задан в настройках</translation>
     </message>
     <message>
-        <location filename="dicom/dcmclient.cpp" line="397"/>
+        <location filename="dicom/dcmclient.cpp" line="398"/>
         <source>Accepted presentation context ID not found</source>
         <translation>Принятый ID контекста представления не найден</translation>
     </message>
     <message>
-        <location filename="dicom/dcmclient.cpp" line="733"/>
+        <location filename="dicom/dcmclient.cpp" line="734"/>
         <source>Storing &apos;%1&apos; to &apos;%2&apos;</source>
         <translation>Отправка &apos;%1&apos; на &apos;%2&apos; </translation>
     </message>
     <message>
-        <location filename="dicom/dcmclient.cpp" line="741"/>
+        <location filename="dicom/dcmclient.cpp" line="742"/>
         <source>Failed to send &apos;%1&apos; to &apos;%2&apos;:
 %3
 Continue?</source>
@@ -987,74 +985,82 @@ Another study is in progress.</source>
 <context>
     <name>StartStudyDialog</name>
     <message>
-        <location filename="patientdialog.cpp" line="39"/>
         <source>New study</source>
-        <translation>Новое исследование</translation>
+        <translation type="obsolete">Новое исследование</translation>
     </message>
     <message>
-        <location filename="patientdialog.cpp" line="43"/>
+        <location filename="startstudydialog.cpp" line="49"/>
+        <source>Patient data</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="startstudydialog.cpp" line="53"/>
         <source>&amp;Patient ID</source>
         <translation>&amp;Карта пациента</translation>
     </message>
     <message>
-        <location filename="patientdialog.cpp" line="44"/>
+        <location filename="startstudydialog.cpp" line="54"/>
         <source>&amp;Name</source>
         <translation>&amp;ФИО</translation>
     </message>
     <message>
-        <location filename="patientdialog.cpp" line="45"/>
+        <location filename="startstudydialog.cpp" line="55"/>
         <source>&amp;Sex</source>
         <translation>&amp;Пол</translation>
     </message>
     <message>
-        <location filename="patientdialog.cpp" line="47"/>
+        <location filename="startstudydialog.cpp" line="57"/>
         <source>female</source>
         <translation>женский</translation>
     </message>
     <message>
-        <location filename="patientdialog.cpp" line="47"/>
+        <location filename="startstudydialog.cpp" line="57"/>
         <source>male</source>
         <translation>мужской</translation>
     </message>
     <message>
-        <location filename="patientdialog.cpp" line="47"/>
+        <location filename="startstudydialog.cpp" line="57"/>
         <source>other</source>
         <translation>иной</translation>
     </message>
     <message>
-        <location filename="patientdialog.cpp" line="55"/>
+        <location filename="startstudydialog.cpp" line="65"/>
         <source>&amp;Birthday</source>
         <translation>Дата &amp;рождения</translation>
     </message>
     <message>
-        <location filename="patientdialog.cpp" line="57"/>
+        <location filename="startstudydialog.cpp" line="67"/>
         <source>MM/dd/yyyy</source>
         <translation>dd/MM/yyyy</translation>
     </message>
     <message>
-        <location filename="patientdialog.cpp" line="59"/>
+        <location filename="startstudydialog.cpp" line="69"/>
         <source>P&amp;hysician</source>
         <translation>&amp;Врач</translation>
     </message>
     <message>
-        <location filename="patientdialog.cpp" line="65"/>
+        <location filename="startstudydialog.cpp" line="75"/>
         <source>Study &amp;type</source>
         <translation>&amp;Исследование</translation>
     </message>
     <message>
-        <location filename="patientdialog.cpp" line="75"/>
+        <location filename="startstudydialog.cpp" line="87"/>
         <source>Show work list</source>
         <translation>Открыть рабочий лист</translation>
     </message>
     <message>
-        <location filename="patientdialog.cpp" line="83"/>
+        <location filename="startstudydialog.cpp" line="96"/>
         <source>Cancel</source>
         <translation>Отменить</translation>
     </message>
     <message>
-        <location filename="patientdialog.cpp" line="87"/>
+        <location filename="startstudydialog.cpp" line="100"/>
+        <source>Start</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Start study</source>
-        <translation>Начать исследование</translation>
+        <translation type="obsolete">Начать исследование</translation>
     </message>
 </context>
 <context>
@@ -1210,85 +1216,85 @@ Another study is in progress.</source>
 <context>
     <name>VideoEditor</name>
     <message>
-        <location filename="videoeditor.cpp" line="74"/>
-        <location filename="videoeditor.cpp" line="144"/>
-        <location filename="videoeditor.cpp" line="365"/>
+        <location filename="videoeditor.cpp" line="75"/>
+        <location filename="videoeditor.cpp" line="145"/>
+        <location filename="videoeditor.cpp" line="376"/>
         <source>Video editor</source>
         <translation>Редактор видео</translation>
     </message>
     <message>
-        <location filename="videoeditor.cpp" line="76"/>
+        <location filename="videoeditor.cpp" line="77"/>
         <source>Exit</source>
         <translation>Выход</translation>
     </message>
     <message>
-        <location filename="videoeditor.cpp" line="83"/>
+        <location filename="videoeditor.cpp" line="84"/>
         <source>Save</source>
         <translation>Сохранить</translation>
     </message>
     <message>
-        <location filename="videoeditor.cpp" line="85"/>
+        <location filename="videoeditor.cpp" line="86"/>
         <source>Save as</source>
         <translation>Сохранить как</translation>
     </message>
     <message>
-        <location filename="videoeditor.cpp" line="87"/>
+        <location filename="videoeditor.cpp" line="88"/>
         <source>Snapshot</source>
         <translation>Снимок</translation>
     </message>
     <message>
-        <location filename="videoeditor.cpp" line="99"/>
+        <location filename="videoeditor.cpp" line="100"/>
         <source>Media</source>
         <translation>Медия</translation>
     </message>
     <message>
-        <location filename="videoeditor.cpp" line="106"/>
+        <location filename="videoeditor.cpp" line="107"/>
         <source>Head</source>
         <translation>Начало</translation>
     </message>
     <message>
-        <location filename="videoeditor.cpp" line="109"/>
+        <location filename="videoeditor.cpp" line="110"/>
         <source>Rewing</source>
         <translation>Отмотать назад</translation>
     </message>
     <message>
-        <location filename="videoeditor.cpp" line="112"/>
-        <location filename="videoeditor.cpp" line="320"/>
+        <location filename="videoeditor.cpp" line="113"/>
+        <location filename="videoeditor.cpp" line="331"/>
         <source>Play</source>
         <translation>Воспроизвести</translation>
     </message>
     <message>
-        <location filename="videoeditor.cpp" line="114"/>
+        <location filename="videoeditor.cpp" line="115"/>
         <source>Forward</source>
         <translation>Перемотать вперёд</translation>
     </message>
     <message>
-        <location filename="videoeditor.cpp" line="117"/>
+        <location filename="videoeditor.cpp" line="118"/>
         <source>Tail</source>
         <translation>Конец</translation>
     </message>
     <message>
-        <location filename="videoeditor.cpp" line="186"/>
+        <location filename="videoeditor.cpp" line="197"/>
         <source>Failed to create the pipeline</source>
         <translation>Не удалось создать конвеер</translation>
     </message>
     <message>
-        <location filename="videoeditor.cpp" line="196"/>
+        <location filename="videoeditor.cpp" line="207"/>
         <source>Video editor - %1</source>
         <translation>Редактор видео - %1</translation>
     </message>
     <message>
-        <location filename="videoeditor.cpp" line="320"/>
+        <location filename="videoeditor.cpp" line="331"/>
         <source>Pause</source>
         <translation>Пауза</translation>
     </message>
     <message>
-        <location filename="videoeditor.cpp" line="365"/>
+        <location filename="videoeditor.cpp" line="376"/>
         <source>Overwrite %1?</source>
         <translation>Затереть %1?</translation>
     </message>
     <message>
-        <location filename="videoeditor.cpp" line="447"/>
+        <location filename="videoeditor.cpp" line="458"/>
         <source>Saving %1</source>
         <translation>Сохранение %1</translation>
     </message>

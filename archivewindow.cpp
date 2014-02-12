@@ -15,6 +15,7 @@
  */
 
 #include "archivewindow.h"
+#include "startstudydialog.h"
 #include "defaults.h"
 #include "qwaitcursor.h"
 #include "thumbnaillist.h"
@@ -87,6 +88,8 @@ ArchiveWindow::ArchiveWindow(QWidget *parent)
     : QWidget(parent)
     , updateTimerId(0)
 {
+    root = QDir::root();
+
     dirWatcher = new QFileSystemWatcher(this);
     connect(dirWatcher, SIGNAL(directoryChanged(const QString &)), this, SLOT(onDirectoryChanged(const QString &)));
 
@@ -95,8 +98,11 @@ ArchiveWindow::ArchiveWindow(QWidget *parent)
     auto barArchive = new QToolBar(tr("Archive"));
     barArchive->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 #ifdef WITH_TOUCH
-    auto actionBack = barArchive->addAction(QIcon(":buttons/back"), tr("Back"), this, SLOT(onBackToMainWindowClick()));
-    actionBack->setShortcut(Qt::Key_Back);
+    if (parent())
+    {
+        auto actionBack = barArchive->addAction(QIcon(":buttons/back"), tr("Back"), this, SLOT(onBackToMainWindowClick()));
+        actionBack->setShortcut(Qt::Key_Back);
+    }
 #endif
 
     actionDelete = barArchive->addAction(QIcon(":buttons/delete"), tr("Delete"), this, SLOT(onDeleteClick()));
@@ -106,7 +112,6 @@ ArchiveWindow::ArchiveWindow(QWidget *parent)
 #ifdef WITH_DICOM
     actionStore = barArchive->addAction(QIcon(":buttons/dicom"), tr("Send to DICOM"), this, SLOT(onStoreClick()));
     actionStore->setShortcut(Qt::Key_F6);
-    actionStore->setEnabled(false);
 #endif
     actionEdit = barArchive->addAction(QIcon(":buttons/edit"), tr("Edit"), this, SLOT(onEditClick()));
     actionEdit->setShortcut(Qt::Key_F4);
@@ -507,8 +512,7 @@ void ArchiveWindow::onListRowChanged(int idx)
     actionDelete->setEnabled(selectedSomething);
 
 #ifdef WITH_DICOM
-    actionStore->setEnabled(selectedSomething && QFile::exists(curr.absoluteFilePath(".patient.dcm"))
-                            && !QSettings().value("storage-servers").toStringList().isEmpty());
+    actionStore->setEnabled(selectedSomething && !QSettings().value("storage-servers").toStringList().isEmpty());
 #endif
 
     stopMedia();
@@ -677,38 +681,44 @@ void ArchiveWindow::onDeleteClick()
 #ifdef WITH_DICOM
 void ArchiveWindow::onStoreClick()
 {
+    QWaitCursor wait(this);
+    StartStudyDialog dlg(true, this);
     DcmDataset patientDs;
     auto cond = patientDs.loadFile((const char*)curr.absoluteFilePath(".patient.dcm").toLocal8Bit());
-    if (cond.bad())
+    if (cond.good())
     {
-        QMessageBox::critical(this, windowTitle(),
-            tr("Failed to load patient dataset:\n\n%1").arg(QString::fromLocal8Bit(cond.text())));
+        dlg.readPatientData(&patientDs);
+    }
+
+    if (dlg.exec() != QDialog::Accepted)
+    {
         return;
     }
 
-    int userChoice = QMessageBox::question(this, windowTitle(),
-        tr("Are you sure to send the result to storage servers?"), QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Ok);
+    dlg.savePatientData(&patientDs);
+    QFileInfoList files = curr.entryInfoList(QDir::Files);
 
-    if (QMessageBox::Ok == userChoice)
+    DcmClient client; // UID_SecondaryCaptureImageStorage | UID_VideoEndoscopicImageStorage | UID_RawDataStorage
+    char seriesUID[100] = {0};
+    dcmGenerateUniqueIdentifier(seriesUID, SITE_SERIES_UID_ROOT);
+    if (client.sendToServer(this, &patientDs, files, seriesUID))
     {
-        QWaitCursor wait(this);
-        QFileInfoList files = curr.entryInfoList(QDir::Files);
-
-        DcmClient client; // UID_SecondaryCaptureImageStorage | UID_VideoEndoscopicImageStorage | UID_RawDataStorage
-        char seriesUID[100] = {0};
-        dcmGenerateUniqueIdentifier(seriesUID, SITE_SERIES_UID_ROOT);
-        if (client.sendToServer(this, &patientDs, files, seriesUID))
+        int userChoice = QMessageBox::information(this, windowTitle(),
+            tr("All files were successfully stored."), QMessageBox::Close | QMessageBox::Ok, QMessageBox::Close);
+        if (QMessageBox::Close == userChoice)
         {
-            int userChoice = QMessageBox::information(this, windowTitle(),
-                tr("All files were successfully stored."), QMessageBox::Close | QMessageBox::Ok, QMessageBox::Close);
-            if (QMessageBox::Close == userChoice)
-            {
 #ifdef WITH_TOUCH
-                onBackToMainWindowClick();
+            onBackToMainWindowClick();
 #else
+            if (parent())
+            {
                 hide();
-#endif
             }
+            else
+            {
+                close();
+            }
+#endif
         }
     }
 }

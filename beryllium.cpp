@@ -18,6 +18,7 @@
 #include "touch/clickfilter.h"
 #endif
 
+#include "archivewindow.h"
 #include "mainwindow.h"
 #include "mainwindowdbusadaptor.h"
 #include "videoeditor.h"
@@ -86,16 +87,19 @@ int main(int argc, char *argv[])
     OFConsoleApplication dcmtkApp(PRODUCT_SHORT_NAME);
     OFCommandLine cmd;
     OFLog::addOptions(cmd);
-    cmd.addOption("--edit-video",      "-ev", 1, "filename", "Start in video editing mode");
+    cmd.addOption(nullptr,           "-sync", "Run the program in X synchronous mode."); // http://qt-project.org/doc/qt-4.8/debug.html
+    cmd.addOption("--archive",       nullptr, 1, "folder name", "Start in archive mode");
+    cmd.addOption("--edit-video",    nullptr, 1, "file name", "Start in video editing mode");
+    cmd.addOption("--safe-mode",     nullptr, "Run the program in safe mode");
+
+    cmd.addOption("--auto-start",       "-a", "Show the start study dialog");
+    cmd.addOption("--accession-number", "-c", 1, "string", "Accession number");
     cmd.addOption("--patient-birthdate","-b", 1, "yyyyMMdd", "Patient birth date");
     cmd.addOption("--patient-id",       "-i", 1, "string", "Patient Id");
     cmd.addOption("--patient-name",     "-n", 1, "string", "Patient name");
     cmd.addOption("--patient-sex",      "-s", 1, "F|M", "Patient sex");
     cmd.addOption("--physician",        "-p", 1, "string", "Physician name");
     cmd.addOption("--study-name",       "-e", 1, "string", "Study name");
-    cmd.addOption("--auto-start",       "-a", "Show the start study dialog");
-    cmd.addOption("--safe-mode",     nullptr, "Run the program in safe mode");
-    cmd.addOption(nullptr,           "-sync", "Run the program in X synchronous mode."); // http://qt-project.org/doc/qt-4.8/debug.html
     dcmtkApp.parseCommandLine(cmd, argc, argv);
     OFLog::configureFromCommandLine(cmd, dcmtkApp);
 #endif
@@ -137,22 +141,21 @@ int main(int argc, char *argv[])
         app.installTranslator(&translator);
     }
 
+    QWidget* wnd = nullptr;
+
     // UI scope
     //
-    int videoEditIdx = app.arguments().indexOf("--edit-video");
-    if (videoEditIdx < 0)
-        videoEditIdx = app.arguments().indexOf("-ev");
-    if (videoEditIdx >= 0 && ++videoEditIdx < app.arguments().size())
+    int idx = app.arguments().indexOf("--edit-video");
+    if (idx >= 0 && ++idx < app.arguments().size())
     {
-        VideoEditor wndEditor;
-#ifdef WITH_TOUCH
-        ClickFilter filter;
-        wndEditor.installEventFilter(&filter);
-        wndEditor.grabGesture(Qt::TapAndHoldGesture);
-#endif
-        fullScreen? wndEditor.showFullScreen(): wndEditor.show();
-        wndEditor.loadFile(app.arguments().at(videoEditIdx));
-        errCode = app.exec();
+        wnd = new VideoEditor(app.arguments().at(idx));
+    }
+    else if (idx = app.arguments().indexOf("--archive"), idx >= 0)
+    {
+        auto wndArc = new ArchiveWindow;
+        wndArc->updateRoot();
+        wndArc->setPath(++idx < app.arguments().size()? app.arguments().at(idx): QDir::currentPath());
+        wnd = wndArc;
     }
     else
     {
@@ -163,21 +166,26 @@ int main(int argc, char *argv[])
         //
         if (bus.registerService(PRODUCT_NAMESPACE) || !MainWindow::switchToRunningInstance())
         {
-            MainWindow wnd;
+            auto wndMain = new MainWindow;
 
             // connect to DBus and register as an object
             //
-            new MainWindowDBusAdaptor(&wnd);
-            bus.registerObject("/com/irkdc/Beryllium/Main", &wnd);
-
-    #ifdef WITH_TOUCH
-            ClickFilter filter;
-            wnd.installEventFilter(&filter);
-            wnd.grabGesture(Qt::TapAndHoldGesture);
-    #endif
-            fullScreen? wnd.showFullScreen(): wnd.show();
-            errCode = app.exec();
+            new MainWindowDBusAdaptor(wndMain);
+            bus.registerObject("/com/irkdc/Beryllium/Main", wndMain);
+            wnd = wndMain;
         }
+    }
+
+    if (wnd)
+    {
+#ifdef WITH_TOUCH
+        ClickFilter filter;
+        wnd->installEventFilter(&filter);
+        wnd->grabGesture(Qt::TapAndHoldGesture);
+#endif
+        fullScreen? wnd->showFullScreen(): wnd->show();
+        errCode = app.exec();
+        delete wnd;
     }
 
     QGst::cleanup();

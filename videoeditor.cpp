@@ -65,8 +65,9 @@ static void DamnQtMadeMeDoTheSunsetByHands(QToolBar* bar)
     }
 }
 
-VideoEditor::VideoEditor(QWidget *parent)
+VideoEditor::VideoEditor(const QString& filePath, QWidget *parent)
     : QWidget(parent)
+    , filePath(filePath)
     , duration(0LL)
 {
     auto layoutMain = new QVBoxLayout;
@@ -145,6 +146,11 @@ VideoEditor::VideoEditor(QWidget *parent)
 
     DamnQtMadeMeDoTheSunsetByHands(barEditor);
     DamnQtMadeMeDoTheSunsetByHands(barMediaControls);
+
+    if (!filePath.isEmpty())
+    {
+        QTimer::singleShot(0, this, SLOT(loadFile()));
+    }
 }
 
 VideoEditor::~VideoEditor()
@@ -162,6 +168,11 @@ void VideoEditor::closeEvent(QCloseEvent *evt)
     settings.setValue("video-editor-geometry", saveGeometry());
     settings.setValue("video-editor-state", (int)windowState() & ~Qt::WindowMinimized);
     QWidget::closeEvent(evt);
+}
+
+void VideoEditor::loadFile()
+{
+    loadFile(filePath);
 }
 
 void VideoEditor::loadFile(const QString& filePath)

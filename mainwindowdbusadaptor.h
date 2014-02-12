@@ -36,7 +36,8 @@ public:
 
 public slots:
     bool startStudy
-        ( const QString& id = QString(), const QString &name = QString()
+        ( const QString &accessionNumber = QString()
+        , const QString &id = QString(), const QString &name = QString()
         , const QString &sex = QString(), const QString &birthday = QString()
         , const QString &physician = QString(), const QString &studyType = QString()
         , bool autoStart = true

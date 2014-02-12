@@ -20,7 +20,7 @@
 #include "archivewindow.h"
 #include "defaults.h"
 #include "mouseshortcut.h"
-#include "patientdialog.h"
+#include "startstudydialog.h"
 #include "qwaitcursor.h"
 #include "settings.h"
 #include "sound.h"
@@ -237,6 +237,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     updateStartButton();
 
+    accessionNumber  = getCmdLineOption("--accession-number", "-c");
     patientBirthDate = getCmdLineOption("--patient-birthdate","-b");
     patientId        = getCmdLineOption("--patient-id",       "-i");
     patientName      = getCmdLineOption("--patient-name",     "-n");
@@ -285,6 +286,7 @@ bool MainWindow::switchToRunningInstance()
 {
     auto msg = QDBusInterface(PRODUCT_NAMESPACE, "/com/irkdc/Beryllium/Main", "com.irkdc.beryllium.Main")
          .call("startStudy"
+            , getCmdLineOption("--accession-number", "-c")
             , getCmdLineOption("--patient-id",       "-i")
             , getCmdLineOption("--patient-name",     "-n")
             , getCmdLineOption("--patient-sex",      "-s")
@@ -786,6 +788,7 @@ QString MainWindow::replace(QString str, int seqNo)
     auto ts = QDateTime::currentDateTime();
 
     return str
+        .replace("%an%",        accessionNumber,     Qt::CaseInsensitive)
         .replace("%name%",      patientName,         Qt::CaseInsensitive)
         .replace("%id%",        patientId,           Qt::CaseInsensitive)
         .replace("%sex%",       patientSex,          Qt::CaseInsensitive)
@@ -894,6 +897,11 @@ void MainWindow::updateWindowTitle()
     QString windowTitle(PRODUCT_FULL_NAME);
     if (running)
     {
+        if (!accessionNumber.isEmpty())
+        {
+            windowTitle.append(tr(" - ")).append(accessionNumber);
+        }
+
         if (!patientId.isEmpty())
         {
             windowTitle.append(tr(" - ")).append(patientId);
@@ -1484,6 +1492,8 @@ void MainWindow::onEnableWidget(QWidget* widget, bool enable)
 
 void MainWindow::updateStartDialog()
 {
+    if (!accessionNumber.isEmpty())
+        dlgStart->setAccessionNumber(accessionNumber);
     if (!patientId.isEmpty())
         dlgStart->setPatientId(patientId);
     if (!patientName.isEmpty())
@@ -1532,42 +1542,13 @@ void MainWindow::onStartStudy()
     listImagesAndClips->clear();
     imageNo = clipNo = 0;
 
-    StartStudyDialog dlg(this);
+    StartStudyDialog dlg(false, this);
     dlgStart = &dlg;
 
 #ifdef WITH_DICOM
     if (patient)
     {
-        const char *str = nullptr;
-        if (patient->findAndGetString(DCM_PatientID, str, true).good())
-        {
-            patientId = QString::fromUtf8(str);
-        }
-
-        if (patient->findAndGetString(DCM_PatientName, str, true).good())
-        {
-            patientName = QString::fromUtf8(str);
-        }
-
-        if (patient->findAndGetString(DCM_PatientBirthDate, str, true).good())
-        {
-            patientBirthDate = QString::fromUtf8(str);
-        }
-
-        if (patient->findAndGetString(DCM_PatientSex, str, true).good())
-        {
-            patientSex = QString::fromUtf8(str);
-        }
-
-        if (patient->findAndGetString(DCM_ScheduledPerformingPhysicianName, str, true).good())
-        {
-            physician = QString::fromUtf8(str);
-        }
-
-        if (patient->findAndGetString(DCM_ScheduledProcedureStepDescription, str, true).good())
-        {
-            studyName = QString::fromUtf8(str);
-        }
+        dlg.readPatientData(patient);
     }
 #endif
 
@@ -1584,12 +1565,13 @@ void MainWindow::onStartStudy()
         return;
     }
 
-    patientId   = fixFileName(dlg.patientId());
-    patientName = fixFileName(dlg.patientName());
-    patientSex  = fixFileName(dlg.patientSex());
+    accessionNumber  = fixFileName(dlg.accessionNumber());
+    patientId        = fixFileName(dlg.patientId());
+    patientName      = fixFileName(dlg.patientName());
+    patientSex       = fixFileName(dlg.patientSex());
     patientBirthDate = fixFileName(dlg.patientBirthDateStr());
-    physician   = fixFileName(dlg.physician());
-    studyName   = fixFileName(dlg.studyName());
+    physician        = fixFileName(dlg.physician());
+    studyName        = fixFileName(dlg.studyName());
 
     updateOutputPath(true);
 
@@ -1598,32 +1580,16 @@ void MainWindow::onStartStudy()
 #ifdef WITH_DICOM
     if (patient)
     {
+        // Make a clone
+        //
         pendingPatient = new DcmDataset(*patient);
-        OFString cp;
-        if (pendingPatient->findAndGetOFString(DCM_SpecificCharacterSet, cp).bad() || cp.length() == 0)
-        {
-            pendingPatient->putAndInsertString(DCM_SpecificCharacterSet, "ISO_IR 192");
-        }
     }
     else
     {
         pendingPatient = new DcmDataset();
-        pendingPatient->putAndInsertString(DCM_SpecificCharacterSet, "ISO_IR 192");
-        pendingPatient->putAndInsertString(DCM_PatientID, dlg.patientId().toUtf8());
-        pendingPatient->putAndInsertString(DCM_PatientName, dlg.patientName().toUtf8());
-        pendingPatient->putAndInsertString(DCM_PatientBirthDate, dlg.patientBirthDateStr().toUtf8());
-        pendingPatient->putAndInsertString(DCM_PatientSex, QString().append(dlg.patientSexCode()).toUtf8());
     }
 
-    OFString studyInstanceUID;
-    char uuid[100] = {0};
-    if (pendingPatient->findAndGetOFString(DCM_StudyInstanceUID, studyInstanceUID).bad() || studyInstanceUID.length() == 0)
-    {
-        pendingPatient->putAndInsertString(DCM_StudyInstanceUID, dcmGenerateUniqueIdentifier(uuid, SITE_STUDY_UID_ROOT));
-    }
-
-    pendingPatient->putAndInsertString(DCM_PerformingPhysicianName, dlg.physician().toUtf8());
-    pendingPatient->putAndInsertString(DCM_StudyDescription, dlg.studyName().toUtf8());
+    dlg.savePatientData(pendingPatient);
 
 #if __BYTE_ORDER == __LITTLE_ENDIAN
     const E_TransferSyntax writeXfer = EXS_LittleEndianImplicit;
@@ -1655,10 +1621,6 @@ void MainWindow::onStartStudy()
             QMessageBox::critical(this, windowTitle(), client.lastError());
         }
         pendingPatient->putAndInsertString(DCM_SOPInstanceUID, pendingSOPInstanceUID.toUtf8());
-    }
-    else
-    {
-        pendingPatient->putAndInsertString(DCM_SOPInstanceUID, dcmGenerateUniqueIdentifier(uuid, SITE_INSTANCE_UID_ROOT));
     }
 #else
     auto localPatientInfoFile = outputPath.absoluteFilePath(".patient");
@@ -1723,6 +1685,7 @@ void MainWindow::onStopStudy()
     pendingSOPInstanceUID.clear();
 #endif
 
+    accessionNumber.clear();
     patientId.clear();
     patientName.clear();
     patientSex.clear();

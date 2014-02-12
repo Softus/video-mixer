@@ -80,6 +80,7 @@ class MainWindow : public QWidget
     QString       clipPreviewFileName;
     QString       pipelineDef;
 
+    QString       accessionNumber;
     QString       patientId;
     QString       patientSex;
     QString       patientName;

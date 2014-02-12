@@ -143,6 +143,7 @@ static void BuildCStoreDataSet(/*const*/ DcmDataset& patientDs, DcmDataset& cSto
     CopyPatientData(&patientDs, &cStoreDs);
     patientDs.findAndInsertCopyOfElement(DCM_PerformingPhysicianName, &cStoreDs);
     patientDs.findAndInsertCopyOfElement(DCM_StudyDescription, &cStoreDs);
+    patientDs.findAndInsertCopyOfElement(DCM_SeriesDescription, &cStoreDs);
 
     patientDs.findAndInsertCopyOfElement(DCM_StudyInstanceUID, &cStoreDs);
     cStoreDs.putAndInsertString(DCM_SeriesInstanceUID, seriesUID.toUtf8());
