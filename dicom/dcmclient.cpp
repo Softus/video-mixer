@@ -682,8 +682,7 @@ bool DcmClient::sendToServer(const QString& server, DcmDataset* dsPatient, const
     return cond.good();
 }
 
-bool DcmClient::sendToServer(QWidget* parent, DcmDataset* dsPatient,
-    const QFileInfoList& listFiles, const QString& seriesUID)
+bool DcmClient::sendToServer(QWidget* parent, DcmDataset* dsPatient, const QFileInfoList& listFiles)
 {
     QProgressDialog pdlg(parent);
     progressDlg = &pdlg;
@@ -697,7 +696,14 @@ bool DcmClient::sendToServer(QWidget* parent, DcmDataset* dsPatient,
 
     // Only single series for now
     //
-    int seriesNo = 1;
+    int imageSeriesNo = 1;
+    int clipsSeriesNo = 2;
+    int videoSeriesNo = 3;
+    int seriesNo = 0;
+
+    char seriesUID[100] = {0};
+    dcmGenerateUniqueIdentifier(seriesUID, SITE_SERIES_UID_ROOT);
+    int idx = strlen(seriesUID) - 1;
 
     foreach (auto server, QSettings().value("storage-servers").toStringList())
     {
@@ -713,27 +719,40 @@ bool DcmClient::sendToServer(QWidget* parent, DcmDataset* dsPatient,
                 continue;
             }
 
-            if ((!allowClips || !allowVideo) && TypeDetect(filePath).startsWith("video/"))
+            if (TypeDetect(filePath).startsWith("video/"))
             {
                 auto thumbnailFileTemplate = QStringList(file.fileName() + ".*");
                 auto isClip = !dir.entryList(thumbnailFileTemplate).isEmpty();
 
-                if (isClip && !allowClips)
+                if (isClip)
                 {
-                    qDebug() << "Clip" << filePath << "skipped";
-                    continue;
+                    if (!allowClips)
+                    {
+                        qDebug() << "Clip" << filePath << "skipped";
+                        continue;
+                    }
+                    seriesNo = clipsSeriesNo;
                 }
-                if (!isClip && !allowVideo)
+                else
                 {
-                    qDebug() << "Video log" << filePath << "skipped";
-                    continue;
+                    if (!allowVideo)
+                    {
+                        qDebug() << "Video log" << filePath << "skipped";
+                        continue;
+                    }
+                    seriesNo = videoSeriesNo;
                 }
+            }
+            else
+            {
+                seriesNo = imageSeriesNo;
             }
 
             pdlg.setValue(i);
             pdlg.setLabelText(tr("Storing '%1' to '%2'").arg(file.fileName(), server));
             qApp->processEvents();
 
+            seriesUID[idx] = '0' + seriesNo;
             if (!sendToServer(server, dsPatient, seriesUID, seriesNo, filePath, i))
             {
                 result = false;

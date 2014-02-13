@@ -708,9 +708,7 @@ void ArchiveWindow::onStoreClick()
     QFileInfoList files = curr.entryInfoList(QDir::Files);
 
     DcmClient client; // UID_SecondaryCaptureImageStorage | UID_VideoEndoscopicImageStorage | UID_RawDataStorage
-    char seriesUID[100] = {0};
-    dcmGenerateUniqueIdentifier(seriesUID, SITE_SERIES_UID_ROOT);
-    if (client.sendToServer(this, &patientDs, files, seriesUID))
+    if (client.sendToServer(this, &patientDs, files))
     {
         int userChoice = QMessageBox::information(this, windowTitle(),
             tr("All files were successfully stored."), QMessageBox::Close | QMessageBox::Ok, QMessageBox::Close);

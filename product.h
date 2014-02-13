@@ -28,7 +28,7 @@
 #define ORGANIZATION_FULL_NAME  "Irkutsk Diagnostic Center"
 #define ORGANIZATION_SHORT_NAME "irk-dc" // lowercase, no spaces
 
-#define SITE_UID_ROOT           "1.2.643.1"
+#define SITE_UID_ROOT           "1.2.643.2.66"
 #define PRODUCT_NAMESPACE       "com." ORGANIZATION_SHORT_NAME "." PRODUCT_SHORT_NAME
 
 #ifndef PRODUCT_MODALITY

@@ -64,7 +64,7 @@ public:
     //
     bool nSetRQ(const char *seriesUID, DcmDataset* patientDs, const QString& sopInstance);
 
-    bool sendToServer(QWidget* parent, DcmDataset* patientDs, const QFileInfoList& files, const QString& seriesUID);
+    bool sendToServer(QWidget* parent, DcmDataset* patientDs, const QFileInfoList& files);
 
     bool sendToServer(const QString& server, DcmDataset* patientDs, const QString& seriesUID,
         int seriesNumber, const QString& file, int instanceNumber);
