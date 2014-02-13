@@ -237,13 +237,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
     updateStartButton();
 
-    accessionNumber  = getCmdLineOption("--accession-number", "-c");
-    patientBirthDate = getCmdLineOption("--patient-birthdate","-b");
-    patientId        = getCmdLineOption("--patient-id",       "-i");
-    patientName      = getCmdLineOption("--patient-name",     "-n");
-    patientSex       = getCmdLineOption("--patient-sex",      "-s");
+    accessionNumber  = getCmdLineOption("--study-id", "-si");
+    patientBirthDate = getCmdLineOption("--patient-birthdate","-pb");
+    patientId        = getCmdLineOption("--patient-id",       "-pi");
+    patientName      = getCmdLineOption("--patient-name",     "-pn");
+    patientSex       = getCmdLineOption("--patient-sex",      "-ps");
     physician        = getCmdLineOption("--physician",        "-p");
-    studyName        = getCmdLineOption("--study-name",       "-e");
+    studyName        = getCmdLineOption("--study-description","-sd");
     auto safeMode    = qApp->queryKeyboardModifiers() == SAFE_MODE_KEYS ||
                        qApp->arguments().contains("--safe-mode") ||
                        settings.value("safe-mode", true).toBool();
@@ -286,13 +286,13 @@ bool MainWindow::switchToRunningInstance()
 {
     auto msg = QDBusInterface(PRODUCT_NAMESPACE, "/com/irkdc/Beryllium/Main", "com.irkdc.beryllium.Main")
          .call("startStudy"
-            , getCmdLineOption("--accession-number", "-c")
-            , getCmdLineOption("--patient-id",       "-i")
-            , getCmdLineOption("--patient-name",     "-n")
-            , getCmdLineOption("--patient-sex",      "-s")
-            , getCmdLineOption("--patient-birthdate","-b")
+            , getCmdLineOption("--study-id",         "-si")
+            , getCmdLineOption("--patient-id",       "-pi")
+            , getCmdLineOption("--patient-name",     "-pn")
+            , getCmdLineOption("--patient-sex",      "-ps")
+            , getCmdLineOption("--patient-birthdate","-pb")
             , getCmdLineOption("--physician",        "-p")
-            , getCmdLineOption("--study-name",       "-e")
+            , getCmdLineOption("--study-description","-sd")
             , qApp->arguments().contains("--auto-start") || qApp->arguments().contains("-a")
             );
     return msg.type() == QDBusMessage::ReplyMessage && msg.arguments().first().toBool();

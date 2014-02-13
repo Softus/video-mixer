@@ -87,19 +87,19 @@ int main(int argc, char *argv[])
     OFConsoleApplication dcmtkApp(PRODUCT_SHORT_NAME);
     OFCommandLine cmd;
     OFLog::addOptions(cmd);
-    cmd.addOption(nullptr,           "-sync", "Run the program in X synchronous mode."); // http://qt-project.org/doc/qt-4.8/debug.html
-    cmd.addOption("--archive",       nullptr, 1, "folder name", "Start in archive mode");
-    cmd.addOption("--edit-video",    nullptr, 1, "file name", "Start in video editing mode");
-    cmd.addOption("--safe-mode",     nullptr, "Run the program in safe mode");
+    cmd.addOption(nullptr,            "-sync",    "Run the program in X synchronous mode."); // http://qt-project.org/doc/qt-4.8/debug.html
+    cmd.addOption("--archive",        nullptr, 1, "folder name", "Start in archive mode");
+    cmd.addOption("--edit-video",     nullptr, 1, "file name", "Start in video editing mode");
+    cmd.addOption("--safe-mode",      nullptr,    "Run the program in safe mode");
+    cmd.addOption("--auto-start",        "-a",    "Show the start study dialog");
 
-    cmd.addOption("--auto-start",       "-a", "Show the start study dialog");
-    cmd.addOption("--accession-number", "-c", 1, "string", "Accession number");
-    cmd.addOption("--patient-birthdate","-b", 1, "yyyyMMdd", "Patient birth date");
-    cmd.addOption("--patient-id",       "-i", 1, "string", "Patient Id");
-    cmd.addOption("--patient-name",     "-n", 1, "string", "Patient name");
-    cmd.addOption("--patient-sex",      "-s", 1, "F|M", "Patient sex");
-    cmd.addOption("--physician",        "-p", 1, "string", "Physician name");
-    cmd.addOption("--study-name",       "-e", 1, "string", "Study name");
+    cmd.addOption("--study-id",         "-si", 1, "string",   "Study id");
+    cmd.addOption("--patient-birthdate","-pb", 1, "yyyyMMdd", "Patient birth date");
+    cmd.addOption("--patient-id",       "-pi", 1, "string",   "Patient Id");
+    cmd.addOption("--patient-name",     "-pn", 1, "string",   "Patient name");
+    cmd.addOption("--patient-sex",      "-ps", 1, "F|M",      "Patient sex");
+    cmd.addOption("--physician",         "-p", 1, "string",   "Physician name");
+    cmd.addOption("--study-desctiption","-sd", 1, "string",   "Study description");
     dcmtkApp.parseCommandLine(cmd, argc, argv);
     OFLog::configureFromCommandLine(cmd, dcmtkApp);
 #endif
