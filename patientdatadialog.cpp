@@ -45,13 +45,14 @@ PatientDataDialog::PatientDataDialog(bool noWorklist, QWidget *parent) :
 {
     QSettings settings;
     auto listMandatory = settings.value("new-study-mandatory-fields", DEFAULT_MANDATORY_FIELDS).toStringList();
+    auto showAccessionNumber = settings.value("patient-data-show-accession-number").toBool();
 
     setWindowTitle(tr("Patient data"));
     setMinimumSize(480, 240);
 
     auto layoutMain = new QFormLayout;
     textAccessionNumber = new QxtLineEdit;
-    if (settings.value("patient-data-show-accession-number").toBool())
+    if (showAccessionNumber)
     {
         layoutMain->addRow(tr("&Accession number"), textAccessionNumber);
     }
@@ -119,7 +120,7 @@ PatientDataDialog::PatientDataDialog(bool noWorklist, QWidget *parent) :
     if (!listMandatory.isEmpty())
     {
         auto group = new MandatoryFieldGroup(this);
-        if (listMandatory.contains("AccessionNumber") && textAccessionNumber->isVisible())
+        if (listMandatory.contains("AccessionNumber") && showAccessionNumber)
             group->add(textAccessionNumber);
         if (listMandatory.contains("PatientID"))
             group->add(textPatientId);
