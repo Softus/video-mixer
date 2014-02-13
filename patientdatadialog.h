@@ -29,7 +29,7 @@ class QLineEdit;
 QT_END_NAMESPACE
 class DcmDataset;
 
-class StartStudyDialog : public QDialog
+class PatientDataDialog : public QDialog
 {
     Q_OBJECT
     QLineEdit* textAccessionNumber;
@@ -38,11 +38,13 @@ class StartStudyDialog : public QDialog
     QComboBox* cbPatientSex;
     QDateEdit* dateBirthday;
     QComboBox* cbPhysician;
-    QComboBox* cbStudyType;
+    QComboBox* cbStudyDescription;
 
 public:
-    explicit StartStudyDialog(bool noWorklist = false, QWidget *parent = 0);
+    explicit PatientDataDialog(bool noWorklist = false, QWidget *parent = 0);
 
+    void readPatientFile(const QString& filePath);
+    void savePatientFile(const QString& filePath);
 #ifdef WITH_DICOM
     void readPatientData(DcmDataset* patient);
     void savePatientData(DcmDataset* patient);
@@ -54,7 +56,7 @@ public:
     QString patientBirthDateStr() const;
     QString patientSex() const;
     QChar   patientSexCode() const;
-    QString studyName() const;
+    QString studyDescription() const;
     QString physician() const;
     void setAccessionNumber(const QString& accessionNumber);
     void setPatientId(const QString& id);
@@ -63,9 +65,8 @@ public:
     void setPatientBirthDateStr(const QString& strDate);
 
     void setPatientSex(const QString& sex);
-    void setStudyName(const QString& name);
+    void setStudyDescription(const QString& name);
     void setPhysician(const QString& name);
-    void savePatientFile(const QString& outputPath);
 
 protected:
     virtual void showEvent(QShowEvent *);

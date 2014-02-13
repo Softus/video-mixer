@@ -26,11 +26,17 @@ MandatoryFieldsSettings::MandatoryFieldsSettings(QWidget *parent) :
     QWidget(parent)
 {
     QSettings settings;
-    auto fieldLabels = QStringList() << tr("Accession number") << tr("Patient ID")
+    auto fieldLabels = QStringList() << tr("Patient ID")
         << tr("Name") << tr("Sex") << tr("Birthday") << tr("Physician") << tr("Study type");
-    auto fieldNames = QStringList() << "AccessionNumber" << "PatientID"
+    auto fieldNames = QStringList() << "PatientID"
         << "Name" << "Sex" << "Birthday" << "Physician" << "StudyType";
     auto listMandatory = settings.value("new-study-mandatory-fields", DEFAULT_MANDATORY_FIELDS).toStringList();
+
+    if (settings.value("patient-data-show-accession-number").toBool())
+    {
+        fieldLabels << tr("Accession number");
+        fieldNames << "AccessionNumber";
+    }
 
     auto layoutMain = new QVBoxLayout;
     layoutMain->setContentsMargins(4,0,4,0);

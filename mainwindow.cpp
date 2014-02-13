@@ -20,7 +20,7 @@
 #include "archivewindow.h"
 #include "defaults.h"
 #include "mouseshortcut.h"
-#include "startstudydialog.h"
+#include "patientdatadialog.h"
 #include "qwaitcursor.h"
 #include "settings.h"
 #include "sound.h"
@@ -159,7 +159,7 @@ static void Dump(QGst::ElementPtr elm)
 
 MainWindow::MainWindow(QWidget *parent) :
     QWidget(parent),
-    dlgStart(nullptr),
+    dlgPatient(nullptr),
     archiveWindow(nullptr),
 #ifdef WITH_DICOM
     pendingPatient(nullptr),
@@ -1493,19 +1493,19 @@ void MainWindow::onEnableWidget(QWidget* widget, bool enable)
 void MainWindow::updateStartDialog()
 {
     if (!accessionNumber.isEmpty())
-        dlgStart->setAccessionNumber(accessionNumber);
+        dlgPatient->setAccessionNumber(accessionNumber);
     if (!patientId.isEmpty())
-        dlgStart->setPatientId(patientId);
+        dlgPatient->setPatientId(patientId);
     if (!patientName.isEmpty())
-        dlgStart->setPatientName(patientName);
+        dlgPatient->setPatientName(patientName);
     if (!patientSex.isEmpty())
-        dlgStart->setPatientSex(patientSex);
+        dlgPatient->setPatientSex(patientSex);
     if (!patientBirthDate.isEmpty())
-        dlgStart->setPatientBirthDateStr(patientBirthDate);
+        dlgPatient->setPatientBirthDateStr(patientBirthDate);
     if (!physician.isEmpty())
-        dlgStart->setPhysician(physician);
+        dlgPatient->setPhysician(physician);
     if (!studyName.isEmpty())
-        dlgStart->setStudyName(studyName);
+        dlgPatient->setStudyDescription(studyName);
 }
 
 #ifdef WITH_DICOM
@@ -1532,7 +1532,7 @@ void MainWindow::onStartStudy()
         return;
     }
 
-    if (dlgStart)
+    if (dlgPatient)
     {
         updateStartDialog();
         return;
@@ -1542,13 +1542,12 @@ void MainWindow::onStartStudy()
     listImagesAndClips->clear();
     imageNo = clipNo = 0;
 
-    StartStudyDialog dlg(false, this);
-    dlgStart = &dlg;
+    dlgPatient = new PatientDataDialog(false, this);
 
 #ifdef WITH_DICOM
     if (patient)
     {
-        dlg.readPatientData(patient);
+        dlgPatient->readPatientData(patient);
     }
     else
 #endif
@@ -1556,7 +1555,7 @@ void MainWindow::onStartStudy()
         updateStartDialog();
     }
 
-    switch (dlg.exec())
+    switch (dlgPatient->exec())
     {
 #ifdef WITH_DICOM
     case SHOW_WORKLIST_RESULT:
@@ -1564,17 +1563,18 @@ void MainWindow::onStartStudy()
         // passthrouht
 #endif
     case QDialog::Rejected:
-        dlgStart = nullptr;
+        delete dlgPatient;
+        dlgPatient = nullptr;
         return;
     }
 
-    accessionNumber  = fixFileName(dlg.accessionNumber());
-    patientId        = fixFileName(dlg.patientId());
-    patientName      = fixFileName(dlg.patientName());
-    patientSex       = fixFileName(dlg.patientSex());
-    patientBirthDate = fixFileName(dlg.patientBirthDateStr());
-    physician        = fixFileName(dlg.physician());
-    studyName        = fixFileName(dlg.studyName());
+    accessionNumber  = fixFileName(dlgPatient->accessionNumber());
+    patientId        = fixFileName(dlgPatient->patientId());
+    patientName      = fixFileName(dlgPatient->patientName());
+    patientSex       = fixFileName(dlgPatient->patientSex());
+    patientBirthDate = fixFileName(dlgPatient->patientBirthDateStr());
+    physician        = fixFileName(dlgPatient->physician());
+    studyName        = fixFileName(dlgPatient->studyDescription());
 
     updateOutputPath(true);
 
@@ -1592,7 +1592,7 @@ void MainWindow::onStartStudy()
         pendingPatient = new DcmDataset();
     }
 
-    dlg.savePatientData(pendingPatient);
+    dlgPatient->savePatientData(pendingPatient);
 
 #if __BYTE_ORDER == __LITTLE_ENDIAN
     const E_TransferSyntax writeXfer = EXS_LittleEndianImplicit;
@@ -1627,7 +1627,7 @@ void MainWindow::onStartStudy()
     }
 #else
     auto localPatientInfoFile = outputPath.absoluteFilePath(".patient");
-    dlg.savePatientFile(localPatientInfoFile);
+    dlgPatient->savePatientFile(localPatientInfoFile);
 #ifdef Q_WS_WIN
     SetFileAttributesW(localPatientInfoFile.toStdWString().c_str(), FILE_ATTRIBUTE_HIDDEN);
 #endif
@@ -1650,7 +1650,8 @@ void MainWindow::onStartStudy()
     updateStartButton();
     updateWindowTitle();
     displayWidget->update();
-    dlgStart = nullptr;
+    delete dlgPatient;
+    dlgPatient = nullptr;
 }
 
 void MainWindow::onStopStudy()

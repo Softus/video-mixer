@@ -47,7 +47,7 @@ class DcmDataset;
 class SlidingStackedWidget;
 class Sound;
 class Worklist;
-class StartStudyDialog;
+class PatientDataDialog;
 
 class MainWindow : public QWidget
 {
@@ -55,7 +55,7 @@ class MainWindow : public QWidget
 
     // UI
     //
-    StartStudyDialog *dlgStart;
+    PatientDataDialog *dlgPatient;
     QToolButton* btnStart;
     QToolButton* btnRecordStart;
     QToolButton* btnRecordStop;

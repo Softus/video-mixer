@@ -14,7 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "startstudydialog.h"
+#include "patientdatadialog.h"
 #include "product.h"
 #include "defaults.h"
 #include "mandatoryfieldgroup.h"
@@ -40,7 +40,7 @@
 #include <QPushButton>
 #include <QSettings>
 
-StartStudyDialog::StartStudyDialog(bool noWorklist, QWidget *parent) :
+PatientDataDialog::PatientDataDialog(bool noWorklist, QWidget *parent) :
     QDialog(parent)
 {
     QSettings settings;
@@ -50,7 +50,11 @@ StartStudyDialog::StartStudyDialog(bool noWorklist, QWidget *parent) :
     setMinimumSize(480, 240);
 
     auto layoutMain = new QFormLayout;
-    layoutMain->addRow(tr("&Accession number"), textAccessionNumber = new QxtLineEdit);
+    textAccessionNumber = new QxtLineEdit;
+    if (settings.value("patient-data-show-accession-number").toBool())
+    {
+        layoutMain->addRow(tr("&Accession number"), textAccessionNumber);
+    }
     layoutMain->addRow(tr("&Patient ID"), textPatientId = new QxtLineEdit);
     layoutMain->addRow(tr("&Name"), textPatientName = new QxtLineEdit);
     layoutMain->addRow(tr("&Sex"), cbPatientSex = new QComboBox);
@@ -73,11 +77,11 @@ StartStudyDialog::StartStudyDialog(bool noWorklist, QWidget *parent) :
     cbPhysician->setCurrentIndex(0); // Select first, if any
     cbPhysician->setEditable(true);
 
-    layoutMain->addRow(tr("Study &type"), cbStudyType = new QComboBox);
-    cbStudyType->setLineEdit(new QxtLineEdit);
-    cbStudyType->addItems(QSettings().value("studies").toStringList());
-    cbStudyType->setCurrentIndex(0); // Select first, if any
-    cbStudyType->setEditable(true);
+    layoutMain->addRow(tr("Study &type"), cbStudyDescription = new QComboBox);
+    cbStudyDescription->setLineEdit(new QxtLineEdit);
+    cbStudyDescription->addItems(QSettings().value("studies").toStringList());
+    cbStudyDescription->setCurrentIndex(0); // Select first, if any
+    cbStudyDescription->setEditable(true);
 
     auto layoutBtns = new QHBoxLayout;
 
@@ -90,6 +94,9 @@ StartStudyDialog::StartStudyDialog(bool noWorklist, QWidget *parent) :
         layoutBtns->addWidget(btnWorklist);
         btnWorklist->setEnabled(!settings.value("mwl-server").toString().isEmpty());
     }
+#else
+    // Suppres warning
+    Q_UNUSED(noWorklist)
 #endif
 
     layoutBtns->addStretch(1);
@@ -112,7 +119,7 @@ StartStudyDialog::StartStudyDialog(bool noWorklist, QWidget *parent) :
     if (!listMandatory.isEmpty())
     {
         auto group = new MandatoryFieldGroup(this);
-        if (listMandatory.contains("AccessionNumber"))
+        if (listMandatory.contains("AccessionNumber") && textAccessionNumber->isVisible())
             group->add(textAccessionNumber);
         if (listMandatory.contains("PatientID"))
             group->add(textPatientId);
@@ -125,12 +132,12 @@ StartStudyDialog::StartStudyDialog(bool noWorklist, QWidget *parent) :
         if (listMandatory.contains("Physician"))
             group->add(cbPhysician);
         if (listMandatory.contains("StudyType"))
-            group->add(cbStudyType);
+            group->add(cbStudyDescription);
         group->setOkButton(btnStart);
     }
 }
 
-void StartStudyDialog::showEvent(QShowEvent *)
+void PatientDataDialog::showEvent(QShowEvent *)
 {
     QSettings settings;
     if (settings.value("show-onboard").toBool())
@@ -140,7 +147,7 @@ void StartStudyDialog::showEvent(QShowEvent *)
     }
 }
 
-void StartStudyDialog::hideEvent(QHideEvent *)
+void PatientDataDialog::hideEvent(QHideEvent *)
 {
     QSettings settings;
     settings.setValue("new-patient-geometry", saveGeometry());
@@ -153,68 +160,68 @@ void StartStudyDialog::hideEvent(QHideEvent *)
     }
 }
 
-QString StartStudyDialog::accessionNumber() const
+QString PatientDataDialog::accessionNumber() const
 {
     return textAccessionNumber->text();
 }
 
-QString StartStudyDialog::patientId() const
+QString PatientDataDialog::patientId() const
 {
     return textPatientId->text();
 }
 
-QString StartStudyDialog::patientName() const
+QString PatientDataDialog::patientName() const
 {
     return textPatientName->text();
 }
 
-QDate StartStudyDialog::patientBirthDate() const
+QDate PatientDataDialog::patientBirthDate() const
 {
     return dateBirthday->date();
 }
 
-QString StartStudyDialog::patientBirthDateStr() const
+QString PatientDataDialog::patientBirthDateStr() const
 {
     return patientBirthDate().toString("yyyyMMdd");
 }
 
-QString StartStudyDialog::patientSex() const
+QString PatientDataDialog::patientSex() const
 {
     return cbPatientSex->currentText();
 }
 
-QChar StartStudyDialog::patientSexCode() const
+QChar PatientDataDialog::patientSexCode() const
 {
     auto idx = cbPatientSex->currentIndex();
     return idx < 0? '\x0': cbPatientSex->itemData(idx).toChar();
 }
 
-QString StartStudyDialog::studyName() const
+QString PatientDataDialog::studyDescription() const
 {
-    return cbStudyType->currentText();
+    return cbStudyDescription->currentText();
 }
 
-QString StartStudyDialog::physician() const
+QString PatientDataDialog::physician() const
 {
     return cbPhysician->currentText();
 }
 
-void StartStudyDialog::setAccessionNumber(const QString& accessionNumber)
+void PatientDataDialog::setAccessionNumber(const QString& accessionNumber)
 {
     textAccessionNumber->setText(accessionNumber);
 }
 
-void StartStudyDialog::setPatientId(const QString& id)
+void PatientDataDialog::setPatientId(const QString& id)
 {
     textPatientId->setText(id);
 }
 
-void StartStudyDialog::setPatientName(const QString& name)
+void PatientDataDialog::setPatientName(const QString& name)
 {
     textPatientName->setText(name);
 }
 
-void StartStudyDialog::setPatientSex(const QString& sex)
+void PatientDataDialog::setPatientSex(const QString& sex)
 {
     // For 'Female' search for text, for 'F' search for data
     //
@@ -230,28 +237,28 @@ void StartStudyDialog::setPatientSex(const QString& sex)
     }
 }
 
-void StartStudyDialog::setPatientBirthDate(const QDate& date)
+void PatientDataDialog::setPatientBirthDate(const QDate& date)
 {
     dateBirthday->setDate(date);
 }
 
-void StartStudyDialog::setPatientBirthDateStr(const QString& dateStr)
+void PatientDataDialog::setPatientBirthDateStr(const QString& dateStr)
 {
     setPatientBirthDate(QDate::fromString(dateStr, "yyyyMMdd"));
 }
 
-void StartStudyDialog::setStudyName(const QString& name)
+void PatientDataDialog::setStudyDescription(const QString& name)
 {
-    auto idx = cbStudyType->findText(name);
-    cbStudyType->setCurrentIndex(idx);
+    auto idx = cbStudyDescription->findText(name);
+    cbStudyDescription->setCurrentIndex(idx);
 
     if (idx < 0)
     {
-        cbStudyType->setEditText(name);
+        cbStudyDescription->setEditText(name);
     }
 }
 
-void StartStudyDialog::setPhysician(const QString& name)
+void PatientDataDialog::setPhysician(const QString& name)
 {
     auto idx = cbPhysician->findText(name);
     cbPhysician->setCurrentIndex(idx);
@@ -262,28 +269,44 @@ void StartStudyDialog::setPhysician(const QString& name)
     }
 }
 
-void StartStudyDialog::savePatientFile(const QString& outputPath)
+void PatientDataDialog::readPatientFile(const QString& filePath)
 {
-    QSettings settings(outputPath, QSettings::IniFormat);
+    QSettings settings(filePath, QSettings::IniFormat);
 
     settings.beginGroup(PRODUCT_SHORT_NAME);
-    settings.setValue("accession-number", textAccessionNumber->text());
-    settings.setValue("patient-id", textPatientId->text());
-    settings.setValue("name", textPatientName->text());
-    settings.setValue("sex", cbPatientSex->currentText());
-    settings.setValue("birthday", dateBirthday->text());
-    settings.setValue("physician", cbPhysician->currentText());
-    settings.setValue("study", cbStudyType->currentText());
+    setAccessionNumber(settings.value("accession-number").toString());
+    setPatientId(settings.value("patient-id").toString());
+    setPatientName(settings.value("name").toString());
+    setPatientSex(settings.value("sex").toString());
+    setPatientBirthDateStr(settings.value("birthday").toString());
+    setPhysician(settings.value("physician").toString());
+    setStudyDescription(settings.value("study-description").toString());
     settings.endGroup();
 }
 
-void StartStudyDialog::onShowWorklist()
+void PatientDataDialog::savePatientFile(const QString& filePath)
+{
+    QSettings settings(filePath, QSettings::IniFormat);
+
+    settings.beginGroup(PRODUCT_SHORT_NAME);
+    settings.setValue("accession-number", accessionNumber());
+    settings.setValue("patient-id", patientId());
+    settings.setValue("name", patientName());
+    settings.setValue("sex", patientSexCode());
+    settings.setValue("birthday", patientBirthDateStr());
+    settings.setValue("physician", physician());
+    settings.setValue("study-description", studyDescription());
+    settings.endGroup();
+}
+
+
+void PatientDataDialog::onShowWorklist()
 {
     done(SHOW_WORKLIST_RESULT);
 }
 
 #ifdef WITH_DICOM
-void StartStudyDialog::readPatientData(DcmDataset* patient)
+void PatientDataDialog::readPatientData(DcmDataset* patient)
 {
     if (!patient)
         return;
@@ -321,11 +344,11 @@ void StartStudyDialog::readPatientData(DcmDataset* patient)
 
     if (patient->findAndGetString(DCM_ScheduledProcedureStepDescription, str, true).good())
     {
-        setStudyName(QString::fromUtf8(str));
+        setStudyDescription(QString::fromUtf8(str));
     }
 }
 
-void StartStudyDialog::savePatientData(DcmDataset* patient)
+void PatientDataDialog::savePatientData(DcmDataset* patient)
 {
     if (!patient)
         return;
@@ -344,8 +367,8 @@ void StartStudyDialog::savePatientData(DcmDataset* patient)
     patient->putAndInsertString(DCM_PatientBirthDate, patientBirthDateStr().toUtf8());
     patient->putAndInsertString(DCM_PatientSex, QString().append(patientSexCode()).toUtf8());
     patient->putAndInsertString(DCM_PerformingPhysicianName, physician().toUtf8());
-    patient->putAndInsertString(DCM_StudyDescription, studyName().toUtf8());
-    patient->putAndInsertString(DCM_SeriesDescription, studyName().toUtf8());
+    patient->putAndInsertString(DCM_StudyDescription, studyDescription().toUtf8());
+    patient->putAndInsertString(DCM_SeriesDescription, studyDescription().toUtf8());
     patient->putAndInsertString(DCM_SOPInstanceUID, dcmGenerateUniqueIdentifier(uuid, SITE_INSTANCE_UID_ROOT));
 }
 

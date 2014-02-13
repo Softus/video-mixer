@@ -15,7 +15,7 @@
  */
 
 #include "archivewindow.h"
-#include "startstudydialog.h"
+#include "patientdatadialog.h"
 #include "defaults.h"
 #include "qwaitcursor.h"
 #include "thumbnaillist.h"
@@ -98,11 +98,8 @@ ArchiveWindow::ArchiveWindow(QWidget *parent)
     auto barArchive = new QToolBar(tr("Archive"));
     barArchive->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 #ifdef WITH_TOUCH
-    if (parent())
-    {
-        auto actionBack = barArchive->addAction(QIcon(":buttons/back"), tr("Back"), this, SLOT(onBackToMainWindowClick()));
-        actionBack->setShortcut(Qt::Key_Back);
-    }
+    actionBack = barArchive->addAction(QIcon(":buttons/back"), tr("Back"), this, SLOT(onBackToMainWindowClick()));
+    actionBack->setShortcut(Qt::Key_Back);
 #endif
 
     actionDelete = barArchive->addAction(QIcon(":buttons/delete"), tr("Delete"), this, SLOT(onDeleteClick()));
@@ -249,7 +246,14 @@ ArchiveWindow::~ArchiveWindow()
     stopMedia();
 }
 
-#ifndef WITH_TOUCH
+#ifdef WITH_TOUCH
+void ArchiveWindow::showEvent(QShowEvent *evt)
+{
+    qDebug() << parent();
+    actionBack->setVisible(parent() != nullptr);
+    QWidget::showEvent(evt);
+}
+#else
 void ArchiveWindow::hideEvent(QHideEvent *evt)
 {
     QSettings settings;
@@ -682,12 +686,17 @@ void ArchiveWindow::onDeleteClick()
 void ArchiveWindow::onStoreClick()
 {
     QWaitCursor wait(this);
-    StartStudyDialog dlg(true, this);
+    PatientDataDialog dlg(true, this);
     DcmDataset patientDs;
     auto cond = patientDs.loadFile((const char*)curr.absoluteFilePath(".patient.dcm").toLocal8Bit());
     if (cond.good())
     {
         dlg.readPatientData(&patientDs);
+    }
+    else
+    {
+        auto localPatientInfoFile = curr.absoluteFilePath(".patient");
+        dlg.readPatientFile(localPatientInfoFile);
     }
 
     if (dlg.exec() != QDialog::Accepted)

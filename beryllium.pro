@@ -71,7 +71,7 @@ SOURCES += aboutdialog.cpp \
     videorecordsettings.cpp \
     sound.cpp \
     mainwindowdbusadaptor.cpp \
-    startstudydialog.cpp
+    patientdatadialog.cpp
 
 HEADERS += aboutdialog.h \
     archivewindow.h \
@@ -100,7 +100,7 @@ HEADERS += aboutdialog.h \
     videorecordsettings.h \
     sound.h \
     mainwindowdbusadaptor.h \
-    startstudydialog.h
+    patientdatadialog.h
 
 FORMS   +=
 

@@ -41,6 +41,7 @@ class ArchiveWindow : public QWidget
 #ifdef WITH_DICOM
     QAction*               actionStore;
 #endif
+    QAction*               actionBack;
     QAction*               actionEdit;
     QAction*               actionPlay;
     QAction*               actionMode;
@@ -67,7 +68,9 @@ public:
     explicit ArchiveWindow(QWidget *parent = 0);
     ~ArchiveWindow();
 protected:
-#ifndef WITH_TOUCH
+#ifdef WITH_TOUCH
+    virtual void showEvent(QShowEvent *);
+#else
     virtual void hideEvent(QHideEvent *);
 #endif
     virtual void timerEvent(QTimerEvent *);
