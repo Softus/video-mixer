@@ -329,7 +329,7 @@ void MainWindow::timerEvent(QTimerEvent* evt)
         {
             if (countdown == recordNotify)
             {
-                sound->play(qApp->applicationDirPath() + "/../share/" PRODUCT_SHORT_NAME "/sound/notify.wav");
+                sound->play(qApp->applicationDirPath() + "/../share/" PRODUCT_SHORT_NAME "/sound/notify.ac3");
             }
             setElementProperty("displayoverlay", "text", QString::number(countdown));
         }
@@ -1245,7 +1245,7 @@ void MainWindow::onSnapshotClick()
     QString imageExt = getExt(settings.value("image-encoder", DEFAULT_IMAGE_ENCODER).toString());
     QString imageFileName = replace(settings.value("image-template", DEFAULT_IMAGE_TEMPLATE).toString(), ++imageNo).append(imageExt);
 
-    sound->play(qApp->applicationDirPath() + "/../share/" PRODUCT_SHORT_NAME "/sound/shutter2.wav");
+    sound->play(qApp->applicationDirPath() + "/../share/" PRODUCT_SHORT_NAME "/sound/shutter.ac3");
 
     setElementProperty(imageSink, "location", outputPath.absoluteFilePath(imageFileName), QGst::StateReady);
 
