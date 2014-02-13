@@ -28,6 +28,7 @@
 #include <QLabel>
 #include <QMessageBox>
 #include <QSettings>
+#include <QSlider>
 #include <QTemporaryFile>
 #include <QTimer>
 #include <QToolBar>
@@ -69,6 +70,7 @@ VideoEditor::VideoEditor(const QString& filePath, QWidget *parent)
     : QWidget(parent)
     , filePath(filePath)
     , duration(0LL)
+    , frameDuration(40000000LL)
 {
     auto layoutMain = new QVBoxLayout;
 
@@ -99,21 +101,30 @@ VideoEditor::VideoEditor(const QString& filePath, QWidget *parent)
 
     auto barMediaControls = new QToolBar(tr("Media"));
     barMediaControls->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+
     lblStart = new QLabel;
     lblStart->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     lblStart->setAlignment(Qt::AlignRight | Qt::AlignCenter);
-    lblStart->setText("00:00:00.000");
+    setLabelTime(0, lblStart);
     barMediaControls->addWidget(lblStart);
+
     auto actionSetLower = barMediaControls->addAction(QIcon(":buttons/cut_left"), tr("Head"), this, SLOT(onCutClick()));
     actionSetLower->setData(-1);
     actionSetLower->setShortcut(QKeySequence(Qt::AltModifier | Qt::Key_Left));
     actionSeekBack = barMediaControls->addAction(QIcon(":buttons/rewind"), tr("Rewing"), this, SLOT(onSeekClick()));
-    actionSeekBack->setData(-40000000);
+    actionSeekBack->setData(-frameDuration);
     actionSeekBack->setShortcut(QKeySequence(Qt::ShiftModifier | Qt::Key_Left));
+
+    lblCurr = new QLabel;
+    lblCurr->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    lblCurr->setAlignment(Qt::AlignRight | Qt::AlignCenter);
+    setLabelTime(0, lblCurr);
+    barMediaControls->addWidget(lblCurr);
+
     actionPlay = barMediaControls->addAction(QIcon(":buttons/record"), tr("Play"), this, SLOT(onPlayPauseClick()));
     actionPlay->setShortcut(QKeySequence(Qt::Key_Space));
     actionSeekFwd = barMediaControls->addAction(QIcon(":buttons/forward"),  tr("Forward"), this, SLOT(onSeekClick()));
-    actionSeekFwd->setData(+40000000);
+    actionSeekFwd->setData(+frameDuration);
     actionSeekFwd->setShortcut(QKeySequence(Qt::ShiftModifier | Qt::Key_Right));
     auto actionSetUpper = barMediaControls->addAction(QIcon(":buttons/cut_right"), tr("Tail"), this, SLOT(onCutClick()));
     actionSetUpper->setData(+1);
@@ -121,9 +132,16 @@ VideoEditor::VideoEditor(const QString& filePath, QWidget *parent)
     lblStop = new QLabel;
     lblStop->setAlignment(Qt::AlignLeft | Qt::AlignCenter);
     lblStop->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    lblStop->setText("00:00:00.000");
+    setLabelTime(0, lblStop);
     barMediaControls->addWidget(lblStop);
     layoutMain->addWidget(barMediaControls, 0, Qt::AlignJustify);
+
+    sliderPos = new QSlider(Qt::Horizontal);
+    sliderPos->setTickPosition(QSlider::TicksAbove);
+    sliderPos->setTickInterval(SLIDER_SCALE / 100);
+    sliderPos->setMaximum(SLIDER_SCALE);
+    layoutMain->addWidget(sliderPos);
+    connect(sliderPos, SIGNAL(sliderMoved(int)), this, SLOT(setPlayerPosition(int)));
 
     sliderRange = new QxtSpanSlider(Qt::Horizontal);
     sliderRange->setTickPosition(QSlider::TicksBelow);
@@ -151,6 +169,8 @@ VideoEditor::VideoEditor(const QString& filePath, QWidget *parent)
     {
         QTimer::singleShot(0, this, SLOT(loadFile()));
     }
+
+    startTimer(100);
 }
 
 VideoEditor::~VideoEditor()
@@ -168,6 +188,26 @@ void VideoEditor::closeEvent(QCloseEvent *evt)
     settings.setValue("video-editor-geometry", saveGeometry());
     settings.setValue("video-editor-state", (int)windowState() & ~Qt::WindowMinimized);
     QWidget::closeEvent(evt);
+}
+
+void VideoEditor::timerEvent(QTimerEvent *)
+{
+    if (duration >0LL && pipeline && !sliderPos->isSliderDown() )
+    {
+        QGst::PositionQueryPtr queryPos = QGst::PositionQuery::create(QGst::FormatTime);
+        if (pipeline->query(queryPos))
+        {
+            auto pos = queryPos->position();
+            if (pos > duration)
+            {
+                pos = duration;
+            }
+            //qDebug() << pos << SLIDER_SCALE << duration << pos * SLIDER_SCALE / duration;
+            sliderPos->setValue(pos * SLIDER_SCALE / duration);
+
+            setLabelTime(pos, lblCurr);
+        }
+    }
 }
 
 void VideoEditor::loadFile()
@@ -200,6 +240,7 @@ void VideoEditor::loadFile(const QString& filePath)
 
     if (pipeline)
     {
+        duration = 0LL;
         pipeline->setProperty("uri", QUrl::fromLocalFile(filePath).toEncoded());
         auto details = GstDebugGraphDetails(GST_DEBUG_GRAPH_SHOW_MEDIA_TYPE | GST_DEBUG_GRAPH_SHOW_NON_DEFAULT_PARAMS | GST_DEBUG_GRAPH_SHOW_STATES);
         GST_DEBUG_BIN_TO_DOT_FILE_WITH_TS(pipeline.staticCast<QGst::Bin>(), details, qApp->applicationName().append(".video-edit-preview").toUtf8());
@@ -216,7 +257,7 @@ void VideoEditor::loadFile(const QString& filePath)
 
 void VideoEditor::onBusMessage(const QGst::MessagePtr& message)
 {
-    //qDebug() << message->typeName() << " " << message->source()->property("name").toString();
+    qDebug() << message->typeName() << " " << message->source()->property("name").toString();
     switch (message->type())
     {
     case QGst::MessageStateChanged:
@@ -224,25 +265,36 @@ void VideoEditor::onBusMessage(const QGst::MessagePtr& message)
         break;
     case QGst::MessageAsyncDone:
         {
-            // Here we query the pipeline about the content's duration
-            // and we request that the result is returned in time format
-            //
-            QGst::DurationQueryPtr queryLen = QGst::DurationQuery::create(QGst::FormatTime);
-            duration = pipeline && pipeline->query(queryLen)? queryLen->duration(): 0LL;
-            auto text = QGst::ClockTime(duration).toTime().toString("hh:mm:ss.zzz");
-            lblStop->setText(text);
+            if (!duration && pipeline)
+            {
+                // Here we query the pipeline about the content's duration
+                // and we request that the result is returned in time format
+                //
+                QGst::DurationQueryPtr queryLen = QGst::DurationQuery::create(QGst::FormatTime);
+
+                duration = pipeline->query(queryLen)? queryLen->duration(): 0LL;
+                setLabelTime(duration, lblStop);
+
+                QGst::PositionQueryPtr queryPos = QGst::PositionQuery::create(QGst::FormatTime);
+                if (pipeline->query(queryPos) && duration > 0LL)
+                {
+                    auto min = queryPos->position() * SLIDER_SCALE / duration;
+                    sliderPos->setMinimum(min);
+                    sliderRange->setMinimum(min);
+                }
+            }
         }
         break;
     case QGst::MessageEos:
-        if (pipeline)
+        if (pipeline && duration)
         {
             // Rewind to the start and pause the video
             //
             QGst::SeekEventPtr evt = QGst::SeekEvent::create(
-                 1.0, QGst::FormatTime, QGst::SeekFlagFlush,
-                 QGst::SeekTypeSet, 0,
-                 QGst::SeekTypeNone, QGst::ClockTime::None
-             );
+                1.0, QGst::FormatTime, QGst::SeekFlagFlush,
+                QGst::SeekTypeSet, sliderRange->lowerValue() * duration / SLIDER_SCALE,
+                QGst::SeekTypeNone, QGst::ClockTime::None
+                );
 
             pipeline->sendEvent(evt);
             pipeline->setState(QGst::StatePaused);
@@ -293,9 +345,9 @@ void VideoEditor::onBusMessage(const QGst::MessagePtr& message)
 
 void VideoEditor::onStateChange(const QGst::StateChangedMessagePtr& message)
 {
-    qDebug() << message->typeName() << " " << message->source()->property("name").toString() << " " << message->oldState() << " => " << message->newState();
     if (message->source() == pipeline)
     {
+        qDebug() << message->typeName() << " " << message->source()->property("name").toString() << " " << message->oldState() << " => " << message->newState();
         if (message->oldState() == QGst::StateReady && message->newState() == QGst::StatePaused)
         {
             // Time to adjust framerate
@@ -318,7 +370,7 @@ void VideoEditor::onStateChange(const QGst::StateChangedMessagePtr& message)
 
             if (denominator > 0 && numerator > 0)
             {
-                auto frameDuration = (GST_SECOND * denominator) / numerator + 1;
+                frameDuration = (GST_SECOND * denominator) / numerator + 1;
                 //qDebug() << "Framerate " << denominator << "/" << numerator << " duration" << frameDuration;
                 actionSeekFwd->setData((int)frameDuration);
                 actionSeekBack->setData((int)-frameDuration);
@@ -342,31 +394,33 @@ void VideoEditor::setUpperPosition(int position)
     setPosition(position, lblStop);
 }
 
+void VideoEditor::setPlayerPosition(int position)
+{
+    setPosition(position, lblCurr);
+}
+
 void VideoEditor::setPosition(int position, QLabel* lbl)
 {
     qint64 seek = 0LL;
 
-    if (pipeline)
+    if (pipeline && duration > 0LL)
     {
-        //here we query the pipeline about the content's duration
-        //and we request that the result is returned in time format
-        QGst::DurationQueryPtr queryLen = QGst::DurationQuery::create(QGst::FormatTime);
-        pipeline->query(queryLen);
+        seek = duration * position / SLIDER_SCALE;
+        QGst::SeekEventPtr evt = QGst::SeekEvent::create(
+            1.0, QGst::FormatTime, QGst::SeekFlagFlush,
+            QGst::SeekTypeSet, seek,
+            QGst::SeekTypeNone, QGst::ClockTime::None
+        );
 
-        seek = queryLen->duration() * position / SLIDER_SCALE;
-        if (queryLen->duration())
-        {
-            QGst::SeekEventPtr evt = QGst::SeekEvent::create(
-                1.0, QGst::FormatTime, QGst::SeekFlagFlush,
-                QGst::SeekTypeSet, seek,
-                QGst::SeekTypeNone, QGst::ClockTime::None
-            );
-
-            pipeline->sendEvent(evt);
-        }
+        pipeline->sendEvent(evt);
     }
 
-    auto text = QGst::ClockTime(seek).toTime().toString("hh:mm:ss.zzz");
+    setLabelTime(seek, lbl);
+}
+
+void VideoEditor::setLabelTime(qint64 time, QLabel* lbl)
+{
+    auto text = QGst::ClockTime(time).toTime().toString("hh:mm:ss.zzz");
     lbl->setText(text);
 }
 
@@ -488,7 +542,7 @@ void VideoEditor::onSeekClick()
             QGst::SeekEventPtr evt = QGst::SeekEvent::create(
                  1.0, QGst::FormatTime, QGst::SeekFlagFlush,
                  QGst::SeekTypeSet, newPos,
-                 QGst::SeekTypeNone, QGst::ClockTime::None
+                 QGst::SeekTypeCur, frameDuration
              );
 
             pipeline->sendEvent(evt);
@@ -500,7 +554,20 @@ void VideoEditor::onPlayPauseClick()
 {
     if (pipeline)
     {
-        pipeline->setState(pipeline->currentState() == QGst::StatePlaying? QGst::StatePaused: QGst::StatePlaying);
+        if (pipeline->currentState() == QGst::StatePlaying)
+        {
+            pipeline->setState(QGst::StatePaused);
+        }
+        else
+        {
+            QGst::SeekEventPtr evt = QGst::SeekEvent::create(
+                1.0, QGst::FormatTime, QGst::SeekFlagFlush,
+                QGst::SeekTypeSet, sliderRange->lowerValue() * duration / SLIDER_SCALE,
+                QGst::SeekTypeSet, sliderRange->upperValue() * duration / SLIDER_SCALE + frameDuration
+                );
+            pipeline->sendEvent(evt);
+            pipeline->setState(QGst::StatePlaying);
+        }
     }
 }
 
@@ -509,18 +576,18 @@ void VideoEditor::onCutClick()
     QGst::PositionQueryPtr queryPos = QGst::PositionQuery::create(QGst::FormatTime);
     if (pipeline && pipeline->query(queryPos))
     {
-        auto value = queryPos->position() * SLIDER_SCALE / duration;
+        auto pos = queryPos->position();
+        auto value = pos * SLIDER_SCALE / duration;
         auto handle = static_cast<QAction*>(sender())->data().toInt();
-        auto text = QGst::ClockTime(queryPos->position()).toTime().toString("hh:mm:ss.zzz");
         if (handle < 0)
         {
             sliderRange->setLowerValue(value);
-            lblStart->setText(text);
+            setLabelTime(pos, lblStart);
         }
         else if (handle > 0)
         {
             sliderRange->setUpperValue(value);
-            lblStop->setText(text);
+            setLabelTime(pos, lblStop);
         }
     }
 }
