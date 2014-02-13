@@ -88,34 +88,34 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
     <name>ArchiveWindow</name>
     <message>
         <location filename="archivewindow.cpp" line="98"/>
-        <location filename="archivewindow.cpp" line="749"/>
-        <location filename="archivewindow.cpp" line="806"/>
+        <location filename="archivewindow.cpp" line="756"/>
+        <location filename="archivewindow.cpp" line="813"/>
         <source>Archive</source>
         <oldsource>archive</oldsource>
         <translation>Архив</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="108"/>
+        <location filename="archivewindow.cpp" line="105"/>
         <source>Delete</source>
         <translation>Удалить</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="146"/>
+        <location filename="archivewindow.cpp" line="143"/>
         <source>File browser</source>
         <translation>Проводник</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="133"/>
+        <location filename="archivewindow.cpp" line="130"/>
         <source>List</source>
         <translation>Список</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="103"/>
+        <location filename="archivewindow.cpp" line="101"/>
         <source>Back</source>
         <translation>Обратно</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="113"/>
+        <location filename="archivewindow.cpp" line="110"/>
         <source>Send to DICOM</source>
         <oldsource>Dicom</oldsource>
         <translation>Отправить в DICOM</translation>
@@ -125,82 +125,82 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
         <translation type="obsolete">Выбрать все</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="116"/>
+        <location filename="archivewindow.cpp" line="113"/>
         <source>Edit</source>
         <translation>Правка</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="119"/>
+        <location filename="archivewindow.cpp" line="116"/>
         <source>Up</source>
         <translation>Вверх</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="136"/>
+        <location filename="archivewindow.cpp" line="133"/>
         <source>Icons</source>
         <translation>Значки</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="139"/>
+        <location filename="archivewindow.cpp" line="136"/>
         <source>Gallery</source>
         <translation>Галерея</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="153"/>
+        <location filename="archivewindow.cpp" line="150"/>
         <source>Path</source>
         <oldsource>path</oldsource>
         <translation>Путь</translation>
     </message>
     <message>
+        <location filename="archivewindow.cpp" line="161"/>
         <location filename="archivewindow.cpp" line="164"/>
-        <location filename="archivewindow.cpp" line="167"/>
         <source>Previous</source>
         <oldsource>Prev</oldsource>
         <translation>Предыдущий</translation>
     </message>
     <message>
+        <location filename="archivewindow.cpp" line="183"/>
         <location filename="archivewindow.cpp" line="186"/>
-        <location filename="archivewindow.cpp" line="189"/>
         <source>Next</source>
         <oldsource>next</oldsource>
         <translation>Следующий</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="199"/>
+        <location filename="archivewindow.cpp" line="196"/>
         <source>Media</source>
         <oldsource>media</oldsource>
         <translation>Медия</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="200"/>
+        <location filename="archivewindow.cpp" line="197"/>
         <source>Rewing</source>
         <translation>Отмотать назад</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="204"/>
-        <location filename="archivewindow.cpp" line="1010"/>
+        <location filename="archivewindow.cpp" line="201"/>
+        <location filename="archivewindow.cpp" line="1017"/>
         <source>Play</source>
         <translation>Воспроизвести</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="207"/>
+        <location filename="archivewindow.cpp" line="204"/>
         <source>Forward</source>
         <translation>Перемотать вперёд</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="466"/>
+        <location filename="archivewindow.cpp" line="470"/>
         <source>The file was uploaded to a storage server</source>
         <oldsource>The file was uploaded to a DICOM server</oldsource>
         <translation>Файл был загружен в хранилище</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="650"/>
+        <location filename="archivewindow.cpp" line="654"/>
         <source>Are you sure to delete
 
 &apos;%1&apos;?</source>
         <translation>Вы действительно хотите удалить &apos;%1&apos;?</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="650"/>
+        <location filename="archivewindow.cpp" line="654"/>
         <source>Are you sure to delete selected items?</source>
         <translation>Вы действительно хотите удалить выбранные объекты?</translation>
     </message>
@@ -215,7 +215,7 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
         <translation type="obsolete">Вы действительно хотите отправить результат в хранилище?</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="707"/>
+        <location filename="archivewindow.cpp" line="714"/>
         <source>All files were successfully stored.</source>
         <translation>Все файлы были успешно сохранены.</translation>
     </message>
@@ -228,17 +228,17 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
         <translation type="obsolete">Вы действительно хотите отправить выбранные объекты в хранилище?</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="744"/>
+        <location filename="archivewindow.cpp" line="751"/>
         <source>Failed to launch </source>
         <translation>Ошибка при выполнении </translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="851"/>
+        <location filename="archivewindow.cpp" line="858"/>
         <source>Archive - %1</source>
         <translation>Архив - %1</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="1010"/>
+        <location filename="archivewindow.cpp" line="1017"/>
         <source>Pause</source>
         <translation>Пауза</translation>
     </message>
@@ -256,12 +256,12 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
         <translation>Принятый ID контекста представления не найден</translation>
     </message>
     <message>
-        <location filename="dicom/dcmclient.cpp" line="734"/>
+        <location filename="dicom/dcmclient.cpp" line="752"/>
         <source>Storing &apos;%1&apos; to &apos;%2&apos;</source>
         <translation>Отправка &apos;%1&apos; на &apos;%2&apos; </translation>
     </message>
     <message>
-        <location filename="dicom/dcmclient.cpp" line="742"/>
+        <location filename="dicom/dcmclient.cpp" line="761"/>
         <source>Failed to send &apos;%1&apos; to &apos;%2&apos;:
 %3
 Continue?</source>
@@ -775,7 +775,7 @@ Another study is in progress.</source>
         <translation>Карта пациента</translation>
     </message>
     <message>
-        <location filename="mandatoryfieldssettings.cpp" line="29"/>
+        <location filename="mandatoryfieldssettings.cpp" line="37"/>
         <source>Accession number</source>
         <translation>Код исследования</translation>
     </message>
@@ -811,6 +811,84 @@ Another study is in progress.</source>
         <location filename="mouseshortcut.cpp" line="41"/>
         <source>(not set)</source>
         <translation>(не задано)</translation>
+    </message>
+</context>
+<context>
+    <name>PatientDataDialog</name>
+    <message>
+        <location filename="patientdatadialog.cpp" line="49"/>
+        <source>Patient data</source>
+        <translation>Данные пациента</translation>
+    </message>
+    <message>
+        <location filename="patientdatadialog.cpp" line="56"/>
+        <source>&amp;Accession number</source>
+        <translation>К&amp;од исследования</translation>
+    </message>
+    <message>
+        <location filename="patientdatadialog.cpp" line="58"/>
+        <source>&amp;Patient ID</source>
+        <translation>&amp;Карта пациента</translation>
+    </message>
+    <message>
+        <location filename="patientdatadialog.cpp" line="59"/>
+        <source>&amp;Name</source>
+        <translation>&amp;ФИО</translation>
+    </message>
+    <message>
+        <location filename="patientdatadialog.cpp" line="60"/>
+        <source>&amp;Sex</source>
+        <translation>&amp;Пол</translation>
+    </message>
+    <message>
+        <location filename="patientdatadialog.cpp" line="62"/>
+        <source>female</source>
+        <translation>женский</translation>
+    </message>
+    <message>
+        <location filename="patientdatadialog.cpp" line="62"/>
+        <source>male</source>
+        <translation>мужской</translation>
+    </message>
+    <message>
+        <location filename="patientdatadialog.cpp" line="62"/>
+        <source>other</source>
+        <translation>иной</translation>
+    </message>
+    <message>
+        <location filename="patientdatadialog.cpp" line="70"/>
+        <source>&amp;Birthday</source>
+        <translation>Дата &amp;рождения</translation>
+    </message>
+    <message>
+        <location filename="patientdatadialog.cpp" line="72"/>
+        <source>MM/dd/yyyy</source>
+        <translation>dd/MM/yyyy</translation>
+    </message>
+    <message>
+        <location filename="patientdatadialog.cpp" line="74"/>
+        <source>P&amp;hysician</source>
+        <translation>&amp;Врач</translation>
+    </message>
+    <message>
+        <location filename="patientdatadialog.cpp" line="80"/>
+        <source>Study &amp;type</source>
+        <translation>&amp;Исследование</translation>
+    </message>
+    <message>
+        <location filename="patientdatadialog.cpp" line="92"/>
+        <source>Show work list</source>
+        <translation>Открыть рабочий лист</translation>
+    </message>
+    <message>
+        <location filename="patientdatadialog.cpp" line="104"/>
+        <source>Cancel</source>
+        <translation>Отменить</translation>
+    </message>
+    <message>
+        <location filename="patientdatadialog.cpp" line="108"/>
+        <source>Start</source>
+        <translation>Начать</translation>
     </message>
 </context>
 <context>
@@ -995,79 +1073,64 @@ Another study is in progress.</source>
         <translation type="obsolete">Новое исследование</translation>
     </message>
     <message>
-        <location filename="startstudydialog.cpp" line="49"/>
         <source>Patient data</source>
-        <translation>Данные пациента</translation>
+        <translation type="obsolete">Данные пациента</translation>
     </message>
     <message>
-        <location filename="startstudydialog.cpp" line="53"/>
         <source>&amp;Accession number</source>
-        <translation>К&amp;од исследования</translation>
+        <translation type="obsolete">К&amp;од исследования</translation>
     </message>
     <message>
-        <location filename="startstudydialog.cpp" line="54"/>
         <source>&amp;Patient ID</source>
-        <translation>&amp;Карта пациента</translation>
+        <translation type="obsolete">&amp;Карта пациента</translation>
     </message>
     <message>
-        <location filename="startstudydialog.cpp" line="55"/>
         <source>&amp;Name</source>
-        <translation>&amp;ФИО</translation>
+        <translation type="obsolete">&amp;ФИО</translation>
     </message>
     <message>
-        <location filename="startstudydialog.cpp" line="56"/>
         <source>&amp;Sex</source>
-        <translation>&amp;Пол</translation>
+        <translation type="obsolete">&amp;Пол</translation>
     </message>
     <message>
-        <location filename="startstudydialog.cpp" line="58"/>
         <source>female</source>
-        <translation>женский</translation>
+        <translation type="obsolete">женский</translation>
     </message>
     <message>
-        <location filename="startstudydialog.cpp" line="58"/>
         <source>male</source>
-        <translation>мужской</translation>
+        <translation type="obsolete">мужской</translation>
     </message>
     <message>
-        <location filename="startstudydialog.cpp" line="58"/>
         <source>other</source>
-        <translation>иной</translation>
+        <translation type="obsolete">иной</translation>
     </message>
     <message>
-        <location filename="startstudydialog.cpp" line="66"/>
         <source>&amp;Birthday</source>
-        <translation>Дата &amp;рождения</translation>
+        <translation type="obsolete">Дата &amp;рождения</translation>
     </message>
     <message>
-        <location filename="startstudydialog.cpp" line="68"/>
         <source>MM/dd/yyyy</source>
-        <translation>dd/MM/yyyy</translation>
+        <translation type="obsolete">dd/MM/yyyy</translation>
     </message>
     <message>
-        <location filename="startstudydialog.cpp" line="70"/>
         <source>P&amp;hysician</source>
-        <translation>&amp;Врач</translation>
+        <translation type="obsolete">&amp;Врач</translation>
     </message>
     <message>
-        <location filename="startstudydialog.cpp" line="76"/>
         <source>Study &amp;type</source>
-        <translation>&amp;Исследование</translation>
+        <translation type="obsolete">&amp;Исследование</translation>
     </message>
     <message>
-        <location filename="startstudydialog.cpp" line="88"/>
         <source>Show work list</source>
-        <translation>Открыть рабочий лист</translation>
+        <translation type="obsolete">Открыть рабочий лист</translation>
     </message>
     <message>
-        <location filename="startstudydialog.cpp" line="97"/>
         <source>Cancel</source>
-        <translation>Отменить</translation>
+        <translation type="obsolete">Отменить</translation>
     </message>
     <message>
-        <location filename="startstudydialog.cpp" line="101"/>
         <source>Start</source>
-        <translation>Начать</translation>
+        <translation type="obsolete">Начать</translation>
     </message>
     <message>
         <source>Start study</source>
