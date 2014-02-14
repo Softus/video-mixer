@@ -63,7 +63,7 @@ void sighandler(int signum)
 
     // Now call default signal handler which generates the core file.
     //
-    SIG_DFL(signum);
+    signal(signum, SIG_DFL);
 }
 
 int main(int argc, char *argv[])
@@ -71,7 +71,6 @@ int main(int argc, char *argv[])
     int errCode = 0;
 
     signal(SIGSEGV, sighandler);
-
     // Pass some arguments to gStreamer.
     // For example --gst-debug-level=5
     //

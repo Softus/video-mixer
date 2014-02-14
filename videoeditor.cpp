@@ -28,7 +28,6 @@
 #include <QLabel>
 #include <QMessageBox>
 #include <QSettings>
-#include <QSlider>
 #include <QTemporaryFile>
 #include <QTimer>
 #include <QToolBar>
