@@ -41,6 +41,7 @@ PKGCONFIG += gstreamer-0.10 gstreamer-base-0.10 gstreamer-interfaces-0.10 gstrea
 # libmediainfo.pc adds UNICODE, but dcmtk isn't compatible with wchar,
 # so we can't use pkgconfig for this library
 LIBS += -lmediainfo -lzen
+unix: LIBS += -lX11
 
 TARGET   = beryllium
 TEMPLATE = app

@@ -32,6 +32,10 @@
 #include <QLocale>
 #include <QSettings>
 #include <QTranslator>
+#ifdef Q_WS_X11
+#include <QX11Info>
+#include <X11/Xlib.h>
+#endif
 #include <QGst/Init>
 
 #ifdef WITH_DICOM
@@ -112,6 +116,13 @@ int main(int argc, char *argv[])
     app.setApplicationName(PRODUCT_SHORT_NAME);
     app.setApplicationVersion(PRODUCT_VERSION_STR);
     app.setWindowIcon(QIcon(":/app/product"));
+
+#ifdef Q_WS_X11
+    if (app.arguments().indexOf("-sync") || qgetenv("DO_X_SYNCHRONIZE").toInt())
+    {
+         XSynchronize(QX11Info::display(), true);
+    }
+#endif
 
     // At this time it is safe to use QSettings
     //
