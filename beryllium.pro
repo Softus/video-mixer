@@ -1,4 +1,4 @@
-# Copyright (C) 2013 Irkutsk Diagnostic Center.
+# Copyright (C) 2013-2014 Irkutsk Diagnostic Center.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -12,37 +12,36 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-isEmpty(PREFIX):  PREFIX   = /usr/local
-DEFINES   += PREFIX=$$PREFIX
+isEmpty(PREFIX): PREFIX   = /usr/local
+DEFINES += PREFIX=$$PREFIX
 
-QT       += core gui dbus
+QT += core gui dbus
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets opengl
-INCLUDEPATH += libqxt
 
-DISTRO = $$system(cat /proc/version)
+unix: DISTRO = $$system(cat /proc/version)
 
 # GCC tuning
 *-g++*:QMAKE_CXXFLAGS += -std=c++0x -Wno-multichar
 
 win32 {
     INCLUDEPATH += c:/usr/include
-    LIBS += c:/usr/lib/*.lib advapi32.lib netapi32.lib wsock32.lib
+    QMAKE_LIBDIR += c:/usr/lib
+    LIBS += advapi32.lib netapi32.lib wsock32.lib
 }
 
-unix {
-    CONFIG    += link_pkgconfig
-    greaterThan(QT_MAJOR_VERSION, 4) {
-        PKGCONFIG += Qt5GLib-2.0 Qt5GStreamer-0.10 Qt5GStreamerUi-0.10
-    }
-    else {
-        PKGCONFIG += QtGLib-2.0 QtGStreamer-0.10 QtGStreamerUi-0.10
-    }
-    PKGCONFIG += gstreamer-0.10 gstreamer-base-0.10 gstreamer-interfaces-0.10 gstreamer-pbutils-0.10 gio-2.0
-
-    # libmediainfo.pc adds UNICODE, but dcmtk isn't compatible with wchar,
-    # so we can't use pkgconfig for this library
-    LIBS += -lmediainfo -lzen
+CONFIG += link_pkgconfig
+greaterThan(QT_MAJOR_VERSION, 4) {
+    PKGCONFIG += Qt5GLib-2.0 Qt5GStreamer-0.10 Qt5GStreamerUi-0.10
 }
+else {
+    PKGCONFIG += QtGLib-2.0 QtGStreamer-0.10 QtGStreamerUi-0.10
+}
+PKGCONFIG += gstreamer-0.10 gstreamer-base-0.10 gstreamer-interfaces-0.10 gstreamer-pbutils-0.10 gio-2.0
+
+# libmediainfo.pc adds UNICODE, but dcmtk isn't compatible with wchar,
+# so we can't use pkgconfig for this library
+LIBS += -lmediainfo -lzen
+unix: LIBS += -lX11
 
 TARGET   = beryllium
 TEMPLATE = app
@@ -111,19 +110,21 @@ unix {
     INSTALLS += target
     target.path = $$PREFIX/bin
 
-	shortcut.files = beryllium.desktop
-	shortcut.path = $$PREFIX/share/applications
-	icon.files = pixmaps/beryllium.png
-	icon.path = $$PREFIX/share/icons
-	man.files = beryllium.1
-	man.path = $$PREFIX/share/man/man1
-	translations.files = beryllium_ru.qm
-	translations.path = $$PREFIX/share/beryllium/translations
-        sound.files = sound/*
-        sound.path = $$PREFIX/share/beryllium/sound
+    shortcut.files = beryllium.desktop
+    shortcut.path = $$PREFIX/share/applications
+    icon.files = pixmaps/beryllium.png
+    icon.path = $$PREFIX/share/icons
+    man.files = beryllium.1
+    man.path = $$PREFIX/share/man/man1
+    translations.files = beryllium_ru.qm
+    translations.path = $$PREFIX/share/beryllium/translations
+    sound.files = sound/*
+    sound.path = $$PREFIX/share/beryllium/sound
 
-        INSTALLS += translations sound shortcut icon man
+    INSTALLS += translations sound shortcut icon man
 }
+
+INCLUDEPATH += libqxt
 
 include (touch/touch.pri)
 include (dicom/dicom.pri) # Must be very last line of this file

@@ -20,6 +20,7 @@
 #include <QWidget>
 
 QT_BEGIN_NAMESPACE
+class QComboBox;
 class QCheckBox;
 class QLineEdit;
 class QSpinBox;
@@ -29,7 +30,7 @@ class DicomDeviceSettings : public QWidget
 {
     Q_OBJECT
     QLineEdit*    textAet;
-    QLineEdit*    textModality;
+    QComboBox*    cbModality;
     QSpinBox*     spinPort;
     QCheckBox*    checkExportClips;
     QCheckBox*    checkExportVideo;

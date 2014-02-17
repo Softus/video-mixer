@@ -31,10 +31,4 @@
 #define SITE_UID_ROOT           "1.2.643.2.66"
 #define PRODUCT_NAMESPACE       "com." ORGANIZATION_SHORT_NAME "." PRODUCT_SHORT_NAME
 
-#ifndef PRODUCT_MODALITY
-  #define PRODUCT_MODALITY              "ES"
-  #define PRODUCT_SOP_CLASS_UID_IMAGE   UID_VLEndoscopicImageStorage
-  #define PRODUCT_SOP_CLASS_UID_VIDEO   UID_VideoEndoscopicImageStorage
-#endif
-
 #endif // PRODUCT_H

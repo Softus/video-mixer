@@ -103,7 +103,7 @@ ArchiveWindow::ArchiveWindow(QWidget *parent)
 #endif
 
     actionDelete = barArchive->addAction(QIcon(":buttons/delete"), tr("Delete"), this, SLOT(onDeleteClick()));
-    actionDelete->setShortcut(Qt::Key_Meta);
+    actionDelete->setShortcut(Qt::Key_Delete);
     actionDelete->setEnabled(false);
 
 #ifdef WITH_DICOM
