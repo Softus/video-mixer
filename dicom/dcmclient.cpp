@@ -56,11 +56,7 @@ static void BuildCFindDataSet(DcmDataset& ds)
     QString modality = settings.value("worklist-modality").toString().toUpper();
     if (modality.isEmpty())
     {
-#ifdef PRODUCT_MODALITY
-        modality = PRODUCT_MODALITY;
-#else
-        modality = settings.value("modality").toString().toUpper();
-#endif
+        modality = settings.value("modality", DEFAULT_MODALITY).toString().toUpper();
     }
 
     QString aet = settings.value("worklist-aet").toString();
@@ -129,11 +125,7 @@ static void BuildCFindDataSet(DcmDataset& ds)
 static void BuildCStoreDataSet(/*const*/ DcmDataset& patientDs, DcmDataset& cStoreDs, const QString& seriesUID)
 {
     auto now = QDateTime::currentDateTime();
-#ifdef PRODUCT_MODALITY
-    auto modality = PRODUCT_MODALITY;
-#else
-    auto modality = QSettings().value("modality").toString().toUpper().toUtf8();
-#endif
+    auto modality = QSettings().value("modality", DEFAULT_MODALITY).toString().toUpper().toUtf8();
 
     if (patientDs.findAndInsertCopyOfElement(DCM_SpecificCharacterSet, &cStoreDs).bad())
     {
@@ -160,11 +152,7 @@ static void BuildNCreateDataSet(/*const*/ DcmDataset& patientDs, DcmDataset& nCr
 {
     QDateTime now = QDateTime::currentDateTime();
     QSettings settings;
-#ifdef PRODUCT_MODALITY
-    auto modality = PRODUCT_MODALITY;
-#else
-    auto modality = settings.value("modality").toString().toUpper().toUtf8();
-#endif
+    auto modality = settings.value("modality", DEFAULT_MODALITY).toString().toUpper().toUtf8();
     QString aet = settings.value("aet", qApp->applicationName().toUpper()).toString();
 
     nCreateDs.putAndInsertString(DCM_SpecificCharacterSet, "ISO_IR 192"); // UTF-8

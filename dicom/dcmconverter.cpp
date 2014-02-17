@@ -44,6 +44,30 @@
 #undef UNICODE
 #endif
 
+static const char* getImageSopClass()
+{
+    auto modality = QSettings().value("modality", DEFAULT_MODALITY).toString();
+
+    return
+        modality == "ES"? UID_VLEndoscopicImageStorage:
+        modality == "US"? UID_UltrasoundImageStorage:
+        modality == "GM"? UID_VLMicroscopicImageStorage:
+        modality == "XC"? UID_VLPhotographicImageStorage:
+        "??";
+}
+
+static const char* getVideoSopClass()
+{
+    auto modality = QSettings().value("modality", DEFAULT_MODALITY).toString();
+
+    return
+        modality == "ES"? UID_VideoEndoscopicImageStorage:
+        modality == "US"? UID_UltrasoundMultiframeImageStorage:
+        modality == "GM"? UID_VideoMicroscopicImageStorage:
+        modality == "XC"? UID_VideoPhotographicImageStorage:
+        "??";
+}
+
 class DcmConverter
 {
     MediaInfoLib::MediaInfo mi;
@@ -174,7 +198,7 @@ public:
 
         if (type == MediaInfoLib::Stream_Image)
         {
-            cond = dset->putAndInsertString(DCM_SOPClassUID, PRODUCT_SOP_CLASS_UID_IMAGE);
+            cond = dset->putAndInsertString(DCM_SOPClassUID, getImageSopClass());
             if (cond.bad())
               return cond;
 
@@ -233,7 +257,7 @@ public:
             }
             else
             {
-                cond = dset->putAndInsertString(DCM_SOPClassUID, PRODUCT_SOP_CLASS_UID_VIDEO);
+                cond = dset->putAndInsertString(DCM_SOPClassUID, getVideoSopClass());
                 if (cond.bad())
                   return cond;
 
