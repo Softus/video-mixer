@@ -46,12 +46,12 @@
       <ParseFiles>false</ParseFiles>
     </Filter>
     <Filter Include="Generated Files\Debug">
-      <UniqueIdentifier>{57649445-a274-4b6f-8b01-5df0951bfca8}</UniqueIdentifier>
+      <UniqueIdentifier>{4acfcd39-ccdb-4fc2-be8a-0bc9797f32cb}</UniqueIdentifier>
       <Extensions>cpp;moc</Extensions>
       <SourceControlFiles>False</SourceControlFiles>
     </Filter>
     <Filter Include="Generated Files\Release">
-      <UniqueIdentifier>{9c999b8d-a7fd-44db-8616-678528c3f885}</UniqueIdentifier>
+      <UniqueIdentifier>{12cd1b39-3750-4ebc-99b0-d92e2221d42a}</UniqueIdentifier>
       <Extensions>cpp;moc</Extensions>
       <SourceControlFiles>False</SourceControlFiles>
     </Filter>
@@ -66,7 +66,19 @@
     <ClCompile Include="beryllium.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="fix_mpeg_sys_type_find.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="hotkeyedit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="hotkeysettings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="mainwindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mainwindowdbusadaptor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="mandatoryfieldgroup.cpp">
@@ -75,7 +87,10 @@
     <ClCompile Include="mandatoryfieldssettings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="patientdialog.cpp">
+    <ClCompile Include="mouseshortcut.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="patientdatadialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="physicianssettings.cpp">
@@ -90,13 +105,28 @@
     <ClCompile Include="settings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="sound.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="storagesettings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="studiessettings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="thumbnaillist.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="typedetect.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="videoeditor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="videoencodingprogressdialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="videorecordsettings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="videosettings.cpp">
@@ -120,10 +150,28 @@
     <ClCompile Include="Release\moc_comboboxwithpopupsignal.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="Debug\moc_hotkeyedit.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_hotkeyedit.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_hotkeysettings.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_hotkeysettings.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
     <ClCompile Include="Debug\moc_mainwindow.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_mainwindow.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_mainwindowdbusadaptor.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_mainwindowdbusadaptor.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_mandatoryfieldgroup.cpp">
@@ -138,10 +186,16 @@
     <ClCompile Include="Release\moc_mandatoryfieldssettings.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Debug\moc_patientdialog.cpp">
+    <ClCompile Include="Debug\moc_mouseshortcut.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="Release\moc_patientdialog.cpp">
+    <ClCompile Include="Release\moc_mouseshortcut.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_patientdatadialog.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_patientdatadialog.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_physicianssettings.cpp">
@@ -174,6 +228,12 @@
     <ClCompile Include="Release\moc_settings.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="Debug\moc_sound.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_sound.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
     <ClCompile Include="Debug\moc_storagesettings.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
@@ -186,10 +246,28 @@
     <ClCompile Include="Release\moc_studiessettings.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="Debug\moc_thumbnaillist.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_thumbnaillist.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
     <ClCompile Include="Debug\moc_videoeditor.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_videoeditor.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_videoencodingprogressdialog.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_videoencodingprogressdialog.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_videorecordsettings.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_videorecordsettings.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_videosettings.cpp">
@@ -200,57 +278,6 @@
     </ClCompile>
     <ClCompile Include="GeneratedFiles\qrc_beryllium.cpp">
       <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_videoencodingprogressdialog.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_videoencodingprogressdialog.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="videoencodingprogressdialog.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="typedetect.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="fix_mpeg_sys_type_find.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_hotkeyedit.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_hotkeyedit.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_hotkeysettings.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_hotkeysettings.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_mouseshortcut.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_mouseshortcut.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="hotkeyedit.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="hotkeysettings.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="mouseshortcut.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="thumbnaillist.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_thumbnaillist.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_thumbnaillist.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -263,7 +290,19 @@
     <CustomBuild Include="comboboxwithpopupsignal.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
+    <ClInclude Include="defaults.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <CustomBuild Include="hotkeyedit.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="hotkeysettings.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
     <CustomBuild Include="mainwindow.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="mainwindowdbusadaptor.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="mandatoryfieldgroup.h">
@@ -272,7 +311,10 @@
     <CustomBuild Include="mandatoryfieldssettings.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="patientdialog.h">
+    <CustomBuild Include="mouseshortcut.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="patientdatadialog.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="physicianssettings.h">
@@ -296,31 +338,31 @@
     <CustomBuild Include="settings.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="sound.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
     <CustomBuild Include="storagesettings.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="studiessettings.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="videoeditor.h">
+    <CustomBuild Include="thumbnaillist.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="videosettings.h">
+    <ClInclude Include="typedetect.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <CustomBuild Include="videoeditor.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="videoencodingprogressdialog.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="hotkeyedit.h">
+    <CustomBuild Include="videorecordsettings.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="hotkeysettings.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="mouseshortcut.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="thumbnaillist.h">
+    <CustomBuild Include="videosettings.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>
@@ -345,6 +387,12 @@
     <None Include="pixmaps\camera.png">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="pixmaps\cut_left.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="pixmaps\cut_right.png">
+      <Filter>Resource Files</Filter>
+    </None>
     <None Include="pixmaps\database.png">
       <Filter>Resource Files</Filter>
     </None>
@@ -355,6 +403,15 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="pixmaps\dicom.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="pixmaps\edit.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="pixmaps\file_save.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="pixmaps\file_save_as.png">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="pixmaps\film.png">
@@ -414,13 +471,5 @@
     <None Include="pixmaps\user_manage.png">
       <Filter>Resource Files</Filter>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="defaults.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="typedetect.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>
