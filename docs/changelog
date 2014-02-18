@@ -1,13 +1,22 @@
+beryllium (0.5.0) debian;
+
+  * Confirmation settings
+  * Modality can be selected from one of four build-ins
+  * Real OID (1.2.643.2.66)
+
+ -- Pavel Bludov <pbludov@gmail.com>  Tue, 18 Feb 2014 13:45:00 +0900
+
 beryllium (0.4.3) debian;
 
   * New field: Accession number is hidden by default
-  * Clips & images uses different series no/series uid
+  * Clips & images uses different series_no/series_uid
 
  -- Pavel Bludov <pbludov@gmail.com>  Thu, 13 Feb 2014 11:22:00 +0900
 
 beryllium (0.4.2) debian;
 
   * New field: Accession number
+  * startStudy new parameter: (accessionNumber,id,name,sex,bd,phys,study)
   * Dedicated archive window
 
  -- Pavel Bludov <pbludov@gmail.com>  Wed, 12 Feb 2014 19:12:00 +0900

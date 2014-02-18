@@ -244,6 +244,39 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
     </message>
 </context>
 <context>
+    <name>ConfirmationSettings</name>
+    <message>
+        <location filename="confirmationsettings.cpp" line="34"/>
+        <source>Capture window</source>
+        <translation>Окно захвата</translation>
+    </message>
+    <message>
+        <location filename="confirmationsettings.cpp" line="37"/>
+        <source>&amp;Start study</source>
+        <translation>&amp;Начать исследование</translation>
+    </message>
+    <message>
+        <location filename="confirmationsettings.cpp" line="39"/>
+        <source>&amp;End study</source>
+        <translation>&amp;Завершить исследование</translation>
+    </message>
+    <message>
+        <location filename="confirmationsettings.cpp" line="43"/>
+        <source>Archive window</source>
+        <translation>Окно захвата</translation>
+    </message>
+    <message>
+        <location filename="confirmationsettings.cpp" line="46"/>
+        <source>&amp;Delete items</source>
+        <translation>&amp;Удалить объект(ы)</translation>
+    </message>
+    <message>
+        <location filename="confirmationsettings.cpp" line="48"/>
+        <source>S&amp;end to storage</source>
+        <translation>&amp;Отправить в хранилище</translation>
+    </message>
+</context>
+<context>
     <name>DcmClient</name>
     <message>
         <location filename="dicom/dcmclient.cpp" line="279"/>
@@ -897,21 +930,22 @@ Another study is in progress.</source>
     </message>
     <message>
         <location filename="patientdatadialog.cpp" line="94"/>
-        <source>Show this dialog if the Shift key is down or some data is required</source>
-        <translation>Показывать окно если нажат Shift или заданы не все данные</translation>
+        <source>Show this dialog if the Shift key is down or some data is required.</source>
+        <oldsource>Show this dialog if the Shift key is down or some data is required</oldsource>
+        <translation>Показывать окно если нажат Shift или заданы не все данные.</translation>
     </message>
     <message>
-        <location filename="patientdatadialog.cpp" line="106"/>
+        <location filename="patientdatadialog.cpp" line="109"/>
         <source>Show work list</source>
         <translation>Открыть рабочий лист</translation>
     </message>
     <message>
-        <location filename="patientdatadialog.cpp" line="118"/>
+        <location filename="patientdatadialog.cpp" line="121"/>
         <source>Cancel</source>
         <translation>Отменить</translation>
     </message>
     <message>
-        <location filename="patientdatadialog.cpp" line="122"/>
+        <location filename="patientdatadialog.cpp" line="125"/>
         <source>Start</source>
         <translation>Начать</translation>
     </message>
@@ -1009,92 +1043,97 @@ Another study is in progress.</source>
 <context>
     <name>Settings</name>
     <message>
-        <location filename="settings.cpp" line="70"/>
+        <location filename="settings.cpp" line="71"/>
         <source>Appl&amp;y</source>
         <translation>Применит&amp;ь</translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="73"/>
+        <location filename="settings.cpp" line="74"/>
         <source>Cancel</source>
         <translation>Отмена</translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="76"/>
+        <location filename="settings.cpp" line="77"/>
         <source>Ok</source>
         <translation>ОК</translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="87"/>
+        <location filename="settings.cpp" line="88"/>
         <source>Settings</source>
         <translation>Настройки</translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="101"/>
+        <location filename="settings.cpp" line="102"/>
         <source>DICOM MWL/MPPS</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="107"/>
+        <location filename="settings.cpp" line="108"/>
         <source>Video source</source>
         <translation>Источник видео</translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="108"/>
+        <location filename="settings.cpp" line="109"/>
         <source>Video recording</source>
         <translation>Запись видео</translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="109"/>
+        <location filename="settings.cpp" line="110"/>
         <source>Storage</source>
         <translation>Хранилище</translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="110"/>
+        <location filename="settings.cpp" line="111"/>
         <source>Physicians</source>
         <translation>Врачи</translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="111"/>
+        <location filename="settings.cpp" line="112"/>
         <source>Studies</source>
         <translation>Исследования</translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="99"/>
+        <location filename="settings.cpp" line="100"/>
         <source>DICOM device</source>
         <translation>DICOM устройство</translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="100"/>
+        <location filename="settings.cpp" line="101"/>
         <source>DICOM servers</source>
         <translation>DICOM сервера</translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="102"/>
+        <location filename="settings.cpp" line="103"/>
         <source>DICOM storage</source>
         <translation>DICOM хранилище</translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="103"/>
+        <location filename="settings.cpp" line="104"/>
         <source>Worklist column display</source>
         <translation>Колонки рабочего листа</translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="104"/>
+        <location filename="settings.cpp" line="105"/>
         <source>Worklist query settings</source>
         <translation>Настройки рабочего листа</translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="112"/>
+        <location filename="settings.cpp" line="113"/>
         <source>Mandatory fields</source>
         <translation>Обязательные поля</translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="113"/>
+        <location filename="settings.cpp" line="114"/>
         <source>Hotkeys</source>
         <translation>Комбинации клавиш</translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="162"/>
+        <location filename="settings.cpp" line="115"/>
+        <source>Confirmations</source>
+        <translation>Подтверждения</translation>
+    </message>
+    <message>
+        <location filename="settings.cpp" line="164"/>
         <source>Close</source>
         <translation>Закрыть</translation>
     </message>

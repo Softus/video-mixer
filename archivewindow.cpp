@@ -696,7 +696,7 @@ void ArchiveWindow::onDeleteClick()
 void ArchiveWindow::onStoreClick()
 {
     QWaitCursor wait(this);
-    PatientDataDialog dlg(true, "start-study", this);
+    PatientDataDialog dlg(true, "archive-store", this);
     DcmDataset patientDs;
     auto cond = patientDs.loadFile((const char*)curr.absoluteFilePath(".patient.dcm").toLocal8Bit());
     if (cond.good())

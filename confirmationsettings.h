@@ -14,26 +14,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef VIDEORECORDSETTINGS_H
-#define VIDEORECORDSETTINGS_H
+#ifndef CONFIRMATIONSETTINGS_H
+#define CONFIRMATIONSETTINGS_H
 
 #include <QWidget>
 
 QT_BEGIN_NAMESPACE
 class QCheckBox;
-class QSpinBox;
 QT_END_NAMESPACE
 
-class VideoRecordSettings : public QWidget
+class ConfirmationSettings : public QWidget
 {
     Q_OBJECT
-    QSpinBox *spinCountdown;
-    QCheckBox *checkLimit;
-    QSpinBox *spinNotify;
-    QCheckBox *checkNotify;
+    QCheckBox* checkStartStudy;
+    QCheckBox* checkEndStudy;
+    QCheckBox* checkDelete;
+    QCheckBox* checkStore;
 
 public:
-    Q_INVOKABLE explicit VideoRecordSettings(QWidget *parent = 0);
+    Q_INVOKABLE explicit ConfirmationSettings(QWidget *parent = 0);
     
 signals:
     
@@ -41,4 +40,4 @@ public slots:
     void save();
 };
 
-#endif // VIDEORECORDSETTINGS_H
+#endif // CONFIRMATIONSETTINGS_H

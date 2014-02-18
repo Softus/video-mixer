@@ -91,11 +91,14 @@ PatientDataDialog::PatientDataDialog(bool noWorklist, const QString& settingsKey
     // Empty row
     layoutMain->addRow(new QLabel, new QLabel);
 
-    checkDontShow = new QCheckBox(tr("Show this dialog if the Shift key is down or some data is required"));
+    checkDontShow = new QCheckBox(tr("Show this dialog if the Shift key is down or some data is required."));
     layoutMain->addRow(nullptr, checkDontShow);
-    settings.beginGroup("confirmations");
-    checkDontShow->setChecked(settings.value(settingsKey).toBool());
-    settings.endGroup();
+    if (!qApp->queryKeyboardModifiers().testFlag(Qt::ShiftModifier))
+    {
+        settings.beginGroup("confirmations");
+        checkDontShow->setChecked(settings.value(settingsKey).toBool());
+        settings.endGroup();
+    }
 
     auto layoutBtns = new QHBoxLayout;
 

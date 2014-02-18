@@ -71,7 +71,8 @@ SOURCES += aboutdialog.cpp \
     sound.cpp \
     mainwindowdbusadaptor.cpp \
     patientdatadialog.cpp \
-    libqxt/qxtconfirmationmessage.cpp
+    libqxt/qxtconfirmationmessage.cpp \
+    confirmationsettings.cpp
 
 HEADERS += aboutdialog.h \
     archivewindow.h \
@@ -101,7 +102,8 @@ HEADERS += aboutdialog.h \
     sound.h \
     mainwindowdbusadaptor.h \
     patientdatadialog.h \
-    libqxt/qxtconfirmationmessage.h
+    libqxt/qxtconfirmationmessage.h \
+    confirmationsettings.h
 
 FORMS   +=
 

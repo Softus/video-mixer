@@ -1230,7 +1230,7 @@ void MainWindow::onStartClick()
         QxtConfirmationMessage msg(QMessageBox::Question, windowTitle()
             , tr("End the study?"), QString(), QMessageBox::Yes | QMessageBox::No, this);
         msg.setSettingsPath("confirmations");
-        msg.setOverrideSettingsKey("capture-end");
+        msg.setOverrideSettingsKey("end-study");
         msg.setRememberOnReject(false);
         msg.setDefaultButton(QMessageBox::Yes);
         if (qApp->queryKeyboardModifiers().testFlag(Qt::ShiftModifier))
@@ -1552,7 +1552,7 @@ void MainWindow::onStartStudy()
     listImagesAndClips->clear();
     imageNo = clipNo = 0;
 
-    dlgPatient = new PatientDataDialog(false, "archive-store", this);
+    dlgPatient = new PatientDataDialog(false, "start-study", this);
 
 #ifdef WITH_DICOM
     if (patient)
