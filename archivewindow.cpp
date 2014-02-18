@@ -54,6 +54,7 @@
 #include <QToolBar>
 #include <QToolButton>
 #include <QUrl>
+#include <QxtConfirmationMessage>
 
 #include <QGlib/Connect>
 #include <QGlib/Error>
@@ -650,11 +651,20 @@ void ArchiveWindow::onDeleteClick()
     listFiles->clearSelection();
     listFiles->setCurrentRow(-1);
 
-    int userChoice = QMessageBox::question(this, windowTitle(),
-        items.count() == 1? tr("Are you sure to delete\n\n'%1'?").arg(items.first()->text()): tr("Are you sure to delete selected items?"),
-        QMessageBox::Ok, QMessageBox::Cancel | QMessageBox::Default);
+    auto text = items.count() == 1? tr("Are you sure to delete\n\n'%1'?").arg(items.first()->text()):
+                                    tr("Are you sure to delete selected items?");
+    QxtConfirmationMessage msg(QMessageBox::Question, windowTitle()
+        , text, QString(), QMessageBox::Ok | QMessageBox::Cancel, this);
+    msg.setSettingsPath("confirmations");
+    msg.setOverrideSettingsKey("archive-delete");
+    msg.setRememberOnReject(false);
+    msg.setDefaultButton(QMessageBox::Cancel);
+    if (qApp->queryKeyboardModifiers().testFlag(Qt::ShiftModifier))
+    {
+        msg.reset();
+    }
 
-    if (QMessageBox::Ok == userChoice)
+    if (QMessageBox::Ok == msg.exec())
     {
         stopMedia();
         QWaitCursor wait(this);
@@ -686,7 +696,7 @@ void ArchiveWindow::onDeleteClick()
 void ArchiveWindow::onStoreClick()
 {
     QWaitCursor wait(this);
-    PatientDataDialog dlg(true, this);
+    PatientDataDialog dlg(true, "start-study", this);
     DcmDataset patientDs;
     auto cond = patientDs.loadFile((const char*)curr.absoluteFilePath(".patient.dcm").toLocal8Bit());
     if (cond.good())

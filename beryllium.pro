@@ -70,7 +70,8 @@ SOURCES += aboutdialog.cpp \
     videorecordsettings.cpp \
     sound.cpp \
     mainwindowdbusadaptor.cpp \
-    patientdatadialog.cpp
+    patientdatadialog.cpp \
+    libqxt/qxtconfirmationmessage.cpp
 
 HEADERS += aboutdialog.h \
     archivewindow.h \
@@ -99,7 +100,8 @@ HEADERS += aboutdialog.h \
     videorecordsettings.h \
     sound.h \
     mainwindowdbusadaptor.h \
-    patientdatadialog.h
+    patientdatadialog.h \
+    libqxt/qxtconfirmationmessage.h
 
 FORMS   +=
 

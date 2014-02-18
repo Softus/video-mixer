@@ -23,6 +23,7 @@
 #define SHOW_WORKLIST_RESULT 100
 
 QT_BEGIN_NAMESPACE
+class QCheckBox;
 class QComboBox;
 class QDateEdit;
 class QLineEdit;
@@ -32,16 +33,20 @@ class DcmDataset;
 class PatientDataDialog : public QDialog
 {
     Q_OBJECT
-    QLineEdit* textAccessionNumber;
-    QLineEdit* textPatientId;
-    QLineEdit* textPatientName;
-    QComboBox* cbPatientSex;
-    QDateEdit* dateBirthday;
-    QComboBox* cbPhysician;
-    QComboBox* cbStudyDescription;
+
+    QString      settingsKey;
+    QLineEdit*   textAccessionNumber;
+    QLineEdit*   textPatientId;
+    QLineEdit*   textPatientName;
+    QComboBox*   cbPatientSex;
+    QDateEdit*   dateBirthday;
+    QComboBox*   cbPhysician;
+    QComboBox*   cbStudyDescription;
+    QCheckBox*   checkDontShow;
+    QPushButton* btnStart;
 
 public:
-    explicit PatientDataDialog(bool noWorklist = false, QWidget *parent = 0);
+    explicit PatientDataDialog(bool noWorklist = false, const QString &settingsKey = QString(), QWidget *parent = 0);
 
     void readPatientFile(const QString& filePath);
     void savePatientFile(const QString& filePath);
@@ -67,10 +72,12 @@ public:
     void setPatientSex(const QString& sex);
     void setStudyDescription(const QString& name);
     void setPhysician(const QString& name);
+    int exec();
 
 protected:
     virtual void showEvent(QShowEvent *);
     virtual void hideEvent(QHideEvent *);
+    virtual void done(int result);
 
 signals:
 

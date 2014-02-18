@@ -63,6 +63,7 @@
 #include <QToolBar>
 #include <QToolButton>
 #include <QUrl>
+#include <QxtConfirmationMessage>
 
 // From QtGstreamer SDK
 //
@@ -1226,10 +1227,18 @@ void MainWindow::onStartClick()
     }
     else
     {
-        auto userChoice = QMessageBox::question(this, windowTitle(),
-           tr("End the study?"), QMessageBox::Yes | QMessageBox::Default, QMessageBox::No);
+        QxtConfirmationMessage msg(QMessageBox::Question, windowTitle()
+            , tr("End the study?"), QString(), QMessageBox::Yes | QMessageBox::No, this);
+        msg.setSettingsPath("confirmations");
+        msg.setOverrideSettingsKey("capture-end");
+        msg.setRememberOnReject(false);
+        msg.setDefaultButton(QMessageBox::Yes);
+        if (qApp->queryKeyboardModifiers().testFlag(Qt::ShiftModifier))
+        {
+            msg.reset();
+        }
 
-        if (userChoice == QMessageBox::Yes)
+        if (QMessageBox::Yes == msg.exec())
         {
             onStopStudy();
 
@@ -1543,7 +1552,7 @@ void MainWindow::onStartStudy()
     listImagesAndClips->clear();
     imageNo = clipNo = 0;
 
-    dlgPatient = new PatientDataDialog(false, this);
+    dlgPatient = new PatientDataDialog(false, "archive-store", this);
 
 #ifdef WITH_DICOM
     if (patient)

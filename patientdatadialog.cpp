@@ -29,26 +29,30 @@
 #include <dcmtk/dcmdata/dcdeftag.h>
 #endif
 
+#include <QApplication>
 #include <QBoxLayout>
+#include <QCheckBox>
 #include <QComboBox>
 #include <QDateEdit>
 #include <QDBusInterface>
 #include <QDebug>
 #include <QFormLayout>
-#include <QxtLineEdit>
+#include <QLabel>
 #include <QLocale>
 #include <QPushButton>
 #include <QSettings>
+#include <QxtLineEdit>
 
-PatientDataDialog::PatientDataDialog(bool noWorklist, QWidget *parent) :
-    QDialog(parent)
+PatientDataDialog::PatientDataDialog(bool noWorklist, const QString& settingsKey, QWidget *parent)
+    : QDialog(parent)
+    , settingsKey(settingsKey)
 {
     QSettings settings;
     auto listMandatory = settings.value("new-study-mandatory-fields", DEFAULT_MANDATORY_FIELDS).toStringList();
     auto showAccessionNumber = settings.value("patient-data-show-accession-number").toBool();
 
     setWindowTitle(tr("Patient data"));
-    setMinimumSize(480, 240);
+    setMinimumSize(480, 300);
 
     auto layoutMain = new QFormLayout;
     textAccessionNumber = new QxtLineEdit;
@@ -84,6 +88,15 @@ PatientDataDialog::PatientDataDialog(bool noWorklist, QWidget *parent) :
     cbStudyDescription->setCurrentIndex(0); // Select first, if any
     cbStudyDescription->setEditable(true);
 
+    // Empty row
+    layoutMain->addRow(new QLabel, new QLabel);
+
+    checkDontShow = new QCheckBox(tr("Show this dialog if the Shift key is down or some data is required"));
+    layoutMain->addRow(nullptr, checkDontShow);
+    settings.beginGroup("confirmations");
+    checkDontShow->setChecked(settings.value(settingsKey).toBool());
+    settings.endGroup();
+
     auto layoutBtns = new QHBoxLayout;
 
 #ifdef WITH_DICOM
@@ -106,7 +119,7 @@ PatientDataDialog::PatientDataDialog(bool noWorklist, QWidget *parent) :
     connect(btnReject, SIGNAL(clicked()), this, SLOT(reject()));
     layoutBtns->addWidget(btnReject);
 
-    auto btnStart = new QPushButton(tr("Start"));
+    btnStart = new QPushButton(tr("Start"));
     connect(btnStart, SIGNAL(clicked()), this, SLOT(accept()));
     btnStart->setDefault(true);
     layoutBtns->addWidget(btnStart);
@@ -159,6 +172,31 @@ void PatientDataDialog::hideEvent(QHideEvent *)
         QDBusInterface("org.onboard.Onboard", "/org/onboard/Onboard/Keyboard",
                        "org.onboard.Onboard.Keyboard").call( "Hide");
     }
+}
+
+void PatientDataDialog::done(int result)
+{
+    if (result == QDialog::Accepted && checkDontShow->isChecked())
+    {
+        QSettings settings;
+        settings.beginGroup("confirmations");
+        settings.setValue(settingsKey, true);
+    }
+
+    QDialog::done(result);
+}
+
+int PatientDataDialog::exec()
+{
+    QSettings settings;
+    settings.beginGroup("confirmations");
+    if (!qApp->queryKeyboardModifiers().testFlag(Qt::ShiftModifier) &&
+        settings.value(settingsKey).toBool() && btnStart->isEnabled())
+    {
+        return QDialog::Accepted;
+    }
+
+    return QDialog::exec();
 }
 
 QString PatientDataDialog::accessionNumber() const
