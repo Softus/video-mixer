@@ -290,19 +290,6 @@ static QGst::IntRange getRange(const QGlib::Value value)
     return ok? QGst::IntRange(intValue, intValue): value.get<QGst::IntRange>();
 }
 
-void VideoSettings::addFrameSize(const QSize& size, const QSize& selectedSize)
-{
-    if (listSizes->findData(size) < 0)
-    {
-        QString name = tr("%1x%2").arg(size.width()).arg(size.height());
-        listSizes->addItem(name, size);
-        if (size == selectedSize)
-        {
-            listSizes->setCurrentIndex(listSizes->count() - 1);
-        }
-    }
-}
-
 void VideoSettings::formatChanged(int index)
 {
     listSizes->clear();
@@ -315,6 +302,7 @@ void VideoSettings::formatChanged(int index)
         return;
     }
 
+    QList<QSize> sizes;
     auto selectedSize = QSettings().value("size").toSize();
     for (uint i = 0; i < caps->size(); ++i)
     {
@@ -334,16 +322,50 @@ void VideoSettings::formatChanged(int index)
             continue;
         }
 
-        while (widthRange.start < widthRange.end && heightRange.start < heightRange.end)
+        // Iterate from min to max (160x120,320x240,640x480)
+        //
+        auto width = widthRange.start;
+        auto height = heightRange.start;
+        while (width <= widthRange.end && height <= heightRange.end)
         {
-            addFrameSize(QSize(widthRange.start, heightRange.start), selectedSize);
-            widthRange.start <<= 1;
-            heightRange.start <<= 1;
+            sizes.append(QSize(width, height));
+            width <<= 1;
+            height <<= 1;
         }
 
-        // Last one
-        //
-        addFrameSize(QSize(widthRange.end, heightRange.end), selectedSize);
+        if ((width >> 1) != widthRange.end || (height >> 1) != heightRange.end)
+        {
+            // Iterate from max to min  (720x576,360x288,180x144)
+            //
+            width = widthRange.end;
+            height = heightRange.end;
+            while (width > widthRange.start && height > heightRange.start)
+            {
+                sizes.append(QSize(width, height));
+                width >>= 1;
+                height >>= 1;
+            }
+        }
+    }
+
+    // Sort resolutions descending
+    //
+    qSort(sizes.begin(), sizes.end(),
+        [](const QSize &s1, const QSize &s2) { return s1.width() * s1.height() > s2.width() * s2.height(); }
+        );
+
+    // And remove duplicates
+    //
+    sizes.erase(std::unique (sizes.begin(), sizes.end()), sizes.end());
+
+    Q_FOREACH(auto size, sizes)
+    {
+        QString name = tr("%1x%2").arg(size.width()).arg(size.height());
+        listSizes->addItem(name, size);
+        if (size == selectedSize)
+        {
+            listSizes->setCurrentIndex(listSizes->count() - 1);
+        }
     }
 }
 

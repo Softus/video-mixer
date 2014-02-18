@@ -63,7 +63,6 @@ class VideoSettings : public QWidget
 
     void updateDeviceList(const char *elmName, const char *propName);
     void updateGstList(const char* setting, const char* def, unsigned long long type, QComboBox* cb);
-    void addFrameSize(const QSize& size, const QSize &selectedSize);
 
 public:
     Q_INVOKABLE explicit VideoSettings(QWidget *parent = 0);
