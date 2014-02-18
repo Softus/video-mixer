@@ -321,16 +321,17 @@ void MainWindow::timerEvent(QTimerEvent* evt)
 {
     if (evt->timerId() == recordTimerId)
     {
-        if (--countdown == 0)
+        if (--countdown <= recordNotify)
+        {
+            sound->play(qApp->applicationDirPath() + "/../share/" PRODUCT_SHORT_NAME "/sound/notify.ac3");
+        }
+
+        if (countdown == 0)
         {
             onRecordStopClick();
         }
         else
         {
-            if (countdown == recordNotify)
-            {
-                sound->play(qApp->applicationDirPath() + "/../share/" PRODUCT_SHORT_NAME "/sound/notify.ac3");
-            }
             setElementProperty("displayoverlay", "text", QString::number(countdown));
         }
     }
