@@ -102,7 +102,7 @@ void VideoSettings::showEvent(QShowEvent *e)
     //
     updateDeviceList(PLATFORM_SPECIFIC_SOURCE, PLATFORM_SPECIFIC_PROPERTY);
 
-#ifndef Q_WS_WIN
+#ifndef Q_OS_WIN
     // Populate firewire list
     //
     updateDeviceList("dv1394src", "guid");

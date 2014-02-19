@@ -82,7 +82,7 @@
 
 #define SAFE_MODE_KEYS (Qt::AltModifier | Qt::ControlModifier | Qt::ShiftModifier)
 
-#if defined(Q_WS_WIN) && !defined(FILE_ATTRIBUTE_HIDDEN)
+#if defined(Q_OS_WIN) && !defined(FILE_ATTRIBUTE_HIDDEN)
     #define FILE_ATTRIBUTE_HIDDEN 0x00000002
     extern "C" __declspec(dllimport) int __stdcall SetFileAttributesW(const wchar_t* lpFileName, quint32 dwFileAttributes);
 #endif
@@ -1618,7 +1618,7 @@ void MainWindow::onStartStudy()
     {
         QMessageBox::critical(this, windowTitle(), QString::fromLocal8Bit(cond.text()));
     }
-#ifdef Q_WS_WIN
+#ifdef Q_OS_WIN
     else
     {
         SetFileAttributesW(localPatientInfoFile.toStdWString().c_str(), FILE_ATTRIBUTE_HIDDEN);
@@ -1638,7 +1638,7 @@ void MainWindow::onStartStudy()
 #else
     auto localPatientInfoFile = outputPath.absoluteFilePath(".patient");
     dlgPatient->savePatientFile(localPatientInfoFile);
-#ifdef Q_WS_WIN
+#ifdef Q_OS_WIN
     SetFileAttributesW(localPatientInfoFile.toStdWString().c_str(), FILE_ATTRIBUTE_HIDDEN);
 #endif
 #endif

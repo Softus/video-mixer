@@ -246,7 +246,7 @@ void VideoEditor::loadFile(const QString& filePath)
         pipeline->setState(QGst::StatePaused);
         setWindowTitle(tr("Video editor - %1").arg(filePath));
         this->filePath = filePath;
-#ifdef Q_WS_WIN
+#ifdef Q_OS_WIN
         // Replace back slashes with regular ones to make gnlfilesource work.
         //
         this->filePath = this->filePath.replace('\\','/');
@@ -328,7 +328,7 @@ void VideoEditor::onBusMessage(const QGst::MessagePtr& message)
             msg.append(ex.message());
 
             qCritical() << msg;
-#ifndef Q_WS_WIN
+#ifndef Q_OS_WIN
             // Showing a message box under Microsoft (R) Windows (TM) breaks everything,
             // since it becomes the active one and the video output goes here.
             // So we can no more then hide this error from the user.

@@ -28,7 +28,7 @@ class QSpinBox;
 class QTextEdit;
 QT_END_NAMESPACE
 
-#if defined (Q_WS_WIN)
+#if defined (Q_OS_WIN)
 #define PLATFORM_SPECIFIC_SOURCE "dshowvideosrc"
 #define PLATFORM_SPECIFIC_PROPERTY "device-name"
 #elif defined (Q_OS_UNIX)

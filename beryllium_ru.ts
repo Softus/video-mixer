@@ -263,7 +263,7 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
     <message>
         <location filename="confirmationsettings.cpp" line="43"/>
         <source>Archive window</source>
-        <translation>Окно захвата</translation>
+        <translation>Окно архива</translation>
     </message>
     <message>
         <location filename="confirmationsettings.cpp" line="46"/>

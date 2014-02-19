@@ -43,7 +43,6 @@ class SlidingStackedWidget: public QStackedWidget
 
 public:
     SlidingStackedWidget(QWidget *parent = nullptr);
-    ~SlidingStackedWidget() = default;
 
 protected:
     virtual bool event(QEvent *e);

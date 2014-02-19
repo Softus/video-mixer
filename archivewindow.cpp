@@ -911,7 +911,7 @@ void ArchiveWindow::onBusMessage(const QGst::MessagePtr& message)
             msg.append(ex.message());
 
             qCritical() << msg;
-#ifndef Q_WS_WIN
+#ifndef Q_OS_WIN
             // Showing a message box under Microsoft (R) Windows (TM) breaks everything,
             // since it becomes the active one and the video output goes here.
             // So we can no more then hide this error from the user.

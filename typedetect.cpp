@@ -41,7 +41,7 @@ bool SetFileExtAttribute(const QString& filePath, const QString& name, const QSt
 
         if (err)
         {
-#ifdef Q_WS_WIN
+#ifdef Q_OS_WIN
             // Backup route for windows
             //
             if (err->domain == G_IO_ERROR && err->code == G_IO_ERROR_NOT_SUPPORTED)
@@ -82,7 +82,7 @@ QString GetFileExtAttribute(const QString& filePath, const QString& name)
             g_object_unref(info);
         }
 
-#ifdef Q_WS_WIN
+#ifdef Q_OS_WIN
         if (encodedValue.isNull())
         {
             // Backup route for windows

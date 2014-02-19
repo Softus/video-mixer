@@ -28,6 +28,9 @@ win32 {
     QMAKE_LIBDIR += c:/usr/lib
     LIBS += advapi32.lib netapi32.lib wsock32.lib
 }
+unix {
+    LIBS += -lX11
+}
 
 CONFIG += link_pkgconfig
 greaterThan(QT_MAJOR_VERSION, 4) {
@@ -38,13 +41,11 @@ else {
 }
 PKGCONFIG += gstreamer-0.10 gstreamer-base-0.10 gstreamer-interfaces-0.10 gstreamer-pbutils-0.10 gio-2.0
 
-# libmediainfo.pc adds UNICODE, but dcmtk isn't compatible with wchar,
-# so we can't use pkgconfig for this library
-LIBS += -lmediainfo -lzen
-unix: LIBS += -lX11
-
 TARGET   = beryllium
 TEMPLATE = app
+
+INCLUDEPATH += libqxt
+DEFINES += QXT_STATIC
 
 SOURCES += aboutdialog.cpp \
     archivewindow.cpp \
@@ -127,8 +128,6 @@ unix {
 
     INSTALLS += translations sound shortcut icon man
 }
-
-INCLUDEPATH += libqxt
 
 include (touch/touch.pri)
 include (dicom/dicom.pri) # Must be very last line of this file

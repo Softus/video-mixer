@@ -52,7 +52,7 @@ PatientDataDialog::PatientDataDialog(bool noWorklist, const QString& settingsKey
     auto showAccessionNumber = settings.value("patient-data-show-accession-number").toBool();
 
     setWindowTitle(tr("Patient data"));
-    setMinimumSize(480, 300);
+    setMinimumSize(520, 300);
 
     auto layoutMain = new QFormLayout;
     textAccessionNumber = new QxtLineEdit;
