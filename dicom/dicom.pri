@@ -1,8 +1,9 @@
 dicom {
     QT        += network
+    LIBS      += -ldcmnet -ldcmdata -loflog -lofstd -lz
+    unux:LIBS += -lwrap -lssl
     DEFINES   += WITH_DICOM
 
-    unix:LIBS += -ldcmnet -lwrap -ldcmdata -loflog -lofstd -lssl -lz
     # libmediainfo.pc adds UNICODE, but dcmtk isn't compatible with wchar,
     # so we can't use pkgconfig for this library
     LIBS += -lmediainfo -lzen

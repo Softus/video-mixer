@@ -15,12 +15,12 @@
  */
 
 #include "worklist.h"
+#include "../defaults.h"
+#include "../mouseshortcut.h"
+#include "../qwaitcursor.h"
 #include "detailsdialog.h"
 #include "dcmclient.h"
-#include "mouseshortcut.h"
 #include "transcyrillic.h"
-#include "../defaults.h"
-#include "../qwaitcursor.h"
 
 #ifdef WITH_TOUCH
 #include "../touch/slidingstackedwidget.h"

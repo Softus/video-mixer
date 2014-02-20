@@ -181,6 +181,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // This magic required for updating widgets from worker threads on Microsoft (R) Windows (TM)
     //
     connect(this, SIGNAL(enableWidget(QWidget*, bool)), this, SLOT(onEnableWidget(QWidget*, bool)), Qt::QueuedConnection);
+    connect(this, SIGNAL(clipFrameReady()), this, SLOT(onClipFrameReady()), Qt::QueuedConnection);
 
     auto layoutMain = new QVBoxLayout();
 #ifndef WITH_TOUCH
@@ -1013,7 +1014,7 @@ void MainWindow::onClipFrame(const QGst::BufferPtr& buf)
     if (recordLimit > 0 && recordTimerId == 0)
     {
         countdown = recordLimit;
-        recordTimerId = startTimer(1000);
+        clipFrameReady();
     }
 
     enableWidget(btnRecordStart, true);
@@ -1041,6 +1042,10 @@ void MainWindow::onClipFrame(const QGst::BufferPtr& buf)
         //
         enableWidget(btnSnapshot, false);
     }
+}
+void MainWindow::onClipFrameReady()
+{
+    recordTimerId = startTimer(1000);
 }
 
 void MainWindow::onVideoFrame(const QGst::BufferPtr& buf)

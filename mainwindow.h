@@ -149,6 +149,7 @@ protected:
     virtual void timerEvent(QTimerEvent*);
 signals:
     void enableWidget(QWidget*, bool);
+    void clipFrameReady();
 
 private slots:
 #ifdef WITH_DICOM
@@ -169,6 +170,7 @@ private slots:
     void toggleSetting();
     void updatePipeline();
     void onEnableWidget(QWidget*, bool);
+    void onClipFrameReady();
 
     friend class MainWindowDBusAdaptor;
 };

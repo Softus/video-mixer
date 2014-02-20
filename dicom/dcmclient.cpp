@@ -14,12 +14,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "../defaults.h"
 #include "../product.h"
+#include "../typedetect.h"
 #include "dcmclient.h"
 #include "dcmconverter.h"
-#include "defaults.h"
-#include "worklist.h"
-#include "typedetect.h"
 
 #include <dcmtk/dcmdata/dcdeftag.h>
 #include <dcmtk/dcmdata/dcdicent.h>

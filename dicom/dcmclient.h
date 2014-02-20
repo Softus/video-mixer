@@ -14,10 +14,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DCMASSOC_H
-#define DCMASSOC_H
+#ifndef DCCLIENT_H
+#define DCCLIENT_H
 
 #include <QObject>
+#include <QDate>
 #include <QFileInfo>
 
 #define HAVE_CONFIG_H
@@ -96,4 +97,4 @@ public slots:
     
 };
 
-#endif // DCMASSOC_H
+#endif // DCCLIENT_H
