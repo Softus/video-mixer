@@ -44,6 +44,7 @@ make install INSTALL_ROOT="%buildroot";
 %doc docs/*
 %{_mandir}/man1/%{name}.1.gz
 %{_bindir}/beryllium
+%{_datadir}/dbus-1/services
 %{_datadir}/%{name}
 %{_datadir}/applications/%{name}.desktop
 %{_datadir}/icons/%{name}.png
