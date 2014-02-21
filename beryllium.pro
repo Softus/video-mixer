@@ -125,8 +125,10 @@ unix {
     translations.path = $$PREFIX/share/beryllium/translations
     sound.files = sound/*
     sound.path = $$PREFIX/share/beryllium/sound
+    dbus.files = com.irk-dc.beryllium.service
+    dbus.path = $$PREFIX/share/dbus-1/services
 
-    INSTALLS += translations sound shortcut icon man
+    INSTALLS += dbus translations sound shortcut icon man
 }
 
 include (touch/touch.pri)
