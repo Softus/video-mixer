@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?define ProductBuild     = "0.3" ?>
-<?define ProductRevision  = "16" ?>
+<?define ProductBuild     = "0.5" ?>
+<?define ProductRevision  = "0" ?>
 <?define ProductName      = "Beryllium" ?>
 
 <?define Manufacturer    = "dc.baikal.ru" ?>
@@ -11,6 +11,7 @@
 <?define SrcDir64        = "$(var.SolutionDir)\X64\$(var.Configuration)\" ?>
 
 <?define RequiresAdmin    = "True" ?>
+<?define QtVersion        = "5" ?>
 
 <?if $(var.Platform)=x64?>
 <?define Win64   = "yes" ?>
@@ -74,91 +75,82 @@
           <Directory Id="ProductFolder32" Name="$(var.ProductName)" FileSource="$(var.SrcDir32)">
             <Component Id="Comp_Application32" Guid="B100D0FF-AF56-0101-0314-079500628307" Win64="no">
               <Environment Id="PATH" Name="PATH" Value="[GSTREAMERSDKROOT_X86]\[GSTREAMERSDKVERSION_X86]\x86\bin" Permanent="no" Part="last" Action="set" System="no" />
-              <File Id="File_Beryllium_x86" Name="beryllium.exe">
+              <File Id="File_Beryllium_x86" Name="beryllium.exe" KeyPath="yes">
                 <Shortcut Id="Shortcut_Beryllium_x86" Directory="ProgramMenuFolder" Name="Beryllium" Advertise="yes" Icon="beryllium.ico">
                   <Icon Id="beryllium.ico" SourceFile="beryllium.ico" />
                 </Shortcut>
               </File>
-              <File Id="File_Beryllium_ru_qm_x86" Name="beryllium_ru.qm" />
               <?if $(var.Configuration)=Debug ?>
                 <File Id="File_Beryllium_pdb_x86" Name="beryllium.pdb" />
               <?endif ?>
             </Component>
-            <Component Id="Comp_Qt4Libs32" Guid="B100D0FF-AF56-0102-0314-079500628307" Win64="no">
-              <File Id="File_QtCore4_x86" Name="QtCore4.dll" />
-              <File Id="File_QtGui4_x86"  Name="QtGui4.dll" />
-              <File Id="File_QtNetwork4_x86" Name="QtNetwork4.dll" />
-              <File Id="File_QtOpenGL4_x86" Name="QtOpenGL4.dll" />
-            </Component>
-            <Component Id="Comp_Qt4GstLibs32" Guid="B100D0FF-AF56-0103-0314-079500628307" Win64="no">
-              <File Id="File_QtGLib2_x86" Name="QtGLib-2.0.dll" />
-              <File Id="File_QtGStreamer010_x86"  Name="QtGStreamer-0.10.dll" />
-              <File Id="File_QtGStreamerUi010_x86" Name="QtGStreamerUi-0.10.dll" />
-              <File Id="File_QtGStreamerUtils010_x86" Name="QtGStreamerUtils-0.10.dll" />
-            </Component>
-            <Directory Id="ImageFormats32" Name="imageformats" FileSource="$(var.SrcDir32)">
-              <Component Id="Comp_Qt4ImageFormats32" Guid="B100D0FF-AF56-0104-0314-079500628307" Win64="no">
-                <File Id="File_qgif4_x86" Name="qgif4.dll" />
-                <File Id="File_qico4_x86"  Name="qico4.dll" />
-                <File Id="File_qjpeg4_x86" Name="qjpeg4.dll" />
-                <File Id="File_qmng4_x86" Name="qmng4.dll" />
-                <File Id="File_qsvg4_x86"  Name="qsvg4.dll" />
-                <File Id="File_qtga4_x86" Name="qtga4.dll" />
-                <File Id="File_qtiff4_x86" Name="qtiff4.dll" />
+            <Directory Id="Translations32" Name="translations">
+              <Component Id="Comp_Translations32" Guid="B100D0FF-AF56-0105-0314-079500628307" Win64="no">
+                <File Id="File_Beryllium_ru_qm_x86" Name="beryllium_ru.qm"  Source="beryllium_ru.qm"/>
               </Component>
             </Directory>
+            <Directory Id="Sound32" Name="sound" FileSource="sound">
+              <Component Id="Comp_Sound32" Guid="B100D0FF-AF56-0106-0314-079500628307" Win64="no">
+                <File Id="File_notify_ac3_x86" Name="notify.ac3" />
+                <File Id="File_shutter_ac3_x86" Name="shutter.ac3" />
+              </Component>
+            </Directory>
+            <?if $(var.QtVersion)=4 ?>
+              <?include Qt4Runtime32.wxi ?>
+            <?else ?>
+              <?include Qt5Runtime32.wxi ?>
+            <?endif ?>
           </Directory>
 
           <?if $(var.Platform)=x64?>
             <Directory Id="ProductFolder64" Name="$(var.ProductName)_X64" FileSource="$(var.SrcDir64)">
               <Component Id="Comp_Application64" Guid="B100D0FF-AF56-0201-0314-079500628307" Win64="yes">
-                <File Id="File_Beryllium_X64" Name="beryllium.exe" />
-                <File Id="File_Beryllium_ru_qm_X64" Name="beryllium_ru.qm" />
+                <File Id="File_Beryllium_X64" Name="beryllium.exe">
+                <Shortcut Id="Shortcut_Beryllium_X64" Directory="ProgramMenuFolder" Name="Beryllium (64 bit)" Advertise="yes" Icon="beryllium.ico">
+                  <Icon Id="beryllium.ico" SourceFile="beryllium.ico" />
+                </Shortcut>
+                </File>
                 <?if $(var.Configuration)=Debug ?>
                   <File Id="File_Beryllium_pdb_X64" Name="beryllium.pdb" />
                 <?endif ?>
               </Component>
-              <Component Id="Comp_Qt4Libs64" Guid="B100D0FF-AF56-0202-0314-079500628307" Win64="yes">
-                <File Id="File_QtCore4_X64" Name="QtCore4.dll" />
-                <File Id="File_QtGui4_X64"  Name="QtGui4.dll" />
-                <File Id="File_QtNetwork4_X64" Name="QtNetwork4.dll" />
-                <File Id="File_QtOpenGL4_X64" Name="QtOpenGL4.dll" />
-              </Component>
-              <Component Id="Comp_Qt4GstLibs64" Guid="B100D0FF-AF56-0203-0314-079500628307" Win64="yes">
-                <File Id="File_QtGLib2_X64" Name="QtGLib-2.0.dll" />
-                <File Id="File_QtGStreamer010_X64"  Name="QtGStreamer-0.10.dll" />
-                <File Id="File_QtGStreamerUi010_X64" Name="QtGStreamerUi-0.10.dll" />
-                <File Id="File_QtGStreamerUtils010_X64" Name="QtGStreamerUtils-0.10.dll" />
-              </Component>
-              <Directory Id="ImageFormats64" Name="imageformats" FileSource="$(var.SrcDir64)">
-                <Component Id="Comp_Qt4ImageFormats64" Guid="B100D0FF-AF56-0204-0314-079500628307" Win64="yes">
-                  <File Id="File_qgif4_X64" Name="qgif4.dll" />
-                  <File Id="File_qico4_X64"  Name="qico4.dll" />
-                  <File Id="File_qjpeg4_X64" Name="qjpeg4.dll" />
-                  <File Id="File_qmng4_X64" Name="qmng4.dll" />
-                  <File Id="File_qsvg4_X64"  Name="qsvg4.dll" />
-                  <File Id="File_qtga4_X64" Name="qtga4.dll" />
-                  <File Id="File_qtiff4_X64" Name="qtiff4.dll" />
+              <Directory Id="Translations64" Name="translations">
+                <Component Id="Comp_Translations64" Guid="B100D0FF-AF56-0205-0314-079500628307" Win64="yes">
+                  <File Id="File_Beryllium_ru_qm_X64" Name="beryllium_ru.qm" src="beryllium_ru.qm" />
+                </Component>
+              </Directory>
+              <Directory Id="Sound64" Name="sound" FileSource="sound">
+                <Component Id="Comp_Sound64" Guid="B100D0FF-AF56-0206-0314-079500628307" Win64="yes">
+                  <File Id="File_notify_ac3_X64" Name="notify.ac3" />
+                  <File Id="File_shutter_ac3_X64" Name="shutter.ac3" />
                 </Component>
               </Directory>
             </Directory>
+            <?if $(var.QtVersion)=4 ?>
+              <?include Qt4Runtime64.wxi ?>
+            <?else ?>
+              <?include Qt5Runtime64.wxi ?>
+            <?endif ?>
           <?endif ?>
-
-          </Directory>
+        </Directory>
         </Directory>
     </Directory>
 
     <Feature Id="Complete" Title="Complete Feature" Level="1">
       <ComponentRef Id="Comp_Application32" />
-      <ComponentRef Id="Comp_Qt4Libs32" />
-      <ComponentRef Id="Comp_Qt4GstLibs32" />
-      <ComponentRef Id="Comp_Qt4ImageFormats32" />
-      <?if $(var.Platform)=x64 ?>
-        <ComponentRef Id="Comp_Application64" />
-        <ComponentRef Id="Comp_Qt4Libs64" />
-        <ComponentRef Id="Comp_Qt4GstLibs64" />
-        <ComponentRef Id="Comp_Qt4ImageFormats64" />
-      <?endif ?>
+      <ComponentRef Id="Comp_Translations32" />
+      <ComponentRef Id="Comp_Sound32" />
+      <ComponentRef Id="Comp_QtLibs32" />
+      <ComponentRef Id="Comp_QtGstLibs32" />
+      <ComponentRef Id="Comp_QtImageFormats32" />
+<?if $(var.Platform)=x64 ?>
+      <ComponentRef Id="Comp_Application64" />
+      <ComponentRef Id="Comp_Translations64" />
+      <ComponentRef Id="Comp_Sound64" />
+      <ComponentRef Id="Comp_QtLibs64" />
+      <ComponentRef Id="Comp_QtGstLibs64" />
+      <ComponentRef Id="Comp_QtImageFormats64" />
+<?endif ?>
     </Feature>
 
     <InstallExecuteSequence>

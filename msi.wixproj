@@ -6,7 +6,7 @@
     <ProductVersion>3.0</ProductVersion>
     <ProjectGuid>{a70f0c0c-8b35-48c9-bce4-e5f7a82ba774}</ProjectGuid>
     <SchemaVersion>2.0</SchemaVersion>
-    <OutputName>beryllium_0.3.14_i386</OutputName>
+    <OutputName>beryllium_0.5.0_i386</OutputName>
     <OutputType>Package</OutputType>
     <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' ">$(MSBuildExtensionsPath)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
   </PropertyGroup>
@@ -67,6 +67,15 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="loc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Qt4Runtime32.wxi" />
+    <Content Include="Qt4Runtime64.wxi">
+      <Link>
+      </Link>
+    </Content>
+    <Content Include="Qt5Runtime32.wxi" />
+    <Content Include="Qt5Runtime64.wxi" />
   </ItemGroup>
   <Import Project="$(WixTargetsPath)" />
   <!--

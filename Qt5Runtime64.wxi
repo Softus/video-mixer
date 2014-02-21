@@ -1,0 +1,34 @@
+<Include>
+  <Component Id="Comp_QtLibs32" Guid="B100D0FF-AF56-0202-0314-079500628307" Win64="yes">
+    <File Id="File_Qt5Core_X64" Name="Qt5Core.dll" />
+    <File Id="File_Qt5DBus_X64" Name="Qt5DBus.dll" />
+    <File Id="File_Qt5Gui_X64"  Name="Qt5Gui.dll" />
+    <File Id="File_Qt5Network_X64" Name="Qt5Network.dll" />
+    <File Id="File_Qt5OpenGL_X64" Name="Qt5OpenGL.dll" />
+    <File Id="File_Qt5Widgets_X64" Name="Qt5Widgets.dll" />
+    <File Id="File_libEGL_X64" Name="libEGL.dll" />
+    <File Id="File_libGLESv2_X64" Name="libGLESv2.dll" />
+    <File Id="File_icuin51_X64" Name="icuin51.dll" />
+    <File Id="File_icudt51_X64" Name="icudt51.dll" />
+    <File Id="File_icuuc51_X64" Name="icuuc51.dll" />
+
+
+  </Component>
+  <Component Id="Comp_QtGstLibs32" Guid="B100D0FF-AF56-0203-0314-079500628307" Win64="yes">
+    <File Id="File_Qt5GLib2_X64" Name="Qt5GLib-2.0.dll" />
+    <File Id="File_Qt5GStreamer010_X64"  Name="Qt5GStreamer-0.10.dll" />
+    <File Id="File_Qt5GStreamerUi010_X64" Name="Qt5GStreamerUi-0.10.dll" />
+    <File Id="File_Qt5GStreamerUtils010_X64" Name="Qt5GStreamerUtils-0.10.dll" />
+  </Component>
+  <Directory Id="ImageFormats32" Name="imageformats" FileSource="$(var.SrcDir32)">
+    <Component Id="Comp_QtImageFormats32" Guid="B100D0FF-AF56-0204-0314-079500628307" Win64="yes">
+      <File Id="File_qgif5_X64" Name="qgif.dll" />
+      <File Id="File_qico5_X64"  Name="qico.dll" />
+      <File Id="File_qjpeg5_X64" Name="qjpeg.dll" />
+      <File Id="File_qmng5_X64" Name="qmng.dll" />
+      <File Id="File_qsvg5_X64"  Name="qsvg.dll" />
+      <File Id="File_qtga5_X64" Name="qtga.dll" />
+      <File Id="File_qtiff5_X64" Name="qtiff.dll" />
+    </Component>
+  </Directory>
+</Include>

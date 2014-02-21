@@ -1,0 +1,26 @@
+<Include>
+  <Component Id="Comp_QtLibs32" Guid="B100D0FF-AF56-0102-0314-079500628307" Win64="no">
+    <File Id="File_QtCore4_x86" Name="QtCore4.dll" />
+    <File Id="File_QtDBus4_x86" Name="QtDBus4.dll" />
+    <File Id="File_QtGui4_x86"  Name="QtGui4.dll" />
+    <File Id="File_QtNetwork4_x86" Name="QtNetwork4.dll" />
+    <File Id="File_QtOpenGL4_x86" Name="QtOpenGL4.dll" />
+  </Component>
+  <Component Id="Comp_QtGstLibs32" Guid="B100D0FF-AF56-0103-0314-079500628307" Win64="no">
+    <File Id="File_QtGLib2_x86" Name="QtGLib-2.0.dll" />
+    <File Id="File_QtGStreamer010_x86"  Name="QtGStreamer-0.10.dll" />
+    <File Id="File_QtGStreamerUi010_x86" Name="QtGStreamerUi-0.10.dll" />
+    <File Id="File_QtGStreamerUtils010_x86" Name="QtGStreamerUtils-0.10.dll" />
+  </Component>
+  <Directory Id="ImageFormats32" Name="imageformats" FileSource="$(var.SrcDir32)">
+    <Component Id="Comp_QtImageFormats32" Guid="B100D0FF-AF56-0104-0314-079500628307" Win64="no">
+      <File Id="File_qgif4_x86" Name="qgif4.dll" />
+      <File Id="File_qico4_x86"  Name="qico4.dll" />
+      <File Id="File_qjpeg4_x86" Name="qjpeg4.dll" />
+      <File Id="File_qmng4_x86" Name="qmng4.dll" />
+      <File Id="File_qsvg4_x86"  Name="qsvg4.dll" />
+      <File Id="File_qtga4_x86" Name="qtga4.dll" />
+      <File Id="File_qtiff4_x86" Name="qtiff4.dll" />
+    </Component>
+  </Directory>
+</Include>
