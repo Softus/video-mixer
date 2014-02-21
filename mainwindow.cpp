@@ -82,9 +82,14 @@
 
 #define SAFE_MODE_KEYS (Qt::AltModifier | Qt::ControlModifier | Qt::ShiftModifier)
 
-#if defined(Q_OS_WIN) && !defined(FILE_ATTRIBUTE_HIDDEN)
+#ifdef Q_OS_WIN
+  #define DATA_FOLDER qApp->applicationDirPath()
+  #ifndef FILE_ATTRIBUTE_HIDDEN
     #define FILE_ATTRIBUTE_HIDDEN 0x00000002
     extern "C" __declspec(dllimport) int __stdcall SetFileAttributesW(const wchar_t* lpFileName, quint32 dwFileAttributes);
+  #endif
+#else
+  #define DATA_FOLDER qApp->applicationDirPath() + "/../share/" PRODUCT_SHORT_NAME
 #endif
 
 static inline QBoxLayout::Direction bestDirection(const QSize &s)
@@ -325,7 +330,7 @@ void MainWindow::timerEvent(QTimerEvent* evt)
     {
         if (--countdown <= recordNotify)
         {
-            sound->play(qApp->applicationDirPath() + "/../share/" PRODUCT_SHORT_NAME "/sound/notify.ac3");
+            sound->play(DATA_FOLDER "/sound/notify.ac3");
         }
 
         if (countdown == 0)
@@ -1260,7 +1265,7 @@ void MainWindow::onSnapshotClick()
     QString imageExt = getExt(settings.value("image-encoder", DEFAULT_IMAGE_ENCODER).toString());
     QString imageFileName = replace(settings.value("image-template", DEFAULT_IMAGE_TEMPLATE).toString(), ++imageNo).append(imageExt);
 
-    sound->play(qApp->applicationDirPath() + "/../share/" PRODUCT_SHORT_NAME "/sound/shutter.ac3");
+    sound->play(DATA_FOLDER "/sound/shutter.ac3");
 
     setElementProperty(imageSink, "location", outputPath.absoluteFilePath(imageFileName), QGst::StateReady);
 
