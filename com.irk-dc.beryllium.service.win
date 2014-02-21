@@ -1,0 +1,3 @@
+[D-BUS Service]
+Name=com.irk-dc.beryllium
+Exec=%ProgramFiles%/dc.baikal.ru/Beryllium/Beryllium.exe

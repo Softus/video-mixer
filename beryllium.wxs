@@ -70,6 +70,15 @@
     <Directory Id="TARGETDIR" Name="SourceDir">
       <Directory Id="ProgramMenuFolder" Name="Programs"/>
         <Directory Id="$(var.DstDir)" Name="PFiles">
+          <Directory Id='CommonFilesFolder' Name='Common Files'>
+            <Directory Id='DBusFolder' Name='dbus-1'>
+              <Directory Id='ServicesFolder' Name='services'>
+                <Component Id="Comp_DBusService32" Guid="B100D0FF-AF56-0107-0314-079500628307" Win64="no">
+                  <File Id="File_com_irk_dc_beryllium_service" Name="com.irk-dc.beryllium.service" Source="com.irk-dc.beryllium.service.win" />
+                </Component>
+              </Directory>
+            </Directory>
+          </Directory>
         <Directory Id="ManufacturerFolder" Name="$(var.Manufacturer)">
 
           <Directory Id="ProductFolder32" Name="$(var.ProductName)" FileSource="$(var.SrcDir32)">
@@ -143,7 +152,8 @@
       <ComponentRef Id="Comp_QtLibs32" />
       <ComponentRef Id="Comp_QtGstLibs32" />
       <ComponentRef Id="Comp_QtImageFormats32" />
-<?if $(var.Platform)=x64 ?>
+      <ComponentRef Id="Comp_DBusService32" />
+      <?if $(var.Platform)=x64 ?>
       <ComponentRef Id="Comp_Application64" />
       <ComponentRef Id="Comp_Translations64" />
       <ComponentRef Id="Comp_Sound64" />
