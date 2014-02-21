@@ -50,61 +50,61 @@ DEFINES += QXT_STATIC
 SOURCES += aboutdialog.cpp \
     archivewindow.cpp \
     beryllium.cpp \
-    mainwindow.cpp \
-    mandatoryfieldgroup.cpp \
-    mandatoryfieldssettings.cpp \
-    physicianssettings.cpp \
-    settings.cpp \
-    storagesettings.cpp \
-    studiessettings.cpp \
-    videosettings.cpp \
-    libqxt/qxtlineedit.cpp \
-    libqxt/qxtspanslider.cpp \
-    videoeditor.cpp \
-    videoencodingprogressdialog.cpp \
+    confirmationsettings.cpp \
     fix_mpeg_sys_type_find.cpp \
-    typedetect.cpp \
     hotkeyedit.cpp \
     hotkeysettings.cpp \
-    mouseshortcut.cpp \
-    thumbnaillist.cpp \
-    videorecordsettings.cpp \
-    sound.cpp \
-    mainwindowdbusadaptor.cpp \
-    patientdatadialog.cpp \
     libqxt/qxtconfirmationmessage.cpp \
-    confirmationsettings.cpp
+    libqxt/qxtlineedit.cpp \
+    libqxt/qxtspanslider.cpp \
+    mainwindow.cpp \
+    mainwindowdbusadaptor.cpp \
+    mandatoryfieldgroup.cpp \
+    mandatoryfieldssettings.cpp \
+    mouseshortcut.cpp \
+    patientdatadialog.cpp \
+    physicianssettings.cpp \
+    settings.cpp \
+    sound.cpp \
+    storagesettings.cpp \
+    studiessettings.cpp \
+    thumbnaillist.cpp \
+    typedetect.cpp \
+    videoeditor.cpp \
+    videoencodingprogressdialog.cpp \
+    videorecordsettings.cpp \
+    videosettings.cpp
 
 HEADERS += aboutdialog.h \
     archivewindow.h \
     comboboxwithpopupsignal.h \
+    confirmationsettings.h \
+    defaults.h \
+    hotkeyedit.h \
+    hotkeysettings.h \
+    libqxt/qxtconfirmationmessage.h \
+    libqxt/qxtlineedit.h \
+    libqxt/qxtspanslider.h \
+    libqxt/qxtspanslider_p.h \
+    mainwindowdbusadaptor.h \
     mainwindow.h \
     mandatoryfieldgroup.h \
     mandatoryfieldssettings.h \
+    mouseshortcut.h \
+    patientdatadialog.h \
     physicianssettings.h \
     product.h \
     qwaitcursor.h \
     settings.h \
+    sound.h \
     storagesettings.h \
     studiessettings.h \
-    videosettings.h \
-    libqxt/qxtlineedit.h \
-    libqxt/qxtspanslider.h \
-    libqxt/qxtspanslider_p.h \
-    videoeditor.h \
-    defaults.h \
-    videoencodingprogressdialog.h \
-    typedetect.h \
-    hotkeyedit.h \
-    hotkeysettings.h \
-    mouseshortcut.h \
     thumbnaillist.h \
+    typedetect.h \
+    videoeditor.h \
+    videoencodingprogressdialog.h \
     videorecordsettings.h \
-    sound.h \
-    mainwindowdbusadaptor.h \
-    patientdatadialog.h \
-    libqxt/qxtconfirmationmessage.h \
-    confirmationsettings.h
+    videosettings.h
 
 FORMS   +=
 

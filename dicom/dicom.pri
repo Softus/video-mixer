@@ -1,7 +1,7 @@
 dicom {
     QT        += network
     LIBS      += -ldcmnet -ldcmdata -loflog -lofstd -lz
-    unux:LIBS += -lwrap -lssl
+    unix:LIBS += -lwrap -lssl
     DEFINES   += WITH_DICOM
 
     # libmediainfo.pc adds UNICODE, but dcmtk isn't compatible with wchar,
