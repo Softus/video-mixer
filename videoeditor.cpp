@@ -467,7 +467,8 @@ bool VideoEditor::exportVideo(QFile* outFile)
 {
     QSettings settings;
     auto encoder         = settings.value("video-encoder", DEFAULT_VIDEO_ENCODER).toString();
-    auto fixColor        = settings.value(encoder + "-colorspace").toBool()? "ffmpegcolorspace ! ": "";
+    auto colorConverter =  settings.value("color-converter", "ffmpegcolorspace").toString();
+    auto fixColor        = settings.value(encoder + "-colorspace").toBool()? colorConverter + " ! ": "";
     auto encoderParams   = settings.value(encoder + "-parameters").toString();
     auto muxer           = settings.value("video-muxer", DEFAULT_VIDEO_MUXER).toString();
     auto videoEncBitrate = settings.value("bitrate", DEFAULT_VIDEOBITRATE).toInt();

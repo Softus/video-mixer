@@ -31,6 +31,7 @@
 //
 #include <QGlib/Error>
 #include <QGlib/ParamSpec>
+#include <QGlib/Value>
 #include <QGst/Caps>
 #include <QGst/ElementFactory>
 #include <QGst/IntRange>
@@ -243,6 +244,26 @@ void VideoSettings::videoDeviceChanged(int index)
     }
 }
 
+static QStringList getFormats(const QGlib::Value& value)
+{
+    QStringList formats;
+
+    if (GST_TYPE_LIST == value.type() || GST_TYPE_ARRAY == value.type())
+    {
+        for (uint idx = 0; idx < gst_value_list_get_size(value); ++idx)
+        {
+            auto elm = gst_value_list_get_value(value, idx);
+            formats << QGlib::Value(elm).toString();
+        }
+    }
+    else
+    {
+        formats << value.toString();
+    }
+
+    return formats;
+}
+
 void VideoSettings::inputChannelChanged(int index)
 {
     listFormats->clear();
@@ -259,22 +280,24 @@ void VideoSettings::inputChannelChanged(int index)
     for (uint i = 0; i < caps->size(); ++i)
     {
         auto s = caps->internalStructure(i);
-        auto format = s->value("format").toString();
-        auto formatName = format.isEmpty()? s->name(): s->name().append(",format=(fourcc)").append(format);
-        if (listFormats->findData(formatName) >= 0)
+        Q_FOREACH (auto format, getFormats(s->value("format")))
         {
-            continue;
-        }
-        auto displayName = format.isEmpty()? s->name(): s->name().append(" (").append(format).append(")");
-        listFormats->addItem(displayName, formatName);
-        if (formatName == selectedFormat)
-        {
-            listFormats->setCurrentIndex(listFormats->count() - 1);
+            auto formatName = format.isEmpty()? s->name(): s->name().append(",format=").append(format);
+            if (listFormats->findData(formatName) >= 0)
+            {
+                continue;
+            }
+            auto displayName = format.isEmpty()? s->name(): s->name().append(" (").append(format).append(")");
+            listFormats->addItem(displayName, formatName);
+            if (formatName == selectedFormat)
+            {
+                listFormats->setCurrentIndex(listFormats->count() - 1);
+            }
         }
     }
 }
 
-static QGst::IntRange getRange(const QGlib::Value value)
+static QGst::IntRange getRange(const QGlib::Value& value)
 {
     // First, try extract a single int value (more common)
     //

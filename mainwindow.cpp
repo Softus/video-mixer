@@ -472,7 +472,7 @@ QToolBar* MainWindow::createToolBar()
 
 
 Sample:
-    v4l2src [! dvdemux ! ffdec_dvvideo | ! jpegdec] [! ffmpegcolorspace] [! deinterlace] ! tee name=splitter
+    v4l2src [! dvdemux ! ffdec_dvvideo | ! jpegdec] [! colorspace] [! deinterlace] ! tee name=splitter
         ! autovideosink name=displaysink async=0 splitter.
         ! valve name=encvalve drop=1 ! queue max-size-bytes=0 ! videorate max-rate=30/1 ! x264enc name=videoencoder ! tee name=videosplitter
                 ! identity  name=videoinspect drop-probability=1.0 ! queue ! valve name=videovalve drop=1 ! [mpegpsmux name=videomux ! filesink name=videosink] videosplitter.
@@ -486,7 +486,8 @@ QString MainWindow::buildPipeline()
 {
     QSettings settings;
 
-    // v4l2src device=/dev/video1 name=(channel) ! video/x-raw-yuv,format=(fourcc)YUY2,width=(int)720,height=(int)576 ! ffmpegcolorspace
+    // v4l2src device=/dev/video1 name=(channel) ! video/x-raw-yuv,format=YUY2,width=720,height=576 ! colorspace
+    // dv1394src guid="9025895599807395" ! video/x-dv,format=PAL ! dvdemux ! dvdec ! colorspace
     //
     QString pipe;
 
@@ -495,52 +496,44 @@ QString MainWindow::buildPipeline()
     auto inputChannel   = settings.value("video-channel").toString();
     auto formatDef      = settings.value("format").toString();
     auto sizeDef        = settings.value("size").toSize();
-    auto srcDef         = settings.value("src").toString();
-    auto srcFixColor    = settings.value("src-colorspace").toBool();
     auto srcDeinterlace = settings.value("video-deinterlace").toBool();
     auto srcParams      = settings.value("src-parameters").toString();
+    auto colorConverter = QString(" ! ").append(settings.value("color-converter", "ffmpegcolorspace").toString());
 
-    if (!srcDef.isEmpty())
+    pipe.append(deviceType);
+
+    if (deviceType == "dv1394src")
     {
-        pipe.append(srcDef);
+        // Special handling of dv video sources
+        //
+        if (inputChannel.toInt() > 0)
+        {
+            pipe.append(" channel=").append(inputChannel).append("");
+        }
+        if (!deviceDef.isEmpty())
+        {
+            pipe.append(" guid=\"").append(deviceDef).append("\"");
+        }
     }
     else
     {
-        pipe.append(deviceType);
-
-        if (deviceType == "dv1394src")
+        if (!inputChannel.isEmpty())
         {
-            // Special handling of dv video sources
+            // Hack: since channel name can't be set with attributes,
+            // we set element name instead. The one reason is to
+            // make the pipeline text do not match with older one.
             //
-            if (inputChannel.toInt() > 0)
-            {
-                pipe.append(" channel=").append(inputChannel).append("");
-            }
-            if (!deviceDef.isEmpty())
-            {
-                pipe.append(" guid=\"").append(deviceDef).append("\"");
-            }
+            pipe.append(" name=\"").append(inputChannel).append("\"");
         }
-        else
+        if (!deviceDef.isEmpty())
         {
-            if (!inputChannel.isEmpty())
-            {
-                // Hack: since channel name can't be set with attributes,
-                // we set element name instead. The one reason is to
-                // make the pipeline text do not match with older one.
-                //
-                pipe.append(" name=\"").append(inputChannel).append("\"");
-            }
-            if (!deviceDef.isEmpty())
-            {
-                pipe.append(" " PLATFORM_SPECIFIC_PROPERTY "=\"").append(deviceDef).append("\"");
-            }
+            pipe.append(" " PLATFORM_SPECIFIC_PROPERTY "=\"").append(deviceDef).append("\"");
         }
+    }
 
-        if (!srcParams.isEmpty())
-        {
-            pipe.append(' ').append(srcParams);
-        }
+    if (!srcParams.isEmpty())
+    {
+        pipe.append(' ').append(srcParams);
     }
 
     if (!formatDef.isEmpty())   
@@ -548,7 +541,7 @@ QString MainWindow::buildPipeline()
         pipe.append(" ! ").append(formatDef);
         if (!sizeDef.isEmpty())
         {
-            pipe = pipe.append(",width=(int)%1,height=(int)%2").arg(sizeDef.width()).arg(sizeDef.height());
+            pipe = pipe.append(",width=%1,height=%2").arg(sizeDef.width()).arg(sizeDef.height());
         }
     }
 
@@ -561,18 +554,12 @@ QString MainWindow::buildPipeline()
     {
         // Add dv demuxer & decoder for DV sources
         //
-        pipe.append(" ! dvdemux ! ffdec_dvvideo");
-    }
-    else if (formatType == "video/x-raw-rgb")
-    {
-        // Force colorspace conversion for RGB-only cameras
-        //
-        srcFixColor = true;
+        pipe.append(" ! dvdemux ! dvdec");
     }
 
-    pipe.append(srcFixColor? " ! ffmpegcolorspace": "").append(srcDeinterlace? " ! deinterlace": "");
+    pipe.append(colorConverter).append(srcDeinterlace? " ! deinterlace": "");
 
-    // v4l2src ... ! tee name=splitter ! ffmpegcolorspace ! ximagesink splitter.");
+    // v4l2src ... ! tee name=splitter ! colorspace ! ximagesink splitter.");
     //
     auto displaySinkDef  = settings.value("display-sink", DEFAULT_DISPLAY_SINK).toString();
     auto displayFixColor = settings.value(displaySinkDef + "-colorspace").toBool();
@@ -581,12 +568,12 @@ QString MainWindow::buildPipeline()
     pipe.append(" ! tee name=splitter");
     if (!displaySinkDef.isEmpty())
     {
-        pipe.append(displayFixColor? " ! ffmpegcolorspace": "")
+        pipe.append(displayFixColor? colorConverter: "")
             .append(" ! textoverlay name=displayoverlay silent=1 shadow=0 halignment=right valignment=top text=* xpad=2 ypad=0 font-desc=16")
             .append(" ! " ).append(displaySinkDef).append(" name=displaysink async=0 ").append(displayParams).append(" splitter.");
     }
 
-    // ... ! tee name=splitter ! ximagesink splitter. ! valve name=encvalve ! ffmpegcolorspace ! x264enc
+    // ... ! tee name=splitter ! ximagesink splitter. ! valve name=encvalve ! colorspace ! x264enc
     //           ! tee name=videosplitter
     //                ! queue ! mpegpsmux ! filesink videosplitter.  ! queue ! x264 videosplitter.
     //                ! queue ! rtph264pay ! udpsink videosplitter.
@@ -611,7 +598,7 @@ QString MainWindow::buildPipeline()
 
     pipe.append(" ! valve name=encvalve drop=1 ! queue max-size-bytes=0");
 
-    pipe.append(videoFixColor? " ! ffmpegcolorspace": "")
+    pipe.append(videoFixColor? colorConverter: "")
         .append(" ! ").append(videoEncoderDef).append(" name=videoencoder ").append(videoEncoderParams);
 
     if (enableRtp || enableVideo)
@@ -643,7 +630,7 @@ QString MainWindow::buildPipeline()
     if (!imageSinkDef.isEmpty())
     {
         pipe.append(" ! identity name=imagevalve drop-probability=1.0")
-            .append(imageEncoderFixColor? " ! ffmpegcolorspace": "")
+            .append(imageEncoderFixColor? colorConverter: "")
             .append(" ! ").append(imageEncoderDef).append(" ").append(imageEncoderParams)
             .append(" ! ").append(imageSinkDef).append(" name=imagesink post-messages=1 async=0 sync=0 location=")
             .append(outputPathDef).append("/image splitter.");
