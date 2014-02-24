@@ -94,12 +94,12 @@
               <?endif ?>
             </Component>
             <Directory Id="Translations32" Name="translations">
-              <Component Id="Comp_Translations32" Guid="B100D0FF-AF56-0105-0314-079500628307" Win64="no">
+              <Component Id="Comp_Translations32" Guid="B100D0FF-AF56-0102-0314-079500628307" Win64="no">
                 <File Id="File_Beryllium_ru_qm_x86" Name="beryllium_ru.qm"  Source="beryllium_ru.qm"/>
               </Component>
             </Directory>
             <Directory Id="Sound32" Name="sound" FileSource="sound">
-              <Component Id="Comp_Sound32" Guid="B100D0FF-AF56-0106-0314-079500628307" Win64="no">
+              <Component Id="Comp_Sound32" Guid="B100D0FF-AF56-0103-0314-079500628307" Win64="no">
                 <File Id="File_notify_ac3_x86" Name="notify.ac3" />
                 <File Id="File_shutter_ac3_x86" Name="shutter.ac3" />
               </Component>
@@ -124,12 +124,12 @@
                 <?endif ?>
               </Component>
               <Directory Id="Translations64" Name="translations">
-                <Component Id="Comp_Translations64" Guid="B100D0FF-AF56-0205-0314-079500628307" Win64="yes">
+                <Component Id="Comp_Translations64" Guid="B100D0FF-AF56-0202-0314-079500628307" Win64="yes">
                   <File Id="File_Beryllium_ru_qm_X64" Name="beryllium_ru.qm" src="beryllium_ru.qm" />
                 </Component>
               </Directory>
               <Directory Id="Sound64" Name="sound" FileSource="sound">
-                <Component Id="Comp_Sound64" Guid="B100D0FF-AF56-0206-0314-079500628307" Win64="yes">
+                <Component Id="Comp_Sound64" Guid="B100D0FF-AF56-0203-0314-079500628307" Win64="yes">
                   <File Id="File_notify_ac3_X64" Name="notify.ac3" />
                   <File Id="File_shutter_ac3_X64" Name="shutter.ac3" />
                 </Component>
@@ -152,6 +152,7 @@
       <ComponentRef Id="Comp_QtLibs32" />
       <ComponentRef Id="Comp_QtGstLibs32" />
       <ComponentRef Id="Comp_QtImageFormats32" />
+      <ComponentRef Id="Comp_QtPlatforms32" />
       <ComponentRef Id="Comp_DBusService32" />
       <?if $(var.Platform)=x64 ?>
       <ComponentRef Id="Comp_Application64" />
@@ -160,7 +161,8 @@
       <ComponentRef Id="Comp_QtLibs64" />
       <ComponentRef Id="Comp_QtGstLibs64" />
       <ComponentRef Id="Comp_QtImageFormats64" />
-<?endif ?>
+      <ComponentRef Id="Comp_QtPlatforms64" />
+      <?endif ?>
     </Feature>
 
     <InstallExecuteSequence>
