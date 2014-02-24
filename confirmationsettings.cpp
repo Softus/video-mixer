@@ -48,7 +48,7 @@ ConfirmationSettings::ConfirmationSettings(QWidget *parent) :
     layoutArchive->addWidget(checkStore = new QCheckBox(tr("S&end to storage")));
     checkStore->setChecked(!settings.value("archive-store").toBool());
 
-    layoutMain->addSpacing(300);
+    layoutMain->addStretch();
     setLayout(layoutMain);
 }
 

@@ -18,11 +18,12 @@
 #include "touch/clickfilter.h"
 #endif
 
+#include "product.h"
 #include "archivewindow.h"
 #include "mainwindow.h"
 #include "mainwindowdbusadaptor.h"
 #include "videoeditor.h"
-#include "product.h"
+#include "settings.h"
 
 #include <signal.h>
 
@@ -100,6 +101,7 @@ int main(int argc, char *argv[])
     cmd.addOption("--archive",        nullptr, 1, "folder name", "Start in archive mode");
     cmd.addOption("--edit-video",     nullptr, 1, "file name", "Start in video editing mode");
     cmd.addOption("--safe-mode",      nullptr,    "Run the program in safe mode");
+    cmd.addOption("--settings",       nullptr,    "Run the program in edit settings mode");
     cmd.addOption("--auto-start",        "-a",    "Show the start study dialog");
 
     cmd.addOption("--study-id",         "-si", 1, "string",   "Study id");
@@ -165,6 +167,10 @@ int main(int argc, char *argv[])
     if (idx >= 0 && ++idx < app.arguments().size())
     {
         wnd = new VideoEditor(app.arguments().at(idx));
+    }
+    else if (idx = app.arguments().indexOf("--settings"), idx >= 0)
+    {
+        wnd = new Settings;
     }
     else if (idx = app.arguments().indexOf("--archive"), idx >= 0)
     {

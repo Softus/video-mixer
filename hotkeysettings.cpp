@@ -61,6 +61,8 @@ HotKeySettings::HotKeySettings(QWidget *parent) :
     layoutWorklist->addRow(tr("Re&load worklist"), heRefresh = new HotKeyEdit());
     heRefresh->setKey(settings.value("hotkey-refresh", DEFAULT_HOTKEY_REFRESH).toInt());
 #endif
+
+    layoutMain->addStretch();
     setLayout(layoutMain);
 }
 

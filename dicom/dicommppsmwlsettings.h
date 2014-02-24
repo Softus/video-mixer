@@ -42,9 +42,10 @@ public:
 signals:
     
 public slots:
+    void save();
+private slots:
     void onUpdateServers();
     void onUseToggle(bool checked);
-    void save();
 };
 
 #endif // DICOMMPPSMWLSETTINGS_H

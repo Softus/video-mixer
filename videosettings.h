@@ -54,7 +54,6 @@ class VideoSettings : public QWidget
     QComboBox* listVideoMuxers;
     QComboBox* listRtpPayloaders;
     QComboBox* listImageCodecs;
-    QCheckBox* checkRecordAll;
     QSpinBox* spinFps;
     QSpinBox* spinBitrate;
     QLineEdit* textRtpClients;

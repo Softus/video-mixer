@@ -178,6 +178,9 @@ MainWindow::MainWindow(QWidget *parent) :
     recordLimit(0),
     recordNotify(0),
     countdown(0),
+    motionStart(false),
+    motionStop(false),
+    motionDetected(false),
     running(false),
     recording(false)
 {
@@ -337,10 +340,7 @@ void MainWindow::timerEvent(QTimerEvent* evt)
         {
             onRecordStopClick();
         }
-        else
-        {
-            setElementProperty("displayoverlay", "text", QString::number(countdown));
-        }
+        updateOverlayText();
     }
 }
 
@@ -453,7 +453,7 @@ QToolBar* MainWindow::createToolBar()
                       V
          +----[main splitter]------+
          |            |            |
-  [image valve]       |       [video rate]
+  [image valve]   [detector]  [video rate]
          |            |            |
          V            V            V
  [image encoder]  [display]   [video valve]
@@ -559,17 +559,30 @@ QString MainWindow::buildPipeline()
 
     pipe.append(colorConverter).append(srcDeinterlace? " ! deinterlace": "");
 
-    // v4l2src ... ! tee name=splitter ! colorspace ! ximagesink splitter.");
+    // v4l2src ... ! tee name=splitter [! colorspace ! motioncells] ! colorspace ! autovideosink splitter.");
     //
     auto displaySinkDef  = settings.value("display-sink", DEFAULT_DISPLAY_SINK).toString();
-    auto displayFixColor = settings.value(displaySinkDef + "-colorspace").toBool();
     auto displayParams   = settings.value(displaySinkDef + "-parameters").toString();
+    auto detectMotion    = settings.value("detect-motion").toBool();
     auto enableVideo     = settings.value("enable-video").toBool();
     pipe.append(" ! tee name=splitter");
     if (!displaySinkDef.isEmpty())
     {
-        pipe.append(displayFixColor? colorConverter: "")
-            .append(" ! textoverlay name=displayoverlay silent=1 shadow=0 halignment=right valignment=top text=* xpad=2 ypad=0 font-desc=16")
+        pipe.append(colorConverter);
+        if (detectMotion)
+        {
+            auto motionDebug       = settings.value("motion-debug").toString();
+            auto motionSensitivity = settings.value("motion-sensitivity", DEFAULT_MOTION_SENSITIVITY).toString();
+            auto motionThreshold   = settings.value("motion-threshold",   DEFAULT_MOTION_THRESHOLD).toString();
+            auto motionMinFrames   = settings.value("motion-min-frames",  DEFAULT_MOTION_MIN_FRAMES).toString();
+
+            pipe.append(" ! motioncells name=motion-detector display=").append(motionDebug)
+                .append(" sensitivity=").append(motionSensitivity)
+                .append(" threshold=").append(motionThreshold)
+                .append(" minimummotionframes=").append(motionMinFrames)
+                .append(colorConverter);
+        }
+        pipe.append(" ! textoverlay name=displayoverlay color=-1 outline-color=-1 shadow=0 halignment=right valignment=top text=* xpad=2 ypad=0 font-desc=16")
             .append(" ! " ).append(displaySinkDef).append(" name=displaysink async=0 ").append(displayParams).append(" splitter.");
     }
 
@@ -885,6 +898,10 @@ void MainWindow::updatePipeline()
 
     recordLimit = settings.value("clip-limit").toBool()? settings.value("clip-countdown").toInt(): 0;
     recordNotify = settings.value("notify-clip-limit").toBool()? settings.value("notify-clip-countdown").toInt(): 0;
+
+    auto detectMotion = settings.value("detect-motion").toBool();
+    motionStart  = detectMotion && settings.value("motion-start").toBool();
+    motionStop   = detectMotion && settings.value("motion-stop").toBool();
 }
 
 void MainWindow::updateWindowTitle()
@@ -1011,14 +1028,7 @@ void MainWindow::onClipFrame(const QGst::BufferPtr& buf)
 
     enableWidget(btnRecordStart, true);
     enableWidget(btnRecordStop, true);
-    auto displayOverlay = pipeline->getElementByName("displayoverlay");
-    if (displayOverlay)
-    {
-        displayOverlay->setProperty("silent", false);
-        displayOverlay->setProperty("text", countdown > 0? QString::number(countdown): "*");
-        displayOverlay->setProperty("color",  0xFF00FF00);
-        displayOverlay->setProperty("outline-color", 0xFF00FF00);
-    }
+    updateOverlayText();
 
     if (!clipPreviewFileName.isEmpty())
     {
@@ -1050,8 +1060,6 @@ void MainWindow::onVideoFrame(const QGst::BufferPtr& buf)
     // Once we got an I-Frame, open second valve
     //
     setElementProperty("videovalve", "drop", false);
-
-    enableWidget(btnStart, true);
 }
 
 void MainWindow::onImageReady(const QGst::BufferPtr& buf)
@@ -1187,7 +1195,25 @@ void MainWindow::onElementMessage(const QGst::ElementMessagePtr& msg)
         return;
     }
 
-    qDebug() << "Got unknown message " << s->name() << " from " << msg->source()->property("name").toString();
+    if (s->name() == "motion")
+    {
+        if (motionStart && s->hasField("motion_begin"))
+        {
+            setElementProperty("videoinspect", "drop-probability", 0.0);
+            motionDetected = true;
+        }
+        else if (motionStop && s->hasField("motion_finished"))
+        {
+            setElementProperty("videoinspect", "drop-probability", 1.0);
+            setElementProperty("videovalve", "drop", true);
+            motionDetected = false;
+        }
+
+        updateOverlayText();
+        return;
+    }
+
+    qDebug() << "Got unknown message " << s->toString() << " from " << msg->source()->property("name").toString();
 }
 
 bool MainWindow::startVideoRecord()
@@ -1211,6 +1237,8 @@ bool MainWindow::startVideoRecord()
                 tr("Failed to start recording.\nCheck the error log for details."), QMessageBox::Ok);
             return false;
         }
+
+        setElementProperty("videoinspect", "drop-probability", motionStart? 1.0: 0.0);
     }
 
     return true;
@@ -1270,13 +1298,6 @@ QString MainWindow::appendVideoTail(const QDir& dir, const QString& prefix, int 
     auto muxDef  = settings.value("video-muxer",    DEFAULT_VIDEO_MUXER).toString(); // no prefix- here, muxer must be equal
     auto sinkDef = settings.value(prefix + "-sink", DEFAULT_VIDEO_SINK).toString();
 
-    auto inspect = pipeline->getElementByName((prefix + "inspect").toUtf8());
-    if (!inspect)
-    {
-        qDebug() << "Required element '" << prefix << "inspect'" << " is missing";
-        return nullptr;
-    }
-
     auto valve   = pipeline->getElementByName((prefix + "valve").toUtf8());
     if (!valve)
     {
@@ -1319,7 +1340,6 @@ QString MainWindow::appendVideoTail(const QDir& dir, const QString& prefix, int 
     mux->setState(QGst::StatePaused);
     sink->setState(QGst::StatePaused);
     valve->setProperty("drop", true);
-    inspect->setProperty("drop-probability", 0.0);
 
     // Replace '%02d' with '00' to get the real clip name
     //
@@ -1366,6 +1386,8 @@ void MainWindow::onRecordStartClick()
             //
             btnRecordStart->setEnabled(false);
             recording = true;
+
+            setElementProperty("clipinspect", "drop-probability", 0.0);
         }
         else
         {
@@ -1394,15 +1416,27 @@ void MainWindow::onRecordStopClick()
         recordTimerId = 0;
     }
 
-    auto displayOverlay = pipeline->getElementByName("displayoverlay");
-    if (displayOverlay)
-    {
-        displayOverlay->setProperty("silent", !pipeline->getElementByName("videomux"));
-        displayOverlay->setProperty("color",  0xFFFF0000);
-        displayOverlay->setProperty("text",  "*");
-        displayOverlay->setProperty("outline-color", 0xFFFF0000);
-    }
     btnRecordStop->setEnabled(false);
+    updateOverlayText();
+}
+
+void MainWindow::updateOverlayText()
+{
+    if (!pipeline)
+        return;
+
+    auto displayOverlay = pipeline->getElementByName("displayoverlay");
+    if (!displayOverlay)
+        return;
+
+    int color = recording? 0xFF0000FF:
+        motionDetected? 0xFF00FF00:
+        pipeline->getElementByName("videomux")? 0xFFFF0000:
+        0xFFFFFFFF;
+
+    displayOverlay->setProperty("color", color);
+    displayOverlay->setProperty("outline-color", color);
+    displayOverlay->setProperty("text",  countdown > 0? QString::number(countdown): "*");
 }
 
 void MainWindow::updateStartButton()
@@ -1642,18 +1676,7 @@ void MainWindow::onStartStudy()
 
     running = startVideoRecord();
     setElementProperty(videoEncoderValve, "drop", !running);
-
-    if (pipeline)
-    {
-        auto displayOverlay = pipeline->getElementByName("displayoverlay");
-        if (displayOverlay)
-        {
-            displayOverlay->setProperty("silent", !pipeline->getElementByName("videomux"));
-            displayOverlay->setProperty("color",  0xFFFF0000);
-            displayOverlay->setProperty("outline-color", 0xFFFF0000);
-        }
-    }
-
+    updateOverlayText();
     updateStartButton();
     updateWindowTitle();
     displayWidget->update();
@@ -1671,8 +1694,8 @@ void MainWindow::onStopStudy()
         onRecordStopClick();
     }
 
-    running = recording = false;
     removeVideoTail("video");
+    running = recording = motionDetected = false;
     updateWindowTitle();
 
 #ifdef WITH_DICOM
@@ -1711,7 +1734,6 @@ void MainWindow::onStopStudy()
     }
 
     setElementProperty(videoEncoderValve, "drop", true);
-    setElementProperty("displayoverlay", "silent", true);
 
     updateStartButton();
     displayWidget->update();

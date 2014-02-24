@@ -75,8 +75,6 @@ VideoSettings::VideoSettings(QWidget *parent) :
 
     layout->addRow(tr("Video &muxer"), listVideoMuxers = new QComboBox());
     layout->addRow(tr("&Image codec"), listImageCodecs = new QComboBox());
-    layout->addRow(nullptr, checkRecordAll = new QCheckBox(tr("Record &video log")));
-    checkRecordAll->setChecked(settings.value("enable-video").toBool());
     layout->addRow(tr("RTP &payloader"), listRtpPayloaders = new QComboBox());
     textRtpClients = new QLineEdit(settings.value("rtp-clients").toString());
     layout->addRow(tr("&RTP clients"), textRtpClients);
@@ -427,7 +425,6 @@ void VideoSettings::save()
     settings.setValue("video-muxer",   getListData(listVideoMuxers));
     settings.setValue("rtp-payloader", getListData(listRtpPayloaders));
     settings.setValue("image-encoder", getListData(listImageCodecs));
-    settings.setValue("enable-video",  checkRecordAll->isChecked());
     settings.setValue("enable-rtp",    checkEnableRtp->isChecked());
     settings.setValue("rtp-clients",   textRtpClients->text());
     settings.setValue("bitrate",       spinBitrate->value());

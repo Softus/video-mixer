@@ -21,16 +21,25 @@
 
 QT_BEGIN_NAMESPACE
 class QCheckBox;
+class QGroupBox;
 class QSpinBox;
 QT_END_NAMESPACE
 
 class VideoRecordSettings : public QWidget
 {
     Q_OBJECT
-    QSpinBox *spinCountdown;
+    QSpinBox  *spinCountdown;
     QCheckBox *checkLimit;
-    QSpinBox *spinNotify;
+    QSpinBox  *spinNotify;
     QCheckBox *checkNotify;
+    QCheckBox *checkRecordLog;
+    QGroupBox *grpMotionDetection;
+    QCheckBox *checkMotionStart;
+    QCheckBox *checkMotionStop;
+    QCheckBox *checkMotionDebug;
+    QSpinBox  *spinSensitivity;
+    QSpinBox  *spinThreshold;
+    QSpinBox  *spinMinTime;
 
 public:
     Q_INVOKABLE explicit VideoRecordSettings(QWidget *parent = 0);
@@ -39,6 +48,7 @@ signals:
     
 public slots:
     void save();
+private slots:
 };
 
 #endif // VIDEORECORDSETTINGS_H

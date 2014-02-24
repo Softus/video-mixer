@@ -95,11 +95,15 @@ class MainWindow : public QWidget
     int           recordLimit;
     int           recordNotify;
     int           countdown;
+    bool          motionStart;
+    bool          motionStop;
+    bool          motionDetected;
     Sound*        sound;
 
     QMenuBar* createMenuBar();
     QToolBar* createToolBar();
     void updateStartButton();
+    void updateOverlayText();
 
     // State machine
     //

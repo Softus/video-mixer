@@ -279,22 +279,22 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
 <context>
     <name>DcmClient</name>
     <message>
-        <location filename="dicom/dcmclient.cpp" line="279"/>
+        <location filename="dicom/dcmclient.cpp" line="278"/>
         <source>Required settings parameter %1 is missing</source>
         <translation>Необходимый параметр %1 не задан в настройках</translation>
     </message>
     <message>
-        <location filename="dicom/dcmclient.cpp" line="386"/>
+        <location filename="dicom/dcmclient.cpp" line="385"/>
         <source>Accepted presentation context ID not found</source>
         <translation>Принятый ID контекста представления не найден</translation>
     </message>
     <message>
-        <location filename="dicom/dcmclient.cpp" line="740"/>
+        <location filename="dicom/dcmclient.cpp" line="739"/>
         <source>Storing &apos;%1&apos; to &apos;%2&apos;</source>
         <translation>Отправка &apos;%1&apos; на &apos;%2&apos; </translation>
     </message>
     <message>
-        <location filename="dicom/dcmclient.cpp" line="749"/>
+        <location filename="dicom/dcmclient.cpp" line="748"/>
         <source>Failed to send &apos;%1&apos; to &apos;%2&apos;:
 %3
 Continue?</source>
@@ -642,22 +642,22 @@ Continue?</source>
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="mainwindow.cpp" line="423"/>
+        <location filename="mainwindow.cpp" line="429"/>
         <source>&amp;Archive</source>
         <translation>&amp;Архив</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="420"/>
+        <location filename="mainwindow.cpp" line="426"/>
         <source>&amp;Worlkist</source>
         <translation>&amp;Рабочий лист</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="426"/>
+        <location filename="mainwindow.cpp" line="432"/>
         <source>&amp;Preferences</source>
         <translation>&amp;Настройки</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="378"/>
+        <location filename="mainwindow.cpp" line="384"/>
         <source>Main</source>
         <oldsource>main</oldsource>
         <translation>Главная</translation>
@@ -667,52 +667,52 @@ Continue?</source>
         <translation type="obsolete">Сделать &amp;снимок</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="424"/>
+        <location filename="mainwindow.cpp" line="430"/>
         <source>Show studies archive</source>
         <translation>Открыть архив исследований</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="427"/>
+        <location filename="mainwindow.cpp" line="433"/>
         <source>Edit settings</source>
         <translation>Открыть окно настроек</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="430"/>
+        <location filename="mainwindow.cpp" line="436"/>
         <source>About %1</source>
         <oldsource>About berillyum</oldsource>
         <translation>О программе %1</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="904"/>
-        <location filename="mainwindow.cpp" line="909"/>
         <location filename="mainwindow.cpp" line="914"/>
         <location filename="mainwindow.cpp" line="919"/>
         <location filename="mainwindow.cpp" line="924"/>
+        <location filename="mainwindow.cpp" line="929"/>
+        <location filename="mainwindow.cpp" line="934"/>
         <source> - </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="951"/>
+        <location filename="mainwindow.cpp" line="961"/>
         <source>Failed to create &apos;%1&apos;</source>
         <translation>Не удалось создать &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1203"/>
+        <location filename="mainwindow.cpp" line="1226"/>
         <source>Failed to start recording.
 Please, adjust the video source settings.</source>
         <translation>Невозможно начать запись.
 Проверьте настройки видео.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1214"/>
-        <location filename="mainwindow.cpp" line="1377"/>
+        <location filename="mainwindow.cpp" line="1237"/>
+        <location filename="mainwindow.cpp" line="1396"/>
         <source>Failed to start recording.
 Check the error log for details.</source>
         <translation>Невозможно начать запись.
 Проверьте журнал ожибок.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1541"/>
+        <location filename="mainwindow.cpp" line="1572"/>
         <source>Failed to start a study.
 Another study is in progress.</source>
         <translation>Невозможно начать исследование.
@@ -735,27 +735,27 @@ Another study is in progress.</source>
         <translation type="obsolete">Отправить</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1231"/>
+        <location filename="mainwindow.cpp" line="1256"/>
         <source>End the study?</source>
         <translation>Завершить исследование?</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1414"/>
+        <location filename="mainwindow.cpp" line="1445"/>
         <source>End study</source>
         <translation>Завершить исследование</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1414"/>
+        <location filename="mainwindow.cpp" line="1445"/>
         <source>Start study</source>
         <translation>Начать исследование</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="409"/>
+        <location filename="mainwindow.cpp" line="415"/>
         <source>Pause</source>
         <translation>Пауза</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="400"/>
+        <location filename="mainwindow.cpp" line="406"/>
         <source>Record</source>
         <translation>Запись</translation>
     </message>
@@ -776,37 +776,37 @@ Another study is in progress.</source>
         <translation type="obsolete">З&amp;апись</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="344"/>
+        <location filename="mainwindow.cpp" line="350"/>
         <source>&amp;Menu</source>
         <translation>&amp;Меню</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="429"/>
+        <location filename="mainwindow.cpp" line="435"/>
         <source>A&amp;bout %1</source>
         <translation>&amp;О %1</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="355"/>
+        <location filename="mainwindow.cpp" line="361"/>
         <source>&amp;Enable RTP streaming</source>
         <translation>Включить RTP &amp;поток</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="359"/>
+        <location filename="mainwindow.cpp" line="365"/>
         <source>&amp;Record entire study</source>
         <translation>Записывать исследование &amp;целиком</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="366"/>
+        <location filename="mainwindow.cpp" line="372"/>
         <source>E&amp;xit</source>
         <translation>В&amp;ыход</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="391"/>
+        <location filename="mainwindow.cpp" line="397"/>
         <source>Take snapshot</source>
         <translation>Сделать снимок</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1156"/>
+        <location filename="mainwindow.cpp" line="1161"/>
         <source>Failed to load image %1</source>
         <translation>Не удалось загрузить снимок %1</translation>
     </message>
@@ -1440,7 +1440,7 @@ Another study is in progress.</source>
         <translation>Затереть %1?</translation>
     </message>
     <message>
-        <location filename="videoeditor.cpp" line="511"/>
+        <location filename="videoeditor.cpp" line="512"/>
         <source>Saving %1</source>
         <translation>Сохранение %1</translation>
     </message>
@@ -1448,134 +1448,197 @@ Another study is in progress.</source>
 <context>
     <name>VideoRecordSettings</name>
     <message>
-        <location filename="videorecordsettings.cpp" line="30"/>
+        <location filename="videorecordsettings.cpp" line="37"/>
+        <source>Video clips</source>
+        <oldsource>Video cips</oldsource>
+        <translation>Фрагменты видео</translation>
+    </message>
+    <message>
+        <location filename="videorecordsettings.cpp" line="39"/>
         <source>&amp;Limit clips to</source>
         <translation>&amp;Ограничить видеофрагметы по</translation>
     </message>
     <message>
-        <location filename="videorecordsettings.cpp" line="32"/>
+        <location filename="videorecordsettings.cpp" line="41"/>
         <source> seconds</source>
         <translation> секунд</translation>
     </message>
     <message>
-        <location filename="videorecordsettings.cpp" line="35"/>
+        <location filename="videorecordsettings.cpp" line="44"/>
         <source>&amp;Play a sound on</source>
         <translation>&amp;Проигрывать звук за</translation>
     </message>
     <message>
-        <location filename="videorecordsettings.cpp" line="37"/>
+        <location filename="videorecordsettings.cpp" line="46"/>
         <source> seconds before stopping</source>
         <translation> секунд до остановки</translation>
+    </message>
+    <message>
+        <location filename="videorecordsettings.cpp" line="52"/>
+        <source>Record &amp;video log</source>
+        <translation>Записывать видео&amp;журнал</translation>
+    </message>
+    <message>
+        <location filename="videorecordsettings.cpp" line="55"/>
+        <source>Use &amp;motion detection</source>
+        <translation>&amp;Использовать детектор движения</translation>
+    </message>
+    <message>
+        <location filename="videorecordsettings.cpp" line="60"/>
+        <source>&amp;Start recording only after the motion is detected</source>
+        <translation>&amp;Начинать запись только если обнаружено движение</translation>
+    </message>
+    <message>
+        <location filename="videorecordsettings.cpp" line="62"/>
+        <source>S&amp;top recording when the motion is lost</source>
+        <translation>О&amp;станавливать запись если движение прекратилось</translation>
+    </message>
+    <message>
+        <location filename="videorecordsettings.cpp" line="65"/>
+        <source>S&amp;ensitivity</source>
+        <translation>&amp;Чувствительность</translation>
+    </message>
+    <message>
+        <location filename="videorecordsettings.cpp" line="67"/>
+        <location filename="videorecordsettings.cpp" line="71"/>
+        <source> percent</source>
+        <translation> процентов</translation>
+    </message>
+    <message>
+        <location filename="videorecordsettings.cpp" line="69"/>
+        <source>T&amp;hreshold</source>
+        <translation>По&amp;рог</translation>
+    </message>
+    <message>
+        <location filename="videorecordsettings.cpp" line="73"/>
+        <source>T&amp;rigger after</source>
+        <translation>Ср&amp;абатывает после</translation>
+    </message>
+    <message>
+        <location filename="videorecordsettings.cpp" line="75"/>
+        <source> frames</source>
+        <translation> кадров</translation>
+    </message>
+    <message>
+        <location filename="videorecordsettings.cpp" line="77"/>
+        <source>&amp;Display motion cells</source>
+        <translation>Показывать &amp;ячейки с движением</translation>
+    </message>
+    <message>
+        <location filename="videorecordsettings.cpp" line="96"/>
+        <source>Motion detection requires the opencv plugin which is not found.
+Are you want to continue?</source>
+        <translation>Обнаружение движения пробует плагин opencv, не обнаруженный в системе.
+Вы уверены что хотите включить обнаружение движения?</translation>
     </message>
 </context>
 <context>
     <name>VideoSettings</name>
     <message>
-        <location filename="videosettings.cpp" line="51"/>
+        <location filename="videosettings.cpp" line="52"/>
         <source>Video &amp;device</source>
         <translation>&amp;Устройство</translation>
     </message>
     <message>
-        <location filename="videosettings.cpp" line="53"/>
+        <location filename="videosettings.cpp" line="54"/>
         <source>I&amp;nput channel</source>
         <translation>&amp;Входной канал</translation>
     </message>
     <message>
-        <location filename="videosettings.cpp" line="55"/>
+        <location filename="videosettings.cpp" line="56"/>
         <source>Pixel &amp;format</source>
         <translation>&amp;Формат</translation>
     </message>
     <message>
-        <location filename="videosettings.cpp" line="57"/>
+        <location filename="videosettings.cpp" line="58"/>
         <source>Frame &amp;size</source>
         <translation>&amp;Размер кадра</translation>
     </message>
     <message>
-        <location filename="videosettings.cpp" line="58"/>
+        <location filename="videosettings.cpp" line="59"/>
         <source>Video &amp;codec</source>
         <translation>&amp;Кодек видео</translation>
     </message>
     <message>
-        <location filename="videosettings.cpp" line="60"/>
+        <location filename="videosettings.cpp" line="61"/>
         <source>M&amp;ax rate</source>
         <translation>&amp;Максимум</translation>
     </message>
     <message>
-        <location filename="videosettings.cpp" line="63"/>
+        <location filename="videosettings.cpp" line="64"/>
         <source> frames per second</source>
         <translation> кадров в секунду</translation>
     </message>
     <message>
-        <location filename="videosettings.cpp" line="64"/>
+        <location filename="videosettings.cpp" line="65"/>
         <source>0 for unlimited</source>
         <translation>0, чтобы не ограничивать</translation>
     </message>
     <message>
-        <location filename="videosettings.cpp" line="66"/>
+        <location filename="videosettings.cpp" line="67"/>
         <source>Video &amp;bitrate</source>
         <translation>Скорость &amp;потока</translation>
     </message>
     <message>
-        <location filename="videosettings.cpp" line="69"/>
+        <location filename="videosettings.cpp" line="70"/>
         <source> kbit per second</source>
         <translation> kbit в секунду</translation>
     </message>
     <message>
-        <location filename="videosettings.cpp" line="72"/>
+        <location filename="videosettings.cpp" line="73"/>
         <source>De&amp;interlace</source>
         <translation>Устранять &amp;чересстрочность</translation>
     </message>
     <message>
-        <location filename="videosettings.cpp" line="75"/>
+        <location filename="videosettings.cpp" line="76"/>
         <source>Video &amp;muxer</source>
         <translation>Конте&amp;йнер видео</translation>
     </message>
     <message>
-        <location filename="videosettings.cpp" line="76"/>
+        <location filename="videosettings.cpp" line="77"/>
         <source>&amp;Image codec</source>
         <translation>Кодек &amp;снимков</translation>
     </message>
     <message>
-        <location filename="videosettings.cpp" line="77"/>
         <source>Record &amp;video log</source>
-        <translation>Записывать видео&amp;журнал</translation>
+        <translation type="obsolete">Записывать видео&amp;журнал</translation>
     </message>
     <message>
         <source>Record entire &amp;video</source>
         <translation type="obsolete">Записывать видео &amp;целиком</translation>
     </message>
     <message>
-        <location filename="videosettings.cpp" line="79"/>
+        <location filename="videosettings.cpp" line="78"/>
         <source>RTP &amp;payloader</source>
         <translation>Контейнер &amp;RTP</translation>
     </message>
     <message>
-        <location filename="videosettings.cpp" line="81"/>
+        <location filename="videosettings.cpp" line="80"/>
         <source>&amp;RTP clients</source>
         <translation>Клиенты R&amp;TP</translation>
     </message>
     <message>
-        <location filename="videosettings.cpp" line="82"/>
+        <location filename="videosettings.cpp" line="81"/>
         <source>&amp;Enable RTP</source>
         <translation>Вкл&amp;ючить RTP</translation>
     </message>
     <message>
-        <location filename="videosettings.cpp" line="99"/>
-        <location filename="videosettings.cpp" line="225"/>
-        <location filename="videosettings.cpp" line="232"/>
-        <location filename="videosettings.cpp" line="249"/>
-        <location filename="videosettings.cpp" line="296"/>
+        <location filename="videosettings.cpp" line="98"/>
+        <location filename="videosettings.cpp" line="224"/>
+        <location filename="videosettings.cpp" line="231"/>
+        <location filename="videosettings.cpp" line="268"/>
+        <location filename="videosettings.cpp" line="317"/>
         <source>(default)</source>
         <translation>(по умолчанию)</translation>
     </message>
     <message>
-        <location filename="videosettings.cpp" line="137"/>
+        <location filename="videosettings.cpp" line="136"/>
         <source>Failed to create element &apos;%1&apos;</source>
         <oldsource>Failed to create element &quot;%1&quot;</oldsource>
         <translation>Не удалось создать элемент &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="videosettings.cpp" line="363"/>
+        <location filename="videosettings.cpp" line="384"/>
         <source>%1x%2</source>
         <translation>%1х%2</translation>
     </message>
