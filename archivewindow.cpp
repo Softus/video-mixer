@@ -536,7 +536,12 @@ void ArchiveWindow::onListRowChanged(int idx)
             }
         }
     }
+
     actionEdit->setEnabled(isVideo);
+    foreach (auto action, barMediaControls->actions())
+    {
+        action->setVisible(isVideo);
+    }
 }
 
 void ArchiveWindow::onListItemDoubleClicked(QListWidgetItem* item)
@@ -934,21 +939,6 @@ void ArchiveWindow::onBusMessage(const QGst::MessagePtr& message)
             pipeline->setState(QGst::StatePaused);
         }
         break;
-    case QGst::MessageAsyncDone:
-        {
-            // At this time we finally is able to query is the pipeline seekable or not.
-            //
-            QGst::SeekingQueryPtr querySeek = QGst::SeekingQuery::create(QGst::FormatTime);
-            pipeline->query(querySeek);
-            //qDebug() << " seekable " << querySeek->seekable() << " format " << querySeek->format();
-            auto isClip = querySeek->seekable();
-            foreach (auto action, barMediaControls->actions())
-            {
-                action->setVisible(isClip);
-            }
-            actionEdit->setEnabled(isClip);
-        }
-        break;
 #ifdef QT_DEBUG
     case QGst::MessageInfo:
         qDebug() << message->source()->property("name").toString() << " " << message.staticCast<QGst::InfoMessage>()->error();
@@ -956,6 +946,7 @@ void ArchiveWindow::onBusMessage(const QGst::MessagePtr& message)
     case QGst::MessageWarning:
         qDebug() << message->source()->property("name").toString() << " " << message.staticCast<QGst::WarningMessage>()->error();
         break;
+    case QGst::MessageAsyncDone:
     case QGst::MessageNewClock:
     case QGst::MessageStreamStatus:
     case QGst::MessageQos:

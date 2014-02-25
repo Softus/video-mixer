@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
     OFConsoleApplication dcmtkApp(PRODUCT_SHORT_NAME);
     OFCommandLine cmd;
     OFLog::addOptions(cmd);
-    cmd.addOption(nullptr,            "-sync",    "Run the program in X synchronous mode."); // http://qt-project.org/doc/qt-4.8/debug.html
+    cmd.addOption("--sync",           nullptr,    "Run the program in X synchronous mode."); // http://qt-project.org/doc/qt-4.8/debug.html
     cmd.addOption("--archive",        nullptr, 1, "folder name", "Start in archive mode");
     cmd.addOption("--edit-video",     nullptr, 1, "file name", "Start in video editing mode");
     cmd.addOption("--safe-mode",      nullptr,    "Run the program in safe mode");
@@ -126,7 +126,7 @@ int main(int argc, char *argv[])
     app.setWindowIcon(QIcon(":/app/product"));
 
 #ifdef Q_WS_X11
-    if (app.arguments().indexOf("-sync") || qgetenv("DO_X_SYNCHRONIZE").toInt())
+    if (app.arguments().indexOf("--sync") || qgetenv("DO_X_SYNCHRONIZE").toInt())
     {
          XSynchronize(QX11Info::display(), true);
     }

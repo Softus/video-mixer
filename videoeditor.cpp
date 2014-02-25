@@ -18,6 +18,7 @@
 #include "videoencodingprogressdialog.h"
 #include "product.h"
 #include "defaults.h"
+#include "typedetect.h"
 #include "qwaitcursor.h"
 
 #include <QAction>
@@ -178,6 +179,7 @@ VideoEditor::~VideoEditor()
     {
         pipeline->setState(QGst::StateNull);
         videoWidget->stopPipelineWatch();
+        pipeline.clear();
     }
 }
 
@@ -473,6 +475,21 @@ bool VideoEditor::exportVideo(QFile* outFile)
     auto muxer           = settings.value("video-muxer", DEFAULT_VIDEO_MUXER).toString();
     auto videoEncBitrate = settings.value("bitrate", DEFAULT_VIDEOBITRATE).toInt();
 
+    if (encoder.isEmpty())
+    {
+        auto caps = TypeDetect(filePath);
+        if (caps.startsWith("video/x-dv"))
+        {
+            encoder = "ffenc_dvvideo";
+            muxer = "ffmux_dv";
+        }
+        else
+        {
+            encoder = DEFAULT_VIDEO_ENCODER;
+            muxer = DEFAULT_VIDEO_MUXER;
+        }
+    }
+
     if (!outFile->open(QIODevice::WriteOnly))
     {
         // TODO
@@ -485,7 +502,7 @@ bool VideoEditor::exportVideo(QFile* outFile)
 
     try
     {
-        auto pipeDef = QString("gnlfilesource location=\"%1\" start=%2 duration=%3 media-start=0 media-duration=%3 !"
+        auto pipeDef = QString("gnlfilesource location=\"%1\" media-start=%2 media-duration=%3 start=0 duration=%3 !"
             " %4 %5 name=videoencoder %6 ! %7 ! filesink location=\"%8\"")
             .arg(filePath).arg(start).arg(len).arg(fixColor, encoder, encoderParams, muxer).arg(outFile->fileName());
         qDebug() << pipeDef;

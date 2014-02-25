@@ -61,7 +61,7 @@ class VideoSettings : public QWidget
     QCheckBox* checkDeinterlace;
 
     void updateDeviceList(const char *elmName, const char *propName);
-    void updateGstList(const char* setting, const char* def, unsigned long long type, QComboBox* cb);
+    QString updateGstList(const char* setting, const char* def, unsigned long long type, QComboBox* cb);
 
 public:
     Q_INVOKABLE explicit VideoSettings(QWidget *parent = 0);
@@ -71,10 +71,13 @@ protected:
 
 signals:
     
-public slots:
+private slots:
     void videoDeviceChanged(int index);
     void inputChannelChanged(int index);
     void formatChanged(int index);
+    void videoCodecChanged(int index);
+
+public slots:
     void save();
 };
 

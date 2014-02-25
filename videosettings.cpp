@@ -57,6 +57,7 @@ VideoSettings::VideoSettings(QWidget *parent) :
     connect(listFormats, SIGNAL(currentIndexChanged(int)), this, SLOT(formatChanged(int)));
     layout->addRow(tr("Frame &size"), listSizes = new QComboBox());
     layout->addRow(tr("Video &codec"), listVideoCodecs = new QComboBox());
+    connect(listVideoCodecs, SIGNAL(currentIndexChanged(int)), this, SLOT(videoCodecChanged(int)));
 
     layout->addRow(tr("M&ax rate"), spinFps = new QSpinBox());
     spinFps->setRange(0, 200);
@@ -89,7 +90,12 @@ void VideoSettings::showEvent(QShowEvent *e)
     QWidget::showEvent(e);
     // Refill the boxes every time the page is shown
     //
-    updateGstList("video-encoder", DEFAULT_VIDEO_ENCODER, GST_ELEMENT_FACTORY_TYPE_ENCODER | GST_ELEMENT_FACTORY_TYPE_MEDIA_VIDEO, listVideoCodecs);
+    auto selectedCodec = updateGstList("video-encoder", DEFAULT_VIDEO_ENCODER, GST_ELEMENT_FACTORY_TYPE_ENCODER | GST_ELEMENT_FACTORY_TYPE_MEDIA_VIDEO, listVideoCodecs);
+    listVideoCodecs->insertItem(0, tr("(none)"));
+    if (selectedCodec.isEmpty())
+    {
+        listVideoCodecs->setCurrentIndex(0);
+    }
     updateGstList("video-muxer",   DEFAULT_VIDEO_MUXER,   GST_ELEMENT_FACTORY_TYPE_MUXER, listVideoMuxers);
     updateGstList("image-encoder", DEFAULT_IMAGE_ENCODER, GST_ELEMENT_FACTORY_TYPE_ENCODER | GST_ELEMENT_FACTORY_TYPE_MEDIA_IMAGE, listImageCodecs);
     updateGstList("rtp-payloader", DEFAULT_RTP_PAYLOADER, GST_ELEMENT_FACTORY_TYPE_PAYLOADER, listRtpPayloaders);
@@ -108,7 +114,7 @@ void VideoSettings::showEvent(QShowEvent *e)
 #endif
 }
 
-void VideoSettings::updateGstList(const char* setting, const char* def, unsigned long long type, QComboBox* cb)
+QString VideoSettings::updateGstList(const char* setting, const char* def, unsigned long long type, QComboBox* cb)
 {
     cb->clear();
     auto selectedCodec = QSettings().value(setting, def).toString();
@@ -125,6 +131,7 @@ void VideoSettings::updateGstList(const char* setting, const char* def, unsigned
     }
 
     gst_plugin_feature_list_free(elmList);
+    return selectedCodec;
 }
 
 void VideoSettings::updateDeviceList(const char* elmName, const char* propName)
@@ -388,6 +395,16 @@ void VideoSettings::formatChanged(int index)
             listSizes->setCurrentIndex(listSizes->count() - 1);
         }
     }
+}
+
+void VideoSettings::videoCodecChanged(int index)
+{
+    auto on = !listVideoCodecs->itemData(index).isNull();
+
+    spinFps->setEnabled(on);
+    spinBitrate->setEnabled(on);
+    listVideoMuxers->setEnabled(on);
+    checkDeinterlace->setEnabled(on);
 }
 
 // Return nullptr for 'default', otherwise the text itself

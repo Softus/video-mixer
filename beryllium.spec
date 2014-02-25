@@ -1,7 +1,7 @@
 Summary: Beryllium DICOM edition.
 Name: beryllium
 Provides: beryllium
-Version: 0.5.0
+Version: 0.6.0
 Release: 1
 License: LGPL-2.1+
 Source: %{name}.tar.gz

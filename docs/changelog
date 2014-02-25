@@ -1,3 +1,11 @@
+beryllium (0.6.0) debian;
+
+  * Video start of the cut fix
+  * Motion detection via opencv plugin
+  * Compressed sources support (DV, MPEG cameras)
+
+ -- Pavel Bludov <pbludov@gmail.com>  Tue, 25 Feb 2014 12:49:00 +0900
+
 beryllium (0.5.0) debian;
 
   * Confirmation settings

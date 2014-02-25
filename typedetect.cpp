@@ -133,5 +133,5 @@ QString TypeDetect(const QString& filePath)
         }
     }
 
-    return nullptr;
+    return "";
 }

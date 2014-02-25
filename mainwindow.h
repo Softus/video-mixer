@@ -118,6 +118,7 @@ class MainWindow : public QWidget
     QGst::ElementPtr imageSink;
     QGst::ElementPtr videoEncoder;
     QGst::ElementPtr videoEncoderValve;
+    QGst::ElementPtr displayOverlay;
 
     QString replace(QString str, int seqNo = 0);
     QString buildPipeline();
