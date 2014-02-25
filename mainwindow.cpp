@@ -333,7 +333,7 @@ void MainWindow::timerEvent(QTimerEvent* evt)
     {
         if (--countdown <= recordNotify)
         {
-            sound->play(DATA_FOLDER "/sound/notify.ac3");
+            sound->play(DATA_FOLDER + "/sound/notify.ac3");
         }
 
         if (countdown == 0)
@@ -1315,7 +1315,7 @@ void MainWindow::onSnapshotClick()
     QString imageExt = getExt(settings.value("image-encoder", DEFAULT_IMAGE_ENCODER).toString());
     QString imageFileName = replace(settings.value("image-template", DEFAULT_IMAGE_TEMPLATE).toString(), ++imageNo).append(imageExt);
 
-    sound->play(DATA_FOLDER "/sound/shutter.ac3");
+    sound->play(DATA_FOLDER + "/sound/shutter.ac3");
 
     setElementProperty(imageSink, "location", outputPath.absoluteFilePath(imageFileName), QGst::StateReady);
 
