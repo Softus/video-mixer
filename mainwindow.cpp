@@ -1340,8 +1340,9 @@ QString MainWindow::appendVideoTail(const QDir& dir, const QString& prefix, int 
     QSettings settings;
     auto noCodec = settings.value("video-encoder",  DEFAULT_VIDEO_ENCODER).toString().isEmpty();
     auto muxDef  = settings.value("video-muxer",    DEFAULT_VIDEO_MUXER).toString();
+    auto maxSize = settings.value("video-max-file-size", DEFAULT_VIDEO_MAX_FILE_SIZE).toLongLong() * 1024 * 1024;
     QString videoExt;
-    bool useMulti = true;
+    bool useMulti = maxSize > 0;
 
     QGst::ElementPtr mux;
     auto valve   = pipeline->getElementByName((prefix + "valve").toUtf8());
@@ -1362,12 +1363,21 @@ QString MainWindow::appendVideoTail(const QDir& dir, const QString& prefix, int 
         pipeline->add(mux);
     }
 
-    auto sink = QGst::ElementFactory::make("multifilesink", (prefix + "sink").toUtf8());
-    if (!sink || !sink->findProperty("max-file-size"))
+
+    QGst::ElementPtr sink;
+    if (!useMulti)
     {
-        useMulti = false;
-        qDebug() << "multiflesink does not support 'max-file-size' property, replaced with filesink";
         sink = QGst::ElementFactory::make("filesink", (prefix + "sink").toUtf8());
+    }
+    else
+    {
+        sink = QGst::ElementFactory::make("multifilesink", (prefix + "sink").toUtf8());
+        if (!sink || !sink->findProperty("max-file-size"))
+        {
+            useMulti = false;
+            qDebug() << "multiflesink does not support 'max-file-size' property, replaced with filesink";
+            sink = QGst::ElementFactory::make("filesink", (prefix + "sink").toUtf8());
+        }
     }
 
     if (!sink)
@@ -1402,7 +1412,6 @@ QString MainWindow::appendVideoTail(const QDir& dir, const QString& prefix, int 
     QString clipFileName = replace(settings.value(prefix + "-template", prefix + "-%study%-%nn%").toString(), idx)
             .append(useMulti? "%02d": "").append(videoExt);
     auto absPath = dir.absoluteFilePath(clipFileName);
-    auto maxSize = settings.value("video-max-file-size", DEFAULT_VIDEO_MAX_FILE_SIZE).toLongLong() * 1024 * 1024;
     sink->setProperty("location", absPath);
     if (useMulti)
     {
