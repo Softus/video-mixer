@@ -71,10 +71,10 @@ QString MouseShortcut::toString(int key, QKeySequence::SequenceFormat format)
 
     if (buttons & Qt::LeftButton)    returnText += "LeftButton";
     if (buttons & Qt::RightButton)   returnText += "RightButton";
-    if (buttons & Qt::MiddleButton)  returnText += "MiddleButton";
     if (buttons & Qt::XButton1)      returnText += "BackButton";
     if (buttons & Qt::XButton2)      returnText += "ForwardButton";
  #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    if (buttons & Qt::MiddleButton)  returnText += "MiddleButton";
     if (buttons & Qt::ExtraButton3)  returnText += "TaskButton";
     if (buttons & Qt::ExtraButton4)  returnText += "ExtraButton4";
     if (buttons & Qt::ExtraButton5)  returnText += "ExtraButton5";
@@ -97,6 +97,8 @@ QString MouseShortcut::toString(int key, QKeySequence::SequenceFormat format)
     if (buttons & Qt::ExtraButton22) returnText += "ExtraButton22";
     if (buttons & Qt::ExtraButton23) returnText += "ExtraButton23";
     if (buttons & Qt::ExtraButton24) returnText += "ExtraButton24";
+#else
+    if (buttons & Qt::MidButton)     returnText += "MiddleButton";
 #endif
     return returnText.join("+");
 }

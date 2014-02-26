@@ -118,7 +118,9 @@ int main(int argc, char *argv[])
     // QT init
     //
     QApplication::setAttribute(Qt::AA_DontShowIconsInMenus);
+#if (QT_VERSION >= QT_VERSION_CHECK(4, 8, 0))
     QApplication::setAttribute(Qt::AA_X11InitThreads);
+#endif
     QApplication app(argc, argv);
     app.setOrganizationName(ORGANIZATION_SHORT_NAME);
     app.setApplicationName(PRODUCT_SHORT_NAME);

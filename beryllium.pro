@@ -15,8 +15,8 @@
 isEmpty(PREFIX): PREFIX   = /usr/local
 DEFINES += PREFIX=$$PREFIX
 
-QT += core gui dbus
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets opengl
+QT += core gui dbus opengl
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 unix: DISTRO = $$system(cat /proc/version)
 

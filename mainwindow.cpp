@@ -254,8 +254,12 @@ MainWindow::MainWindow(QWidget *parent) :
     patientSex       = getCmdLineOption("--patient-sex",      "-ps");
     physician        = getCmdLineOption("--physician",        "-p");
     studyName        = getCmdLineOption("--study-description","-sd");
-    auto safeMode    = qApp->queryKeyboardModifiers() == SAFE_MODE_KEYS ||
-                       qApp->arguments().contains("--safe-mode") ||
+    auto safeMode    = qApp->arguments().contains("--safe-mode") ||
+#if (QT_VERSION >= QT_VERSION_CHECK(4, 8, 0))
+                        qApp->queryKeyboardModifiers() == SAFE_MODE_KEYS ||
+#else
+                        qApp->keyboardModifiers() == SAFE_MODE_KEYS ||
+#endif
                        settings.value("safe-mode", true).toBool();
 
     if (safeMode)
@@ -645,7 +649,7 @@ QString MainWindow::buildPipeline()
                 .append(" minimummotionframes=").append(motionMinFrames)
                 .append(colorConverter);
         }
-        pipe.append(" ! textoverlay name=displayoverlay color=-1 outline-color=-1 shadow=0 halignment=right valignment=top text=* xpad=2 ypad=0 font-desc=16")
+        pipe.append(" ! textoverlay name=displayoverlay color=-1 halignment=right valignment=top text=* xpad=2 ypad=0 font-desc=16")
             .append(" ! " ).append(displaySinkDef).append(" name=displaysink async=0 ").append(displayParams).append(" splitter.");
     }
 
@@ -1293,7 +1297,11 @@ void MainWindow::onStartClick()
         msg.setOverrideSettingsKey("end-study");
         msg.setRememberOnReject(false);
         msg.setDefaultButton(QMessageBox::Yes);
+#if (QT_VERSION >= QT_VERSION_CHECK(4, 8, 0))
         if (qApp->queryKeyboardModifiers().testFlag(Qt::ShiftModifier))
+#else
+        if (qApp->keyboardModifiers().testFlag(Qt::ShiftModifier))
+#endif
         {
             msg.reset();
         }

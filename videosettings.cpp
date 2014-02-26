@@ -16,6 +16,7 @@
 
 #include "videosettings.h"
 #include "defaults.h"
+#include <algorithm>
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDebug>

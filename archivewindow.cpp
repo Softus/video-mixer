@@ -405,7 +405,7 @@ void ArchiveWindow::updateList()
 
     listFiles->setUpdatesEnabled(false);
     listFiles->clear();
-    auto filter = QDir::NoDot | QDir::AllEntries | QDir::NoDotDot;
+    auto filter = QDir::AllEntries | QDir::NoDotAndDotDot;
 
     foreach (QFileInfo fi, curr.entryInfoList(filter, QDir::Time))
     {
@@ -664,7 +664,11 @@ void ArchiveWindow::onDeleteClick()
     msg.setOverrideSettingsKey("archive-delete");
     msg.setRememberOnReject(false);
     msg.setDefaultButton(QMessageBox::Cancel);
+#if (QT_VERSION >= QT_VERSION_CHECK(4, 8, 0))
     if (qApp->queryKeyboardModifiers().testFlag(Qt::ShiftModifier))
+#else
+    if (qApp->keyboardModifiers().testFlag(Qt::ShiftModifier))
+#endif
     {
         msg.reset();
     }

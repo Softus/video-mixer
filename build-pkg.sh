@@ -54,7 +54,7 @@ Ubuntu | Debian)  echo "Building DEB package"
     cp docs/* debian/
     dpkg-buildpackage -I.git -I*.sh -rfakeroot
     ;;
-"openSUSE project" | fedora | "SUSE LINUX")  echo "Building RPM package"
+"openSUSE project" | fedora | "SUSE LINUX" | CentOS)  echo "Building RPM package"
     rm -f ../*.rpm ../*.tar.gz
     tar czf ../beryllium.tar.gz * --exclude=.git --exclude=*.sh && rpmbuild -D"dicom $dicom" -D"debug $debug" -D"touch $touch" -ta ../beryllium.tar.gz
     mv ~/rpmbuild/RPMS/*/beryllium-*.rpm ..
