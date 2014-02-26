@@ -1340,8 +1340,8 @@ QString MainWindow::appendVideoTail(const QDir& dir, const QString& prefix, int 
     QSettings settings;
     auto noCodec = settings.value("video-encoder",  DEFAULT_VIDEO_ENCODER).toString().isEmpty();
     auto muxDef  = settings.value("video-muxer",    DEFAULT_VIDEO_MUXER).toString();
-    auto sinkDef = settings.value(prefix + "-sink", DEFAULT_VIDEO_SINK).toString();
     QString videoExt;
+    bool useMulti = true;
 
     QGst::ElementPtr mux;
     auto valve   = pipeline->getElementByName((prefix + "valve").toUtf8());
@@ -1362,12 +1362,20 @@ QString MainWindow::appendVideoTail(const QDir& dir, const QString& prefix, int 
         pipeline->add(mux);
     }
 
-    auto sink    = QGst::ElementFactory::make(sinkDef, (prefix + "sink").toUtf8());
+    auto sink = QGst::ElementFactory::make("multifilesink", (prefix + "sink").toUtf8());
+    if (!sink || !sink->findProperty("max-file-size"))
+    {
+        useMulti = false;
+        qDebug() << "multiflesink does not support 'max-file-size' property, replaced with filesink";
+        sink = QGst::ElementFactory::make("filesink", (prefix + "sink").toUtf8());
+    }
+
     if (!sink)
     {
-        qDebug() << "Failed to create element '" << prefix << "sink'" << " (" << sinkDef << ")";
+        qDebug() << "Failed to create filesink element";
         return nullptr;
     }
+
     pipeline->add(sink);
 
     if (noCodec)
@@ -1392,20 +1400,22 @@ QString MainWindow::appendVideoTail(const QDir& dir, const QString& prefix, int 
     // Manually increment video/clip file name
     //
     QString clipFileName = replace(settings.value(prefix + "-template", prefix + "-%study%-%nn%").toString(), idx)
-            .append("%02d").append(videoExt);
+            .append(useMulti? "%02d": "").append(videoExt);
     auto absPath = dir.absoluteFilePath(clipFileName);
     auto maxSize = settings.value("video-max-file-size", DEFAULT_VIDEO_MAX_FILE_SIZE).toLongLong() * 1024 * 1024;
     sink->setProperty("location", absPath);
-    sink->setProperty("next-file", 4);
-    sink->setProperty("max-file-size", maxSize);
-
+    if (useMulti)
+    {
+        sink->setProperty("next-file", 4);
+        sink->setProperty("max-file-size", maxSize);
+    }
     mux && mux->setState(QGst::StatePaused);
     sink->setState(QGst::StatePaused);
     valve->setProperty("drop", true);
 
     // Replace '%02d' with '00' to get the real clip name
     //
-    return absPath.replace("%02d","00");
+    return useMulti? absPath.replace("%02d","00"): absPath;
 }
 
 void MainWindow::removeVideoTail(const QString& prefix)

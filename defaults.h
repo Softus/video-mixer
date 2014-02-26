@@ -44,7 +44,6 @@
 #define DEFAULT_IMAGE_ENCODER         "jpegenc"
 #define DEFAULT_IMAGE_SINK            "multifilesink"
 #define DEFAULT_VIDEO_ENCODER         "ffenc_mpeg2video"
-#define DEFAULT_VIDEO_SINK            "multifilesink"
 #define DEFAULT_VIDEO_MUXER           "mpegpsmux"
 #define DEFAULT_VIDEO_MAX_FPS         30
 #define DEFAULT_VIDEO_MAX_FILE_SIZE   1024
