@@ -44,8 +44,9 @@
 #include <gst/gst.h>
 #include <gst/interfaces/tuner.h>
 
-VideoSettings::VideoSettings(QWidget *parent) :
-    QWidget(parent)
+VideoSettings::VideoSettings(QWidget *parent)
+  : QWidget(parent)
+  , spinFps(nullptr)
 {
     QSettings settings;
     auto layout = new QFormLayout();

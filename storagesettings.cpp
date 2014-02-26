@@ -30,8 +30,9 @@
 
 #include <QGst/ElementFactory>
 
-StorageSettings::StorageSettings(QWidget *parent) :
-    QWidget(parent)
+StorageSettings::StorageSettings(QWidget *parent)
+    : QWidget(parent)
+    , spinMaxVideoSize(nullptr)
 {
     QSettings settings;
     auto layoutMain = new QVBoxLayout;

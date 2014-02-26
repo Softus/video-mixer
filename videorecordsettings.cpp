@@ -91,7 +91,7 @@ void VideoRecordSettings::save()
     auto useDetection = grpMotionDetection->isChecked();
     if (useDetection)
     {
-        auto elm = QGst::ElementFactory::find("motioncells");
+        auto elm = QGst::ElementFactory::make("motioncells");
         if (elm.isNull() && QMessageBox::question(this, windowTitle()
           , tr("Motion detection requires the opencv plugin which is not found.\nAre you want to continue?")
           , QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::No)
