@@ -20,7 +20,7 @@ BuildRequires: boost-devel, make, gstreamer-devel
 #, libqt4-devel, libQtGLib-devel, gstreamer-0_10-plugins-qt-devel
 
 %if %dicom == 1
-Requires: libdcmtk3_6, libopenssl1_0_0
+#Requires: libdcmtk3_6, libopenssl1_0_0
 Requires: libmediainfo0, libzen0
 BuildRequires: libmediainfo-devel, dcmtk-devel, tcp_wrappers-devel
 %endif

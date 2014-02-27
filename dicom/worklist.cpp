@@ -236,7 +236,7 @@ void Worklist::onLoadClick()
     //
     table->setUpdatesEnabled(false);
     table->setSortingEnabled(false);
-    maxDate.setMSecsSinceEpoch(0);
+    maxDate.setTime_t(0);
     table->setRowCount(0);
 
     DcmClient assoc(UID_FINDModalityWorklistInformationModel);
