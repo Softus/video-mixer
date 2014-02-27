@@ -47,17 +47,17 @@ if [ $touch == 1 ]; then
   ' beryllium.pro
 fi
 
-distro=$(lsb_release -is)
+distro=$(lsb_release -is | awk '{print $1}')
 case $distro in
 Ubuntu | Debian)  echo "Building DEB package"
     rm -f ../*.deb ../*.tar.gz ../*.dsc ../*.changes
     cp docs/* debian/
     dpkg-buildpackage -I.git -I*.sh -rfakeroot
     ;;
-"openSUSE project" | fedora | "SUSE LINUX" | CentOS)  echo "Building RPM package"
+openSUSE | fedora | SUSE | CentOS)  echo "Building RPM package"
     rm -f ../*.rpm ../*.tar.gz
-    tar czf ../beryllium.tar.gz * --exclude=.git --exclude=*.sh && rpmbuild -D"dicom $dicom" -D"debug $debug" -D"touch $touch" -ta ../beryllium.tar.gz
-    mv ~/rpmbuild/RPMS/*/beryllium-*.rpm ..
+    tar czf ../beryllium.tar.gz * --exclude=.git --exclude=*.sh && rpmbuild -D"dicom $dicom" -D"debug $debug" -D"touch $touch" -D"distro $distro" -ta ../beryllium.tar.gz
+    mv ~/rpmbuild/RPMS/*-beryllium-*.rpm ..
     ;;
 *) echo "$distro is not supported yet"
    ;;
