@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=Berillyum
-Name[ru_RU]=Берилий
+Name[ru_RU]=Бериллий
 Comment=Image and video capturing program
 Comment[ru_RU]=Программа для записи видео
 Exec=beryllium %U

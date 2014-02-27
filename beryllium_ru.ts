@@ -27,7 +27,7 @@
     <message>
         <location filename="aboutdialog.cpp" line="55"/>
         <source>Beryllium</source>
-        <translation>Берилий</translation>
+        <translation>Бериллий</translation>
     </message>
     <message>
         <location filename="aboutdialog.cpp" line="84"/>
