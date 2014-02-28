@@ -18,13 +18,6 @@
 #include <gst/gsttypefind.h>
 #include <gst/gstutils.h>
 
-static const gchar *mpeg_sys_exts[] = { "mpe", "mpeg", "mpg", NULL };
-
-/*** video/mpeg systemstream ***/
-static GstStaticCaps mpeg_sys_caps = GST_STATIC_CAPS ("video/mpeg, "
-    "systemstream = (boolean) true, mpegversion = (int) [ 1, 2 ]");
-
-#define MPEG_SYS_CAPS gst_static_caps_get(&mpeg_sys_caps)
 #define IS_MPEG_HEADER(data) (G_UNLIKELY((((guint8 *)(data))[0] == 0x00) &&  \
                                          (((guint8 *)(data))[1] == 0x00) &&  \
                                          (((guint8 *)(data))[2] == 0x01)))
@@ -164,7 +157,7 @@ mpeg_sys_is_valid_sys (GstTypeFind * /*tf*/, const guint8 * data, guint len,
  * Since we also check marker bits and pes packet lengths, this probability is a
  * very coarse upper bound.
  */
-static void
+void
 mpeg_sys_type_find (GstTypeFind * tf, gpointer /*unused*/)
 {
   const guint8 *data, *data0, *first_sync, *end;
@@ -279,10 +272,4 @@ suggest:
         "systemstream", G_TYPE_BOOLEAN, TRUE,
         "mpegversion", G_TYPE_INT, mpegversion, NULL);
   }
-}
-
-void fix_mpeg_sys_type_find()
-{
-    gst_type_find_register(nullptr, "video/mpegps", GST_RANK_NONE,
-        mpeg_sys_type_find, (gchar **)mpeg_sys_exts, MPEG_SYS_CAPS, NULL, NULL);
 }

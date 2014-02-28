@@ -55,7 +55,7 @@
 // The mpegps type finder is a bit broken,
 // this code fixes it.
 //
-extern void fix_mpeg_sys_type_find();
+extern bool GstApplyFixes();
 
 volatile sig_atomic_t fatal_error_in_progress = 0;
 void sighandler(int signum)
@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
     // For example --gst-debug-level=5
     //
     QGst::init(&argc, &argv);
-    fix_mpeg_sys_type_find();
+    qDebug() << GstApplyFixes();
 
 #ifdef WITH_DICOM
     // Pass some arguments to dcmtk.

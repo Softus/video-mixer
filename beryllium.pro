@@ -39,7 +39,7 @@ greaterThan(QT_MAJOR_VERSION, 4) {
 else {
     PKGCONFIG += QtGLib-2.0 QtGStreamer-0.10 QtGStreamerUi-0.10
 }
-PKGCONFIG += gstreamer-0.10 gstreamer-base-0.10 gstreamer-interfaces-0.10 gstreamer-pbutils-0.10 gio-2.0
+PKGCONFIG += gstreamer-0.10 gstreamer-base-0.10 gstreamer-interfaces-0.10 gstreamer-pbutils-0.10 gio-2.0 opencv
 
 TARGET   = beryllium
 TEMPLATE = app
@@ -51,7 +51,6 @@ SOURCES += aboutdialog.cpp \
     archivewindow.cpp \
     beryllium.cpp \
     confirmationsettings.cpp \
-    fix_mpeg_sys_type_find.cpp \
     hotkeyedit.cpp \
     hotkeysettings.cpp \
     libqxt/qxtconfirmationmessage.cpp \
@@ -69,11 +68,16 @@ SOURCES += aboutdialog.cpp \
     storagesettings.cpp \
     studiessettings.cpp \
     thumbnaillist.cpp \
-    typedetect.cpp \
     videoeditor.cpp \
     videoencodingprogressdialog.cpp \
     videorecordsettings.cpp \
-    videosettings.cpp
+    videosettings.cpp \
+    gst/motioncells/motioncells_wrapper.cpp \
+    gst/motioncells/MotionCells.cpp \
+    gst/motioncells/gstmotioncells.c \
+    gst/gst.cpp \
+    typedetect.cpp \
+    gst/mpeg_sys_type_find.cpp
 
 HEADERS += aboutdialog.h \
     archivewindow.h \
@@ -104,7 +108,10 @@ HEADERS += aboutdialog.h \
     videoeditor.h \
     videoencodingprogressdialog.h \
     videorecordsettings.h \
-    videosettings.h
+    videosettings.h \
+    gst/motioncells/motioncells_wrapper.h \
+    gst/motioncells/MotionCells.h \
+    gst/motioncells/gstmotioncells.h
 
 FORMS   +=
 
