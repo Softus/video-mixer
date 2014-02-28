@@ -407,8 +407,9 @@ void ArchiveWindow::updateList()
     listFiles->clear();
     auto filter = QDir::AllEntries | QDir::NoDotAndDotDot;
 
-    foreach (QFileInfo fi, curr.entryInfoList(filter, QDir::Time))
+    foreach (QFileInfo fi, curr.entryInfoList(filter, QDir::Time | QDir::Reversed))
     {
+        qDebug() << fi.absoluteFilePath();
         QIcon icon;
         QPixmap pm;
 
@@ -423,36 +424,37 @@ void ArchiveWindow::updateList()
                 icon.addFile(":/buttons/folder");
             }
         }
-        else if (pm.load(fi.absoluteFilePath()))
+        else if (QFile::exists(curr.absoluteFilePath(fi.completeBaseName())))
         {
-            auto clipFilePath = curr.absoluteFilePath(fi.completeBaseName());
-            if (QFile::exists(clipFilePath))
+            // Got thumbnail image, skip it
+            //
+            continue;
+        }
+        else
+        {
+            auto caps = TypeDetect(fi.absoluteFilePath());
+            if (caps.startsWith("video/"))
             {
-                auto clip = listFiles->findItems(fi.completeBaseName(), Qt::MatchExactly);
-                if (!clip.isEmpty())
+                auto thumbnailList = curr.entryInfoList(QStringList(fi.fileName() + ".*"));
+                if (thumbnailList.isEmpty())
+                {
+                    icon.addFile(":/buttons/movie");
+                }
+                else
                 {
                     // Got a snapshot for a clip file. Add a fency overlay to it
                     //
                     QPixmap pmOverlay(":/buttons/film");
+                    pm.load(thumbnailList.first().absoluteFilePath());
                     QPainter painter(&pm);
                     painter.setOpacity(0.75);
                     painter.drawPixmap(pm.rect(), pmOverlay);
                     icon.addPixmap(pm);
-                    addDicomStatusOverlay(clipFilePath,  icon);
-                    clip.first()->setIcon(icon);
-                    clip.first()->setData(Qt::UserRole, fi.absoluteFilePath());
                 }
-                continue;
             }
-            icon.addPixmap(pm);
-        }
-        else
-        {
-            QGst::StructurePtr str;
-            auto caps = TypeDetect(fi.absoluteFilePath());
-            if (caps.startsWith("video/"))
+            else if (pm.load(fi.absoluteFilePath()))
             {
-                icon.addFile(":/buttons/movie");
+                icon.addPixmap(pm);
             }
             else
             {
