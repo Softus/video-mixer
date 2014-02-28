@@ -932,9 +932,10 @@ void MainWindow::updatePipeline()
     delete worklist;
     worklist = new Worklist();
     connect(worklist, SIGNAL(startStudy(DcmDataset*)), this, SLOT(onStartStudy(DcmDataset*)));
+#ifdef WITH_TOUCH
     worklist->setObjectName("Worklist");
     mainStack->addWidget(worklist);
-
+#endif
     updateShortcut(actionWorklist, settings.value("hotkey-worklist",   DEFAULT_HOTKEY_WORKLIST).toInt());
     actionWorklist->setEnabled(!settings.value("mwl-server").toString().isEmpty());
 #endif
