@@ -10,7 +10,8 @@ URL: http://dc.baikal.ru/products/beryllium
 Vendor: Beryllium team <beryllium@dc.baikal.ru>
 Packager: Beryllium team <beryllium@dc.baikal.ru>
 
-BuildRequires: boost-devel, make
+Requires: opencv
+BuildRequires: boost-devel, make, opencv-devel
 
 %if %distro == CentOS
 BuildRequires: gstreamer-devel, qt-devel
