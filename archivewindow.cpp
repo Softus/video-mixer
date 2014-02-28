@@ -369,6 +369,7 @@ void ArchiveWindow::preparePathPopupMenu()
     }
 }
 
+#ifdef WITH_DICOM
 static QString addDicomStatusOverlay(const QString& filePath, QIcon& icon)
 {
     auto dicomStatus = GetFileExtAttribute(filePath, "dicom-status");
@@ -395,6 +396,7 @@ static QString addDicomStatusOverlay(const QString& filePath, QIcon& icon)
 
     return dicomStatus;
 }
+#endif
 
 void ArchiveWindow::updateList()
 {
