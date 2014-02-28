@@ -29,14 +29,17 @@ bool ClickFilter::eventFilter(QObject *o, QEvent *e)
 {
     if (e->type() == QEvent::Gesture)
     {
-        auto tapGesture = static_cast<QTapAndHoldGesture*>(static_cast<QGestureEvent*>(e)->gesture(Qt::TapAndHoldGesture));
+        auto tapGesture = static_cast<QTapAndHoldGesture*>
+                (static_cast<QGestureEvent*>(e)->gesture(Qt::TapAndHoldGesture));
+
         if (tapGesture && tapGesture->state() == Qt::GestureFinished)
         {
             auto pt = tapGesture->hotSpot().toPoint();
             auto widget = QApplication::widgetAt(pt);
             if (widget)
             {
-                me = QMouseEvent(QEvent::MouseButtonDblClick, widget->mapFromGlobal(pt), pt, Qt::LeftButton, Qt::LeftButton, Qt::NoModifier);
+                me = QMouseEvent(QEvent::MouseButtonDblClick, widget->mapFromGlobal(pt)
+                    , pt, Qt::LeftButton, Qt::LeftButton, Qt::NoModifier);
                 //QSpontaneKeyEvent::setSpontaneous(&me);
                 return qApp->notify(widget, &me);
             }

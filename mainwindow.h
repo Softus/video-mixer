@@ -151,6 +151,7 @@ public:
 
 protected:
     virtual void closeEvent(QCloseEvent*);
+    virtual void hideEvent(QHideEvent *);
     virtual void timerEvent(QTimerEvent*);
 signals:
     void enableWidget(QWidget*, bool);

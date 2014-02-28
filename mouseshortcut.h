@@ -49,24 +49,25 @@ template <class T>
 static void updateShortcut(T* btn, int key)
 {
     MouseShortcut::removeMouseShortcut(btn);
+    btn->setShortcut(0);
+
+    if (key == 0)
+    {
+        btn->setToolTip(btn->text().remove("&"));
+        return;
+    }
 
     if (key > 0)
     {
         btn->setShortcut(QKeySequence(key));
-        btn->setToolTip(btn->text().remove("&") + " (" + MouseShortcut::toString(key) + ")");
     }
     else if (key < 0)
     {
         // Will be deleted with parent, or explicitly via removeMouseShortcut
         //
         new MouseShortcut(key, btn);
-        btn->setToolTip(btn->text().remove("&") + " (" + MouseShortcut::toString(key) + ")");
-        btn->setShortcut(0);
     }
-    else
-    {
-        btn->setToolTip(btn->text().remove("&"));
-    }
+    btn->setToolTip(btn->text().remove("&") + " (" + MouseShortcut::toString(key) + ")");
 }
 
 #endif // MOUSESHORTCUT_H

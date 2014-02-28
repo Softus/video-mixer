@@ -210,12 +210,6 @@ MainWindow::MainWindow(QWidget *parent) :
     mainStack = new SlidingStackedWidget();
     layoutMain->addWidget(mainStack);
 
-#ifdef WITH_DICOM
-    worklist = new Worklist();
-    connect(worklist, SIGNAL(startStudy(DcmDataset*)), this, SLOT(onStartStudy(DcmDataset*)));
-    worklist->setObjectName("Worklist");
-    mainStack->addWidget(worklist);
-#endif
     auto studyLayout = new QVBoxLayout;
     studyLayout->addWidget(displayWidget);
     studyLayout->addWidget(listImagesAndClips);
@@ -312,7 +306,7 @@ bool MainWindow::switchToRunningInstance()
     return msg.type() == QDBusMessage::ReplyMessage && msg.arguments().first().toBool();
 }
 
-void MainWindow::closeEvent(QCloseEvent *evt)
+void MainWindow::closeEvent(QCloseEvent *)
 {
     if (archiveWindow)
     {
@@ -324,11 +318,14 @@ void MainWindow::closeEvent(QCloseEvent *evt)
         worklist->close();
     }
 #endif
+}
 
+void MainWindow::hideEvent(QHideEvent *evt)
+{
     QSettings settings;
     settings.setValue("mainwindow-geometry", saveGeometry());
     settings.setValue("mainwindow-state", (int)windowState() & ~Qt::WindowMinimized);
-    QWidget::closeEvent(evt);
+    QWidget::hideEvent(evt);
 }
 
 void MainWindow::timerEvent(QTimerEvent* evt)
@@ -930,6 +927,14 @@ void MainWindow::updatePipeline()
     updateShortcut(actionSettings, settings.value("hotkey-settings",  DEFAULT_HOTKEY_SETTINGS).toInt());
 
 #ifdef WITH_DICOM
+    // Recreate worklist just in case the columns/servers were changed
+    //
+    delete worklist;
+    worklist = new Worklist();
+    connect(worklist, SIGNAL(startStudy(DcmDataset*)), this, SLOT(onStartStudy(DcmDataset*)));
+    worklist->setObjectName("Worklist");
+    mainStack->addWidget(worklist);
+
     updateShortcut(actionWorklist, settings.value("hotkey-worklist",   DEFAULT_HOTKEY_WORKLIST).toInt());
     actionWorklist->setEnabled(!settings.value("mwl-server").toString().isEmpty());
 #endif
@@ -1598,13 +1603,6 @@ void MainWindow::onShowSettingsClick()
     if (dlg.exec())
     {
         updatePipeline();
-
-#ifdef WITH_DICOM
-        // Recreate worklist just in case the columns/servers were changed
-        //
-        delete worklist;
-        worklist = nullptr;
-#endif
     }
 }
 

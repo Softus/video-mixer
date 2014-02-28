@@ -17,7 +17,6 @@
 #include "slidingstackedwidget.h"
 #include "slidingstackedwidget_p.h"
 
-#include <QDebug>
 #include <QGestureEvent>
 #include <QPanGesture>
 #include <QParallelAnimationGroup>

@@ -66,7 +66,7 @@ Worklist::Worklist(QWidget *parent) :
     }
 
     table = new QTableWidget(0, cols.size());
-    connect(table, SIGNAL(itemDoubleClicked(QTableWidgetItem*)), this, SLOT(onCellDoubleClicked(QTableWidgetItem*)));
+    connect(table, SIGNAL(itemDoubleClicked(QTableWidgetItem*)), this, SLOT(onItemDoubleClicked(QTableWidgetItem*)));
     connect(table, SIGNAL(currentItemChanged(QTableWidgetItem*,QTableWidgetItem*)), this, SLOT(onCurrentItemChanged(QTableWidgetItem*,QTableWidgetItem*)));
 
     for (auto i = 0; i < cols.size(); ++i)
@@ -284,7 +284,7 @@ void Worklist::onShowDetailsClick()
     }
 }
 
-void Worklist::onCellDoubleClicked(QTableWidgetItem* item)
+void Worklist::onItemDoubleClicked(QTableWidgetItem* item)
 {
     table->setCurrentItem(item);
     //onShowDetailsClick();

@@ -69,7 +69,7 @@ private slots:
     void onLoadClick();
     void onShowDetailsClick();
     void onStartStudyClick();
-    void onCellDoubleClicked(QTableWidgetItem* item);
+    void onItemDoubleClicked(QTableWidgetItem* item);
     void onCurrentItemChanged(QTableWidgetItem*,QTableWidgetItem*);
     void onAddRow(DcmDataset* responseIdentifiers);
 #ifdef WITH_TOUCH
