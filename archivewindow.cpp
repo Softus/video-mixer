@@ -108,7 +108,7 @@ ArchiveWindow::ArchiveWindow(QWidget *parent)
     actionDelete->setEnabled(false);
 
 #ifdef WITH_DICOM
-    actionStore = barArchive->addAction(QIcon(":buttons/dicom"), tr("Send to DICOM"), this, SLOT(onStoreClick()));
+    actionStore = barArchive->addAction(QIcon(":buttons/dicom"), tr("Upload"), this, SLOT(onStoreClick()));
     actionStore->setShortcut(Qt::Key_F6);
 #endif
     actionEdit = barArchive->addAction(QIcon(":buttons/edit"), tr("Edit"), this, SLOT(onEditClick()));
@@ -199,7 +199,7 @@ ArchiveWindow::ArchiveWindow(QWidget *parent)
     actionSeekBack->setVisible(false);
     actionSeekBack->setData(-40000000);
     actionSeekBack->setShortcut(QKeySequence(Qt::ShiftModifier | Qt::Key_Left));
-    actionPlay = barMediaControls->addAction(QIcon(":buttons/record"), tr("Play"), this, SLOT(onPlayPauseClick()));
+    actionPlay = barMediaControls->addAction(QIcon(":buttons/play"), tr("Play"), this, SLOT(onPlayPauseClick()));
     actionPlay->setVisible(false);
     actionPlay->setShortcut(QKeySequence(Qt::Key_Space));
     actionSeekFwd = barMediaControls->addAction(QIcon(":buttons/forward"),  tr("Forward"), this, SLOT(onSeekClick()));
@@ -1022,7 +1022,7 @@ void ArchiveWindow::onStateChangedMessage(const QGst::StateChangedMessagePtr& me
 
         // Make sure the play/pause button is in consistent state
         //
-        actionPlay->setIcon(QIcon(message->newState() == QGst::StatePlaying? ":buttons/pause": ":buttons/record"));
+        actionPlay->setIcon(QIcon(message->newState() == QGst::StatePlaying? ":buttons/pause": ":buttons/play"));
         actionPlay->setText(message->newState() == QGst::StatePlaying? tr("Pause"): tr("Play"));
     }
 }

@@ -39,9 +39,9 @@ HotKeySettings::HotKeySettings(QWidget *parent) :
     heStartStudy->setKey(settings.value("hotkey-start", DEFAULT_HOTKEY_START).toInt());
     layoutCapture->addRow(tr("&Take snapshot"), heTakeSnapshot = new HotKeyEdit());
     heTakeSnapshot->setKey(settings.value("hotkey-snapshot", DEFAULT_HOTKEY_SNAPSHOT).toInt());
-    layoutCapture->addRow(tr("&Record"), heRecordStart = new HotKeyEdit());
+    layoutCapture->addRow(tr("Start &clip"), heRecordStart = new HotKeyEdit());
     heRecordStart->setKey(settings.value("hotkey-record-start", DEFAULT_HOTKEY_RECORD_START).toInt());
-    layoutCapture->addRow(tr("&Pause"), heRecordStop = new HotKeyEdit());
+    layoutCapture->addRow(tr("Clip d&one"), heRecordStop = new HotKeyEdit());
     heRecordStop->setKey(settings.value("hotkey-record-stop", DEFAULT_HOTKEY_RECORD_STOP).toInt());
     layoutCapture->addRow(tr("Show &Archive"), heArchive = new HotKeyEdit());
     heArchive->setKey(settings.value("hotkey-archive", DEFAULT_HOTKEY_ARCHIVE).toInt());

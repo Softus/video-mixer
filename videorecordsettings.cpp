@@ -37,12 +37,12 @@ VideoRecordSettings::VideoRecordSettings(QWidget *parent) :
     auto grpClips = new QGroupBox(tr("Video clips"));
     auto layoutClips = new QFormLayout;
     layoutClips->addRow(checkLimit = new QCheckBox(tr("&Limit clips to")), spinCountdown = new QSpinBox);
-    checkLimit->setChecked(settings.value("clip-limit").toBool());
+    checkLimit->setChecked(settings.value("clip-limit", DEFAULT_CLIP_LIMIT).toBool());
     spinCountdown->setSuffix(tr(" seconds"));
     spinCountdown->setRange(1, 3600);
     spinCountdown->setValue(settings.value("clip-countdown", DEFAULT_VIDEO_RECORD_LIMIT).toInt());
     layoutClips->addRow(checkNotify = new QCheckBox(tr("&Play a sound on")), spinNotify = new QSpinBox);
-    checkNotify->setChecked(settings.value("notify-clip-limit").toBool());
+    checkNotify->setChecked(settings.value("notify-clip-limit", DEFAULT_NOTIFY_CLIP_LIMIT).toBool());
     spinNotify->setSuffix(tr(" seconds before stopping"));
     spinNotify->setRange(1, 3600);
     spinNotify->setValue(settings.value("notify-clip-countdown", DEFAULT_VIDEO_RECORD_NOTIFY).toInt());
@@ -55,7 +55,7 @@ VideoRecordSettings::VideoRecordSettings(QWidget *parent) :
     grpMotionDetection = new QGroupBox(tr("Use &motion detection"));
     layoutClips->addWidget(grpMotionDetection);
     grpMotionDetection->setCheckable(true);
-    grpMotionDetection->setChecked(settings.value("detect-motion").toBool());
+    grpMotionDetection->setChecked(settings.value("detect-motion", DEFAULT_MOTION_DETECTION).toBool());
     auto layoutVideoLog = new QFormLayout;
     layoutVideoLog->addRow(nullptr, checkMotionStart = new QCheckBox(tr("&Start recording only after the motion is detected")));
     checkMotionStart->setChecked(settings.value("motion-start", true).toBool());

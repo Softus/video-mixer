@@ -33,10 +33,13 @@
 #define DEFAULT_RTP_PAYLOADER         "rtpmp2tpay"
 #define DEFAULT_RTP_SINK              "udpsink"
 #define DEFAULT_VIDEOBITRATE          4000
+#define DEFAULT_NOTIFY_CLIP_LIMIT     true
+#define DEFAULT_CLIP_LIMIT            true
 #define DEFAULT_MANDATORY_FIELD_COLOR "red"
 #define DEFAULT_MANDATORY_FIELDS      (QStringList() << "PatientID" << "Name")
-#define DEFAULT_MOTION_SENSITIVITY    0.5
-#define DEFAULT_MOTION_THRESHOLD      0.01
+#define DEFAULT_MOTION_DETECTION      true
+#define DEFAULT_MOTION_SENSITIVITY    0.75
+#define DEFAULT_MOTION_THRESHOLD      0.02
 #define DEFAULT_MOTION_MIN_FRAMES     1
 #define DEFAULT_IMAGE_TEMPLATE        "image-%study%-%nn%"
 #define DEFAULT_CLIP_TEMPLATE         "clip-%study%-%nn%"

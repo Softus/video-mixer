@@ -407,7 +407,7 @@ QToolBar* MainWindow::createToolBar()
     btnRecordStart->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     btnRecordStart->setFocusPolicy(Qt::NoFocus);
     btnRecordStart->setIcon(QIcon(":/buttons/record"));
-    btnRecordStart->setText(tr("Record"));
+    btnRecordStart->setText(tr("Start clip"));
     btnRecordStart->setMinimumWidth(175);
     connect(btnRecordStart, SIGNAL(clicked()), this, SLOT(onRecordStartClick()));
     bar->addWidget(btnRecordStart);
@@ -415,8 +415,8 @@ QToolBar* MainWindow::createToolBar()
     btnRecordStop = new QToolButton();
     btnRecordStop->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     btnRecordStop->setFocusPolicy(Qt::NoFocus);
-    btnRecordStop->setIcon(QIcon(":/buttons/pause"));
-    btnRecordStop->setText(tr("Pause"));
+    btnRecordStop->setIcon(QIcon(":/buttons/record_done"));
+    btnRecordStop->setText(tr("Clip done"));
     btnRecordStop->setMinimumWidth(175);
     connect(btnRecordStop, SIGNAL(clicked()), this, SLOT(onRecordStopClick()));
     bar->addWidget(btnRecordStop);
@@ -631,7 +631,7 @@ QString MainWindow::buildPipeline()
     //
     auto displaySinkDef  = settings.value("display-sink", DEFAULT_DISPLAY_SINK).toString();
     auto displayParams   = settings.value(displaySinkDef + "-parameters").toString();
-    auto detectMotion    = settings.value("detect-motion").toBool();
+    auto detectMotion    = settings.value("detect-motion", DEFAULT_MOTION_DETECTION).toBool();
     pipe.append(" ! tee name=splitter");
     if (!displaySinkDef.isEmpty())
     {
@@ -935,10 +935,10 @@ void MainWindow::updatePipeline()
 #endif
     updateShortcut(actionAbout, settings.value("hotkey-about",  DEFAULT_HOTKEY_ABOUT).toInt());
 
-    recordLimit = settings.value("clip-limit").toBool()? settings.value("clip-countdown").toInt(): 0;
-    recordNotify = settings.value("notify-clip-limit").toBool()? settings.value("notify-clip-countdown").toInt(): 0;
+    recordLimit = settings.value("clip-limit", DEFAULT_CLIP_LIMIT).toBool()? settings.value("clip-countdown").toInt(): 0;
+    recordNotify = settings.value("notify-clip-limit", DEFAULT_NOTIFY_CLIP_LIMIT).toBool()? settings.value("notify-clip-countdown").toInt(): 0;
 
-    auto detectMotion = settings.value("detect-motion").toBool();
+    auto detectMotion = settings.value("detect-motion", DEFAULT_MOTION_DETECTION).toBool();
     motionStart  = detectMotion && settings.value("motion-start").toBool();
     motionStop   = detectMotion && settings.value("motion-stop").toBool();
 }

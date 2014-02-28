@@ -121,7 +121,7 @@ VideoEditor::VideoEditor(const QString& filePath, QWidget *parent)
     setLabelTime(0, lblCurr);
     barMediaControls->addWidget(lblCurr);
 
-    actionPlay = barMediaControls->addAction(QIcon(":buttons/record"), tr("Play"), this, SLOT(onPlayPauseClick()));
+    actionPlay = barMediaControls->addAction(QIcon(":buttons/play"), tr("Play"), this, SLOT(onPlayPauseClick()));
     actionPlay->setShortcut(QKeySequence(Qt::Key_Space));
     actionSeekFwd = barMediaControls->addAction(QIcon(":buttons/forward"),  tr("Forward"), this, SLOT(onSeekClick()));
     actionSeekFwd->setData(+frameDuration);
@@ -380,7 +380,7 @@ void VideoEditor::onStateChange(const QGst::StateChangedMessagePtr& message)
 
         // Make sure the play/pause button is in consistent state
         //
-        actionPlay->setIcon(QIcon(message->newState() == QGst::StatePlaying? ":buttons/pause": ":buttons/record"));
+        actionPlay->setIcon(QIcon(message->newState() == QGst::StatePlaying? ":buttons/pause": ":buttons/play"));
         actionPlay->setText(message->newState() == QGst::StatePlaying? tr("Pause"): tr("Play"));
     }
 }
