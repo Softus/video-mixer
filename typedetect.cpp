@@ -18,6 +18,7 @@
 #include "product.h"
 #include <gio/gio.h>
 
+#include <QDebug>
 #include <QSettings>
 #include <QUrl>
 
@@ -51,6 +52,8 @@ bool SetFileExtAttribute(const QString& filePath, const QString& name, const QSt
                 settings.sync();
                 ret = (settings.status() == QSettings::NoError);
             }
+#else
+            qDebug() << QString::fromLocal8Bit(err->message);
 #endif
             g_error_free(err);
         }
@@ -69,8 +72,9 @@ QString GetFileExtAttribute(const QString& filePath, const QString& name)
         QString attr("xattr::" PRODUCT_NAMESPACE ".");
         attr.append(name);
 
+        GError* err = nullptr;
         auto info = g_file_query_info(file, attr.toLocal8Bit(),
-            G_FILE_QUERY_INFO_NONE, nullptr, nullptr);
+            G_FILE_QUERY_INFO_NONE, nullptr, &err);
 
         if (info)
         {
@@ -91,6 +95,11 @@ QString GetFileExtAttribute(const QString& filePath, const QString& name)
             encodedValue = settings.value(name).toByteArray();
         }
 #endif
+        if (err)
+        {
+            qDebug() << QString::fromLocal8Bit(err->message);
+            g_error_free(err);
+        }
 
         g_object_unref(file);
     }
