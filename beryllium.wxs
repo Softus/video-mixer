@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?define ProductBuild     = "0.5" ?>
+<?define ProductBuild     = "0.7" ?>
 <?define ProductRevision  = "0" ?>
 <?define ProductName      = "Beryllium" ?>
 
@@ -93,6 +93,7 @@
                 <File Id="File_Beryllium_pdb_x86" Name="beryllium.pdb" />
               <?endif ?>
             </Component>
+            <?include opencv32.wxi ?>
             <Directory Id="Translations32" Name="translations">
               <Component Id="Comp_Translations32" Guid="B100D0FF-AF56-0102-0314-079500628307" Win64="no">
                 <File Id="File_Beryllium_ru_qm_x86" Name="beryllium_ru.qm"  Source="beryllium_ru.qm"/>
@@ -154,6 +155,7 @@
       <ComponentRef Id="Comp_QtImageFormats32" />
       <ComponentRef Id="Comp_QtPlatforms32" />
       <ComponentRef Id="Comp_DBusService32" />
+      <ComponentRef Id="Comp_opencv32" />
       <?if $(var.Platform)=x64 ?>
       <ComponentRef Id="Comp_Application64" />
       <ComponentRef Id="Comp_Translations64" />
@@ -162,6 +164,7 @@
       <ComponentRef Id="Comp_QtGstLibs64" />
       <ComponentRef Id="Comp_QtImageFormats64" />
       <ComponentRef Id="Comp_QtPlatforms64" />
+      <ComponentRef Id="Comp_opencv64" />
       <?endif ?>
     </Feature>
 

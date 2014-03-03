@@ -46,9 +46,49 @@
 #include <errno.h>
 #include <math.h>
 #include <gst/gst.h>
-#include <arpa/inet.h>
+#ifdef _MSC_VER
+  #include <WinSock.h>
+#else
+  #include <arpa/inet.h>
+#endif
 #include "MotionCells.h"
 
+#ifdef _MSC_VER
+
+#define ftello _ftelli64
+#define bzero(memArea, len)  memset((memArea), 0, (len))
+#define snprintf c99_snprintf
+
+inline int round(double x)
+{
+    return (floor(x + 0.5));
+}
+
+inline int c99_vsnprintf(char* str, size_t size, const char* format, va_list ap)
+{
+    int count = -1;
+
+    if (size != 0)
+        count = _vsnprintf_s(str, size, _TRUNCATE, format, ap);
+    if (count == -1)
+        count = _vscprintf(format, ap);
+
+    return count;
+}
+
+inline int c99_snprintf(char* str, size_t size, const char* format, ...)
+{
+    int count;
+    va_list ap;
+
+    va_start(ap, format);
+    count = c99_vsnprintf(str, size, format, ap);
+    va_end(ap);
+
+    return count;
+}
+
+#endif // _MSC_VER
 uint64_t ntohl64 (uint64_t val);
 uint64_t htonl64 (uint64_t val);
 

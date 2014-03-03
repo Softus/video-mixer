@@ -45,7 +45,7 @@
 #ifndef MOTIONCELLS_WRAPPER_H
 #define MOTIONCELLS_WRAPPER_H
 
-#include <stdbool.h>
+//#include <stdbool.h>
 
 #ifdef __cplusplus
 #include "MotionCells.h"
@@ -54,8 +54,6 @@ struct instanceOfMC
   int id;
   MotionCells *mc;
 };
-vector < instanceOfMC > motioncellsvector;
-vector < int >motioncellsfreeids;
 
 int searchIdx (int p_id);
 extern "C"

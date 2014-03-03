@@ -52,6 +52,9 @@ static gboolean element_id_was_max = false;
 MotionCells *mc;
 char p_str[] = "idx failed";
 
+vector < instanceOfMC > motioncellsvector;
+vector < int >motioncellsfreeids;
+
 int
 motion_cells_init ()
 {

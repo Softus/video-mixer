@@ -80,23 +80,23 @@ struct MotionCellData{
 	char *data;
 };
 
-typedef struct {
+struct motionmaskcoordrect {
 	int upper_left_x;
 	int upper_left_y;
 	int lower_right_x;
 	int lower_right_y;
-} motionmaskcoordrect;
+};
 
-typedef struct {
+struct cellscolor {
 	int R_channel_value;
 	int G_channel_value;
 	int B_channel_value;
-} cellscolor;
+};
 
-typedef struct {
+struct motioncellidx {
 	int lineidx;
 	int columnidx;
-} motioncellidx;
+};
 
 struct Cell
 {

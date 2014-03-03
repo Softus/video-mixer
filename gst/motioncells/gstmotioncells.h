@@ -63,23 +63,9 @@ G_BEGIN_DECLS
 typedef struct _GstMotioncells GstMotioncells;
 typedef struct _GstMotioncellsClass GstMotioncellsClass;
 
-typedef struct {
-	int upper_left_x;
-	int upper_left_y;
-	int lower_right_x;
-	int lower_right_y;
-} motionmaskcoordrect;
-
-typedef struct {
-	int R_channel_value;
-	int G_channel_value;
-	int B_channel_value;
-} cellscolor;
-
-typedef struct {
-	int lineidx;
-	int columnidx;
-} motioncellidx;
+struct motionmaskcoordrect;
+struct cellscolor;
+struct motioncellidx;
 
 struct _GstMotioncells
 {
@@ -95,9 +81,9 @@ struct _GstMotioncells
   gint prevgridx, gridx, prevgridy, gridy, id;
   gdouble sensitivity, threshold;
   IplImage *cvImage;
-  motionmaskcoordrect *motionmaskcoords;
-  cellscolor *motioncellscolor;
-  motioncellidx *motioncellsidx, *motionmaskcellsidx;
+  struct motionmaskcoordrect *motionmaskcoords;
+  struct cellscolor *motioncellscolor;
+  struct motioncellidx *motioncellsidx, *motionmaskcellsidx;
   int motionmaskcoord_count, motioncells_count, motionmaskcells_count;
   int gap, thickness, datafileidx, postnomotion, minimum_motion_frames;
   guint64 motion_begin_timestamp, last_motion_timestamp, motion_timestamp,

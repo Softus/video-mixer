@@ -74,7 +74,7 @@ SOURCES += aboutdialog.cpp \
     videosettings.cpp \
     gst/motioncells/motioncells_wrapper.cpp \
     gst/motioncells/MotionCells.cpp \
-    gst/motioncells/gstmotioncells.c \
+    gst/motioncells/gstmotioncells.cpp \
     gst/gst.cpp \
     typedetect.cpp \
     gst/mpeg_sys_type_find.cpp

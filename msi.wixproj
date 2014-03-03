@@ -69,6 +69,7 @@
     <Folder Include="loc" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="opencv32.wxi" />
     <Content Include="Qt4Runtime32.wxi" />
     <Content Include="Qt4Runtime64.wxi">
       <Link>
