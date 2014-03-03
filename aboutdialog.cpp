@@ -24,6 +24,7 @@
 #include <qxtglobal.h>
 #include <gst/gst.h>
 #include <QGlib/Value>
+#include <opencv2/core/version.hpp>
 
 #ifdef WITH_DICOM
 #define HAVE_CONFIG_H
@@ -89,6 +90,10 @@ AboutDialog::AboutDialog(QWidget *parent) :
     auto lblGstreamer = new QLabel(tr("<a href=\"http://gstreamer.freedesktop.org/\">").append(gst_version_string()).append("</a>"));
     lblGstreamer->setOpenExternalLinks(true);
     layoutText->addWidget(lblGstreamer);
+
+    auto lblOpencv = new QLabel(tr("<a href=\"http://opencv.org/\">OpenCV ").append(CV_VERSION).append("</a>"));
+    lblOpencv->setOpenExternalLinks(true);
+    layoutText->addWidget(lblOpencv);
 
     auto lblQtGstreamer = new QLabel(tr("<a href=\"http://gstreamer.freedesktop.org/modules/qt-gstreamer.html/\">QtGStreamer ").append(QT_GST_VERSION_STR).append("</a>"));
     lblQtGstreamer->setOpenExternalLinks(true);
