@@ -635,7 +635,7 @@ QString MainWindow::buildPipeline()
         pipe.append(colorConverter);
         if (detectMotion)
         {
-            auto motionDebug       = settings.value("motion-debug").toString();
+            auto motionDebug       = settings.value("motion-debug", false).toString();
             auto motionSensitivity = settings.value("motion-sensitivity", DEFAULT_MOTION_SENSITIVITY).toString();
             auto motionThreshold   = settings.value("motion-threshold",   DEFAULT_MOTION_THRESHOLD).toString();
             auto motionMinFrames   = settings.value("motion-min-frames",  DEFAULT_MOTION_MIN_FRAMES).toString();
@@ -947,6 +947,8 @@ void MainWindow::updatePipeline()
     auto detectMotion = settings.value("detect-motion", DEFAULT_MOTION_DETECTION).toBool();
     motionStart  = detectMotion && settings.value("motion-start").toBool();
     motionStop   = detectMotion && settings.value("motion-stop").toBool();
+
+    updateOverlayText();
 }
 
 void MainWindow::updateWindowTitle()
@@ -1518,7 +1520,7 @@ void MainWindow::updateOverlayText()
         return;
 
     int color = recording? 0xFF0000FF: // red
-        motionDetected? 0xFF00FF00: // green
+        !motionStart || motionDetected? 0xFF00FF00: // green
         pipeline->getElementByName("videomux")? 0xFFFF0000: // blue
         0xFFFFFFFF; // white
 
@@ -1778,6 +1780,7 @@ void MainWindow::onStopStudy()
     removeVideoTail("video");
     running = recording = motionDetected = false;
     updateWindowTitle();
+    updateOverlayText();
 
 #ifdef WITH_DICOM
     if (pendingPatient)
