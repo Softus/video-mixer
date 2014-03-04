@@ -42,6 +42,13 @@ public slots:
         , const QString &physician = QString(), const QString &studyType = QString()
         , bool autoStart = true
         );
+    QString value
+        ( const QString &name
+        );
+    void setValue
+        ( const QString &name
+        , const QString &value = QString()
+        );
 };
 
 #endif // MAINWINDOWDBUSADAPTOR_H

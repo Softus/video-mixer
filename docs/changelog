@@ -1,3 +1,11 @@
+beryllium (0.7.1) debian;
+
+  * Make folder unique is now off by default
+  * Persist study counter
+  * Command line switch to change settings
+
+ -- Pavel Bludov <pbludov@gmail.com>  Tue, 4 Mar 2014 10:35:00 +0900
+
 beryllium (0.7.0) debian;
 
   * Builtin motion detection

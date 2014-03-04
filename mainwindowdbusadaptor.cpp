@@ -19,6 +19,7 @@
 
 #include <QTimer>
 #include <QDebug>
+#include <QSettings>
 
 MainWindowDBusAdaptor::MainWindowDBusAdaptor(MainWindow *wnd)
     : QDBusAbstractAdaptor(wnd), wnd(wnd)
@@ -64,4 +65,19 @@ bool MainWindowDBusAdaptor::startStudy
     }
 
     return true;
+}
+
+QString MainWindowDBusAdaptor::value
+    ( const QString &name
+    )
+{
+    return QSettings().value(name).toString();
+}
+
+void MainWindowDBusAdaptor::setValue
+    ( const QString &name
+    , const QString &value
+    )
+{
+    QSettings().setValue(name, value);
 }

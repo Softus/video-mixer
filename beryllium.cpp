@@ -109,8 +109,10 @@ int main(int argc, char *argv[])
     cmd.addOption("--patient-id",       "-pi", 1, "string",   "Patient Id");
     cmd.addOption("--patient-name",     "-pn", 1, "string",   "Patient name");
     cmd.addOption("--patient-sex",      "-ps", 1, "F|M",      "Patient sex");
-    cmd.addOption("--physician",         "-p", 1, "string",   "Physician name");
+    cmd.addOption("--physician",        "-p",  1, "string",   "Physician name");
     cmd.addOption("--study-desctiption","-sd", 1, "string",   "Study description");
+
+    cmd.addOption("--set-value",        "-sv", 1, "name=value", "Set variable 'name' to 'value'");
     dcmtkApp.parseCommandLine(cmd, argc, argv);
     OFLog::configureFromCommandLine(cmd, dcmtkApp);
 #endif
@@ -126,9 +128,10 @@ int main(int argc, char *argv[])
     app.setApplicationName(PRODUCT_SHORT_NAME);
     app.setApplicationVersion(PRODUCT_VERSION_STR);
     app.setWindowIcon(QIcon(":/app/product"));
+    auto args = app.arguments();
 
 #ifdef Q_WS_X11
-    if (app.arguments().indexOf("--sync") || qgetenv("DO_X_SYNCHRONIZE").toInt())
+    if (args.indexOf("--sync") || qgetenv("DO_X_SYNCHRONIZE").toInt())
     {
          XSynchronize(QX11Info::display(), true);
     }
@@ -165,20 +168,30 @@ int main(int argc, char *argv[])
 
     // UI scope
     //
-    int idx = app.arguments().indexOf("--edit-video");
-    if (idx >= 0 && ++idx < app.arguments().size())
+    for (int i = 0; i < args.size() - 1; ++i)
     {
-        wnd = new VideoEditor(app.arguments().at(idx));
+        if (args[i] != "--set-value" && args[i] != "-sv")
+        {
+            continue;
+        }
+        auto pair =  args[++i].split("=");
+        settings.setValue(pair.first(), pair.last());
     }
-    else if (idx = app.arguments().indexOf("--settings"), idx >= 0)
+
+    auto idx = args.indexOf("--edit-video");
+    if (idx >= 0 && ++idx < args.size())
+    {
+        wnd = new VideoEditor(args.at(idx));
+    }
+    else if (idx = args.indexOf("--settings"), idx >= 0)
     {
         wnd = new Settings;
     }
-    else if (idx = app.arguments().indexOf("--archive"), idx >= 0)
+    else if (idx = args.indexOf("--archive"), idx >= 0)
     {
         auto wndArc = new ArchiveWindow;
         wndArc->updateRoot();
-        wndArc->setPath(++idx < app.arguments().size()? app.arguments().at(idx): QDir::currentPath());
+        wndArc->setPath(++idx < args.size()? args.at(idx): QDir::currentPath());
         wnd = wndArc;
     }
     else

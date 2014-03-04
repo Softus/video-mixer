@@ -1,7 +1,11 @@
 === Ubuntu ===
 
 1. Install build dependecies
-        sudo apt-get install build-essential libqtgstreamer-dev libgstreamer-plugins-base0.10-dev libdcmtk2-dev libwrap0-dev libssl-dev libmediainfo-dev
+        sudo apt-get install dpkg-dev libboost-dev libcv-dev libhighgui-dev libopencv-dev libgstreamer0.10-dev libgstreamer-plugins-base0.10-dev libdcmtk2-dev libmediainfo-dev libssl-dev libwrap0-dev
+	For QT5:
+        sudo apt-get install libqt5opengl5-dev
+    For QT4:
+        sudo apt-get install libqt4-opengl-dev libqtgstreamer-dev
 
 2. Make Makefile:
 	qmake CONFIG+=dicom beryllium.pro
