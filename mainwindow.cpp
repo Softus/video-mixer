@@ -267,7 +267,7 @@ MainWindow::MainWindow(QWidget *parent) :
     sound = new Sound(this);
 
     updatePipeline();
-    updateOutputPath(false);
+    outputPath.setPath(settings.value("output-path", DEFAULT_OUTPUT_PATH).toString());
 
     if (btnStart->isEnabled() &&
         (qApp->arguments().contains("--auto-start") || qApp->arguments().contains("-a")))

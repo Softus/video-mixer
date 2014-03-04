@@ -250,7 +250,6 @@ ArchiveWindow::~ArchiveWindow()
 #ifdef WITH_TOUCH
 void ArchiveWindow::showEvent(QShowEvent *evt)
 {
-    qDebug() << parent();
     actionBack->setVisible(parent() != nullptr);
     QWidget::showEvent(evt);
 }
@@ -372,7 +371,7 @@ void ArchiveWindow::preparePathPopupMenu()
 #ifdef WITH_DICOM
 static QString addDicomStatusOverlay(const QString& filePath, QIcon& icon)
 {
-    qDebug() << filePath;
+    //qDebug() << filePath;
 
     auto dicomStatus = GetFileExtAttribute(filePath, "dicom-status");
     if (!dicomStatus.isEmpty())
@@ -416,7 +415,7 @@ void ArchiveWindow::updateList()
 
     foreach (QFileInfo fi, curr.entryInfoList(filter, QDir::Time | QDir::Reversed))
     {
-        qDebug() << fi.absoluteFilePath();
+        //qDebug() << fi.absoluteFilePath();
         QIcon icon;
         QPixmap pm;
 

@@ -81,12 +81,14 @@ int main(int argc, char *argv[])
 {
     int errCode = 0;
 
+    qDebug() << PRODUCT_FULL_NAME << PRODUCT_VERSION_STR << "(" __DATE__ " " __TIME__ ")";
+
     signal(SIGSEGV, sighandler);
     // Pass some arguments to gStreamer.
     // For example --gst-debug-level=5
     //
     QGst::init(&argc, &argv);
-    qDebug() << GstApplyFixes();
+    GstApplyFixes();
 
 #ifdef WITH_DICOM
     // Pass some arguments to dcmtk.
