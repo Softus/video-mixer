@@ -1,3 +1,10 @@
+beryllium (0.7.2) debian;
+
+  * Video log record fix
+  * Study description fix
+
+ -- Pavel Bludov <pbludov@gmail.com>  Tue, 4 Mar 2014 14:42:00 +0900
+
 beryllium (0.7.1) debian;
 
   * Make folder unique is now off by default
