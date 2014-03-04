@@ -185,6 +185,8 @@ MainWindow::MainWindow(QWidget *parent) :
     recording(false)
 {
     QSettings settings;
+    studyNo = settings.value("study-no").toInt();
+
     updateWindowTitle();
     // This magic required for updating widgets from worker threads on Microsoft (R) Windows (TM)
     //
@@ -1019,8 +1021,8 @@ void MainWindow::updateOutputPath(bool needUnique)
 
     auto root = settings.value("output-path", DEFAULT_OUTPUT_PATH).toString();
     auto tpl = settings.value("folder-template", DEFAULT_FOLDER_TEMPLATE).toString();
-    auto path = replace(root + tpl, ++studyNo);
-    outputPath = checkPath(path, needUnique);
+    auto path = replace(root + tpl, studyNo);
+    outputPath = checkPath(path, needUnique && settings.value("output-unique", DEFAULT_OUTPUT_UNIQUE).toBool());
 
     auto videoRoot = settings.value("video-output-path").toString();
     if (videoRoot.isEmpty())
@@ -1038,7 +1040,8 @@ void MainWindow::updateOutputPath(bool needUnique)
     // If video path is same as images path, omit checkPath,
     // since it is already checked.
     //
-    videoOutputPath = (videoPath == path)? outputPath: checkPath(videoPath, needUnique);
+    videoOutputPath = (videoPath == path)? outputPath:
+        checkPath(videoPath, needUnique && settings.value("video-output-unique", DEFAULT_VIDEO_OUTPUT_UNIQUE).toBool());
 }
 
 void MainWindow::releasePipeline()
@@ -1700,6 +1703,7 @@ void MainWindow::onStartStudy()
     physician        = fixFileName(dlgPatient->physician());
     studyName        = fixFileName(dlgPatient->studyDescription());
 
+    settings.setValue("study-no", ++studyNo);
     updateOutputPath(true);
 
     // After updateOutputPath the outputPath is usable

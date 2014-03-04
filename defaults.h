@@ -18,7 +18,7 @@
 #define BERYLLIUM_DEFAULTS_H
 
 #define DEFAULT_DISPLAY_SINK          "autovideosink"
-#define DEFAULT_FOLDER_TEMPLATE       "/%yyyy%-%MM%/%dd%/%name%/"
+#define DEFAULT_FOLDER_TEMPLATE       "/%yyyy%-%MM%/%dd%/%name%-%id%-%nn%/"
 #define DEFAULT_HOTKEY_ABOUT          (int)(Qt::AltModifier | Qt::Key_Question)
 #define DEFAULT_HOTKEY_ARCHIVE        (int)(Qt::Key_F2)
 #define DEFAULT_HOTKEY_RECORD_START   (int)(Qt::AltModifier | Qt::Key_R)
@@ -30,6 +30,7 @@
 #define DEFAULT_HOTKEY_START          (int)(Qt::AltModifier | Qt::Key_A)
 #define DEFAULT_HOTKEY_WORKLIST       (int)(Qt::Key_F3)
 #define DEFAULT_OUTPUT_PATH           "/video"
+#define DEFAULT_OUTPUT_UNIQUE         false
 #define DEFAULT_RTP_PAYLOADER         "rtpmp2tpay"
 #define DEFAULT_RTP_SINK              "udpsink"
 #define DEFAULT_VIDEOBITRATE          4000
@@ -44,6 +45,7 @@
 #define DEFAULT_IMAGE_TEMPLATE        "image-%study%-%nn%"
 #define DEFAULT_CLIP_TEMPLATE         "clip-%study%-%nn%"
 #define DEFAULT_VIDEO_TEMPLATE        "video-%study%"
+#define DEFAULT_VIDEO_OUTPUT_UNIQUE   false
 #define DEFAULT_IMAGE_ENCODER         "jpegenc"
 #define DEFAULT_IMAGE_SINK            "multifilesink"
 #define DEFAULT_VIDEO_ENCODER         "ffenc_mpeg2video"
