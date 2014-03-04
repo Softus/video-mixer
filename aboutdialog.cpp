@@ -24,7 +24,7 @@
 #include <qxtglobal.h>
 #include <gst/gst.h>
 #include <QGlib/Value>
-#include <opencv2/core/version.hpp>
+#include <opencv/cv.h>
 
 #ifdef WITH_DICOM
 #define HAVE_CONFIG_H
