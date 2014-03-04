@@ -173,6 +173,32 @@ gettimeofday(struct timeval * tp, struct timezone * tzp)
 
 #endif
 
+#if !GST_CHECK_VERSION(0,10,36)
+/**
+ * gst_element_class_add_static_pad_template:
+ * @klass: the #GstElementClass to add the pad template to.
+ * @templ: (transfer none): a #GstStaticPadTemplate describing the pad
+ * to add to the element class.
+ *
+ * Adds a padtemplate to an element class. This is mainly used in the _base_init
+ * functions of classes.
+ *
+ * Since: 0.10.36
+ */
+static void
+gst_element_class_add_static_pad_template (GstElementClass * klass,
+    GstStaticPadTemplate * templ)
+{
+  GstPadTemplate *pt;
+
+  g_return_if_fail (GST_IS_ELEMENT_CLASS (klass));
+
+  pt = gst_static_pad_template_get (templ);
+  gst_element_class_add_pad_template (klass, pt);
+  gst_object_unref (pt);
+}
+#endif
+
 /* the capabilities of the inputs and outputs.
  */
 static GstStaticPadTemplate sink_factory = GST_STATIC_PAD_TEMPLATE ("sink",
