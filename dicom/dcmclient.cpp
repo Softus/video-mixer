@@ -647,8 +647,9 @@ bool DcmClient::sendToServer(const QString& server, DcmDataset* dsPatient, const
         return false;
 
     BuildCStoreDataSet(*dsPatient, ds, seriesUID);
-    //DcmFileFormat dcmff(ds);
-    //cond = dcmff.saveFile(src.getImageFile().append(".dcm").c_str(), writeXfer);
+
+    //DcmFileFormat dcmff(&ds);
+    //cond = dcmff.saveFile((file +".dcm").toLocal8Bit(), writeXfer);
 
     OFString sopClass;
     ds.findAndGetOFString(DCM_SOPClassUID, sopClass);

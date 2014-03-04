@@ -1048,6 +1048,7 @@ void MainWindow::releasePipeline()
 {
     pipeline->setState(QGst::StateNull);
     pipeline->getState(nullptr, nullptr, 10000000000L); // 10 sec
+    motionDetected = false;
 
     displaySink.clear();
     imageValve.clear();
@@ -1288,7 +1289,7 @@ bool MainWindow::startVideoRecord()
             return false;
         }
 
-        setElementProperty("videoinspect", "drop-probability", motionStart? 1.0: 0.0);
+        setElementProperty("videoinspect", "drop-probability", motionStart && !motionDetected? 1.0: 0.0);
     }
 
     return true;
