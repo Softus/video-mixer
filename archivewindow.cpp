@@ -372,6 +372,8 @@ void ArchiveWindow::preparePathPopupMenu()
 #ifdef WITH_DICOM
 static QString addDicomStatusOverlay(const QString& filePath, QIcon& icon)
 {
+    qDebug() << filePath;
+
     auto dicomStatus = GetFileExtAttribute(filePath, "dicom-status");
     if (!dicomStatus.isEmpty())
     {
@@ -384,7 +386,10 @@ static QString addDicomStatusOverlay(const QString& filePath, QIcon& icon)
         {
             pmOverlay = QMessageBox::standardIcon(QMessageBox::Critical);
         }
-        auto pm = icon.pixmap(icon.availableSizes().first());
+
+        auto sizes = icon.availableSizes();
+        auto size = sizes.empty()? QSize(128,128): sizes.first();
+        auto pm = icon.pixmap(size);
         QPainter painter(&pm);
         painter.setOpacity(0.75);
         auto rect = pm.rect();
@@ -438,7 +443,7 @@ void ArchiveWindow::updateList()
             if (caps.startsWith("video/"))
             {
                 auto thumbnailList = curr.entryInfoList(QStringList(fi.fileName() + ".*"));
-                if (thumbnailList.isEmpty())
+                if (thumbnailList.isEmpty() || !pm.load(thumbnailList.first().absoluteFilePath()))
                 {
                     icon.addFile(":/buttons/movie");
                 }
@@ -447,7 +452,6 @@ void ArchiveWindow::updateList()
                     // Got a snapshot for a clip file. Add a fency overlay to it
                     //
                     QPixmap pmOverlay(":/buttons/film");
-                    pm.load(thumbnailList.first().absoluteFilePath());
                     QPainter painter(&pm);
                     painter.setOpacity(0.75);
                     painter.drawPixmap(pm.rect(), pmOverlay);

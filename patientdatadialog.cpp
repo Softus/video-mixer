@@ -387,12 +387,14 @@ void PatientDataDialog::readPatientData(DcmDataset* patient)
         setPatientSex(QString::fromUtf8(str));
     }
 
-    if (patient->findAndGetString(DCM_ScheduledPerformingPhysicianName, str, true).good())
+    if (patient->findAndGetString(DCM_ScheduledPerformingPhysicianName, str, true).good() ||
+        patient->findAndGetString(DCM_PerformingPhysicianName, str, true).good())
     {
         setPhysician(QString::fromUtf8(str));
     }
 
-    if (patient->findAndGetString(DCM_ScheduledProcedureStepDescription, str, true).good())
+    if (patient->findAndGetString(DCM_ScheduledProcedureStepDescription, str, true).good() ||
+        patient->findAndGetString(DCM_StudyDescription, str, true).good())
     {
         setStudyDescription(QString::fromUtf8(str));
     }
