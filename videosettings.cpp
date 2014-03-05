@@ -171,12 +171,12 @@ void VideoSettings::updateDeviceList(const char* elmName, const char* propName)
                 src->setState(QGst::StateReady);
                 src->getState(nullptr, nullptr, GST_SECOND * 10);
 
-                //qDebug() << deviceName << " caps:\n" << srcPad->caps()->toString();
                 QStringList channelsAndCaps;
 
                 // First three entries will be device type, device id, caps
                 //
                 channelsAndCaps << elmName << deviceName << srcPad->caps()->toString();
+                //qDebug() << channelsAndCaps;
 
                 auto tuner = GST_TUNER(src);
                 if (tuner)
@@ -254,21 +254,28 @@ void VideoSettings::videoDeviceChanged(int index)
     }
 }
 
-static QStringList getFormats(const QGlib::Value& value)
+static QString valueToString(const QGlib::Value& value)
 {
-    QStringList formats;
+    return GST_TYPE_FOURCC == value.type()? "(fourcc)" + value.toString():
+           G_TYPE_STRING == value.type()?   "(string)" + value.toString():
+           value.toString();
+}
+
+static QList<QGlib::Value> getFormats(const QGlib::Value& value)
+{
+    QList<QGlib::Value> formats;
 
     if (GST_TYPE_LIST == value.type() || GST_TYPE_ARRAY == value.type())
     {
         for (uint idx = 0; idx < gst_value_list_get_size(value); ++idx)
         {
             auto elm = gst_value_list_get_value(value, idx);
-            formats << QGlib::Value(elm).toString();
+            formats << QGlib::Value(elm);
         }
     }
     else
     {
-        formats << value.toString();
+        formats << value;
     }
 
     return formats;
@@ -292,12 +299,12 @@ void VideoSettings::inputChannelChanged(int index)
         auto s = caps->internalStructure(i);
         Q_FOREACH (auto format, getFormats(s->value("format")))
         {
-            auto formatName = format.isEmpty()? s->name(): s->name().append(",format=").append(format);
+            auto formatName = !format.isValid()? s->name(): s->name().append(",format=").append(valueToString(format));
             if (listFormats->findData(formatName) >= 0)
             {
                 continue;
             }
-            auto displayName = format.isEmpty()? s->name(): s->name().append(" (").append(format).append(")");
+            auto displayName = !format.isValid()? s->name(): s->name().append(" (").append(format.toString()).append(")");
             listFormats->addItem(displayName, formatName);
             if (formatName == selectedFormat)
             {
@@ -340,8 +347,8 @@ void VideoSettings::formatChanged(int index)
     for (uint i = 0; i < caps->size(); ++i)
     {
         auto s = caps->internalStructure(i);
-        auto format = s->value("format").toString();
-        auto formatName = format.isEmpty()? s->name(): s->name().append(",format=(fourcc)").append(format);
+        auto format = s->value("format");
+        auto formatName = !format.isValid()? s->name(): s->name().append(",format=").append(valueToString(format));
         if (selectedFormat != formatName)
         {
             continue;
