@@ -534,7 +534,7 @@ static QString appendVideo(QString& pipe, const QSettings& settings)
         if (enableRtp)
         {
             pipe.append(" ! queue ! ").append(rtpPayDef).append(" ").append(rtpPayParams)
-                .append(" ! ").append(rtpSinkDef).append(" clients=127.0.0.1:5000 sync=0 name=rtpsink ")
+                .append(" ! ").append(rtpSinkDef).append(" clients=127.0.0.1:5000 sync=0 async=0 name=rtpsink ")
                 .append(rtpSinkParams).append(" videosplitter. ");
         }
     }
@@ -785,6 +785,7 @@ void MainWindow::setElementProperty(QGst::ElementPtr& elm, const char* prop, con
         }
         if (prop)
         {
+            //qDebug() << elm->name() << prop << value.toString();
             elm->setProperty(prop, value);
         }
         elm->setState(currentState);
@@ -1248,16 +1249,23 @@ void MainWindow::onElementMessage(const QGst::ElementMessagePtr& msg)
 
     if (s->name() == "motion")
     {
+        qDebug() << s->toString() << " from " << msg->source()->property("name").toString();
         if (motionStart && s->hasField("motion_begin"))
         {
-            setElementProperty("videoinspect", "drop-probability", 0.0);
             motionDetected = true;
+            if (running)
+            {
+                setElementProperty("videoinspect", "drop-probability", 0.0);
+            }
         }
         else if (motionStop && s->hasField("motion_finished"))
         {
-            setElementProperty("videoinspect", "drop-probability", 1.0);
-            setElementProperty("videovalve", "drop", true);
             motionDetected = false;
+            if (running)
+            {
+                setElementProperty("videoinspect", "drop-probability", 1.0);
+                setElementProperty("videovalve", "drop", true);
+            }
         }
 
         updateOverlayText();
@@ -1783,7 +1791,7 @@ void MainWindow::onStopStudy()
     }
 
     removeVideoTail("video");
-    running = recording = motionDetected = false;
+    running = recording = false;
     updateWindowTitle();
     updateOverlayText();
 
