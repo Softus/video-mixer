@@ -1358,7 +1358,6 @@ void MainWindow::onSnapshotClick()
 QString MainWindow::appendVideoTail(const QDir& dir, const QString& prefix, int idx)
 {
     QSettings settings;
-    auto noCodec = settings.value("video-encoder",  DEFAULT_VIDEO_ENCODER).toString().isEmpty();
     auto muxDef  = settings.value("video-muxer",    DEFAULT_VIDEO_MUXER).toString();
     auto maxSize = settings.value("video-max-file-size", DEFAULT_VIDEO_MAX_FILE_SIZE).toLongLong() * 1024 * 1024;
     QString videoExt;
@@ -1372,7 +1371,7 @@ QString MainWindow::appendVideoTail(const QDir& dir, const QString& prefix, int 
         return nullptr;
     }
 
-    if (!noCodec)
+    if (!muxDef.isEmpty())
     {
         mux = QGst::ElementFactory::make(muxDef, (prefix + "mux").toUtf8());
         if (!mux)
@@ -1408,7 +1407,7 @@ QString MainWindow::appendVideoTail(const QDir& dir, const QString& prefix, int 
 
     pipeline->add(sink);
 
-    if (noCodec)
+    if (!mux)
     {
         if (!valve->link(sink))
         {

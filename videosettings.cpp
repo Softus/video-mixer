@@ -101,7 +101,12 @@ void VideoSettings::showEvent(QShowEvent *e)
     {
         listVideoCodecs->setCurrentIndex(0);
     }
-    updateGstList("video-muxer",   DEFAULT_VIDEO_MUXER,   GST_ELEMENT_FACTORY_TYPE_MUXER, listVideoMuxers);
+    auto selectedMuxer = updateGstList("video-muxer",   DEFAULT_VIDEO_MUXER,   GST_ELEMENT_FACTORY_TYPE_MUXER, listVideoMuxers);
+    listVideoMuxers->insertItem(0, tr("(none)"));
+    if (selectedMuxer.isEmpty())
+    {
+        listVideoMuxers->setCurrentIndex(0);
+    }
     updateGstList("image-encoder", DEFAULT_IMAGE_ENCODER, GST_ELEMENT_FACTORY_TYPE_ENCODER | GST_ELEMENT_FACTORY_TYPE_MEDIA_IMAGE, listImageCodecs);
     updateGstList("rtp-payloader", DEFAULT_RTP_PAYLOADER, GST_ELEMENT_FACTORY_TYPE_PAYLOADER, listRtpPayloaders);
 
@@ -418,8 +423,6 @@ void VideoSettings::videoCodecChanged(int index)
         spinFps->setEnabled(on);
     }
     spinBitrate->setEnabled(on);
-    listVideoMuxers->setEnabled(on);
-    checkDeinterlace->setEnabled(on);
 }
 
 // Return nullptr for 'default', otherwise the text itself
