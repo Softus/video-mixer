@@ -31,7 +31,7 @@
 #define DEFAULT_HOTKEY_WORKLIST       (int)(Qt::Key_F3)
 #define DEFAULT_OUTPUT_PATH           "/video"
 #define DEFAULT_OUTPUT_UNIQUE         false
-#define DEFAULT_RTP_PAYLOADER         "rtpmp2tpay"
+#define DEFAULT_RTP_PAYLOADER         "rtpmpvpay"
 #define DEFAULT_RTP_SINK              "udpsink"
 #define DEFAULT_VIDEOBITRATE          4000
 #define DEFAULT_NOTIFY_CLIP_LIMIT     true
