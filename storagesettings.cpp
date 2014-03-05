@@ -83,7 +83,7 @@ StorageSettings::StorageSettings(QWidget *parent)
     {
         layoutVideoLog->addRow(tr("&Split files by"), spinMaxVideoSize = new QSpinBox);
         spinMaxVideoSize->setSuffix(tr(" Mb"));
-        spinMaxVideoSize->setRange(1, 1024*1024);
+        spinMaxVideoSize->setRange(0, 1024*1024);
         spinMaxVideoSize->setValue(settings.value("video-max-file-size", DEFAULT_VIDEO_MAX_FILE_SIZE).toInt());
         spinMaxVideoSize->setToolTip(tr("0 for unlimited"));
     }
