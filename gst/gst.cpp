@@ -12,7 +12,7 @@ static GstStaticCaps mpeg_sys_caps = GST_STATIC_CAPS ("video/mpeg, "
 extern void mpeg_sys_type_find (GstTypeFind * tf, gpointer /*unused*/);
 extern "C" gboolean gst_motion_cells_plugin_init (GstPlugin * plugin);
 
-bool GstApplyFixes()
+bool gstApplyFixes()
 {
     return gst_type_find_register(nullptr, "video/mpegps", GST_RANK_NONE,
         mpeg_sys_type_find, (gchar **)mpeg_sys_exts, MPEG_SYS_CAPS, NULL, NULL)

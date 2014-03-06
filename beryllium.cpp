@@ -37,6 +37,9 @@
 #include <QX11Info>
 #include <X11/Xlib.h>
 #endif
+
+#include <glib/gi18n.h>
+#include <gst/gst.h>
 #include <QGst/Init>
 
 #ifdef WITH_DICOM
@@ -55,7 +58,7 @@
 // The mpegps type finder is a bit broken,
 // this code fixes it.
 //
-extern bool GstApplyFixes();
+extern bool gstApplyFixes();
 
 volatile sig_atomic_t fatal_error_in_progress = 0;
 void sighandler(int signum)
@@ -77,18 +80,109 @@ void sighandler(int signum)
     signal(signum, SIG_DFL);
 }
 
+static gboolean
+setValueCallback(const gchar *name, const gchar *value, gpointer, GError **err)
+{
+    qDebug() << name;
+    if (0 == qstrcmp(name, "--safe-mode"))
+    {
+        value = "safe-mode=true";
+    }
+
+    auto idx = nullptr == value? nullptr: strchr(value, '=');
+    if (nullptr == idx)
+    {
+        if (err)
+        {
+            *err = g_error_new(G_OPTION_ERROR,
+                G_OPTION_ERROR_BAD_VALUE, N_("Bad argument '%s' (must be name=value)"), value);
+        }
+        return false;
+    }
+
+    QSettings().setValue(QString::fromLocal8Bit(value, idx - value), QString::fromLocal8Bit(idx + 1));
+    return true;
+}
+
+static gboolean
+xSyncCallback(const gchar *, const gchar *, gpointer, GError **)
+{
+#ifdef Q_WS_X11
+    XSynchronize(QX11Info::display(), true);
+#endif
+    return true;
+}
+
+static gchar   windowType = '\x0';
+static QString windowArg;
+
+static gboolean
+setModeCallback(const gchar *name, const gchar *value, gpointer, GError **)
+{
+    windowType = name[2]; // --settings => 's', --archive => 'a'
+    windowArg = QString::fromLocal8Bit(value);
+    return true;
+}
+
 int main(int argc, char *argv[])
 {
+    qDebug() << PRODUCT_FULL_NAME << PRODUCT_VERSION_STR << "(" __DATE__ " " __TIME__ ")";
+    signal(SIGSEGV, sighandler);
+
     int errCode = 0;
 
-    qDebug() << PRODUCT_FULL_NAME << PRODUCT_VERSION_STR << "(" __DATE__ " " __TIME__ ")";
+    GOptionEntry options[] = {
+        {"archive", '\x0', G_OPTION_FLAG_OPTIONAL_ARG, G_OPTION_ARG_CALLBACK, (gpointer)setModeCallback,
+            N_("Show the archive window."), N_("PATH")},
+        {"edit-video", '\x0', G_OPTION_FLAG_OPTIONAL_ARG, G_OPTION_ARG_CALLBACK, (gpointer)setModeCallback,
+            N_("Show the video editor window."), N_("FILE")},
+        {"settings", '\x0', G_OPTION_FLAG_OPTIONAL_ARG, G_OPTION_ARG_CALLBACK, (gpointer)setModeCallback,
+            N_("Show the settings window."), N_("PAGE")},
+        {"safe-mode", '\x0', G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK, (gpointer)setValueCallback,
+            N_("Run the program in safe mode."), nullptr},
+        {"sync", '\x0', G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK, (gpointer)xSyncCallback,
+            N_("Run the program in X synchronous mode."), nullptr},
+        {G_OPTION_REMAINING, '\x0', 0, G_OPTION_ARG_CALLBACK, (gpointer)setValueCallback,
+            nullptr, nullptr},
+        {nullptr, '\x0', 0, G_OPTION_ARG_NONE, nullptr,
+            nullptr, nullptr},
+    };
 
-    signal(SIGSEGV, sighandler);
-    // Pass some arguments to gStreamer.
+    QApplication::setOrganizationName(ORGANIZATION_SHORT_NAME);
+    QApplication::setApplicationName(PRODUCT_SHORT_NAME);
+    QApplication::setApplicationVersion(PRODUCT_VERSION_STR);
+
+#if !GLIB_CHECK_VERSION(2, 32, 0)
+    // Must initialise the threading system before using any other GLib funtion
+    //
+    if (!g_thread_supported())
+    {
+      g_thread_init(nullptr);
+    }
+#endif
+
+    // Pass some arguments to gstreamer.
     // For example --gst-debug-level=5
     //
-    QGst::init(&argc, &argv);
-    GstApplyFixes();
+    GError* err = nullptr;
+    auto ctx = g_option_context_new("[var=value] [var=value] ...");
+    g_option_context_add_main_entries(ctx, options, PRODUCT_SHORT_NAME);
+    g_option_context_add_group(ctx, gst_init_get_option_group());
+    g_option_context_parse(ctx, &argc, &argv, &err);
+    g_option_context_free(ctx);
+
+    if (err)
+    {
+      g_print(N_("Error initializing: %s\n"), GST_STR_NULL(err->message));
+      g_error_free(err);
+      return 1;
+    }
+
+    gstApplyFixes();
+
+    // QGStreamer stuff
+    //
+    QGst::init();
 
 #ifdef WITH_DICOM
     // Pass some arguments to dcmtk.
@@ -99,13 +193,8 @@ int main(int argc, char *argv[])
     OFConsoleApplication dcmtkApp(PRODUCT_SHORT_NAME);
     OFCommandLine cmd;
     OFLog::addOptions(cmd);
-    cmd.addOption("--sync",           nullptr,    "Run the program in X synchronous mode."); // http://qt-project.org/doc/qt-4.8/debug.html
-    cmd.addOption("--archive",        nullptr, 1, "folder name", "Start in archive mode");
-    cmd.addOption("--edit-video",     nullptr, 1, "file name", "Start in video editing mode");
-    cmd.addOption("--safe-mode",      nullptr,    "Run the program in safe mode");
-    cmd.addOption("--settings",       nullptr,    "Run the program in edit settings mode");
-    cmd.addOption("--auto-start",        "-a",    "Show the start study dialog");
 
+    cmd.addOption("--auto-start",        "-a",    "Show the start study dialog");
     cmd.addOption("--study-id",         "-si", 1, "string",   "Study id");
     cmd.addOption("--patient-birthdate","-pb", 1, "yyyyMMdd", "Patient birth date");
     cmd.addOption("--patient-id",       "-pi", 1, "string",   "Patient Id");
@@ -114,7 +203,6 @@ int main(int argc, char *argv[])
     cmd.addOption("--physician",        "-p",  1, "string",   "Physician name");
     cmd.addOption("--study-desctiption","-sd", 1, "string",   "Study description");
 
-    cmd.addOption("--set-value",        "-sv", 1, "name=value", "Set variable 'name' to 'value'");
     dcmtkApp.parseCommandLine(cmd, argc, argv);
     OFLog::configureFromCommandLine(cmd, dcmtkApp);
 #endif
@@ -126,18 +214,9 @@ int main(int argc, char *argv[])
     QApplication::setAttribute(Qt::AA_X11InitThreads);
 #endif
     QApplication app(argc, argv);
-    app.setOrganizationName(ORGANIZATION_SHORT_NAME);
-    app.setApplicationName(PRODUCT_SHORT_NAME);
-    app.setApplicationVersion(PRODUCT_VERSION_STR);
     app.setWindowIcon(QIcon(":/app/product"));
-    auto args = app.arguments();
 
-#ifdef Q_WS_X11
-    if (args.indexOf("--sync") || qgetenv("DO_X_SYNCHRONIZE").toInt())
-    {
-         XSynchronize(QX11Info::display(), true);
-    }
-#endif
+    auto args = app.arguments();
 
     // At this time it is safe to use QSettings
     //
@@ -170,49 +249,42 @@ int main(int argc, char *argv[])
 
     // UI scope
     //
-    for (int i = 0; i < args.size() - 1; ++i)
+
+    switch (windowType)
     {
-        if (args[i] != "--set-value" && args[i] != "-sv")
+    case 'a':
         {
-            continue;
+            auto wndArc = new ArchiveWindow;
+            wndArc->updateRoot();
+            wndArc->setPath(windowArg.isEmpty()? QDir::currentPath(): windowArg);
+            wnd = wndArc;
         }
-        auto pair =  args[++i].split("=");
-        settings.setValue(pair.first(), pair.last());
-    }
-
-    auto idx = args.indexOf("--edit-video");
-    if (idx >= 0 && ++idx < args.size())
-    {
-        wnd = new VideoEditor(args.at(idx));
-    }
-    else if (idx = args.indexOf("--settings"), idx >= 0)
-    {
-        wnd = new Settings;
-    }
-    else if (idx = args.indexOf("--archive"), idx >= 0)
-    {
-        auto wndArc = new ArchiveWindow;
-        wndArc->updateRoot();
-        wndArc->setPath(++idx < args.size()? args.at(idx): QDir::currentPath());
-        wnd = wndArc;
-    }
-    else
-    {
-        auto bus = QDBusConnection::sessionBus();
-
-        // Failed to register our service.
-        // Another instance is running, or DBus is complitelly broken.
-        //
-        if (bus.registerService(PRODUCT_NAMESPACE) || !MainWindow::switchToRunningInstance())
+        break;
+    case 'e':
+        wnd = new VideoEditor(windowArg);
+        break;
+    case 's':
+        wnd = new Settings(windowArg);
+        break;
+    default:
         {
-            auto wndMain = new MainWindow;
+            auto bus = QDBusConnection::sessionBus();
 
-            // connect to DBus and register as an object
+            // Failed to register our service.
+            // Another instance is running, or DBus is complitelly broken.
             //
-            new MainWindowDBusAdaptor(wndMain);
-            bus.registerObject("/com/irkdc/Beryllium/Main", wndMain);
-            wnd = wndMain;
+            if (!bus.registerService(PRODUCT_NAMESPACE) || !MainWindow::switchToRunningInstance())
+            {
+                auto wndMain = new MainWindow;
+
+                // connect to DBus and register as an object
+                //
+                new MainWindowDBusAdaptor(wndMain);
+                bus.registerObject("/com/irkdc/Beryllium/Main", wndMain);
+                wnd = wndMain;
+            }
         }
+        break;
     }
 
     if (wnd)

@@ -40,6 +40,7 @@
 
 #include <QListWidget>
 #include <QBoxLayout>
+#include <QDebug>
 #include <QStackedWidget>
 #include <QPushButton>
 #include "qwaitcursor.h"
@@ -48,6 +49,11 @@ Q_DECLARE_METATYPE(QMetaObject)
 static int QMetaObjectMetaType = qRegisterMetaType<QMetaObject>();
 
 Settings::Settings(QWidget *parent, Qt::WindowFlags flags)
+    : Settings(QString(), parent, flags)
+{
+}
+
+Settings::Settings(QString pageTitle, QWidget *parent, Qt::WindowFlags flags)
     : QDialog(parent, flags)
 {
     listWidget = new QListWidget;
@@ -86,6 +92,23 @@ Settings::Settings(QWidget *parent, Qt::WindowFlags flags)
     setLayout(mainLayout);
 
     setWindowTitle(tr("Settings"));
+
+    if (!pageTitle.isEmpty())
+    {
+        auto idx = pageTitle.toInt();
+        if (idx > 0)
+        {
+            listWidget->setCurrentRow(idx - 1);
+        }
+        else
+        {
+            auto pages = listWidget->findItems(pageTitle, Qt::MatchContains);
+            if (!pages.empty())
+            {
+                listWidget->setCurrentItem(pages.first());
+            }
+        }
+    }
 }
 
 void Settings::createPage(const QString& title, const QMetaObject& page)
