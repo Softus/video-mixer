@@ -676,13 +676,14 @@ QString MainWindow::buildPipeline()
         //                ! identity name=clipinspect ! queue ! mpegpsmux ! filesink videosplitter.
         //           splitter.
         //
-        auto videoMaxRate       = settings.value("video-max-fps",  DEFAULT_VIDEO_MAX_FPS).toString();
+        auto videoMaxRate       = settings.value("limit-video-fps", DEFAULT_LIMIT_VIDEO_FPS).toBool()?
+                                  settings.value("video-max-fps",  DEFAULT_VIDEO_MAX_FPS).toInt(): 0;
         auto videoFixColor      = settings.value(videoCodec + "-colorspace").toBool();
         auto videoEncoderParams = settings.value(videoCodec + "-parameters").toString();
 
-        if (videoMaxRate.toInt() > 0)
+        if (videoMaxRate > 0)
         {
-            pipe.append(" ! videorate skip-to-first=1 max-rate=").append(videoMaxRate);
+            pipe.append(" ! videorate skip-to-first=1 max-rate=").append(QString::number(videoMaxRate));
         }
 
         pipe.append(" ! valve name=encvalve drop=1 ! queue max-size-bytes=0");
@@ -1359,7 +1360,9 @@ QString MainWindow::appendVideoTail(const QDir& dir, const QString& prefix, int 
 {
     QSettings settings;
     auto muxDef  = settings.value("video-muxer",    DEFAULT_VIDEO_MUXER).toString();
-    auto maxSize = settings.value("video-max-file-size", DEFAULT_VIDEO_MAX_FILE_SIZE).toLongLong() * 1024 * 1024;
+    auto maxSize = settings.value("split-video-files", DEFAULT_SPLIT_VIDEO_FILES).toBool()?
+        settings.value("video-max-file-size", DEFAULT_VIDEO_MAX_FILE_SIZE).toLongLong() * 1024 * 1024: 0;
+
     QString videoExt;
     bool useMulti = maxSize > 0;
 

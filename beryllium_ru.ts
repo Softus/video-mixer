@@ -10,17 +10,17 @@
         <translation>О программе %1</translation>
     </message>
     <message>
-        <location filename="aboutdialog.cpp" line="78"/>
+        <location filename="aboutdialog.cpp" line="83"/>
         <source>Based on:</source>
         <translation>Использует:</translation>
     </message>
     <message>
-        <location filename="aboutdialog.cpp" line="102"/>
+        <location filename="aboutdialog.cpp" line="107"/>
         <source>&lt;a href=&quot;http://qt-project.org/&quot;&gt;Qt </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="aboutdialog.cpp" line="90"/>
+        <location filename="aboutdialog.cpp" line="95"/>
         <source>&lt;a href=&quot;http://gstreamer.freedesktop.org/&quot;&gt;</source>
         <translation></translation>
     </message>
@@ -30,53 +30,53 @@
         <translation>Бериллий</translation>
     </message>
     <message>
-        <location filename="aboutdialog.cpp" line="85"/>
+        <location filename="aboutdialog.cpp" line="90"/>
         <source>&lt;a href=&quot;http://dcmtk.org/&quot;&gt;DCMTK </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="aboutdialog.cpp" line="81"/>
+        <location filename="aboutdialog.cpp" line="86"/>
         <source>&lt;a href=&quot;http://mediainfo.sourceforge.net/&quot;&gt;</source>
         <translation>&lt;a href=&quot;http://mediainfo.sourceforge.net/ru&quot;&gt;</translation>
     </message>
     <message>
-        <location filename="aboutdialog.cpp" line="106"/>
+        <location filename="aboutdialog.cpp" line="111"/>
         <source>&lt;a href=&quot;http://libqxt.org/&quot;&gt;LibQxt </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="aboutdialog.cpp" line="98"/>
+        <location filename="aboutdialog.cpp" line="103"/>
         <source>&lt;a href=&quot;http://gstreamer.freedesktop.org/modules/qt-gstreamer.html/&quot;&gt;QtGStreamer </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="aboutdialog.cpp" line="94"/>
+        <location filename="aboutdialog.cpp" line="99"/>
         <source>&lt;a href=&quot;http://opencv.org/&quot;&gt;OpenCV </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="aboutdialog.cpp" line="114"/>
+        <location filename="aboutdialog.cpp" line="119"/>
         <source>&lt;a href=&quot;http://neurovit.deviantart.com/art/simplicio-92311415&quot;&gt;Simplicio icon set by Neurovit&lt;/a&gt;</source>
         <translation>&lt;a href=&quot;http://neurovit.deviantart.com/art/simplicio-92311415&quot;&gt;Набор иконок Simplicio от Neurovit&lt;/a&gt;</translation>
     </message>
     <message>
-        <location filename="aboutdialog.cpp" line="117"/>
+        <location filename="aboutdialog.cpp" line="122"/>
         <source>&lt;a href=&quot;http://icons8.com/&quot;&gt;Icons8 icon set by VisualPharm&lt;/a&gt;</source>
         <translation>&lt;a href=&quot;http://icons8.com/&quot;&gt;Набор иконок Icons8 от VisualPharm&lt;/a&gt;</translation>
     </message>
     <message>
-        <location filename="aboutdialog.cpp" line="126"/>
+        <location filename="aboutdialog.cpp" line="131"/>
         <source>&lt;p&gt;Copyright (C) 2013-2014 &lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;. All rights reserved.&lt;/p&gt;</source>
         <oldsource>&lt;p&gt;Copyright (C) 2013 &lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;. All rights reserved.&lt;/p&gt;</oldsource>
         <translation>&lt;p&gt;Авторское право (C) 2013-2014 &lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;&lt;br/&gt;Программа защищена законом об авторских правах&lt;br/&gt;и международными соглашениями.&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="aboutdialog.cpp" line="127"/>
+        <location filename="aboutdialog.cpp" line="132"/>
         <source>Irkutsk Diagnostic Center</source>
         <translation>Иркутский Диагостический Центр</translation>
     </message>
     <message>
-        <location filename="aboutdialog.cpp" line="132"/>
+        <location filename="aboutdialog.cpp" line="137"/>
         <source>The program is provided AS IS with NO WARRANTY OF ANY KIND,
 INCLUDING THE WARRANTY OF DESIGN,
 MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
@@ -84,7 +84,7 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
 без каких-либо явных или подразумеваемых гарантий любого рода.</translation>
     </message>
     <message>
-        <location filename="aboutdialog.cpp" line="142"/>
+        <location filename="aboutdialog.cpp" line="147"/>
         <source>OK</source>
         <translation>ОК</translation>
     </message>
@@ -93,8 +93,8 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
     <name>ArchiveWindow</name>
     <message>
         <location filename="archivewindow.cpp" line="99"/>
-        <location filename="archivewindow.cpp" line="783"/>
-        <location filename="archivewindow.cpp" line="840"/>
+        <location filename="archivewindow.cpp" line="782"/>
+        <location filename="archivewindow.cpp" line="839"/>
         <source>Archive</source>
         <oldsource>archive</oldsource>
         <translation>Архив</translation>
@@ -186,7 +186,7 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
     </message>
     <message>
         <location filename="archivewindow.cpp" line="202"/>
-        <location filename="archivewindow.cpp" line="1030"/>
+        <location filename="archivewindow.cpp" line="1029"/>
         <source>Play</source>
         <translation>Воспроизвести</translation>
     </message>
@@ -196,20 +196,20 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
         <translation>Перемотать вперёд</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="479"/>
+        <location filename="archivewindow.cpp" line="478"/>
         <source>The file was uploaded to a storage server</source>
         <oldsource>The file was uploaded to a DICOM server</oldsource>
         <translation>Файл был загружен в хранилище</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="667"/>
+        <location filename="archivewindow.cpp" line="666"/>
         <source>Are you sure to delete
 
 &apos;%1&apos;?</source>
         <translation>Вы действительно хотите удалить &apos;%1&apos;?</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="668"/>
+        <location filename="archivewindow.cpp" line="667"/>
         <source>Are you sure to delete selected items?</source>
         <translation>Вы действительно хотите удалить выбранные объекты?</translation>
     </message>
@@ -224,7 +224,7 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
         <translation type="obsolete">Вы действительно хотите отправить результат в хранилище?</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="741"/>
+        <location filename="archivewindow.cpp" line="740"/>
         <source>All files were successfully stored.</source>
         <translation>Все файлы были успешно сохранены.</translation>
     </message>
@@ -237,17 +237,17 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
         <translation type="obsolete">Вы действительно хотите отправить выбранные объекты в хранилище?</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="778"/>
+        <location filename="archivewindow.cpp" line="777"/>
         <source>Failed to launch </source>
         <translation>Ошибка при выполнении </translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="885"/>
+        <location filename="archivewindow.cpp" line="884"/>
         <source>Archive - %1</source>
         <translation>Архив - %1</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="1030"/>
+        <location filename="archivewindow.cpp" line="1029"/>
         <source>Pause</source>
         <translation>Пауза</translation>
     </message>
@@ -701,36 +701,36 @@ Continue?</source>
         <translation>О программе %1</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="963"/>
-        <location filename="mainwindow.cpp" line="968"/>
-        <location filename="mainwindow.cpp" line="973"/>
-        <location filename="mainwindow.cpp" line="978"/>
-        <location filename="mainwindow.cpp" line="983"/>
+        <location filename="mainwindow.cpp" line="965"/>
+        <location filename="mainwindow.cpp" line="970"/>
+        <location filename="mainwindow.cpp" line="975"/>
+        <location filename="mainwindow.cpp" line="980"/>
+        <location filename="mainwindow.cpp" line="985"/>
         <source> - </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1010"/>
+        <location filename="mainwindow.cpp" line="1012"/>
         <source>Failed to create &apos;%1&apos;</source>
         <translation>Не удалось создать &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1277"/>
+        <location filename="mainwindow.cpp" line="1286"/>
         <source>Failed to start recording.
 Please, adjust the video source settings.</source>
         <translation>Невозможно начать запись.
 Проверьте настройки видео.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1288"/>
-        <location filename="mainwindow.cpp" line="1494"/>
+        <location filename="mainwindow.cpp" line="1297"/>
+        <location filename="mainwindow.cpp" line="1504"/>
         <source>Failed to start recording.
 Check the error log for details.</source>
         <translation>Невозможно начать запись.
 Проверьте журнал ожибок.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1659"/>
+        <location filename="mainwindow.cpp" line="1669"/>
         <source>Failed to start a study.
 Another study is in progress.</source>
         <translation>Невозможно начать исследование.
@@ -753,17 +753,17 @@ Another study is in progress.</source>
         <translation type="obsolete">Отправить</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1307"/>
+        <location filename="mainwindow.cpp" line="1316"/>
         <source>End the study?</source>
         <translation>Завершить исследование?</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1539"/>
+        <location filename="mainwindow.cpp" line="1549"/>
         <source>End study</source>
         <translation>Завершить исследование</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1539"/>
+        <location filename="mainwindow.cpp" line="1549"/>
         <source>Start study</source>
         <translation>Начать исследование</translation>
     </message>
@@ -832,7 +832,7 @@ Another study is in progress.</source>
         <translation>Завершить фрагмент</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1212"/>
+        <location filename="mainwindow.cpp" line="1214"/>
         <source>Failed to load image %1</source>
         <translation>Не удалось загрузить снимок %1</translation>
     </message>
@@ -1238,84 +1238,83 @@ Another study is in progress.</source>
 <context>
     <name>StorageSettings</name>
     <message>
-        <location filename="storagesettings.cpp" line="41"/>
+        <location filename="storagesettings.cpp" line="43"/>
         <source>Images and clips</source>
         <translation>Снимки и видеофрагменты</translation>
     </message>
     <message>
-        <location filename="storagesettings.cpp" line="44"/>
-        <location filename="storagesettings.cpp" line="68"/>
+        <location filename="storagesettings.cpp" line="46"/>
+        <location filename="storagesettings.cpp" line="70"/>
         <source>Browse</source>
         <translation>Обзор</translation>
     </message>
     <message>
-        <location filename="storagesettings.cpp" line="46"/>
+        <location filename="storagesettings.cpp" line="48"/>
         <source>&amp;Output path</source>
         <translation>С&amp;охранять в</translation>
     </message>
     <message>
-        <location filename="storagesettings.cpp" line="54"/>
+        <location filename="storagesettings.cpp" line="56"/>
         <source>&amp;Folder template</source>
         <translation>Шаблон &amp;папки</translation>
     </message>
     <message>
-        <location filename="storagesettings.cpp" line="56"/>
+        <location filename="storagesettings.cpp" line="58"/>
         <source>&amp;Pictures template</source>
         <translation>Шаблон &amp;снимков</translation>
     </message>
     <message>
-        <location filename="storagesettings.cpp" line="57"/>
+        <location filename="storagesettings.cpp" line="59"/>
         <source>&amp;Clips template</source>
         <translation>Шаблон &amp;клипов</translation>
     </message>
     <message>
-        <location filename="storagesettings.cpp" line="62"/>
+        <location filename="storagesettings.cpp" line="64"/>
         <source>Video logs</source>
         <translation>Видеожурнал</translation>
     </message>
     <message>
-        <location filename="storagesettings.cpp" line="67"/>
-        <location filename="storagesettings.cpp" line="77"/>
+        <location filename="storagesettings.cpp" line="69"/>
+        <location filename="storagesettings.cpp" line="79"/>
         <source>(share with images and clips)</source>
         <translation>(как для снимков и видеофрагментов)</translation>
     </message>
     <message>
-        <location filename="storagesettings.cpp" line="70"/>
+        <location filename="storagesettings.cpp" line="72"/>
         <source>O&amp;utput path</source>
         <translation>Со&amp;хранять в</translation>
     </message>
     <message>
-        <location filename="storagesettings.cpp" line="78"/>
+        <location filename="storagesettings.cpp" line="80"/>
         <source>Fol&amp;der template</source>
         <translation>&amp;Шаблон папки</translation>
     </message>
     <message>
-        <location filename="storagesettings.cpp" line="79"/>
+        <location filename="storagesettings.cpp" line="81"/>
         <source>&amp;Video template</source>
         <translation>Шаблон &amp;видео</translation>
     </message>
     <message>
-        <location filename="storagesettings.cpp" line="84"/>
+        <location filename="storagesettings.cpp" line="86"/>
         <source>&amp;Split files by</source>
         <translation>&amp;Разбивать файлы по</translation>
     </message>
     <message>
-        <location filename="storagesettings.cpp" line="85"/>
+        <location filename="storagesettings.cpp" line="90"/>
         <source> Mb</source>
         <translation> Мб</translation>
     </message>
     <message>
-        <location filename="storagesettings.cpp" line="88"/>
         <source>0 for unlimited</source>
-        <translation>0, чтобы не ограничивать</translation>
+        <translation type="obsolete">0, чтобы не ограничивать</translation>
     </message>
     <message>
-        <location filename="storagesettings.cpp" line="94"/>
+        <location filename="storagesettings.cpp" line="99"/>
         <source>Substitutes</source>
         <translation>Подстановки</translation>
     </message>
     <message>
-        <location filename="storagesettings.cpp" line="96"/>
+        <location filename="storagesettings.cpp" line="101"/>
         <source>%yyyy%		year			%mm%		month
 %dd%		day			%hh%		hour
 %min%		minute			%nn%		sequential number
@@ -1566,67 +1565,67 @@ Are you want to continue?</source>
 <context>
     <name>VideoSettings</name>
     <message>
-        <location filename="videosettings.cpp" line="54"/>
+        <location filename="videosettings.cpp" line="55"/>
         <source>Video &amp;device</source>
         <translation>&amp;Устройство</translation>
     </message>
     <message>
-        <location filename="videosettings.cpp" line="56"/>
+        <location filename="videosettings.cpp" line="57"/>
         <source>I&amp;nput channel</source>
         <translation>&amp;Входной канал</translation>
     </message>
     <message>
-        <location filename="videosettings.cpp" line="58"/>
+        <location filename="videosettings.cpp" line="59"/>
         <source>Pixel &amp;format</source>
         <translation>&amp;Формат</translation>
     </message>
     <message>
-        <location filename="videosettings.cpp" line="60"/>
+        <location filename="videosettings.cpp" line="61"/>
         <source>Frame &amp;size</source>
         <translation>&amp;Размер кадра</translation>
     </message>
     <message>
-        <location filename="videosettings.cpp" line="61"/>
+        <location filename="videosettings.cpp" line="62"/>
         <source>Video &amp;codec</source>
         <translation>&amp;Кодек видео</translation>
     </message>
     <message>
         <location filename="videosettings.cpp" line="67"/>
-        <source>M&amp;ax rate</source>
-        <translation>&amp;Максимум</translation>
+        <source>&amp;Limit rate</source>
+        <oldsource>M&amp;ax rate</oldsource>
+        <translation>&amp;Ограничить до</translation>
     </message>
     <message>
-        <location filename="videosettings.cpp" line="70"/>
+        <location filename="videosettings.cpp" line="73"/>
         <source> frames per second</source>
         <translation> кадров в секунду</translation>
     </message>
     <message>
-        <location filename="videosettings.cpp" line="71"/>
         <source>0 for unlimited</source>
-        <translation>0, чтобы не ограничивать</translation>
+        <translation type="obsolete">0, чтобы не ограничивать</translation>
     </message>
     <message>
-        <location filename="videosettings.cpp" line="73"/>
+        <location filename="videosettings.cpp" line="76"/>
         <source>Video &amp;bitrate</source>
         <translation>Скорость &amp;потока</translation>
     </message>
     <message>
-        <location filename="videosettings.cpp" line="76"/>
+        <location filename="videosettings.cpp" line="79"/>
         <source> kbit per second</source>
         <translation> kbit в секунду</translation>
     </message>
     <message>
-        <location filename="videosettings.cpp" line="79"/>
+        <location filename="videosettings.cpp" line="82"/>
         <source>De&amp;interlace</source>
         <translation>Устранять &amp;чересстрочность</translation>
     </message>
     <message>
-        <location filename="videosettings.cpp" line="82"/>
+        <location filename="videosettings.cpp" line="85"/>
         <source>Video &amp;muxer</source>
         <translation>Конте&amp;йнер видео</translation>
     </message>
     <message>
-        <location filename="videosettings.cpp" line="83"/>
+        <location filename="videosettings.cpp" line="86"/>
         <source>&amp;Image codec</source>
         <translation>Кодек &amp;снимков</translation>
     </message>
@@ -1639,42 +1638,43 @@ Are you want to continue?</source>
         <translation type="obsolete">Записывать видео &amp;целиком</translation>
     </message>
     <message>
-        <location filename="videosettings.cpp" line="84"/>
+        <location filename="videosettings.cpp" line="87"/>
         <source>RTP &amp;payloader</source>
         <translation>Контейнер &amp;RTP</translation>
     </message>
     <message>
-        <location filename="videosettings.cpp" line="86"/>
+        <location filename="videosettings.cpp" line="89"/>
         <source>&amp;RTP clients</source>
         <translation>Клиенты R&amp;TP</translation>
     </message>
     <message>
-        <location filename="videosettings.cpp" line="87"/>
+        <location filename="videosettings.cpp" line="90"/>
         <source>&amp;Enable RTP</source>
         <translation>Вкл&amp;ючить RTP</translation>
     </message>
     <message>
-        <location filename="videosettings.cpp" line="99"/>
+        <location filename="videosettings.cpp" line="102"/>
+        <location filename="videosettings.cpp" line="108"/>
         <source>(none)</source>
         <translation>(нет)</translation>
     </message>
     <message>
-        <location filename="videosettings.cpp" line="109"/>
-        <location filename="videosettings.cpp" line="236"/>
-        <location filename="videosettings.cpp" line="243"/>
-        <location filename="videosettings.cpp" line="280"/>
-        <location filename="videosettings.cpp" line="329"/>
+        <location filename="videosettings.cpp" line="117"/>
+        <location filename="videosettings.cpp" line="244"/>
+        <location filename="videosettings.cpp" line="251"/>
+        <location filename="videosettings.cpp" line="295"/>
+        <location filename="videosettings.cpp" line="344"/>
         <source>(default)</source>
         <translation>(по умолчанию)</translation>
     </message>
     <message>
-        <location filename="videosettings.cpp" line="148"/>
+        <location filename="videosettings.cpp" line="156"/>
         <source>Failed to create element &apos;%1&apos;</source>
         <oldsource>Failed to create element &quot;%1&quot;</oldsource>
         <translation>Не удалось создать элемент &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="videosettings.cpp" line="396"/>
+        <location filename="videosettings.cpp" line="411"/>
         <source>%1x%2</source>
         <translation>%1х%2</translation>
     </message>
