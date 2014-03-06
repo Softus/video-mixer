@@ -663,8 +663,8 @@ QString MainWindow::buildPipeline()
         pipe.append(" ! identity name=imagevalve drop-probability=1.0")
             .append(imageEncoderFixColor? colorConverter: "")
             .append(" ! ").append(imageEncoderDef).append(" ").append(imageEncoderParams)
-            .append(" ! ").append(imageSinkDef).append(" name=imagesink post-messages=1 async=0 sync=0 location=")
-            .append(outputPathDef).append("/image splitter.");
+            .append(" ! ").append(imageSinkDef).append(" name=imagesink post-messages=1 async=0 sync=0 location=\"")
+            .append(outputPathDef).append("/image\" splitter.");
     }
 
     if (!videoCodec.isEmpty())
