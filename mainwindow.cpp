@@ -641,11 +641,13 @@ QString MainWindow::buildPipeline()
             auto motionSensitivity = settings.value("motion-sensitivity", DEFAULT_MOTION_SENSITIVITY).toString();
             auto motionThreshold   = settings.value("motion-threshold",   DEFAULT_MOTION_THRESHOLD).toString();
             auto motionMinFrames   = settings.value("motion-min-frames",  DEFAULT_MOTION_MIN_FRAMES).toString();
+            auto motionGap         = settings.value("motion-gap",         DEFAULT_MOTION_GAP).toString();
 
             pipe.append(" ! motioncells name=motion-detector display=").append(motionDebug)
                 .append(" sensitivity=").append(motionSensitivity)
                 .append(" threshold=").append(motionThreshold)
                 .append(" minimummotionframes=").append(motionMinFrames)
+                .append(" gap=").append(motionGap)
                 .append(colorConverter);
         }
         pipe.append(" ! textoverlay name=displayoverlay color=-1 halignment=right valignment=top text=* xpad=2 ypad=0 font-desc=16")

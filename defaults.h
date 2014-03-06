@@ -42,6 +42,7 @@
 #define DEFAULT_MOTION_SENSITIVITY    0.75
 #define DEFAULT_MOTION_THRESHOLD      0.02
 #define DEFAULT_MOTION_MIN_FRAMES     1
+#define DEFAULT_MOTION_GAP            5
 #define DEFAULT_IMAGE_TEMPLATE        "image-%study%-%nn%"
 #define DEFAULT_CLIP_TEMPLATE         "clip-%study%-%nn%"
 #define DEFAULT_VIDEO_TEMPLATE        "video-%study%"

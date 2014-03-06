@@ -40,6 +40,7 @@ class VideoRecordSettings : public QWidget
     QSpinBox  *spinSensitivity;
     QSpinBox  *spinThreshold;
     QSpinBox  *spinMinTime;
+    QSpinBox  *spinGap;
 
 public:
     Q_INVOKABLE explicit VideoRecordSettings(QWidget *parent = 0);
