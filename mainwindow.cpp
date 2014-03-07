@@ -1618,7 +1618,7 @@ void MainWindow::onShowArchiveClick()
 
 void MainWindow::onShowSettingsClick()
 {
-    Settings dlg(this);
+    Settings dlg(QString(), this);
     connect(&dlg, SIGNAL(apply()), this, SLOT(updatePipeline()));
     if (dlg.exec())
     {

@@ -48,12 +48,7 @@
 Q_DECLARE_METATYPE(QMetaObject)
 static int QMetaObjectMetaType = qRegisterMetaType<QMetaObject>();
 
-Settings::Settings(QWidget *parent, Qt::WindowFlags flags)
-    : Settings(QString(), parent, flags)
-{
-}
-
-Settings::Settings(QString pageTitle, QWidget *parent, Qt::WindowFlags flags)
+Settings::Settings(const QString& pageTitle, QWidget *parent, Qt::WindowFlags flags)
     : QDialog(parent, flags)
 {
     listWidget = new QListWidget;
