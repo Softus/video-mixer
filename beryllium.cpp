@@ -20,6 +20,7 @@
 
 #include "product.h"
 #include "archivewindow.h"
+#include "defaults.h"
 #include "mainwindow.h"
 #include "mainwindowdbusadaptor.h"
 #include "videoeditor.h"
@@ -124,6 +125,34 @@ setModeCallback(const gchar *name, const gchar *value, gpointer, GError **)
     return true;
 }
 
+static void setupGstDebug(const QSettings& settings)
+{
+    auto debugDotDir = settings.value("gst-debug-dot-dir", DEFAULT_GST_DEBUG_DOT_DIR).toString();
+    if (!debugDotDir.isEmpty())
+    {
+        qputenv("GST_DEBUG_DUMP_DOT_DIR", debugDotDir.toLocal8Bit());
+    }
+    auto debugLogFile = settings.value("gst-debug-log-file", DEFAULT_GST_DEBUG_LOG_FILE).toString();
+    if (!debugLogFile.isEmpty())
+    {
+        //QDir().mkpath(debugLogFile);
+        qDebug()<<debugLogFile;
+        qputenv("GST_DEBUG_FILE", debugLogFile.toLocal8Bit());
+    }
+    auto gstDebug = settings.value("gst-debug", DEFAULT_GST_DEBUG).toString();
+    if (!gstDebug.isEmpty())
+    {
+        qputenv("GST_DEBUG", gstDebug.toLocal8Bit());
+    }
+    auto gstDebugFullTags = settings.value("gst-debug-full-tags", DEFAULT_GST_DEBUG_FULL_TAGS).toBool();
+    qputenv("GST_DEBUG_OPTIONS", gstDebugFullTags? "full-tags":"pretty-tags");
+    gst_debug_set_colored(settings.value("gst-debug-colored", DEFAULT_GST_DEBUG_COLORED).toBool());
+    auto gstDebugLevel = (GstDebugLevel)settings.value("gst-debug-level", DEFAULT_GST_DEBUG_LEVEL).toInt();
+    gst_debug_set_default_threshold(gstDebugLevel);
+    gst_debug_set_active(settings.value("gst-debug-on", DEFAULT_GST_DEBUG_ON).toBool());
+
+}
+
 int main(int argc, char *argv[])
 {
     qDebug() << PRODUCT_FULL_NAME << PRODUCT_VERSION_STR << "(" __DATE__ " " __TIME__ ")";
@@ -151,6 +180,12 @@ int main(int argc, char *argv[])
     QApplication::setOrganizationName(ORGANIZATION_SHORT_NAME);
     QApplication::setApplicationName(PRODUCT_SHORT_NAME);
     QApplication::setApplicationVersion(PRODUCT_VERSION_STR);
+
+    // At this time it is safe to use QSettings
+    //
+    QSettings settings;
+
+    setupGstDebug(settings);
 
 #if !GLIB_CHECK_VERSION(2, 32, 0)
     // Must initialise the threading system before using any other GLib funtion
@@ -218,9 +253,6 @@ int main(int argc, char *argv[])
 
     auto args = app.arguments();
 
-    // At this time it is safe to use QSettings
-    //
-    QSettings settings;
     bool fullScreen = settings.value("show-fullscreen").toBool();
 
     // Override some style sheets
