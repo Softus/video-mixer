@@ -130,13 +130,13 @@ static void setupGstDebug(const QSettings& settings)
     auto debugDotDir = settings.value("gst-debug-dot-dir", DEFAULT_GST_DEBUG_DOT_DIR).toString();
     if (!debugDotDir.isEmpty())
     {
+        QDir(debugDotDir).mkpath(".");
         qputenv("GST_DEBUG_DUMP_DOT_DIR", debugDotDir.toLocal8Bit());
     }
     auto debugLogFile = settings.value("gst-debug-log-file", DEFAULT_GST_DEBUG_LOG_FILE).toString();
     if (!debugLogFile.isEmpty())
     {
-        //QDir().mkpath(debugLogFile);
-        qDebug()<<debugLogFile;
+        QFileInfo(debugLogFile).absoluteDir().mkpath(".");
         qputenv("GST_DEBUG_FILE", debugLogFile.toLocal8Bit());
     }
     auto gstDebug = settings.value("gst-debug", DEFAULT_GST_DEBUG).toString();
