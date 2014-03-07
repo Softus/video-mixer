@@ -133,6 +133,7 @@ void HotKeySettings::keyChanged(int key)
 void HotKeySettings::checkKeys(QTreeWidgetItem *top)
 {
     QMap<int, QTreeWidgetItem*> keys;
+
     for (auto keyIdx = 0; keyIdx < top->childCount(); ++keyIdx)
     {
         auto item = top->child(keyIdx);
