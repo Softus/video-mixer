@@ -1343,8 +1343,9 @@ void MainWindow::onStartClick()
 void MainWindow::onSnapshotClick()
 {
     QSettings settings;
-    QString imageExt = getExt(settings.value("image-encoder", DEFAULT_IMAGE_ENCODER).toString());
-    QString imageFileName = replace(settings.value("image-template", DEFAULT_IMAGE_TEMPLATE).toString(), ++imageNo).append(imageExt);
+    auto imageExt = getExt(settings.value("image-encoder", DEFAULT_IMAGE_ENCODER).toString());
+    auto imageTemplate = settings.value("image-template", DEFAULT_IMAGE_TEMPLATE).toString();
+    auto imageFileName = replace(imageTemplate, ++imageNo).append(imageExt);
 
     sound->play(DATA_FOLDER + "/sound/shutter.ac3");
 
@@ -1372,7 +1373,7 @@ QString MainWindow::appendVideoTail(const QDir& dir, const QString& prefix, int 
     auto valve   = pipeline->getElementByName((prefix + "valve").toUtf8());
     if (!valve)
     {
-        qDebug() << "Required element '" << prefix << "valve'" << " is missing";
+        qDebug() << "Required element '" << prefix + "valve'" << " is missing";
         return nullptr;
     }
 
@@ -1381,7 +1382,7 @@ QString MainWindow::appendVideoTail(const QDir& dir, const QString& prefix, int 
         mux = QGst::ElementFactory::make(muxDef, (prefix + "mux").toUtf8());
         if (!mux)
         {
-            qDebug() << "Failed to create element '" << prefix << "mux'" << " (" << muxDef << ")";
+            qDebug() << "Failed to create element '" << prefix + "mux'" << " (" << muxDef << ")";
             return nullptr;
         }
         pipeline->add(mux);
