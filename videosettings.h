@@ -46,19 +46,20 @@ QT_END_NAMESPACE
 class VideoSettings : public QWidget
 {
     Q_OBJECT
-    QComboBox* listDevices;
-    QComboBox* listChannels;
-    QComboBox* listFormats;
-    QComboBox* listSizes;
-    QComboBox* listVideoCodecs;
-    QComboBox* listVideoMuxers;
-    QComboBox* listRtpPayloaders;
-    QComboBox* listImageCodecs;
-    QSpinBox* spinFps;
-    QSpinBox* spinBitrate;
-    QLineEdit* textRtpClients;
-    QCheckBox* checkEnableRtp;
-    QCheckBox* checkDeinterlace;
+    QComboBox *listDevices;
+    QComboBox *listChannels;
+    QComboBox *listFormats;
+    QComboBox *listSizes;
+    QComboBox *listVideoCodecs;
+    QComboBox *listVideoMuxers;
+    QComboBox *listRtpPayloaders;
+    QComboBox *listImageCodecs;
+    QCheckBox *checkFps;
+    QSpinBox  *spinFps;
+    QSpinBox  *spinBitrate;
+    QLineEdit *textRtpClients;
+    QCheckBox *checkEnableRtp;
+    QCheckBox *checkDeinterlace;
 
     void updateDeviceList(const char *elmName, const char *propName);
     QString updateGstList(const char* setting, const char* def, unsigned long long type, QComboBox* cb);
@@ -75,7 +76,6 @@ private slots:
     void videoDeviceChanged(int index);
     void inputChannelChanged(int index);
     void formatChanged(int index);
-    void videoCodecChanged(int index);
 
 public slots:
     void save();

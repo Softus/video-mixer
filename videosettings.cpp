@@ -46,6 +46,7 @@
 
 VideoSettings::VideoSettings(QWidget *parent)
   : QWidget(parent)
+  , checkFps(nullptr)
   , spinFps(nullptr)
 {
     QSettings settings;
@@ -59,16 +60,18 @@ VideoSettings::VideoSettings(QWidget *parent)
     connect(listFormats, SIGNAL(currentIndexChanged(int)), this, SLOT(formatChanged(int)));
     layout->addRow(tr("Frame &size"), listSizes = new QComboBox());
     layout->addRow(tr("Video &codec"), listVideoCodecs = new QComboBox());
-    connect(listVideoCodecs, SIGNAL(currentIndexChanged(int)), this, SLOT(videoCodecChanged(int)));
 
     auto elm = QGst::ElementFactory::make("videorate");
     if (elm && elm->findProperty("max-rate"))
     {
-        layout->addRow(tr("M&ax rate"), spinFps = new QSpinBox());
-        spinFps->setRange(0, 200);
+        layout->addRow(checkFps = new QCheckBox(tr("&Limit rate")), spinFps = new QSpinBox());
+        connect(checkFps, SIGNAL(toggled(bool)), spinFps, SLOT(setEnabled(bool)));
+        checkFps->setChecked(settings.value("limit-video-fps", DEFAULT_LIMIT_VIDEO_FPS).toBool());
+
+        spinFps->setRange(1, 200);
         spinFps->setValue(settings.value("video-max-fps", DEFAULT_VIDEO_MAX_FPS).toInt());
         spinFps->setSuffix(tr(" frames per second"));
-        spinFps->setToolTip(tr("0 for unlimited"));
+        spinFps->setEnabled(checkFps->isChecked());
     }
     layout->addRow(tr("Video &bitrate"), spinBitrate = new QSpinBox());
     spinBitrate->setRange(300, 102400);
@@ -414,17 +417,6 @@ void VideoSettings::formatChanged(int index)
     }
 }
 
-void VideoSettings::videoCodecChanged(int index)
-{
-    auto on = !listVideoCodecs->itemData(index).isNull();
-
-    if (spinFps)
-    {
-        spinFps->setEnabled(on);
-    }
-    spinBitrate->setEnabled(on);
-}
-
 // Return nullptr for 'default', otherwise the text itself
 //
 static QString getListText(const QComboBox* cb)
@@ -466,6 +458,7 @@ void VideoSettings::save()
     settings.setValue("video-deinterlace", checkDeinterlace->isChecked());
     if (spinFps)
     {
+        settings.setValue("limit-video-fps", checkFps->isChecked());
         settings.setValue("video-max-fps", spinFps->value() > 0? spinFps->value(): QVariant());
     }
 }

@@ -57,24 +57,30 @@ VideoRecordSettings::VideoRecordSettings(QWidget *parent) :
     grpMotionDetection->setCheckable(true);
     grpMotionDetection->setChecked(settings.value("detect-motion", DEFAULT_MOTION_DETECTION).toBool());
     auto layoutVideoLog = new QFormLayout;
-    layoutVideoLog->addRow(nullptr, checkMotionStart = new QCheckBox(tr("&Start recording only after the motion is detected")));
+
+    layoutVideoLog->addRow(checkMotionStart = new QCheckBox(tr("&Start after")), spinMinTime = new QSpinBox);
     checkMotionStart->setChecked(settings.value("motion-start", true).toBool());
-    layoutVideoLog->addRow(nullptr, checkMotionStop = new QCheckBox(tr("S&top recording when the motion is lost")));
+    connect(checkMotionStart, SIGNAL(toggled(bool)), spinMinTime, SLOT(setEnabled(bool)));
+    spinMinTime->setValue(settings.value("motion-min-frames", DEFAULT_MOTION_MIN_FRAMES).toInt());
+    spinMinTime->setSuffix(tr(" frames with motion"));
+    spinMinTime->setEnabled(checkMotionStart->isChecked());
+
+    layoutVideoLog->addRow(checkMotionStop = new QCheckBox(tr("S&top after")), spinGap = new QSpinBox);
     checkMotionStop->setChecked(settings.value("motion-stop", true).toBool());
+    connect(checkMotionStop, SIGNAL(toggled(bool)), spinGap, SLOT(setEnabled(bool)));
+    spinGap->setValue(settings.value("motion-gap", DEFAULT_MOTION_GAP).toInt());
+    spinGap->setSuffix(tr(" seconds without motion"));
+    spinGap->setEnabled(checkMotionStop->isChecked());
 
     layoutVideoLog->addRow(tr("S&ensitivity"), spinSensitivity = new QSpinBox);
     spinSensitivity->setValue(settings.value("motion-sensitivity", DEFAULT_MOTION_SENSITIVITY).toReal()* 100);
-    spinSensitivity->setSuffix(tr(" percent"));
+    spinSensitivity->setSuffix(tr("%"));
 
     layoutVideoLog->addRow(tr("T&hreshold"), spinThreshold = new QSpinBox);
     spinThreshold->setValue(settings.value("motion-threshold", DEFAULT_MOTION_THRESHOLD).toReal()* 100);
-    spinThreshold->setSuffix(tr(" percent"));
+    spinThreshold->setSuffix(tr("%"));
 
-    layoutVideoLog->addRow(tr("T&rigger after"), spinMinTime = new QSpinBox);
-    spinMinTime->setValue(settings.value("motion-min-frames", DEFAULT_MOTION_MIN_FRAMES).toInt());
-    spinMinTime->setSuffix(tr(" frames"));
-
-    layoutVideoLog->addRow(nullptr, checkMotionDebug = new QCheckBox(tr("&Display motion cells")));
+    layoutVideoLog->addRow(nullptr, checkMotionDebug = new QCheckBox(tr("&Display cells with motion")));
     checkMotionDebug->setChecked(settings.value("motion-debug").toBool());
     grpMotionDetection->setLayout(layoutVideoLog);
     layoutMain->addWidget(grpMotionDetection);
@@ -111,5 +117,6 @@ void VideoRecordSettings::save()
     settings.setValue("motion-sensitivity",     spinSensitivity->value() * 0.01);
     settings.setValue("motion-threshold",       spinThreshold->value() * 0.01);
     settings.setValue("motion-min-frames",      spinMinTime->value());
+    settings.setValue("motion-gap",             spinGap->value());
     settings.setValue("motion-debug",           checkMotionDebug->isChecked());
 }

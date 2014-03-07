@@ -20,6 +20,7 @@
 #include <QWidget>
 
 QT_BEGIN_NAMESPACE
+class QCheckBox;
 class QLineEdit;
 class QxtLineEdit;
 class QSpinBox;
@@ -28,14 +29,16 @@ QT_END_NAMESPACE
 class StorageSettings : public QWidget
 {
     Q_OBJECT
-    QLineEdit*   textOutputPath;
-    QxtLineEdit* textVideoOutputPath;
-    QLineEdit*   textFolderTemplate;
-    QxtLineEdit* textVideoFolderTemplate;
-    QLineEdit*   textImageTemplate;
-    QLineEdit*   textClipTemplate;
-    QLineEdit*   textVideoTemplate;
-    QSpinBox*    spinMaxVideoSize;
+    QLineEdit   *textOutputPath;
+    QxtLineEdit *textVideoOutputPath;
+    QLineEdit   *textFolderTemplate;
+    QxtLineEdit *textVideoFolderTemplate;
+    QLineEdit   *textImageTemplate;
+    QLineEdit   *textClipTemplate;
+    QLineEdit   *textVideoTemplate;
+    QCheckBox   *checkMaxVideoSize;
+    QSpinBox    *spinMaxVideoSize;
+
 public:
     Q_INVOKABLE explicit StorageSettings(QWidget *parent = 0);
     
