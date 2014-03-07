@@ -17,6 +17,7 @@
 #include "archivewindow.h"
 #include "patientdatadialog.h"
 #include "defaults.h"
+#include "mouseshortcut.h"
 #include "qwaitcursor.h"
 #include "thumbnaillist.h"
 #include "typedetect.h"
@@ -72,23 +73,11 @@
 
 static QSize videoSize(352, 258);
 
-static void DamnQtMadeMeDoTheSunsetByHands(QToolBar* bar)
-{
-    foreach (auto action, bar->actions())
-    {
-        auto shortcut = action->shortcut();
-        if (shortcut.isEmpty())
-        {
-            continue;
-        }
-        action->setToolTip(action->text() + " (" + shortcut.toString(QKeySequence::NativeText) + ")");
-    }
-}
-
 ArchiveWindow::ArchiveWindow(QWidget *parent)
     : QWidget(parent)
     , updateTimerId(0)
 {
+    QSettings settings;
     root = QDir::root();
 
     dirWatcher = new QFileSystemWatcher(this);
@@ -104,45 +93,36 @@ ArchiveWindow::ArchiveWindow(QWidget *parent)
 #endif
 
     actionDelete = barArchive->addAction(QIcon(":buttons/delete"), tr("Delete"), this, SLOT(onDeleteClick()));
-    actionDelete->setShortcut(Qt::Key_Delete);
     actionDelete->setEnabled(false);
 
 #ifdef WITH_DICOM
     actionStore = barArchive->addAction(QIcon(":buttons/dicom"), tr("Upload"), this, SLOT(onStoreClick()));
-    actionStore->setShortcut(Qt::Key_F6);
 #endif
     actionEdit = barArchive->addAction(QIcon(":buttons/edit"), tr("Edit"), this, SLOT(onEditClick()));
-    actionEdit->setShortcut(Qt::Key_F4);
     actionEdit->setEnabled(false);
     actionUp = barArchive->addAction(QIcon(":/buttons/up"), tr("Up"), this, SLOT(onUpFolderClick()));
     actionUp->setEnabled(false);
-    actionUp->setShortcut(Qt::Key_Backspace);
 
     auto spacer = new QWidget;
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     barArchive->addWidget(spacer);
 
     actionMode = new QAction(barArchive);
-    actionMode->setShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_0));
     connect(actionMode, SIGNAL(triggered()), this, SLOT(onSwitchModeClick()));
 
     auto menuMode = new QMenu;
     connect(menuMode, SIGNAL(triggered(QAction*)), this, SLOT(onSwitchModeClick(QAction*)));
     auto actionListMode = menuMode->addAction(QIcon(":buttons/list"), tr("List"));
     actionListMode->setData(QListView::ListMode);
-    actionListMode->setShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_1));
     auto actionIconMode = menuMode->addAction(QIcon(":buttons/icons"), tr("Icons"));
     actionIconMode->setData(QListView::IconMode);
-    actionIconMode->setShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_2));
     auto actionGalleryMode = menuMode->addAction(QIcon(":buttons/gallery"), tr("Gallery"));
     actionGalleryMode->setData(GALLERY_MODE);
-    actionGalleryMode->setShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_3));
 
     actionMode->setMenu(menuMode);
     barArchive->addAction(actionMode);
 
     auto actionBrowse = barArchive->addAction(QIcon(":buttons/folder"), tr("File browser"), this, SLOT(onShowFolderClick()));
-    actionBrowse->setShortcut(Qt::Key_F2); // Same as the key that open this dialog
 
 #ifndef WITH_TOUCH
     layoutMain->addWidget(barArchive);
@@ -198,14 +178,11 @@ ArchiveWindow::ArchiveWindow(QWidget *parent)
     actionSeekBack = barMediaControls->addAction(QIcon(":buttons/rewind"), tr("Rewing"), this, SLOT(onSeekClick()));
     actionSeekBack->setVisible(false);
     actionSeekBack->setData(-40000000);
-    actionSeekBack->setShortcut(QKeySequence(Qt::ShiftModifier | Qt::Key_Left));
     actionPlay = barMediaControls->addAction(QIcon(":buttons/play"), tr("Play"), this, SLOT(onPlayPauseClick()));
     actionPlay->setVisible(false);
-    actionPlay->setShortcut(QKeySequence(Qt::Key_Space));
     actionSeekFwd = barMediaControls->addAction(QIcon(":buttons/forward"),  tr("Forward"), this, SLOT(onSeekClick()));
     actionSeekFwd->setVisible(false);
     actionSeekFwd->setData(+40000000);
-    actionSeekFwd->setShortcut(QKeySequence(Qt::ShiftModifier | Qt::Key_Right));
     barMediaControls->setMinimumSize(48, 48);
 
     playerLayout->addWidget(barMediaControls, 0, Qt::AlignHCenter);
@@ -221,7 +198,6 @@ ArchiveWindow::ArchiveWindow(QWidget *parent)
     connect(listFiles, SIGNAL(currentRowChanged(int)), this, SLOT(onListRowChanged(int)));
     connect(listFiles, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(onListItemDoubleClicked(QListWidgetItem*)));
     auto actionEnter = new QAction(listFiles);
-    actionEnter->setShortcut(Qt::Key_Return);
     connect(actionEnter, SIGNAL(triggered()), this, SLOT(onListKey()));
     listFiles->addAction(actionEnter);
     layoutMain->addWidget(listFiles);
@@ -232,14 +208,33 @@ ArchiveWindow::ArchiveWindow(QWidget *parent)
     setLayout(layoutMain);
 
 #ifndef WITH_TOUCH
-    QSettings settings;
     restoreGeometry(settings.value("archive-geometry").toByteArray());
     setWindowState((Qt::WindowState)settings.value("archive-state").toInt());
     setAttribute(Qt::WA_DeleteOnClose, false);
 #endif
 
-    DamnQtMadeMeDoTheSunsetByHands(barArchive);
-    DamnQtMadeMeDoTheSunsetByHands(barMediaControls);
+    updateShortcut(actionDelete,      settings.value("hotkey-delete",        DEFAULT_HOTKEY_DELETE).toInt());
+#ifdef WITH_DICOM
+    updateShortcut(actionStore,       settings.value("hotkey-upload",        DEFAULT_HOTKEY_UPLOAD).toInt());
+#endif
+    updateShortcut(actionEdit,        settings.value("hotkey-edit",          DEFAULT_HOTKEY_EDIT).toInt());
+    updateShortcut(actionUp,          settings.value("hotkey-parent-folder", DEFAULT_HOTKEY_PARENT_FOLDER).toInt());
+
+    updateShortcut(actionMode,        settings.value("hotkey-next-mode",     DEFAULT_HOTKEY_NEXT_MODE).toInt());
+    updateShortcut(actionListMode,    settings.value("hotkey-list-mode",     DEFAULT_HOTKEY_LIST_MODE).toInt());
+    updateShortcut(actionIconMode,    settings.value("hotkey-icon-mode",     DEFAULT_HOTKEY_ICON_MODE).toInt());
+    updateShortcut(actionGalleryMode, settings.value("hotkey-gallery-mode",  DEFAULT_HOTKEY_GALLERY_MODE).toInt());
+
+    updateShortcut(actionBrowse,      settings.value("hotkey-browse",        DEFAULT_HOTKEY_BROWSE).toInt());
+
+    updateShortcut(actionSeekBack,    settings.value("hotkey-seek-back",     DEFAULT_HOTKEY_SEEK_BACK).toInt());
+    updateShortcut(actionSeekFwd,     settings.value("hotkey-seek-fwd",      DEFAULT_HOTKEY_SEEK_FWD).toInt());
+    updateShortcut(actionPlay,        settings.value("hotkey-play",          DEFAULT_HOTKEY_PLAY).toInt());
+    updateShortcut(actionEnter,       settings.value("hotkey-select",        DEFAULT_HOTKEY_SELECT).toInt());
+
+    // Not a real keys
+    // updateShortcut(btnPrev,        settings.value("hotkey-prev",        DEFAULT_HOTKEY_PREV).toInt());
+    // updateShortcut(btnNext,        settings.value("hotkey-next",        DEFAULT_HOTKEY_NEXT).toInt());
 }
 
 ArchiveWindow::~ArchiveWindow()

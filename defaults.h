@@ -21,6 +21,10 @@
 #define DEFAULT_FOLDER_TEMPLATE       "/%yyyy%-%MM%/%dd%/%name%-%id%/"
 #define DEFAULT_HOTKEY_ABOUT          (int)(Qt::AltModifier | Qt::Key_Question)
 #define DEFAULT_HOTKEY_ARCHIVE        (int)(Qt::Key_F2)
+#define DEFAULT_HOTKEY_UPLOAD         (int)(Qt::Key_F6)
+#define DEFAULT_HOTKEY_DELETE         (int)(Qt::Key_Delete)
+#define DEFAULT_HOTKEY_EDIT           (int)(Qt::Key_F4)
+#define DEFAULT_HOTKEY_PARENT_FOLDER  (int)(Qt::Key_Backspace)
 #define DEFAULT_HOTKEY_RECORD_START   (int)(Qt::AltModifier | Qt::Key_R)
 #define DEFAULT_HOTKEY_RECORD_STOP    (int)(Qt::AltModifier | Qt::Key_E)
 #define DEFAULT_HOTKEY_REFRESH        (int)(Qt::Key_F5)
@@ -29,6 +33,17 @@
 #define DEFAULT_HOTKEY_SNAPSHOT       (int)(Qt::AltModifier | Qt::Key_T)
 #define DEFAULT_HOTKEY_START          (int)(Qt::AltModifier | Qt::Key_A)
 #define DEFAULT_HOTKEY_WORKLIST       (int)(Qt::Key_F3)
+#define DEFAULT_HOTKEY_NEXT_MODE      (int)(Qt::ControlModifier | Qt::Key_0)
+#define DEFAULT_HOTKEY_LIST_MODE      (int)(Qt::ControlModifier | Qt::Key_1)
+#define DEFAULT_HOTKEY_ICON_MODE      (int)(Qt::ControlModifier | Qt::Key_2)
+#define DEFAULT_HOTKEY_GALLERY_MODE   (int)(Qt::ControlModifier | Qt::Key_3)
+#define DEFAULT_HOTKEY_BROWSE         (int)(Qt::Key_F2)
+#define DEFAULT_HOTKEY_PREV           (int)(Qt::Key_Left)
+#define DEFAULT_HOTKEY_NEXT           (int)(Qt::Key_Right)
+#define DEFAULT_HOTKEY_SEEK_BACK      (int)(Qt::ShiftModifier | Qt::Key_Left)
+#define DEFAULT_HOTKEY_SEEK_FWD       (int)(Qt::ShiftModifier | Qt::Key_Right)
+#define DEFAULT_HOTKEY_PLAY           (int)(Qt::Key_Space)
+#define DEFAULT_HOTKEY_SELECT         (int)(Qt::Key_Return)
 #define DEFAULT_OUTPUT_PATH           "/video"
 #define DEFAULT_OUTPUT_UNIQUE         false
 #define DEFAULT_RTP_PAYLOADER         "rtpmpvpay"

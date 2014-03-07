@@ -20,21 +20,20 @@
 #include <QWidget>
 
 class HotKeyEdit;
+class QPushButton;
+class QTreeWidget;
+class QTreeWidgetItem;
 
 class HotKeySettings : public QWidget
 {
     Q_OBJECT
-    HotKeyEdit*  heStartStudy;
-    HotKeyEdit*  heTakeSnapshot;
-    HotKeyEdit*  heRecordStart;
-    HotKeyEdit*  heRecordStop;
-    HotKeyEdit*  heArchive;
-    HotKeyEdit*  heSettings;
-#ifdef WITH_DICOM
-    HotKeyEdit*  heWorklist;
-    HotKeyEdit*  heRefresh;
-    HotKeyEdit*  heDetails;
-#endif
+
+    QPushButton *btnReset;
+    HotKeyEdit  *editor;
+    QTreeWidget *tree;
+    QColor      defaultColor;
+
+    void checkKeys(QTreeWidgetItem *top);
 
 public:
     Q_INVOKABLE explicit HotKeySettings(QWidget *parent = 0);
@@ -43,6 +42,10 @@ signals:
     
 public slots:
     void save();
+private slots:
+    void treeItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
+    void resetClicked();
+    void keyChanged(int key);
 };
 
 #endif // HOTKEYSETTINGS_H
