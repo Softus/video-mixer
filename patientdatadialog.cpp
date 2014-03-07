@@ -207,6 +207,7 @@ int PatientDataDialog::exec()
         return QDialog::Accepted;
     }
 
+    settings.setValue(settingsKey, false);
     return QDialog::exec();
 }
 

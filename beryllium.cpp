@@ -270,10 +270,10 @@ int main(int argc, char *argv[])
         {
             auto bus = QDBusConnection::sessionBus();
 
-            // Failed to register our service.
-            // Another instance is running, or DBus is complitelly broken.
+            // If registerService succeeded, there is no other instances.
+            // If failed, then another instance is possible running, or DBus is complitelly broken.
             //
-            if (!bus.registerService(PRODUCT_NAMESPACE) || !MainWindow::switchToRunningInstance())
+            if (bus.registerService(PRODUCT_NAMESPACE) || !MainWindow::switchToRunningInstance())
             {
                 auto wndMain = new MainWindow;
 
