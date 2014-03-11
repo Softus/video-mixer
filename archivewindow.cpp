@@ -242,13 +242,16 @@ ArchiveWindow::~ArchiveWindow()
     stopMedia();
 }
 
-#ifdef WITH_TOUCH
 void ArchiveWindow::showEvent(QShowEvent *evt)
 {
+#ifdef WITH_TOUCH
     actionBack->setVisible(parent() != nullptr);
+#endif
+    onDirectoryChanged(QString());
     QWidget::showEvent(evt);
 }
-#else
+
+#ifndef WITH_TOUCH
 void ArchiveWindow::hideEvent(QHideEvent *evt)
 {
     QSettings settings;
@@ -285,7 +288,7 @@ void ArchiveWindow::setPath(const QString& path)
 
         dirWatcher->removePaths(dirWatcher->directories());
         dirWatcher->addPath(path);
-        updatePath();
+        onDirectoryChanged(QString());
     }
 }
 
@@ -603,8 +606,6 @@ void ArchiveWindow::switchViewMode(int mode)
     listFiles->setIconSize(mode == QListView::ListMode? QSize(32, 32): QSize(144, 144));
     listFiles->setVerticalScrollBarPolicy(
         mode == QListView::IconMode? Qt::ScrollBarAsNeeded: Qt::ScrollBarAlwaysOff);
-
-    updateList();
 }
 
 void ArchiveWindow::onSwitchModeClick()
@@ -866,7 +867,7 @@ void ArchiveWindow::playMediaFile(const QFileInfo& fi)
     {
 //      auto pipeDef = QString("filesrc location=\"%1\" ! decodebin ! autovideosink name=displaysink async=0").arg(fi.absoluteFilePath());
 //      auto pipeDef = QString("uridecodebin uri=\"%1\" ! autovideosink name=displaysink async=0").arg(QUrl::fromLocalFile(fi.absoluteFilePath()).toString());
-        auto pipeDef = QString("playbin2 uri=\"%1\"").arg(QUrl::fromLocalFile(fi.absoluteFilePath()).toString());
+        auto pipeDef = QString("playbin2 uri=\"%1\"").arg(QUrl::fromLocalFile(fi.absoluteFilePath()).toEncoded().constData());
         pipeline = QGst::Parse::launch(pipeDef).dynamicCast<QGst::Pipeline>();
         auto hiddenVideoWidget = static_cast<QGst::Ui::VideoWidget*>(pagesWidget->widget(1 - pagesWidget->currentIndex()));
         hiddenVideoWidget->watchPipeline(pipeline);
@@ -946,6 +947,12 @@ void ArchiveWindow::onBusMessage(const QGst::MessagePtr& message)
         }
         break;
 #ifdef QT_DEBUG
+    case QGst::MessageDuration:
+        {
+            auto msg = message.staticCast<QGst::DurationMessage>();
+            qDebug() << "Duration" << msg->format() << msg->duration();
+        }
+        break;
     case QGst::MessageInfo:
         qDebug() << message->source()->property("name").toString() << " " << message.staticCast<QGst::InfoMessage>()->error();
         break;
@@ -956,6 +963,7 @@ void ArchiveWindow::onBusMessage(const QGst::MessagePtr& message)
     case QGst::MessageNewClock:
     case QGst::MessageStreamStatus:
     case QGst::MessageQos:
+    case QGst::MessageTag:
         break;
     default:
         qDebug() << message->type();
