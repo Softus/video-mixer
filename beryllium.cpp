@@ -150,7 +150,6 @@ static void setupGstDebug(const QSettings& settings)
     auto gstDebugLevel = (GstDebugLevel)settings.value("gst-debug-level", DEFAULT_GST_DEBUG_LEVEL).toInt();
     gst_debug_set_default_threshold(gstDebugLevel);
     gst_debug_set_active(settings.value("gst-debug-on", DEFAULT_GST_DEBUG_ON).toBool());
-
 }
 
 int main(int argc, char *argv[])
