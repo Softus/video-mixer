@@ -528,7 +528,7 @@ void ArchiveWindow::onListRowChanged(int idx)
     if (selectedSomething)
     {
         QFileInfo fi(curr.absoluteFilePath(listFiles->item(idx)->text()));
-        auto caps = TypeDetect(fi.absoluteFilePath());
+        auto caps = fi.isFile()? TypeDetect(fi.absoluteFilePath()): QString();
         if (!caps.isEmpty())
         {
             isVideo = caps.startsWith("video/");
