@@ -30,6 +30,7 @@
 
 #include <QApplication>
 #include <QDBusConnection>
+#include <QDBusInterface>
 #include <QIcon>
 #include <QLocale>
 #include <QSettings>
@@ -46,8 +47,9 @@
 #ifdef WITH_DICOM
 #define HAVE_CONFIG_H
 #include <dcmtk/config/osconfig.h>   /* make sure OS specific configuration is included first */
-#include <dcmtk/oflog/oflog.h>
+#include "dcmtk/oflog/logger.h"
 #include <dcmtk/oflog/fileap.h>
+#include <dcmtk/oflog/configrt.h>
 #endif
 
 #ifdef Q_OS_WIN
@@ -84,7 +86,6 @@ void sighandler(int signum)
 static gboolean
 setValueCallback(const gchar *name, const gchar *value, gpointer, GError **err)
 {
-    qDebug() << name;
     if (0 == qstrcmp(name, "--safe-mode"))
     {
         value = "safe-mode=true";
@@ -150,64 +151,129 @@ static void setupGstDebug(const QSettings& settings)
     {
         qputenv("GST_DEBUG", gstDebug.toLocal8Bit());
     }
-    auto gstDebugFullTags = settings.value("gst-debug-full-tags", DEFAULT_GST_DEBUG_FULL_TAGS).toBool();
-    qputenv("GST_DEBUG_OPTIONS", gstDebugFullTags? "full-tags":"pretty-tags");
-    gst_debug_set_colored(settings.value("gst-debug-colored", DEFAULT_GST_DEBUG_COLORED).toBool());
+    gst_debug_set_colored(!settings.value("gst-debug-no-color", DEFAULT_GST_DEBUG_NO_COLOR).toBool());
     auto gstDebugLevel = (GstDebugLevel)settings.value("gst-debug-level", DEFAULT_GST_DEBUG_LEVEL).toInt();
     gst_debug_set_default_threshold(gstDebugLevel);
 }
 
 #ifdef WITH_DICOM
-static void setupDcmtkDebug(const QSettings& settings, int argc, char *argv[])
+static gboolean
+dcmtkLogLevelCallback(const gchar *, const gchar *value, gpointer, GError **)
 {
-    // Pass some arguments to dcmtk.
-    // For example --log-level trace
-    // or --log-config log.cfg
-    // See http://support.dcmtk.org/docs-dcmrt/file_filelog.html for details
-    //
-    OFCommandLine cmd;
-    OFLog::addOptions(cmd);
+    auto level = log4cplus::getLogLevelManager().fromString(value);
+    log4cplus::Logger::getRoot().setLogLevel(level);
+    return true;
+}
 
-    cmd.addOption("--auto-start",        "-a",    "Show the start study dialog");
-    cmd.addOption("--study-id",         "-si", 1, "string",   "Study id");
-    cmd.addOption("--patient-birthdate","-pb", 1, "yyyyMMdd", "Patient birth date");
-    cmd.addOption("--patient-id",       "-pi", 1, "string",   "Patient Id");
-    cmd.addOption("--patient-name",     "-pn", 1, "string",   "Patient name");
-    cmd.addOption("--patient-sex",      "-ps", 1, "F|M",      "Patient sex");
-    cmd.addOption("--physician",        "-p",  1, "string",   "Physician name");
-    cmd.addOption("--study-desctiption","-sd", 1, "string",   "Study description");
+static gboolean
+dcmtkLogFileCallback(const gchar *, const gchar *value, gpointer, GError **)
+{
+        log4cplus::SharedAppenderPtr file(new log4cplus::FileAppender(value));
+        log4cplus::Logger::getRoot().addAppender(file);
+        return true;
+}
 
-    if (OFCommandLine::PS_Normal == cmd.parseLine(argc, argv))
-    {
-        OFLog::reconfigure(&cmd);
-    }
+static gboolean
+dcmtkLogConfigCallback(const gchar *, const gchar *value, gpointer, GError **)
+{
+    log4cplus::PropertyConfigurator(value).configure();
+    return true;
+}
 
+// Pass some arguments to dcmtk.
+// For example --dcmtk-log-level trace
+// or --dcmtk-log-config log.cfg
+// See http://support.dcmtk.org/docs-dcmrt/file_filelog.html for details
+//
+static GOptionEntry dcmtkOptions[] = {
+    {"dcmtk-log-file", '\x0', 0, G_OPTION_ARG_CALLBACK, (gpointer)dcmtkLogFileCallback,
+        N_("DCMTK log output file."), N_("FILE")},
+    {"dcmtk-log-level", '\x0', 0, G_OPTION_ARG_CALLBACK, (gpointer)dcmtkLogLevelCallback,
+        N_("DCMTK logging level: fatal, error, warn, info, debug, trace."), N_("LEVEL")},
+    {"dcmtk-log-config", '\x0', 0, G_OPTION_ARG_CALLBACK, (gpointer)dcmtkLogConfigCallback,
+        N_("Config file for DCMTK logger."), N_("FILE")},
+    {nullptr, '\x0', 0, G_OPTION_ARG_NONE, nullptr,
+        nullptr, nullptr},
+};
+
+static void setupDcmtkDebug(const QSettings& settings)
+{
     if (!settings.value("dcmtk-debug-on", DEFAULT_DCMTK_DEBUG_ON).toBool())
     {
         return;
     }
 
-    auto debugCfgFile = settings.value("dcmtk-config-file", DEFAULT_DCMTK_CONFIG_FILE).toString();
-    if (!debugCfgFile.isEmpty())
+    for (auto o = dcmtkOptions; o->long_name; ++o)
     {
-        char* cfgArgv[2] = {argv[0], debugCfgFile.toLocal8Bit().data()};
-        if (OFCommandLine::PS_Normal == cmd.parseLine(2, cfgArgv))
+        auto value = settings.value(o->long_name).toString();
+        if (!value.isEmpty())
         {
-            OFLog::reconfigure(&cmd);
+            ((GOptionArgFunc)o->arg_data)(o->long_name, value.toLocal8Bit().constData(), nullptr, nullptr);
         }
     }
-
-    auto rootLogger = log4cplus::Logger::getRoot();
-    auto debugLogFile = settings.value("dcmtk-debug-log-file", DEFAULT_DCMTK_DEBUG_LOG_FILE).toString();
-    if (!debugLogFile.isEmpty())
-    {
-        log4cplus::SharedAppenderPtr file(new log4cplus::FileAppender(debugLogFile.toLocal8Bit().constData()));
-        rootLogger.addAppender(file);
-    }
-    auto dcmtkDebugLevel = settings.value("dcmtk-debug-level", DEFAULT_DCMTK_DEBUG_LEVEL).toInt();
-    rootLogger.setLogLevel(dcmtkDebugLevel);
 }
 #endif
+
+static gchar *accessionNumber = nullptr;
+static gchar *patientBirthdate = nullptr;
+static gchar *patientId = nullptr;
+static gchar *patientName = nullptr;
+static gchar *patientSex = nullptr;
+static gchar *physician = nullptr;
+static gchar *studyDescription = nullptr;
+static gboolean autoStart = false;
+
+static GOptionEntry options[] = {
+    {"archive", '\x0', G_OPTION_FLAG_OPTIONAL_ARG, G_OPTION_ARG_CALLBACK, (gpointer)setModeCallback,
+        N_("Show the archive window."), N_("PATH")},
+    {"edit-video", '\x0', G_OPTION_FLAG_OPTIONAL_ARG, G_OPTION_ARG_CALLBACK, (gpointer)setModeCallback,
+        N_("Show the video editor window."), N_("FILE")},
+    {"settings", '\x0', G_OPTION_FLAG_OPTIONAL_ARG, G_OPTION_ARG_CALLBACK, (gpointer)setModeCallback,
+        N_("Show the settings window."), N_("PAGE")},
+    {"safe-mode", '\x0', G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK, (gpointer)setValueCallback,
+        N_("Run the program in safe mode."), nullptr},
+    {"sync", '\x0', G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK, (gpointer)xSyncCallback,
+        N_("Run the program in X synchronous mode."), nullptr},
+
+    {"study-id", 'a', 0, G_OPTION_ARG_STRING, (gpointer)&accessionNumber,
+        N_("Study accession number (id)."), "ID"},
+    {"patient-birthdate", 'b', 0, G_OPTION_ARG_STRING, (gpointer)&patientBirthdate,
+        N_("Patient birthdate."), "YYYYMMDD"},
+    {"study-description", 'd', 0, G_OPTION_ARG_STRING, (gpointer)&studyDescription,
+        N_("Study description."), "STRING"},
+    {"patient-id", 'i', 0, G_OPTION_ARG_STRING, (gpointer)&patientId,
+        N_("Patient id."), "ID"},
+    {"patient-name", 'n', 0, G_OPTION_ARG_STRING, (gpointer)&patientName,
+        N_("Patient name."), "STRING"},
+    {"physician", 'p', 0, G_OPTION_ARG_STRING, (gpointer)&physician,
+        N_("Performing physician name."), "STRING"},
+    {"patient-sex", 's', 0, G_OPTION_ARG_STRING, (gpointer)&patientSex,
+        N_("Patient sex."), "F|M|O|U"},
+    {"auto-start", '\x0', 0, G_OPTION_ARG_NONE, (gpointer)&autoStart,
+        N_("Automatically start the study."), nullptr},
+
+    {G_OPTION_REMAINING, '\x0', 0, G_OPTION_ARG_CALLBACK, (gpointer)setValueCallback,
+        nullptr, nullptr},
+    {nullptr, '\x0', 0, G_OPTION_ARG_NONE, nullptr,
+        nullptr, nullptr},
+};
+
+bool switchToRunningInstance()
+{
+    auto msg = QDBusInterface(PRODUCT_NAMESPACE, "/com/irkdc/Beryllium/Main", "com.irkdc.beryllium.Main")
+         .call("startStudy"
+            , accessionNumber
+            , patientId
+            , patientName
+            , patientSex
+            , patientBirthdate
+            , physician
+            , studyDescription
+            , (bool)autoStart
+            );
+    qDebug() << msg;
+    return msg.type() == QDBusMessage::ReplyMessage && msg.arguments().first().toBool();
+}
 
 int main(int argc, char *argv[])
 {
@@ -215,23 +281,6 @@ int main(int argc, char *argv[])
     signal(SIGSEGV, sighandler);
 
     int errCode = 0;
-
-    GOptionEntry options[] = {
-        {"archive", '\x0', G_OPTION_FLAG_OPTIONAL_ARG, G_OPTION_ARG_CALLBACK, (gpointer)setModeCallback,
-            N_("Show the archive window."), N_("PATH")},
-        {"edit-video", '\x0', G_OPTION_FLAG_OPTIONAL_ARG, G_OPTION_ARG_CALLBACK, (gpointer)setModeCallback,
-            N_("Show the video editor window."), N_("FILE")},
-        {"settings", '\x0', G_OPTION_FLAG_OPTIONAL_ARG, G_OPTION_ARG_CALLBACK, (gpointer)setModeCallback,
-            N_("Show the settings window."), N_("PAGE")},
-        {"safe-mode", '\x0', G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK, (gpointer)setValueCallback,
-            N_("Run the program in safe mode."), nullptr},
-        {"sync", '\x0', G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK, (gpointer)xSyncCallback,
-            N_("Run the program in X synchronous mode."), nullptr},
-        {G_OPTION_REMAINING, '\x0', 0, G_OPTION_ARG_CALLBACK, (gpointer)setValueCallback,
-            nullptr, nullptr},
-        {nullptr, '\x0', 0, G_OPTION_ARG_NONE, nullptr,
-            nullptr, nullptr},
-    };
 
     QApplication::setOrganizationName(ORGANIZATION_SHORT_NAME);
     QApplication::setApplicationName(PRODUCT_SHORT_NAME);
@@ -258,7 +307,18 @@ int main(int argc, char *argv[])
     GError* err = nullptr;
     auto ctx = g_option_context_new("[var=value] [var=value] ...");
     g_option_context_add_main_entries(ctx, options, PRODUCT_SHORT_NAME);
+
+#ifdef WITH_DICOM
+    setupDcmtkDebug(settings);
+    auto dcmtkGroup = g_option_group_new ("dcmtk", _("DCMTK Options"),
+        _("Show DCMTK Options"), NULL, NULL);
+    g_option_context_add_group(ctx, dcmtkGroup);
+    g_option_group_add_entries (dcmtkGroup, dcmtkOptions);
+    //g_option_group_set_translation_domain (dcmtkGroup, GETTEXT_PACKAGE);
+#endif
+
     g_option_context_add_group(ctx, gst_init_get_option_group());
+    g_option_context_set_ignore_unknown_options(ctx, false);
     g_option_context_parse(ctx, &argc, &argv, &err);
     g_option_context_free(ctx);
 
@@ -275,10 +335,6 @@ int main(int argc, char *argv[])
     //
     QGst::init();
 
-#ifdef WITH_DICOM
-    setupDcmtkDebug(settings, argc, argv);
-#endif
-
     // QT init
     //
     QApplication::setAttribute(Qt::AA_DontShowIconsInMenus);
@@ -287,8 +343,6 @@ int main(int argc, char *argv[])
 #endif
     QApplication app(argc, argv);
     app.setWindowIcon(QIcon(":/app/product"));
-
-    auto args = app.arguments();
 
     bool fullScreen = settings.value("show-fullscreen").toBool();
 
@@ -338,19 +392,31 @@ int main(int argc, char *argv[])
     default:
         {
             auto bus = QDBusConnection::sessionBus();
+            auto wndMain = new MainWindow;
+
+            // connect to DBus and register as an object
+            //
+            auto adapter = new MainWindowDBusAdaptor(wndMain);
+            bus.registerObject("/com/irkdc/Beryllium/Main", wndMain);
 
             // If registerService succeeded, there is no other instances.
             // If failed, then another instance is possible running, or DBus is complitelly broken.
             //
-            if (bus.registerService(PRODUCT_NAMESPACE) || !MainWindow::switchToRunningInstance())
+            if (bus.registerService(PRODUCT_NAMESPACE) || !switchToRunningInstance())
             {
-                auto wndMain = new MainWindow;
-
-                // connect to DBus and register as an object
-                //
-                new MainWindowDBusAdaptor(wndMain);
-                bus.registerObject("/com/irkdc/Beryllium/Main", wndMain);
+                adapter->startStudy(accessionNumber
+                                    , patientId
+                                    , patientName
+                                    , patientSex
+                                    , patientBirthdate
+                                    , physician
+                                    , studyDescription
+                                    , (bool)autoStart);
                 wnd = wndMain;
+            }
+            else
+            {
+                delete wndMain;
             }
         }
         break;
@@ -366,6 +432,7 @@ int main(int argc, char *argv[])
         fullScreen? wnd->showFullScreen(): wnd->show();
         errCode = app.exec();
         delete wnd;
+        QDBusConnection::sessionBus().unregisterObject("/com/irkdc/Beryllium/Main");
     }
 
     QGst::cleanup();

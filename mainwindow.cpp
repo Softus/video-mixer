@@ -45,7 +45,6 @@
 
 #include <QApplication>
 #include <QBoxLayout>
-#include <QDBusInterface>
 #include <QDesktopServices>
 #include <QDebug>
 #include <QDir>
@@ -95,15 +94,6 @@
 static inline QBoxLayout::Direction bestDirection(const QSize &s)
 {
     return s.width() >= s.height()? QBoxLayout::LeftToRight: QBoxLayout::TopToBottom;
-}
-
-static QString getCmdLineOption(const QString& longName, const QString& shortName)
-{
-    auto args = qApp->arguments();
-    auto idx = args.indexOf(longName);
-    if (idx < 0)
-        idx = args.indexOf(shortName);
-    return (idx >= 0 && ++idx < args.size())? args[idx]: "";
 }
 
 #ifdef QT_DEBUG
@@ -243,14 +233,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     updateStartButton();
 
-    accessionNumber  = getCmdLineOption("--study-id", "-si");
-    patientBirthDate = getCmdLineOption("--patient-birthdate","-pb");
-    patientId        = getCmdLineOption("--patient-id",       "-pi");
-    patientName      = getCmdLineOption("--patient-name",     "-pn");
-    patientSex       = getCmdLineOption("--patient-sex",      "-ps");
-    physician        = getCmdLineOption("--physician",        "-p");
-    studyName        = getCmdLineOption("--study-description","-sd");
-    auto safeMode    = qApp->arguments().contains("--safe-mode") ||
+    auto safeMode    =
 #if (QT_VERSION >= QT_VERSION_CHECK(4, 8, 0))
                         qApp->queryKeyboardModifiers() == SAFE_MODE_KEYS ||
 #else
@@ -258,22 +241,19 @@ MainWindow::MainWindow(QWidget *parent) :
 #endif
                        settings.value("safe-mode", true).toBool();
 
+    sound = new Sound(this);
+
     if (safeMode)
     {
         settings.setValue("safe-mode", false);
         QTimer::singleShot(0, this, SLOT(onShowSettingsClick()));
     }
-
-    sound = new Sound(this);
-
-    updatePipeline();
-    outputPath.setPath(settings.value("output-path", DEFAULT_OUTPUT_PATH).toString());
-
-    if (btnStart->isEnabled() &&
-        (qApp->arguments().contains("--auto-start") || qApp->arguments().contains("-a")))
+    else
     {
-        QTimer::singleShot(0, this, SLOT(onStartClick()));
+        updatePipeline();
     }
+
+    outputPath.setPath(settings.value("output-path", DEFAULT_OUTPUT_PATH).toString());
 }
 
 MainWindow::~MainWindow()
@@ -290,22 +270,6 @@ MainWindow::~MainWindow()
     delete worklist;
     worklist = nullptr;
 #endif
-}
-
-bool MainWindow::switchToRunningInstance()
-{
-    auto msg = QDBusInterface(PRODUCT_NAMESPACE, "/com/irkdc/Beryllium/Main", "com.irkdc.beryllium.Main")
-         .call("startStudy"
-            , getCmdLineOption("--study-id",         "-si")
-            , getCmdLineOption("--patient-id",       "-pi")
-            , getCmdLineOption("--patient-name",     "-pn")
-            , getCmdLineOption("--patient-sex",      "-ps")
-            , getCmdLineOption("--patient-birthdate","-pb")
-            , getCmdLineOption("--physician",        "-p")
-            , getCmdLineOption("--study-description","-sd")
-            , qApp->arguments().contains("--auto-start") || qApp->arguments().contains("-a")
-            );
-    return msg.type() == QDBusMessage::ReplyMessage && msg.arguments().first().toBool();
 }
 
 void MainWindow::closeEvent(QCloseEvent *)
@@ -1604,10 +1568,10 @@ void MainWindow::onShowArchiveClick()
     {
         archiveWindow = new ArchiveWindow();
         archiveWindow->updateRoot();
+        archiveWindow->setPath(outputPath.absolutePath());
     }
 #endif
 
-    archiveWindow->setPath(outputPath.absolutePath());
 #ifdef WITH_TOUCH
     mainStack->slideInWidget(archiveWindow);
 #else
@@ -1719,6 +1683,10 @@ void MainWindow::onStartStudy()
 
     settings.setValue("study-no", ++studyNo);
     updateOutputPath(true);
+    if (archiveWindow)
+    {
+        archiveWindow->setPath(outputPath.absolutePath());
+    }
 
     // After updateOutputPath the outputPath is usable
     //

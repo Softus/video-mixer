@@ -147,8 +147,6 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    static bool switchToRunningInstance();
-
 protected:
     virtual void closeEvent(QCloseEvent*);
     virtual void hideEvent(QHideEvent *);
