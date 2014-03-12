@@ -247,7 +247,10 @@ void ArchiveWindow::showEvent(QShowEvent *evt)
 #ifdef WITH_TOUCH
     actionBack->setVisible(parent() != nullptr);
 #endif
-    onDirectoryChanged(QString());
+    if (listFiles->count() == 0)
+    {
+        onDirectoryChanged(QString());
+    }
     QWidget::showEvent(evt);
 }
 
