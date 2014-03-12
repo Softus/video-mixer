@@ -46,8 +46,8 @@
 #ifdef WITH_DICOM
 #define HAVE_CONFIG_H
 #include <dcmtk/config/osconfig.h>   /* make sure OS specific configuration is included first */
-#include <dcmtk/ofstd/ofconapp.h>
 #include <dcmtk/oflog/oflog.h>
+#include <dcmtk/oflog/fileap.h>
 #endif
 
 #ifdef Q_OS_WIN
@@ -127,6 +127,12 @@ setModeCallback(const gchar *name, const gchar *value, gpointer, GError **)
 
 static void setupGstDebug(const QSettings& settings)
 {
+    if (!settings.value("gst-debug-on", DEFAULT_GST_DEBUG_ON).toBool())
+    {
+        return;
+    }
+
+    gst_debug_set_active(true);
     auto debugDotDir = settings.value("gst-debug-dot-dir", DEFAULT_GST_DEBUG_DOT_DIR).toString();
     if (!debugDotDir.isEmpty())
     {
@@ -149,8 +155,59 @@ static void setupGstDebug(const QSettings& settings)
     gst_debug_set_colored(settings.value("gst-debug-colored", DEFAULT_GST_DEBUG_COLORED).toBool());
     auto gstDebugLevel = (GstDebugLevel)settings.value("gst-debug-level", DEFAULT_GST_DEBUG_LEVEL).toInt();
     gst_debug_set_default_threshold(gstDebugLevel);
-    gst_debug_set_active(settings.value("gst-debug-on", DEFAULT_GST_DEBUG_ON).toBool());
 }
+
+#ifdef WITH_DICOM
+static void setupDcmtkDebug(const QSettings& settings, int argc, char *argv[])
+{
+    // Pass some arguments to dcmtk.
+    // For example --log-level trace
+    // or --log-config log.cfg
+    // See http://support.dcmtk.org/docs-dcmrt/file_filelog.html for details
+    //
+    OFCommandLine cmd;
+    OFLog::addOptions(cmd);
+
+    cmd.addOption("--auto-start",        "-a",    "Show the start study dialog");
+    cmd.addOption("--study-id",         "-si", 1, "string",   "Study id");
+    cmd.addOption("--patient-birthdate","-pb", 1, "yyyyMMdd", "Patient birth date");
+    cmd.addOption("--patient-id",       "-pi", 1, "string",   "Patient Id");
+    cmd.addOption("--patient-name",     "-pn", 1, "string",   "Patient name");
+    cmd.addOption("--patient-sex",      "-ps", 1, "F|M",      "Patient sex");
+    cmd.addOption("--physician",        "-p",  1, "string",   "Physician name");
+    cmd.addOption("--study-desctiption","-sd", 1, "string",   "Study description");
+
+    if (OFCommandLine::PS_Normal == cmd.parseLine(argc, argv))
+    {
+        OFLog::reconfigure(&cmd);
+    }
+
+    if (!settings.value("dcmtk-debug-on", DEFAULT_DCMTK_DEBUG_ON).toBool())
+    {
+        return;
+    }
+
+    auto debugCfgFile = settings.value("dcmtk-config-file", DEFAULT_DCMTK_CONFIG_FILE).toString();
+    if (!debugCfgFile.isEmpty())
+    {
+        char* cfgArgv[2] = {argv[0], debugCfgFile.toLocal8Bit().data()};
+        if (OFCommandLine::PS_Normal == cmd.parseLine(2, cfgArgv))
+        {
+            OFLog::reconfigure(&cmd);
+        }
+    }
+
+    auto rootLogger = log4cplus::Logger::getRoot();
+    auto debugLogFile = settings.value("dcmtk-debug-log-file", DEFAULT_DCMTK_DEBUG_LOG_FILE).toString();
+    if (!debugLogFile.isEmpty())
+    {
+        log4cplus::SharedAppenderPtr file(new log4cplus::FileAppender(debugLogFile.toLocal8Bit().constData()));
+        rootLogger.addAppender(file);
+    }
+    auto dcmtkDebugLevel = settings.value("dcmtk-debug-level", DEFAULT_DCMTK_DEBUG_LEVEL).toInt();
+    rootLogger.setLogLevel(dcmtkDebugLevel);
+}
+#endif
 
 int main(int argc, char *argv[])
 {
@@ -219,26 +276,7 @@ int main(int argc, char *argv[])
     QGst::init();
 
 #ifdef WITH_DICOM
-    // Pass some arguments to dcmtk.
-    // For example --log-level trace
-    // or --log-config log.cfg
-    // See http://support.dcmtk.org/docs-dcmrt/file_filelog.html for details
-    //
-    OFConsoleApplication dcmtkApp(PRODUCT_SHORT_NAME);
-    OFCommandLine cmd;
-    OFLog::addOptions(cmd);
-
-    cmd.addOption("--auto-start",        "-a",    "Show the start study dialog");
-    cmd.addOption("--study-id",         "-si", 1, "string",   "Study id");
-    cmd.addOption("--patient-birthdate","-pb", 1, "yyyyMMdd", "Patient birth date");
-    cmd.addOption("--patient-id",       "-pi", 1, "string",   "Patient Id");
-    cmd.addOption("--patient-name",     "-pn", 1, "string",   "Patient name");
-    cmd.addOption("--patient-sex",      "-ps", 1, "F|M",      "Patient sex");
-    cmd.addOption("--physician",        "-p",  1, "string",   "Physician name");
-    cmd.addOption("--study-desctiption","-sd", 1, "string",   "Study description");
-
-    dcmtkApp.parseCommandLine(cmd, argc, argv);
-    OFLog::configureFromCommandLine(cmd, dcmtkApp);
+    setupDcmtkDebug(settings, argc, argv);
 #endif
 
     // QT init
