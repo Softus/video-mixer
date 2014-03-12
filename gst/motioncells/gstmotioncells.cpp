@@ -383,7 +383,7 @@ gst_motion_cells_class_init (GstMotioncellsClass * klass)
  * initialize instance structure
  */
 static void
-gst_motion_cells_init (GstMotioncells * filter, GstMotioncellsClass * gclass)
+gst_motion_cells_init (GstMotioncells * filter, GstMotioncellsClass *)
 {
   filter->sinkpad = gst_pad_new_from_static_template (&sink_factory, "sink");
   gst_pad_set_setcaps_function (filter->sinkpad,
