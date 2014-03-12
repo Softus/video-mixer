@@ -54,14 +54,9 @@ bool MainWindowDBusAdaptor::startStudy
     if (!studyName.isEmpty())
         wnd->studyName = studyName;
 
-    auto state = wnd->windowState();
-    wnd->setWindowState(state | Qt::WindowFullScreen);
-    wnd->activateWindow();
-    wnd->setWindowState(state);
-
     if (autoStart)
     {
-        wnd->onStartStudy();
+        QTimer::singleShot(0, wnd, SLOT(onStartClick()));
     }
 
     return true;
