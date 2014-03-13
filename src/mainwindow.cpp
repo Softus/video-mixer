@@ -25,7 +25,7 @@
 #include "settings.h"
 #include "sound.h"
 #include "thumbnaillist.h"
-#include "videosettings.h"
+#include "settings/videosourcesettings.h"
 
 #ifdef WITH_DICOM
 #include "dicom/worklist.h"

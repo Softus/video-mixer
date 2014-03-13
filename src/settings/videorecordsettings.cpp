@@ -15,7 +15,7 @@
  */
 
 #include "videorecordsettings.h"
-#include "defaults.h"
+#include "../defaults.h"
 
 #include <QCheckBox>
 #include <QBoxLayout>

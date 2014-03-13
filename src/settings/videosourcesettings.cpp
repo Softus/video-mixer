@@ -14,8 +14,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "videosettings.h"
-#include "defaults.h"
+#include "videosourcesettings.h"
+#include "../defaults.h"
 #include <algorithm>
 #include <QCheckBox>
 #include <QComboBox>
@@ -44,7 +44,7 @@
 #include <gst/gst.h>
 #include <gst/interfaces/tuner.h>
 
-VideoSettings::VideoSettings(QWidget *parent)
+VideoSourceSettings::VideoSourceSettings(QWidget *parent)
   : QWidget(parent)
   , checkFps(nullptr)
   , spinFps(nullptr)
@@ -93,7 +93,7 @@ VideoSettings::VideoSettings(QWidget *parent)
     setLayout(layout);
 }
 
-void VideoSettings::showEvent(QShowEvent *e)
+void VideoSourceSettings::showEvent(QShowEvent *e)
 {
     QWidget::showEvent(e);
     // Refill the boxes every time the page is shown
@@ -127,7 +127,7 @@ void VideoSettings::showEvent(QShowEvent *e)
 #endif
 }
 
-QString VideoSettings::updateGstList(const char* setting, const char* def, unsigned long long type, QComboBox* cb)
+QString VideoSourceSettings::updateGstList(const char* setting, const char* def, unsigned long long type, QComboBox* cb)
 {
     cb->clear();
     auto selectedCodec = QSettings().value(setting, def).toString();
@@ -147,7 +147,7 @@ QString VideoSettings::updateGstList(const char* setting, const char* def, unsig
     return selectedCodec;
 }
 
-void VideoSettings::updateDeviceList(const char* elmName, const char* propName)
+void VideoSourceSettings::updateDeviceList(const char* elmName, const char* propName)
 {
     QSettings settings;
     auto selectedDevice = settings.value("device-type") == elmName? settings.value("device").toString(): nullptr;
@@ -234,7 +234,7 @@ void VideoSettings::updateDeviceList(const char* elmName, const char* propName)
     }
 }
 
-void VideoSettings::videoDeviceChanged(int index)
+void VideoSourceSettings::videoDeviceChanged(int index)
 {
     listChannels->clear();
 
@@ -289,7 +289,7 @@ static QList<QGlib::Value> getFormats(const QGlib::Value& value)
     return formats;
 }
 
-void VideoSettings::inputChannelChanged(int index)
+void VideoSourceSettings::inputChannelChanged(int index)
 {
     listFormats->clear();
     listFormats->addItem(tr("(default)"));
@@ -338,7 +338,7 @@ static QGst::IntRange getRange(const QGlib::Value& value)
     return ok? QGst::IntRange(intValue, intValue): value.get<QGst::IntRange>();
 }
 
-void VideoSettings::formatChanged(int index)
+void VideoSourceSettings::formatChanged(int index)
 {
     listSizes->clear();
     listSizes->addItem(tr("(default)"));
@@ -431,7 +431,7 @@ static QVariant getListData(const QComboBox* cb)
     return cb->itemData(idx);
 }
 
-void VideoSettings::save()
+void VideoSourceSettings::save()
 {
     QSettings settings;
     auto device = getListData(listDevices).toStringList();

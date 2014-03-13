@@ -25,10 +25,10 @@ done
 
 if [ $dicom == 0 ]; then
   # Remove all non-free code
-  for f in $(grep -l WITH_DICOM *.h *.cpp)
+  rm -fr src/dicom*
+  for f in $(grep -rl WITH_DICOM src)
     do unifdef -o $f -UWITH_DICOM $f
   done
-  rm -fr dicom*
   sed -i '$d' beryllium.pro
   # Beryllium DICOM edition => Beryllium free edition
   sed -i 's/DICOM/free/g' debian/control beryllium.spec

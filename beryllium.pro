@@ -47,73 +47,75 @@ TEMPLATE = app
 INCLUDEPATH += libqxt
 DEFINES += QXT_STATIC
 
-SOURCES += aboutdialog.cpp \
-    archivewindow.cpp \
-    beryllium.cpp \
-    confirmationsettings.cpp \
-    hotkeyedit.cpp \
+SOURCES += \
     libqxt/qxtconfirmationmessage.cpp \
     libqxt/qxtlineedit.cpp \
     libqxt/qxtspanslider.cpp \
-    mainwindow.cpp \
-    mainwindowdbusadaptor.cpp \
-    mandatoryfieldgroup.cpp \
-    mandatoryfieldssettings.cpp \
-    mouseshortcut.cpp \
-    patientdatadialog.cpp \
-    physicianssettings.cpp \
-    settings.cpp \
-    sound.cpp \
-    storagesettings.cpp \
-    studiessettings.cpp \
-    thumbnaillist.cpp \
-    videoeditor.cpp \
-    videoencodingprogressdialog.cpp \
-    videorecordsettings.cpp \
-    videosettings.cpp \
     gst/motioncells/motioncells_wrapper.cpp \
     gst/motioncells/MotionCells.cpp \
     gst/motioncells/gstmotioncells.cpp \
     gst/gst.cpp \
-    typedetect.cpp \
     gst/mpeg_sys_type_find.cpp \
     src/settings/debugsettings.cpp \
-    src/settings/hotkeysettings.cpp
+    src/settings/hotkeysettings.cpp \
+    src/settings.cpp \
+    src/settings/confirmationsettings.cpp \
+    src/settings/mandatoryfieldssettings.cpp \
+    src/settings/physicianssettings.cpp \
+    src/settings/storagesettings.cpp \
+    src/settings/studiessettings.cpp \
+    src/settings/videorecordsettings.cpp \
+    src/settings/videosourcesettings.cpp \
+    src/aboutdialog.cpp \
+    src/archivewindow.cpp \
+    src/beryllium.cpp \
+    src/hotkeyedit.cpp \
+    src/mainwindow.cpp \
+    src/mainwindowdbusadaptor.cpp \
+    src/mandatoryfieldgroup.cpp \
+    src/mouseshortcut.cpp \
+    src/patientdatadialog.cpp \
+    src/sound.cpp \
+    src/thumbnaillist.cpp \
+    src/typedetect.cpp \
+    src/videoeditor.cpp \
+    src/videoencodingprogressdialog.cpp
 
-HEADERS += aboutdialog.h \
-    archivewindow.h \
-    comboboxwithpopupsignal.h \
-    confirmationsettings.h \
-    defaults.h \
-    hotkeyedit.h \
+HEADERS += \
     libqxt/qxtconfirmationmessage.h \
     libqxt/qxtlineedit.h \
     libqxt/qxtspanslider.h \
     libqxt/qxtspanslider_p.h \
-    mainwindowdbusadaptor.h \
-    mainwindow.h \
-    mandatoryfieldgroup.h \
-    mandatoryfieldssettings.h \
-    mouseshortcut.h \
-    patientdatadialog.h \
-    physicianssettings.h \
-    product.h \
-    qwaitcursor.h \
-    settings.h \
-    sound.h \
-    storagesettings.h \
-    studiessettings.h \
-    thumbnaillist.h \
-    typedetect.h \
-    videoeditor.h \
-    videoencodingprogressdialog.h \
-    videorecordsettings.h \
-    videosettings.h \
     gst/motioncells/motioncells_wrapper.h \
     gst/motioncells/MotionCells.h \
     gst/motioncells/gstmotioncells.h \
     src/settings/debugsettings.h \
-    src/settings/hotkeysettings.h
+    src/settings/hotkeysettings.h \
+    src/settings.h \
+    src/settings/videosourcesettings.h \
+    src/settings/videorecordsettings.h \
+    src/settings/studiessettings.h \
+    src/settings/storagesettings.h \
+    src/settings/physicianssettings.h \
+    src/settings/mandatoryfieldssettings.h \
+    src/settings/confirmationsettings.h \
+    src/aboutdialog.h \
+    src/archivewindow.h \
+    src/comboboxwithpopupsignal.h \
+    src/defaults.h \
+    src/hotkeyedit.h \
+    src/mainwindow.h \
+    src/mainwindowdbusadaptor.h \
+    src/mandatoryfieldgroup.h \
+    src/mouseshortcut.h \
+    src/patientdatadialog.h \
+    src/product.h \
+    src/qwaitcursor.h \
+    src/sound.h \
+    src/thumbnaillist.h \
+    src/typedetect.h \
+    src/videoeditor.h \
+    src/videoencodingprogressdialog.h
 
 FORMS   +=
 
@@ -140,5 +142,5 @@ unix {
     INSTALLS += dbus translations sound shortcut icon man
 }
 
-include (touch/touch.pri)
-include (dicom/dicom.pri) # Must be very last line of this file
+include (src/touch/touch.pri)
+include (src/dicom/dicom.pri) # Must be very last line of this file

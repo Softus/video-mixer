@@ -15,7 +15,7 @@
  */
 
 #include "mandatoryfieldssettings.h"
-#include "defaults.h"
+#include "../defaults.h"
 #include <QBoxLayout>
 #include <QGroupBox>
 #include <QListWidget>

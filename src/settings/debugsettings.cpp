@@ -15,8 +15,8 @@
  */
 
 #include "debugsettings.h"
-#include "defaults.h"
-#include "qwaitcursor.h"
+#include "../defaults.h"
+#include "../qwaitcursor.h"
 
 #include <QBoxLayout>
 #include <QCheckBox>

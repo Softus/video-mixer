@@ -43,7 +43,7 @@ QT_END_NAMESPACE
 
 #define DEFAULT_VIDEOBITRATE 4000
 
-class VideoSettings : public QWidget
+class VideoSourceSettings : public QWidget
 {
     Q_OBJECT
     QComboBox *listDevices;
@@ -65,7 +65,7 @@ class VideoSettings : public QWidget
     QString updateGstList(const char* setting, const char* def, unsigned long long type, QComboBox* cb);
 
 public:
-    Q_INVOKABLE explicit VideoSettings(QWidget *parent = 0);
+    Q_INVOKABLE explicit VideoSourceSettings(QWidget *parent = 0);
 
 protected:
     virtual void showEvent(QShowEvent *);

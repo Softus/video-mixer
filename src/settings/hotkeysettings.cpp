@@ -15,9 +15,9 @@
  */
 
 #include "hotkeysettings.h"
-#include "defaults.h"
-#include "hotkeyedit.h"
-#include "mouseshortcut.h"
+#include "../defaults.h"
+#include "../hotkeyedit.h"
+#include "../mouseshortcut.h"
 
 #include <QBoxLayout>
 #include <QLabel>
