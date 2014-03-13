@@ -14,8 +14,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "defaults.h"
 #include "hotkeysettings.h"
+#include "defaults.h"
 #include "hotkeyedit.h"
 #include "mouseshortcut.h"
 

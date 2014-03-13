@@ -47,7 +47,7 @@
 #ifdef WITH_DICOM
 #define HAVE_CONFIG_H
 #include <dcmtk/config/osconfig.h>   /* make sure OS specific configuration is included first */
-#include "dcmtk/oflog/logger.h"
+#include <dcmtk/oflog/logger.h>
 #include <dcmtk/oflog/fileap.h>
 #include <dcmtk/oflog/configrt.h>
 #endif
@@ -271,7 +271,7 @@ bool switchToRunningInstance()
             , studyDescription
             , (bool)autoStart
             );
-    qDebug() << msg;
+    //qDebug() << msg;
     return msg.type() == QDBusMessage::ReplyMessage && msg.arguments().first().toBool();
 }
 

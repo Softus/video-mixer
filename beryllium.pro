@@ -52,7 +52,6 @@ SOURCES += aboutdialog.cpp \
     beryllium.cpp \
     confirmationsettings.cpp \
     hotkeyedit.cpp \
-    hotkeysettings.cpp \
     libqxt/qxtconfirmationmessage.cpp \
     libqxt/qxtlineedit.cpp \
     libqxt/qxtspanslider.cpp \
@@ -77,7 +76,9 @@ SOURCES += aboutdialog.cpp \
     gst/motioncells/gstmotioncells.cpp \
     gst/gst.cpp \
     typedetect.cpp \
-    gst/mpeg_sys_type_find.cpp
+    gst/mpeg_sys_type_find.cpp \
+    src/settings/debugsettings.cpp \
+    src/settings/hotkeysettings.cpp
 
 HEADERS += aboutdialog.h \
     archivewindow.h \
@@ -85,7 +86,6 @@ HEADERS += aboutdialog.h \
     confirmationsettings.h \
     defaults.h \
     hotkeyedit.h \
-    hotkeysettings.h \
     libqxt/qxtconfirmationmessage.h \
     libqxt/qxtlineedit.h \
     libqxt/qxtspanslider.h \
@@ -111,7 +111,9 @@ HEADERS += aboutdialog.h \
     videosettings.h \
     gst/motioncells/motioncells_wrapper.h \
     gst/motioncells/MotionCells.h \
-    gst/motioncells/gstmotioncells.h
+    gst/motioncells/gstmotioncells.h \
+    src/settings/debugsettings.h \
+    src/settings/hotkeysettings.h
 
 FORMS   +=
 

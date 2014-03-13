@@ -93,8 +93,8 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
     <name>ArchiveWindow</name>
     <message>
         <location filename="archivewindow.cpp" line="88"/>
-        <location filename="archivewindow.cpp" line="777"/>
-        <location filename="archivewindow.cpp" line="834"/>
+        <location filename="archivewindow.cpp" line="781"/>
+        <location filename="archivewindow.cpp" line="838"/>
         <source>Archive</source>
         <oldsource>archive</oldsource>
         <translation>Архив</translation>
@@ -186,7 +186,7 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
     </message>
     <message>
         <location filename="archivewindow.cpp" line="181"/>
-        <location filename="archivewindow.cpp" line="1024"/>
+        <location filename="archivewindow.cpp" line="1035"/>
         <source>Play</source>
         <translation>Воспроизвести</translation>
     </message>
@@ -196,20 +196,20 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
         <translation>Перемотать вперёд</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="473"/>
+        <location filename="archivewindow.cpp" line="479"/>
         <source>The file was uploaded to a storage server</source>
         <oldsource>The file was uploaded to a DICOM server</oldsource>
         <translation>Файл был загружен в хранилище</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="661"/>
+        <location filename="archivewindow.cpp" line="665"/>
         <source>Are you sure to delete
 
 &apos;%1&apos;?</source>
         <translation>Вы действительно хотите удалить &apos;%1&apos;?</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="662"/>
+        <location filename="archivewindow.cpp" line="666"/>
         <source>Are you sure to delete selected items?</source>
         <translation>Вы действительно хотите удалить выбранные объекты?</translation>
     </message>
@@ -224,7 +224,7 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
         <translation type="obsolete">Вы действительно хотите отправить результат в хранилище?</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="735"/>
+        <location filename="archivewindow.cpp" line="739"/>
         <source>All files were successfully stored.</source>
         <translation>Все файлы были успешно сохранены.</translation>
     </message>
@@ -237,17 +237,17 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
         <translation type="obsolete">Вы действительно хотите отправить выбранные объекты в хранилище?</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="772"/>
+        <location filename="archivewindow.cpp" line="776"/>
         <source>Failed to launch </source>
         <translation>Ошибка при выполнении </translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="879"/>
+        <location filename="archivewindow.cpp" line="883"/>
         <source>Archive - %1</source>
         <translation>Архив - %1</translation>
     </message>
     <message>
-        <location filename="archivewindow.cpp" line="1024"/>
+        <location filename="archivewindow.cpp" line="1035"/>
         <source>Pause</source>
         <translation>Пауза</translation>
     </message>
@@ -318,6 +318,69 @@ Continue?</source>
         <translation type="obsolete">Не удалось отправить &apos;%1&apos; на &apos;%2&apos;:
 %3
 Продолжить?</translation>
+    </message>
+</context>
+<context>
+    <name>DebugSettings</name>
+    <message>
+        <location filename="src/settings/debugsettings.cpp" line="45"/>
+        <source>Enable &amp;Gstreamer debugging</source>
+        <translation>Включить отладку &amp;Gstreamer</translation>
+    </message>
+    <message>
+        <location filename="src/settings/debugsettings.cpp" line="50"/>
+        <source>&amp;Log level</source>
+        <translation>&amp;Уровень отладки</translation>
+    </message>
+    <message>
+        <location filename="src/settings/debugsettings.cpp" line="69"/>
+        <source>&amp;Output file</source>
+        <translation>&amp;Выводить в файл</translation>
+    </message>
+    <message>
+        <location filename="src/settings/debugsettings.cpp" line="76"/>
+        <source>Ou&amp;tput no color</source>
+        <translation>Выводить без &amp;цвета</translation>
+    </message>
+    <message>
+        <location filename="src/settings/debugsettings.cpp" line="79"/>
+        <source>&amp;Pipelines dump folder</source>
+        <translation>&amp;Папка для снимков конвеера</translation>
+    </message>
+    <message>
+        <location filename="src/settings/debugsettings.cpp" line="86"/>
+        <source>&amp;Categories</source>
+        <translation>&amp;Категории</translation>
+    </message>
+    <message>
+        <location filename="src/settings/debugsettings.cpp" line="89"/>
+        <source>Comma separated list</source>
+        <translation>список, разделенный запятыми</translation>
+    </message>
+    <message>
+        <location filename="src/settings/debugsettings.cpp" line="103"/>
+        <source>Enable &amp;DICOM debugging</source>
+        <translation>Включить отладку &amp;DICOM</translation>
+    </message>
+    <message>
+        <location filename="src/settings/debugsettings.cpp" line="108"/>
+        <source>Log l&amp;evel</source>
+        <translation>У&amp;ровень отладки</translation>
+    </message>
+    <message>
+        <location filename="src/settings/debugsettings.cpp" line="120"/>
+        <source>O&amp;utput file</source>
+        <translation>Выво&amp;дить в файл</translation>
+    </message>
+    <message>
+        <location filename="src/settings/debugsettings.cpp" line="127"/>
+        <source>Co&amp;nfig file</source>
+        <translation>&amp;Файл настроек</translation>
+    </message>
+    <message>
+        <location filename="src/settings/debugsettings.cpp" line="138"/>
+        <source>NOTE: The changes will take effect the next time the application starts.</source>
+        <translation>ПРИМЕЧАНИЕ: Изменения вступят в силу при следующем запуске приложения.</translation>
     </message>
 </context>
 <context>
@@ -577,142 +640,142 @@ Continue?</source>
 <context>
     <name>HotKeySettings</name>
     <message>
-        <location filename="hotkeysettings.cpp" line="54"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="54"/>
         <source>Action</source>
         <translation>Действие</translation>
     </message>
     <message>
-        <location filename="hotkeysettings.cpp" line="54"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="54"/>
         <source>Hotkey</source>
         <translation>Клавиша</translation>
     </message>
     <message>
-        <location filename="hotkeysettings.cpp" line="59"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="59"/>
         <source>Capture window</source>
         <translation>Окно захвата</translation>
     </message>
     <message>
-        <location filename="hotkeysettings.cpp" line="63"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="63"/>
         <source>Start/stop study</source>
         <translation>Начать/закончить исследование</translation>
     </message>
     <message>
-        <location filename="hotkeysettings.cpp" line="64"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="64"/>
         <source>Take snapshot</source>
         <translation>Сделать снимок</translation>
     </message>
     <message>
-        <location filename="hotkeysettings.cpp" line="65"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="65"/>
         <source>Start clip</source>
         <translation>Записать фрагмент</translation>
     </message>
     <message>
-        <location filename="hotkeysettings.cpp" line="66"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="66"/>
         <source>Clip done</source>
         <translation>Завершить фрагмент</translation>
     </message>
     <message>
-        <location filename="hotkeysettings.cpp" line="67"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="67"/>
         <source>Show Archive window</source>
         <translation>Открыть окно архива</translation>
     </message>
     <message>
-        <location filename="hotkeysettings.cpp" line="68"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="68"/>
         <source>Show Settings window</source>
         <translation>Открыть окно настроек</translation>
     </message>
     <message>
-        <location filename="hotkeysettings.cpp" line="70"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="70"/>
         <source>Show Worklist window</source>
         <translation>Открыть рабочий лист</translation>
     </message>
     <message>
-        <location filename="hotkeysettings.cpp" line="72"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="72"/>
         <source>Archive window</source>
         <translation>Окно архива</translation>
     </message>
     <message>
-        <location filename="hotkeysettings.cpp" line="75"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="75"/>
         <source>Delete</source>
         <translation>Удалить</translation>
     </message>
     <message>
-        <location filename="hotkeysettings.cpp" line="76"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="76"/>
         <source>Upload</source>
         <translation>В хранилище</translation>
     </message>
     <message>
-        <location filename="hotkeysettings.cpp" line="77"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="77"/>
         <source>Edit</source>
         <translation>Правка</translation>
     </message>
     <message>
-        <location filename="hotkeysettings.cpp" line="78"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="78"/>
         <source>Up</source>
         <translation>Вверх</translation>
     </message>
     <message>
-        <location filename="hotkeysettings.cpp" line="79"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="79"/>
         <source>File browser</source>
         <translation>Проводник</translation>
     </message>
     <message>
-        <location filename="hotkeysettings.cpp" line="81"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="81"/>
         <source>Switch mode</source>
         <translation>Переключить режим</translation>
     </message>
     <message>
-        <location filename="hotkeysettings.cpp" line="82"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="82"/>
         <source>List mode</source>
         <translation>Режим списка</translation>
     </message>
     <message>
-        <location filename="hotkeysettings.cpp" line="83"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="83"/>
         <source>Icon mode</source>
         <translation>Режим значков</translation>
     </message>
     <message>
-        <location filename="hotkeysettings.cpp" line="84"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="84"/>
         <source>Gallery mode</source>
         <translation>Режим галереи</translation>
     </message>
     <message>
-        <location filename="hotkeysettings.cpp" line="86"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="86"/>
         <source>Seek backward</source>
         <translation>Отмотать назад</translation>
     </message>
     <message>
-        <location filename="hotkeysettings.cpp" line="87"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="87"/>
         <source>Seek forward</source>
         <translation>Отмотать вперёд</translation>
     </message>
     <message>
-        <location filename="hotkeysettings.cpp" line="88"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="88"/>
         <source>Play video</source>
         <translation>Проиграть видео</translation>
     </message>
     <message>
-        <location filename="hotkeysettings.cpp" line="89"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="89"/>
         <source>Select</source>
         <translation>Выбрать</translation>
     </message>
     <message>
-        <location filename="hotkeysettings.cpp" line="98"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="98"/>
         <source>Show details</source>
         <translation>Показать детали</translation>
     </message>
     <message>
-        <location filename="hotkeysettings.cpp" line="99"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="99"/>
         <source>Reload worklist</source>
         <translation>Обновить Рабочий лист</translation>
     </message>
     <message>
-        <location filename="hotkeysettings.cpp" line="106"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="106"/>
         <source>&amp;Set key</source>
-        <translation>Задать клавишу</translation>
+        <translation>&amp;Задать клавишу</translation>
     </message>
     <message>
-        <location filename="hotkeysettings.cpp" line="111"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="111"/>
         <source>&amp;Reset</source>
         <translation>&amp;Сбросить</translation>
     </message>
@@ -757,7 +820,7 @@ Continue?</source>
         <translation type="obsolete">Открыть &amp;Рабочий лист</translation>
     </message>
     <message>
-        <location filename="hotkeysettings.cpp" line="95"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="95"/>
         <source>Worklist window</source>
         <translation></translation>
     </message>
@@ -786,22 +849,22 @@ Continue?</source>
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="mainwindow.cpp" line="432"/>
+        <location filename="mainwindow.cpp" line="396"/>
         <source>&amp;Archive</source>
         <translation>&amp;Архив</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="429"/>
+        <location filename="mainwindow.cpp" line="393"/>
         <source>&amp;Worlkist</source>
         <translation>&amp;Рабочий лист</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="435"/>
+        <location filename="mainwindow.cpp" line="399"/>
         <source>&amp;Preferences</source>
         <translation>&amp;Настройки</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="387"/>
+        <location filename="mainwindow.cpp" line="351"/>
         <source>Main</source>
         <oldsource>main</oldsource>
         <translation>Главная</translation>
@@ -811,52 +874,52 @@ Continue?</source>
         <translation type="obsolete">Сделать &amp;снимок</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="433"/>
+        <location filename="mainwindow.cpp" line="397"/>
         <source>Show studies archive</source>
         <translation>Открыть архив исследований</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="436"/>
+        <location filename="mainwindow.cpp" line="400"/>
         <source>Edit settings</source>
         <translation>Открыть окно настроек</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="439"/>
+        <location filename="mainwindow.cpp" line="403"/>
         <source>About %1</source>
         <oldsource>About berillyum</oldsource>
         <translation>О программе %1</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="967"/>
-        <location filename="mainwindow.cpp" line="972"/>
-        <location filename="mainwindow.cpp" line="977"/>
-        <location filename="mainwindow.cpp" line="982"/>
-        <location filename="mainwindow.cpp" line="987"/>
+        <location filename="mainwindow.cpp" line="931"/>
+        <location filename="mainwindow.cpp" line="936"/>
+        <location filename="mainwindow.cpp" line="941"/>
+        <location filename="mainwindow.cpp" line="946"/>
+        <location filename="mainwindow.cpp" line="951"/>
         <source> - </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1014"/>
+        <location filename="mainwindow.cpp" line="978"/>
         <source>Failed to create &apos;%1&apos;</source>
         <translation>Не удалось создать &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1288"/>
+        <location filename="mainwindow.cpp" line="1252"/>
         <source>Failed to start recording.
 Please, adjust the video source settings.</source>
         <translation>Невозможно начать запись.
 Проверьте настройки видео.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1299"/>
-        <location filename="mainwindow.cpp" line="1507"/>
+        <location filename="mainwindow.cpp" line="1263"/>
+        <location filename="mainwindow.cpp" line="1471"/>
         <source>Failed to start recording.
 Check the error log for details.</source>
         <translation>Невозможно начать запись.
 Проверьте журнал ожибок.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1672"/>
+        <location filename="mainwindow.cpp" line="1636"/>
         <source>Failed to start a study.
 Another study is in progress.</source>
         <translation>Невозможно начать исследование.
@@ -879,17 +942,17 @@ Another study is in progress.</source>
         <translation type="obsolete">Отправить</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1318"/>
+        <location filename="mainwindow.cpp" line="1282"/>
         <source>End the study?</source>
         <translation>Завершить исследование?</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1552"/>
+        <location filename="mainwindow.cpp" line="1516"/>
         <source>End study</source>
         <translation>Завершить исследование</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1552"/>
+        <location filename="mainwindow.cpp" line="1516"/>
         <source>Start study</source>
         <translation>Начать исследование</translation>
     </message>
@@ -918,47 +981,47 @@ Another study is in progress.</source>
         <translation type="obsolete">З&amp;апись</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="353"/>
+        <location filename="mainwindow.cpp" line="317"/>
         <source>&amp;Menu</source>
         <translation>&amp;Меню</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="438"/>
+        <location filename="mainwindow.cpp" line="402"/>
         <source>A&amp;bout %1</source>
         <translation>&amp;О %1</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="364"/>
+        <location filename="mainwindow.cpp" line="328"/>
         <source>&amp;Enable RTP streaming</source>
         <translation>Включить RTP &amp;поток</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="368"/>
+        <location filename="mainwindow.cpp" line="332"/>
         <source>&amp;Record entire study</source>
         <translation>Записывать исследование &amp;целиком</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="375"/>
+        <location filename="mainwindow.cpp" line="339"/>
         <source>E&amp;xit</source>
         <translation>В&amp;ыход</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="400"/>
+        <location filename="mainwindow.cpp" line="364"/>
         <source>Take snapshot</source>
         <translation>Сделать снимок</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="409"/>
+        <location filename="mainwindow.cpp" line="373"/>
         <source>Start clip</source>
         <translation>Записать фрагмент</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="418"/>
+        <location filename="mainwindow.cpp" line="382"/>
         <source>Clip done</source>
         <translation>Завершить фрагмент</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1216"/>
+        <location filename="mainwindow.cpp" line="1180"/>
         <source>Failed to load image %1</source>
         <translation>Не удалось загрузить снимок %1</translation>
     </message>
@@ -1195,97 +1258,102 @@ Another study is in progress.</source>
 <context>
     <name>Settings</name>
     <message>
-        <location filename="settings.cpp" line="77"/>
+        <location filename="settings.cpp" line="73"/>
         <source>Appl&amp;y</source>
         <translation>Применит&amp;ь</translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="80"/>
+        <location filename="settings.cpp" line="76"/>
         <source>Cancel</source>
         <translation>Отмена</translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="83"/>
+        <location filename="settings.cpp" line="79"/>
         <source>Ok</source>
         <translation>ОК</translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="94"/>
+        <location filename="settings.cpp" line="90"/>
         <source>Settings</source>
         <translation>Настройки</translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="125"/>
+        <location filename="settings.cpp" line="121"/>
         <source>DICOM MWL/MPPS</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="131"/>
+        <location filename="settings.cpp" line="127"/>
         <source>Video source</source>
         <translation>Источник видео</translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="132"/>
+        <location filename="settings.cpp" line="128"/>
         <source>Video recording</source>
         <translation>Запись видео</translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="133"/>
+        <location filename="settings.cpp" line="129"/>
         <source>Storage</source>
         <translation>Хранилище</translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="134"/>
+        <location filename="settings.cpp" line="130"/>
         <source>Physicians</source>
         <translation>Врачи</translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="135"/>
+        <location filename="settings.cpp" line="131"/>
         <source>Studies</source>
         <translation>Исследования</translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="123"/>
+        <location filename="settings.cpp" line="119"/>
         <source>DICOM device</source>
         <translation>DICOM устройство</translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="124"/>
+        <location filename="settings.cpp" line="120"/>
         <source>DICOM servers</source>
         <translation>DICOM сервера</translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="126"/>
+        <location filename="settings.cpp" line="122"/>
         <source>DICOM storage</source>
         <translation>DICOM хранилище</translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="127"/>
+        <location filename="settings.cpp" line="123"/>
         <source>Worklist column display</source>
         <translation>Колонки рабочего листа</translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="128"/>
+        <location filename="settings.cpp" line="124"/>
         <source>Worklist query settings</source>
         <translation>Настройки рабочего листа</translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="136"/>
+        <location filename="settings.cpp" line="132"/>
         <source>Mandatory fields</source>
         <translation>Обязательные поля</translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="137"/>
+        <location filename="settings.cpp" line="133"/>
         <source>Hotkeys</source>
         <translation>Комбинации клавиш</translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="138"/>
+        <location filename="settings.cpp" line="134"/>
         <source>Confirmations</source>
         <translation>Подтверждения</translation>
     </message>
     <message>
-        <location filename="settings.cpp" line="187"/>
+        <location filename="settings.cpp" line="135"/>
+        <source>Debug</source>
+        <translation>Отладка</translation>
+    </message>
+    <message>
+        <location filename="settings.cpp" line="184"/>
         <source>Close</source>
         <translation>Закрыть</translation>
     </message>

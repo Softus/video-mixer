@@ -37,4 +37,8 @@
     <qresource prefix="/app">
         <file alias="product">pixmaps/beryllium.png</file>
     </qresource>
+    <qresource prefix="/icons">
+        <file alias="reset.png">libqxt/resources/icons/reset.png</file>
+        <file alias="search.png">libqxt/resources/icons/search.png</file>
+    </qresource>
 </RCC>

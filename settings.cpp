@@ -17,7 +17,8 @@
 #include "settings.h"
 
 #include "confirmationsettings.h"
-#include "hotkeysettings.h"
+#include "src/settings/debugsettings.h"
+#include "src/settings/hotkeysettings.h"
 #include "mandatoryfieldssettings.h"
 #include "physicianssettings.h"
 #include "storagesettings.h"
@@ -131,6 +132,7 @@ void Settings::createPages()
     createPage(tr("Mandatory fields"), MandatoryFieldsSettings::staticMetaObject);
     createPage(tr("Hotkeys"), HotKeySettings::staticMetaObject);
     createPage(tr("Confirmations"), ConfirmationSettings::staticMetaObject);
+    createPage(tr("Debug"), DebugSettings::staticMetaObject);
 
     // Sort pages using current locale
     //
