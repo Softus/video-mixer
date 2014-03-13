@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?define ProductBuild     = "0.7" ?>
+<?define ProductBuild     = "0.8" ?>
 <?define ProductRevision  = "0" ?>
 <?define ProductName      = "Beryllium" ?>
 

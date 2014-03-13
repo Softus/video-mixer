@@ -1,3 +1,5 @@
+CONFIG+=dicom
+CONFIG+=touch
 # Copyright (C) 2013-2014 Irkutsk Diagnostic Center.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -119,7 +121,8 @@ HEADERS += \
 
 FORMS   +=
 
-RESOURCES    += beryllium.qrc
+RESOURCES    += \
+    beryllium.qrc
 TRANSLATIONS += beryllium_ru.ts
 
 unix {
