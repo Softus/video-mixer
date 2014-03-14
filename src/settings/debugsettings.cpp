@@ -32,8 +32,12 @@
 
 #ifdef WITH_DICOM
 #define HAVE_CONFIG_H
+#include "dcmtk/config/cfunix.h"
 #include <dcmtk/config/osconfig.h>   /* make sure OS specific configuration is included first */
 #include <dcmtk/oflog/logger.h>
+#if PACKAGE_VERSION_NUMBER > 360
+using namespace dcmtk;
+#endif
 #endif
 
 DebugSettings::DebugSettings(QWidget *parent) :
@@ -91,13 +95,13 @@ DebugSettings::DebugSettings(QWidget *parent) :
     grpGst->setLayout(layoutGst);
 
 #ifdef WITH_DICOM
-    dcmtk::log4cplus::LogLevel levels[] = {
-        dcmtk::log4cplus::FATAL_LOG_LEVEL,
-        dcmtk::log4cplus::ERROR_LOG_LEVEL,
-        dcmtk::log4cplus::WARN_LOG_LEVEL,
-        dcmtk::log4cplus::INFO_LOG_LEVEL,
-        dcmtk::log4cplus::DEBUG_LOG_LEVEL,
-        dcmtk::log4cplus::TRACE_LOG_LEVEL,
+    log4cplus::LogLevel levels[] = {
+        log4cplus::FATAL_LOG_LEVEL,
+        log4cplus::ERROR_LOG_LEVEL,
+        log4cplus::WARN_LOG_LEVEL,
+        log4cplus::INFO_LOG_LEVEL,
+        log4cplus::DEBUG_LOG_LEVEL,
+        log4cplus::TRACE_LOG_LEVEL,
     };
 
     layoutMain->addWidget(grpDicom = new QGroupBox(tr("Enable &DICOM debugging")));
@@ -109,7 +113,7 @@ DebugSettings::DebugSettings(QWidget *parent) :
     auto dicomDebugLevel = settings.value("dcmtk-log-level", DEFAULT_DCMTK_DEBUG_LEVEL).toString();
     for (size_t i = 0; i < sizeof(levels)/sizeof(levels[0]); ++i)
     {
-        auto name = QString::fromStdString(dcmtk::log4cplus::getLogLevelManager().toString(levels[i]).c_str());
+        auto name = QString::fromStdString(log4cplus::getLogLevelManager().toString(levels[i]).c_str());
         cbDicomLogLevel->addItem(name);
         if (dicomDebugLevel == name)
         {

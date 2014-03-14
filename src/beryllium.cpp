@@ -50,6 +50,9 @@
 #include <dcmtk/oflog/logger.h>
 #include <dcmtk/oflog/fileap.h>
 #include <dcmtk/oflog/configrt.h>
+#if PACKAGE_VERSION_NUMBER > 360
+using namespace dcmtk;
+#endif
 #endif
 
 #ifdef Q_OS_WIN
@@ -160,23 +163,23 @@ static void setupGstDebug(const QSettings& settings)
 static gboolean
 dcmtkLogLevelCallback(const gchar *, const gchar *value, gpointer, GError **)
 {
-    auto level = dcmtk::log4cplus::getLogLevelManager().fromString(value);
-    dcmtk::log4cplus::Logger::getRoot().setLogLevel(level);
+    auto level = log4cplus::getLogLevelManager().fromString(value);
+    log4cplus::Logger::getRoot().setLogLevel(level);
     return true;
 }
 
 static gboolean
 dcmtkLogFileCallback(const gchar *, const gchar *value, gpointer, GError **)
 {
-        dcmtk::log4cplus::SharedAppenderPtr file(new dcmtk::log4cplus::FileAppender(value));
-        dcmtk::log4cplus::Logger::getRoot().addAppender(file);
+        log4cplus::SharedAppenderPtr file(new log4cplus::FileAppender(value));
+        log4cplus::Logger::getRoot().addAppender(file);
         return true;
 }
 
 static gboolean
 dcmtkLogConfigCallback(const gchar *, const gchar *value, gpointer, GError **)
 {
-    dcmtk::log4cplus::PropertyConfigurator(value).configure();
+    log4cplus::PropertyConfigurator(value).configure();
     return true;
 }
 
