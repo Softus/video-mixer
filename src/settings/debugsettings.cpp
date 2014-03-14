@@ -44,7 +44,7 @@ DebugSettings::DebugSettings(QWidget *parent) :
     QSettings settings;
     auto layoutMain = new QVBoxLayout;
 
-    layoutMain->addWidget(grpGst = new QGroupBox(tr("Enable &Gstreamer debugging")));
+    layoutMain->addWidget(grpGst = new QGroupBox(tr("Enable &GStreamer debugging")));
     grpGst->setCheckable(true);
     grpGst->setChecked(settings.value("gst-debug-on", DEFAULT_GST_DEBUG_ON).toBool());
     auto layoutGst = new QFormLayout;

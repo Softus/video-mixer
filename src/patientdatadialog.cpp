@@ -93,11 +93,7 @@ PatientDataDialog::PatientDataDialog(bool noWorklist, const QString& settingsKey
 
     checkDontShow = new QCheckBox(tr("Show this dialog if the Shift key is down or some data is required."));
     layoutMain->addRow(nullptr, checkDontShow);
-#if (QT_VERSION >= QT_VERSION_CHECK(4, 8, 0))
-    if (!qApp->queryKeyboardModifiers().testFlag(Qt::ShiftModifier))
-#else
     if (!qApp->keyboardModifiers().testFlag(Qt::ShiftModifier))
-#endif
     {
         settings.beginGroup("confirmations");
         checkDontShow->setChecked(settings.value(settingsKey).toBool());
@@ -197,11 +193,7 @@ int PatientDataDialog::exec()
 {
     QSettings settings;
     settings.beginGroup("confirmations");
-#if (QT_VERSION >= QT_VERSION_CHECK(4, 8, 0))
-    if (!qApp->queryKeyboardModifiers().testFlag(Qt::ShiftModifier)
-#else
     if (!qApp->keyboardModifiers().testFlag(Qt::ShiftModifier)
-#endif
         && settings.value(settingsKey).toBool() && btnStart->isEnabled())
     {
         return QDialog::Accepted;

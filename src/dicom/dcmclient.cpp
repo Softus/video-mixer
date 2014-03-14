@@ -19,6 +19,7 @@
 #include "../typedetect.h"
 #include "dcmclient.h"
 #include "dcmconverter.h"
+#include "transcyrillic.h"
 
 #include <dcmtk/dcmdata/dcdeftag.h>
 #include <dcmtk/dcmdata/dcdicent.h>
@@ -670,12 +671,39 @@ bool DcmClient::sendToServer(const QString& server, DcmDataset* dsPatient, const
     return cond.good();
 }
 
-bool DcmClient::sendToServer(QWidget* parent, DcmDataset* dsPatient, const QFileInfoList& listFiles)
+static void
+translateDcmObjectToLatin(DcmObject *parent)
+{
+    DcmObject* obj = nullptr;
+    while (obj = parent->nextInContainer(obj), obj != nullptr)
+    {
+        char *val = nullptr;
+        if (obj->isaString() && obj->containsExtendedCharacters())
+        {
+            auto elm = dynamic_cast<DcmElement*>(obj);
+            if (elm->getString(val).good())
+            {
+                auto str = QString::fromUtf8(val);
+                auto tranlated = translateToLatin(str);
+                //qDebug() << str << " => " << tranlated;
+                elm->putString(tranlated.toUtf8().constData());
+            }
+        }
+
+        if (!obj->isLeaf())
+        {
+            translateDcmObjectToLatin(obj);
+        }
+    }
+}
+
+bool DcmClient::sendToServer(QWidget *parent, DcmDataset *dsPatient, const QFileInfoList& listFiles)
 {
     QProgressDialog pdlg(parent);
     progressDlg = &pdlg;
     QSettings settings;
     bool result = true;
+    auto translate  = settings.value("translate-cyrillic", DEFAULT_TRANSLATE_CYRILLIC).toBool();
     auto allowClips = settings.value("dicom-export-clips", DEFAULT_EXPORT_CLIPS_TO_DICOM).toBool();
     auto allowVideo = settings.value("dicom-export-video", DEFAULT_EXPORT_VIDEO_TO_DICOM).toBool();
 
@@ -692,6 +720,12 @@ bool DcmClient::sendToServer(QWidget* parent, DcmDataset* dsPatient, const QFile
     char seriesUID[100] = {0};
     dcmGenerateUniqueIdentifier(seriesUID, SITE_SERIES_UID_ROOT);
     int idx = strlen(seriesUID) - 1;
+
+    if (translate)
+    {
+        dsPatient = static_cast<DcmDataset*>(dsPatient->clone());
+        translateDcmObjectToLatin(dsPatient);
+    }
 
     foreach (auto server, QSettings().value("storage-servers").toStringList())
     {
@@ -761,5 +795,11 @@ bool DcmClient::sendToServer(QWidget* parent, DcmDataset* dsPatient, const QFile
         }
     }
     progressDlg = nullptr;
+
+    if (translate)
+    {
+        delete dsPatient;
+    }
+
     return result;
 }

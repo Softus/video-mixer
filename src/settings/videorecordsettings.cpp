@@ -36,14 +36,14 @@ VideoRecordSettings::VideoRecordSettings(QWidget *parent) :
 
     auto grpClips = new QGroupBox(tr("Video clips"));
     auto layoutClips = new QFormLayout;
-    layoutClips->addRow(checkLimit = new QCheckBox(tr("&Limit clips to")), spinCountdown = new QSpinBox);
+    layoutClips->addRow(checkLimit = new QCheckBox(tr("&Limit clip duration at")), spinCountdown = new QSpinBox);
     checkLimit->setChecked(settings.value("clip-limit", DEFAULT_CLIP_LIMIT).toBool());
     spinCountdown->setSuffix(tr(" seconds"));
     spinCountdown->setRange(1, 3600);
     spinCountdown->setValue(settings.value("clip-countdown", DEFAULT_VIDEO_RECORD_LIMIT).toInt());
-    layoutClips->addRow(checkNotify = new QCheckBox(tr("&Play a sound on")), spinNotify = new QSpinBox);
+    layoutClips->addRow(checkNotify = new QCheckBox(tr("&Play alert at")), spinNotify = new QSpinBox);
     checkNotify->setChecked(settings.value("notify-clip-limit", DEFAULT_NOTIFY_CLIP_LIMIT).toBool());
-    spinNotify->setSuffix(tr(" seconds before stopping"));
+    spinNotify->setSuffix(tr(" seconds till stop"));
     spinNotify->setRange(1, 3600);
     spinNotify->setValue(settings.value("notify-clip-countdown", DEFAULT_VIDEO_RECORD_NOTIFY).toInt());
     grpClips->setLayout(layoutClips);
@@ -80,7 +80,7 @@ VideoRecordSettings::VideoRecordSettings(QWidget *parent) :
     spinThreshold->setValue(settings.value("motion-threshold", DEFAULT_MOTION_THRESHOLD).toReal()* 100);
     spinThreshold->setSuffix(tr("%"));
 
-    layoutVideoLog->addRow(nullptr, checkMotionDebug = new QCheckBox(tr("&Display cells with motion")));
+    layoutVideoLog->addRow(nullptr, checkMotionDebug = new QCheckBox(tr("&Highlight areas with motion")));
     checkMotionDebug->setChecked(settings.value("motion-debug").toBool());
     grpMotionDetection->setLayout(layoutVideoLog);
     layoutMain->addWidget(grpMotionDetection);

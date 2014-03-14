@@ -25,5 +25,6 @@
 // NEPOMNYASHCHIKH => НЕПОМНЯЩИХ
 //
 QString translateToCyrillic(const QString& str);
+QString translateToLatin(const QString& str);
 
 #endif // TRANSCYRILLIC_H

@@ -262,3 +262,283 @@ QString translateToCyrillic(const QString& str)
 
     return ret;
 }
+
+QString translateToLatin(const QString& str)
+{
+    if (str.isNull())
+    {
+        return str;
+    }
+
+    QString ret;
+
+    for (int i = 0; i < str.length(); ++i)
+    {
+        switch (str[i].unicode())
+        {
+//      case ' ':
+//          ret.append('^'); // Заменяем пробел на шапку
+//          break;
+        case L'А':
+            ret.append('A');
+            break;
+        case L'Б':
+            ret.append('B');
+            break;
+        case L'В':
+            ret.append('V');
+            break;
+        case L'Г':
+            ret.append('G');
+            break;
+        case L'Д':
+            ret.append('D');
+            break;
+        case L'Е':
+            if (i==0)  // В начале слова русская 'е' это 'ye' или 'YE'
+            {
+                ret.append('Y');
+                ret.append(str.length() > 1 && str[1].isLower()? 'e': 'E');
+            }
+            else
+            {
+                ret.append('E');
+            }
+            break;
+        case L'Ё':
+            ret.append('Y');
+            ret.append(str.length() > i && str[i].isLower()? 'o': 'O');
+            break;
+        case L'Ж':
+            ret.append('Z');
+            ret.append(str.length() > i && str[i].isLower()? 'h': 'H');
+            break;
+        case L'З':
+            ret.append('Z');
+            break;
+        case L'И': // В конце слова 'ий' == 'y'
+            if (str.length() > i && str[i] == L'Й')
+            {
+                ret.append('Y'); ++i;
+            }
+            else if (str.length() > i && str[i] == L'й')
+            {
+                ret.append('y'); ++i;
+            }
+            else
+            {
+                ret.append('I');
+            }
+            break;
+        case L'Й':
+            ret.append('Y');
+            break;
+        case L'К':
+            ret.append('K');
+            break;
+        case L'Л':
+            ret.append('L');
+            break;
+        case L'М':
+            ret.append('M');
+            break;
+        case L'Н':
+            ret.append('N');
+            break;
+        case L'О':
+            ret.append('O');
+            break;
+        case L'П':
+            ret.append('P');
+            break;
+        case L'Р':
+            ret.append('R');
+            break;
+        case L'С':
+            ret.append('S');
+            break;
+        case L'Т':
+            ret.append('T');
+            break;
+        case L'У':
+            ret.append('U');
+            break;
+        case L'Ф':
+            ret.append('F');
+            break;
+        case L'Х':
+            ret.append('K');
+            ret.append(str.length() > i && str[i].isLower()? 'h': 'H');
+            break;
+        case L'Ц':
+            ret.append('T');
+            ret.append(str.length() > i && str[i].isLower()? 's': 'S');
+            break;
+        case L'Ч':
+            ret.append('C');
+            ret.append(str.length() > i && str[i].isLower()? 'h': 'H');
+            break;
+        case L'Ш':
+            ret.append('S');
+            ret.append(str.length() > i && str[i].isLower()? 'h': 'H');
+            break;
+        case L'Щ':
+            ret.append('S');
+            ret.append(str.length() > i && str[i].isLower()? "hch": "HCH");
+            break;
+        case L'Ъ': // Съедаем
+            break;
+        case L'Ы': // В конце слова 'ый' == 'y'
+            ret.append('Y');
+            if (str.length() > i && str[i] == L'Й')
+            {
+                ++i;
+            }
+            break;
+        case L'Ь': // Только для мягкого знака перед 'и', как Ilyin.
+            if (str.length() > i && str[i] == L'И')
+            {
+                ret.append('Y');
+            }
+            else if (str.length() > i && str[i] == L'и')
+            {
+                ret.append('y');
+            }
+            break;
+        case L'Э':
+            ret.append('E');
+            break;
+        case L'Ю':
+            ret.append('Y');
+            ret.append(str.length() > i && str[i].isLower()? 'u': 'U');
+            break;
+        case L'Я':
+            ret.append('Y');
+            ret.append(str.length() > i && str[i].isLower()? 'a': 'A');
+            break;
+
+        case L'а':
+            ret.append('a');
+            break;
+        case L'б':
+            ret.append('b');
+            break;
+        case L'в':
+            ret.append('v');
+            break;
+        case L'г':
+            ret.append('g');
+            break;
+        case L'д':
+            ret.append('d');
+            break;
+        case L'е':
+            if (i==0)  // В начале слова русская 'е' это 'ye' или 'YE'
+            {
+                ret.append('y');
+            }
+            ret.append('e');
+            break;
+        case L'ё':
+            ret.append("yo");
+            break;
+        case L'ж':
+            ret.append("zh");
+            break;
+        case L'з':
+            ret.append('Z');
+            break;
+        case L'и': // В конце слова 'ий' == 'y'
+            if (str.length() > i && str[i] == L'й')
+            {
+                ret.append('y'); ++i;
+            }
+            else
+            {
+                ret.append('i');
+            }
+            break;
+        case L'й':
+            ret.append('y');
+            break;
+        case L'к':
+            ret.append('k');
+            break;
+        case L'л':
+            ret.append('l');
+            break;
+        case L'м':
+            ret.append('m');
+            break;
+        case L'н':
+            ret.append('n');
+            break;
+        case L'о':
+            ret.append('o');
+            break;
+        case L'п':
+            ret.append('p');
+            break;
+        case L'р':
+            ret.append('r');
+            break;
+        case L'с':
+            ret.append('s');
+            break;
+        case L'т':
+            ret.append('t');
+            break;
+        case L'у':
+            ret.append('u');
+            break;
+        case L'ф':
+            ret.append('f');
+            break;
+        case L'х':
+            ret.append("kh");
+            break;
+        case L'ц':
+            ret.append("tc");
+            break;
+        case L'ч':
+            ret.append("ch");
+            break;
+        case L'ш':
+            ret.append("sh");
+            break;
+        case L'щ':
+            ret.append("shch");
+            break;
+        case L'ъ': // Съедаем
+            break;
+        case L'ы': // В конце слова 'ый' == 'y'
+            ret.append('y');
+            if (str.length() > i && str[i] == L'й')
+            {
+                ++i;
+            }
+            break;
+        case L'ь': // Только для мягкого знака перед 'и', как Ilyin.
+            if (str.length() > i && str[i] == L'и')
+            {
+                ret.append('y');
+            }
+            break;
+        case L'э':
+            ret.append('e');
+            break;
+        case L'ю':
+            ret.append("yu");
+            break;
+        case L'я':
+            ret.append("ya");
+            break;
+
+        default:
+            ret.append(str[i]); // Прочие символы без изменений
+            break;
+        }
+    }
+
+    return ret;
+}

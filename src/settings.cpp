@@ -107,7 +107,11 @@ Settings::Settings(const QString& pageTitle, QWidget *parent, Qt::WindowFlags fl
         }
         else
         {
-            auto pages = listWidget->findItems(selectedPage, Qt::MatchContains);
+            auto pages = listWidget->findItems(selectedPage, Qt::MatchExactly);
+            if (pages.empty())
+            {
+                pages = listWidget->findItems(selectedPage, Qt::MatchContains);
+            }
             if (!pages.empty())
             {
                 listWidget->setCurrentItem(pages.first());
@@ -173,8 +177,6 @@ void Settings::changePage(QListWidgetItem *current, QListWidgetItem *previous)
     {
         pagesWidget->setCurrentIndex(current->data(Qt::UserRole).toInt());
     }
-
-    QSettings().setValue("settings-page", current->text());
 }
 
 void Settings::onClickApply()
@@ -199,4 +201,5 @@ void Settings::accept()
 {
     save();
     QDialog::accept();
+    QSettings().setValue("settings-page", listWidget->currentItem()->text());
 }

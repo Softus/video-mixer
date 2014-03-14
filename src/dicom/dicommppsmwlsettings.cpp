@@ -43,17 +43,14 @@ DicomMppsMwlSettings::DicomMppsMwlSettings(QWidget *parent) :
 
     connect(cbMwlServer, SIGNAL(beforePopup()), this, SLOT(onUpdateServers()));
 
-    mainLayout->addRow(checkTransCyr = new QCheckBox(tr("&Translate latin letters back to cyrillic")));
-    checkTransCyr->setChecked(settings.value("translate-cyrillic", DEFAULT_TRANSLATE_CYRILLIC).toBool());
-
     auto spacer = new QWidget;
     spacer->setMinimumHeight(16);
     mainLayout->addWidget(spacer);
 
     mainLayout->addRow(checkUseMpps = new QCheckBox(tr("MPPS F&unction")), cbMppsServer = new ComboBoxWithPopupSignal);
     connect(checkUseMpps, SIGNAL(toggled(bool)), this, SLOT(onUseToggle(bool)));
-    mainLayout->addRow(checkStartWithMpps = new QCheckBox(tr("&In progress is automatically sent when an examinaion has been started")));
-    mainLayout->addRow(checkCompleteWithMpps = new QCheckBox(tr("&Completed is automatically sent when an examinaion has been ended")));
+    mainLayout->addRow(checkStartWithMpps = new QCheckBox(tr("Send \"&In Progress\" signal upon examination start")));
+    mainLayout->addRow(checkCompleteWithMpps = new QCheckBox(tr("Send \"&Completed\" signal upon examination end")));
 
     QString mppsServer = settings.value("mpps-server").toString();
     if (mppsServer.isEmpty())
@@ -99,9 +96,11 @@ void DicomMppsMwlSettings::onUseToggle(bool checked)
     auto cb = check == checkUseMpps? cbMppsServer: cbMwlServer;
 
     cb->setEnabled(checked);
-    if (!checked)
+    if (checked && cb->currentIndex() < 0)
     {
-        cb->setCurrentIndex(-1);
+        cb->setFocus();
+        cb->showPopup();
+        cb->setCurrentIndex(0);
     }
 }
 
@@ -112,5 +111,4 @@ void DicomMppsMwlSettings::save()
     settings.setValue("mpps-server", checkUseMpps->isChecked()? cbMppsServer->currentText(): nullptr);
     settings.setValue("start-with-mpps", checkStartWithMpps->isChecked());
     settings.setValue("complete-with-mpps", checkCompleteWithMpps->isChecked());
-    settings.setValue("translate-cyrillic", checkTransCyr->isChecked());
 }

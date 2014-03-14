@@ -29,11 +29,12 @@ QT_END_NAMESPACE
 class DicomDeviceSettings : public QWidget
 {
     Q_OBJECT
-    QLineEdit*    textAet;
-    QComboBox*    cbModality;
-    QSpinBox*     spinPort;
-    QCheckBox*    checkExportClips;
-    QCheckBox*    checkExportVideo;
+    QLineEdit *textAet;
+    QComboBox *cbModality;
+    QSpinBox  *spinPort;
+    QCheckBox *checkExportClips;
+    QCheckBox *checkExportVideo;
+    QCheckBox *checkTransCyr;
 
 public:
     Q_INVOKABLE explicit DicomDeviceSettings(QWidget *parent = 0);

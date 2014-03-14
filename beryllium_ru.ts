@@ -288,22 +288,22 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
 <context>
     <name>DcmClient</name>
     <message>
-        <location filename="src/dicom/dcmclient.cpp" line="278"/>
+        <location filename="src/dicom/dcmclient.cpp" line="279"/>
         <source>Required settings parameter %1 is missing</source>
         <translation>Необходимый параметр %1 не задан в настройках</translation>
     </message>
     <message>
-        <location filename="src/dicom/dcmclient.cpp" line="385"/>
+        <location filename="src/dicom/dcmclient.cpp" line="386"/>
         <source>Accepted presentation context ID not found</source>
         <translation>Принятый ID контекста представления не найден</translation>
     </message>
     <message>
-        <location filename="src/dicom/dcmclient.cpp" line="740"/>
+        <location filename="src/dicom/dcmclient.cpp" line="774"/>
         <source>Storing &apos;%1&apos; to &apos;%2&apos;</source>
         <translation>Отправка &apos;%1&apos; на &apos;%2&apos; </translation>
     </message>
     <message>
-        <location filename="src/dicom/dcmclient.cpp" line="749"/>
+        <location filename="src/dicom/dcmclient.cpp" line="783"/>
         <source>Failed to send &apos;%1&apos; to &apos;%2&apos;:
 %3
 Continue?</source>
@@ -323,62 +323,66 @@ Continue?</source>
 <context>
     <name>DebugSettings</name>
     <message>
-        <location filename="src/settings/debugsettings.cpp" line="49"/>
         <source>Enable &amp;Gstreamer debugging</source>
-        <translation>Включить отладку &amp;Gstreamer</translation>
+        <translation type="obsolete">Включить отладку &amp;Gstreamer</translation>
     </message>
     <message>
-        <location filename="src/settings/debugsettings.cpp" line="54"/>
+        <location filename="src/settings/debugsettings.cpp" line="47"/>
+        <source>Enable &amp;GStreamer debugging</source>
+        <translation>Включить отладку &amp;GStreamer</translation>
+    </message>
+    <message>
+        <location filename="src/settings/debugsettings.cpp" line="52"/>
         <source>&amp;Log level</source>
         <translation>&amp;Уровень отладки</translation>
     </message>
     <message>
-        <location filename="src/settings/debugsettings.cpp" line="73"/>
+        <location filename="src/settings/debugsettings.cpp" line="71"/>
         <source>&amp;Output file</source>
         <translation>&amp;Выводить в файл</translation>
     </message>
     <message>
-        <location filename="src/settings/debugsettings.cpp" line="80"/>
+        <location filename="src/settings/debugsettings.cpp" line="78"/>
         <source>Ou&amp;tput no color</source>
         <translation>Выводить без &amp;цвета</translation>
     </message>
     <message>
-        <location filename="src/settings/debugsettings.cpp" line="83"/>
+        <location filename="src/settings/debugsettings.cpp" line="81"/>
         <source>&amp;Pipelines dump folder</source>
         <translation>&amp;Папка для снимков конвеера</translation>
     </message>
     <message>
-        <location filename="src/settings/debugsettings.cpp" line="90"/>
+        <location filename="src/settings/debugsettings.cpp" line="88"/>
         <source>&amp;Categories</source>
         <translation>&amp;Категории</translation>
     </message>
     <message>
-        <location filename="src/settings/debugsettings.cpp" line="93"/>
+        <location filename="src/settings/debugsettings.cpp" line="91"/>
         <source>Comma separated list</source>
         <translation>список, разделенный запятыми</translation>
     </message>
     <message>
-        <location filename="src/settings/debugsettings.cpp" line="107"/>
+        <location filename="src/settings/debugsettings.cpp" line="105"/>
         <source>Enable &amp;DICOM debugging</source>
         <translation>Включить отладку &amp;DICOM</translation>
     </message>
     <message>
-        <location filename="src/settings/debugsettings.cpp" line="112"/>
+        <location filename="src/settings/debugsettings.cpp" line="110"/>
         <source>Log l&amp;evel</source>
         <translation>У&amp;ровень отладки</translation>
     </message>
     <message>
-        <location filename="src/settings/debugsettings.cpp" line="124"/>
+        <location filename="src/settings/debugsettings.cpp" line="122"/>
         <source>O&amp;utput file</source>
         <translation>Выво&amp;дить в файл</translation>
     </message>
     <message>
-        <location filename="src/settings/debugsettings.cpp" line="131"/>
+        <location filename="src/settings/debugsettings.cpp" line="129"/>
         <source>Co&amp;nfig file</source>
         <translation>&amp;Файл настроек</translation>
     </message>
     <message>
-        <location filename="src/settings/debugsettings.cpp" line="142"/>
+        <location filename="src/settings/debugsettings.cpp" line="140"/>
         <source>NOTE: some changes on this page will take effect the next time the application starts.</source>
         <translation>ПРИМЕЧАНИЕ: часть изменений с этой вкладки вступят в силу только при следующем запуске приложения.</translation>
     </message>
@@ -473,6 +477,11 @@ Continue?</source>
         <source>Export &amp;video log to DICOM</source>
         <translation>&amp;Экспорт видеожурнала в DICOM</translation>
     </message>
+    <message>
+        <location filename="src/dicom/dicomdevicesettings.cpp" line="136"/>
+        <source>DICOM server accepts 7-bit &amp;ASCII only</source>
+        <translation>Сервер DICOM принимает только 7 bit &amp;ASCII</translation>
+    </message>
 </context>
 <context>
     <name>DicomMppsMwlSettings</name>
@@ -482,26 +491,33 @@ Continue?</source>
         <translation>&amp;Функция MWL</translation>
     </message>
     <message>
-        <location filename="src/dicom/dicommppsmwlsettings.cpp" line="46"/>
-        <source>&amp;Translate latin letters back to cyrillic</source>
-        <translation>&amp;Переводить транслит обратно</translation>
+        <location filename="src/dicom/dicommppsmwlsettings.cpp" line="52"/>
+        <source>Send &quot;&amp;In Progress&quot; signal upon examination start</source>
+        <translation>&amp;При запуске исследования автоматически отправлять &quot;In Progress&quot;</translation>
     </message>
     <message>
         <location filename="src/dicom/dicommppsmwlsettings.cpp" line="53"/>
+        <source>Send &quot;&amp;Completed&quot; signal upon examination end</source>
+        <translation>При &amp;завершении исследования автоматически отправлять &quot;Completed&quot;</translation>
+    </message>
+    <message>
+        <source>&amp;Translate latin letters back to cyrillic</source>
+        <translation type="obsolete">&amp;Переводить транслит обратно</translation>
+    </message>
+    <message>
+        <location filename="src/dicom/dicommppsmwlsettings.cpp" line="50"/>
         <source>MPPS F&amp;unction</source>
         <translation>Ф&amp;ункция MPPS</translation>
     </message>
     <message>
-        <location filename="src/dicom/dicommppsmwlsettings.cpp" line="55"/>
         <source>&amp;In progress is automatically sent when an examinaion has been started</source>
         <oldsource>&amp;In progress is automatically sent when an examitaion has been started</oldsource>
-        <translation>&amp;При запуске исследования автоматически отправлять In Progress</translation>
+        <translation type="obsolete">&amp;При запуске исследования автоматически отправлять In Progress</translation>
     </message>
     <message>
-        <location filename="src/dicom/dicommppsmwlsettings.cpp" line="56"/>
         <source>&amp;Completed is automatically sent when an examinaion has been ended</source>
         <oldsource>&amp;Completed is automatically sent when an examitaion has been ended</oldsource>
-        <translation>При &amp;завершении исследования автоматически отправлять Completed </translation>
+        <translation type="obsolete">При &amp;завершении исследования автоматически отправлять Completed </translation>
     </message>
 </context>
 <context>
@@ -1157,17 +1173,17 @@ Another study is in progress.</source>
         <translation>Показывать окно если нажат Shift или заданы не все данные.</translation>
     </message>
     <message>
-        <location filename="src/patientdatadialog.cpp" line="113"/>
+        <location filename="src/patientdatadialog.cpp" line="109"/>
         <source>Show work list</source>
         <translation>Открыть рабочий лист</translation>
     </message>
     <message>
-        <location filename="src/patientdatadialog.cpp" line="125"/>
+        <location filename="src/patientdatadialog.cpp" line="121"/>
         <source>Cancel</source>
         <translation>Отменить</translation>
     </message>
     <message>
-        <location filename="src/patientdatadialog.cpp" line="129"/>
+        <location filename="src/patientdatadialog.cpp" line="125"/>
         <source>Start</source>
         <translation>Начать</translation>
     </message>
@@ -1285,37 +1301,37 @@ Another study is in progress.</source>
         <translation>Настройки</translation>
     </message>
     <message>
-        <location filename="src/settings.cpp" line="130"/>
+        <location filename="src/settings.cpp" line="134"/>
         <source>DICOM MWL/MPPS</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="src/settings.cpp" line="136"/>
+        <location filename="src/settings.cpp" line="140"/>
         <source>Video source</source>
         <translation>Источник видео</translation>
     </message>
     <message>
-        <location filename="src/settings.cpp" line="137"/>
+        <location filename="src/settings.cpp" line="141"/>
         <source>Video recording</source>
         <translation>Запись видео</translation>
     </message>
     <message>
-        <location filename="src/settings.cpp" line="138"/>
+        <location filename="src/settings.cpp" line="142"/>
         <source>Storage</source>
         <translation>Хранилище</translation>
     </message>
     <message>
-        <location filename="src/settings.cpp" line="139"/>
+        <location filename="src/settings.cpp" line="143"/>
         <source>Physicians</source>
         <translation>Врачи</translation>
     </message>
     <message>
-        <location filename="src/settings.cpp" line="140"/>
+        <location filename="src/settings.cpp" line="144"/>
         <source>Studies</source>
         <translation>Исследования</translation>
     </message>
     <message>
-        <location filename="src/settings.cpp" line="128"/>
+        <location filename="src/settings.cpp" line="132"/>
         <source>DICOM device</source>
         <translation>DICOM устройство</translation>
     </message>
@@ -1325,47 +1341,47 @@ Another study is in progress.</source>
         <translation>ПРИМЕЧАНИЕ: все изменения будут утеряны после закрытия приложения.</translation>
     </message>
     <message>
-        <location filename="src/settings.cpp" line="129"/>
+        <location filename="src/settings.cpp" line="133"/>
         <source>DICOM servers</source>
         <translation>DICOM сервера</translation>
     </message>
     <message>
-        <location filename="src/settings.cpp" line="131"/>
+        <location filename="src/settings.cpp" line="135"/>
         <source>DICOM storage</source>
         <translation>DICOM хранилище</translation>
     </message>
     <message>
-        <location filename="src/settings.cpp" line="132"/>
+        <location filename="src/settings.cpp" line="136"/>
         <source>Worklist column display</source>
         <translation>Колонки рабочего листа</translation>
     </message>
     <message>
-        <location filename="src/settings.cpp" line="133"/>
+        <location filename="src/settings.cpp" line="137"/>
         <source>Worklist query settings</source>
         <translation>Настройки рабочего листа</translation>
     </message>
     <message>
-        <location filename="src/settings.cpp" line="141"/>
+        <location filename="src/settings.cpp" line="145"/>
         <source>Mandatory fields</source>
         <translation>Обязательные поля</translation>
     </message>
     <message>
-        <location filename="src/settings.cpp" line="142"/>
+        <location filename="src/settings.cpp" line="146"/>
         <source>Hotkeys</source>
         <translation>Комбинации клавиш</translation>
     </message>
     <message>
-        <location filename="src/settings.cpp" line="143"/>
+        <location filename="src/settings.cpp" line="147"/>
         <source>Confirmations</source>
         <translation>Подтверждения</translation>
     </message>
     <message>
-        <location filename="src/settings.cpp" line="144"/>
+        <location filename="src/settings.cpp" line="148"/>
         <source>Debug</source>
         <translation>Отладка</translation>
     </message>
     <message>
-        <location filename="src/settings.cpp" line="195"/>
+        <location filename="src/settings.cpp" line="197"/>
         <source>Close</source>
         <translation>Закрыть</translation>
     </message>
@@ -1691,7 +1707,8 @@ Another study is in progress.</source>
     </message>
     <message>
         <location filename="src/settings/videorecordsettings.cpp" line="39"/>
-        <source>&amp;Limit clips to</source>
+        <source>&amp;Limit clip duration at</source>
+        <oldsource>&amp;Limit clips to</oldsource>
         <translation>&amp;Ограничить видеофрагметы по</translation>
     </message>
     <message>
@@ -1701,12 +1718,14 @@ Another study is in progress.</source>
     </message>
     <message>
         <location filename="src/settings/videorecordsettings.cpp" line="44"/>
-        <source>&amp;Play a sound on</source>
+        <source>&amp;Play alert at</source>
+        <oldsource>&amp;Play a sound on</oldsource>
         <translation>&amp;Проигрывать звук за</translation>
     </message>
     <message>
         <location filename="src/settings/videorecordsettings.cpp" line="46"/>
-        <source> seconds before stopping</source>
+        <source> seconds till stop</source>
+        <oldsource> seconds before stopping</oldsource>
         <translation> секунд до остановки</translation>
     </message>
     <message>
@@ -1747,8 +1766,9 @@ Another study is in progress.</source>
     </message>
     <message>
         <location filename="src/settings/videorecordsettings.cpp" line="83"/>
-        <source>&amp;Display cells with motion</source>
-        <translation>Показывать &amp;ячейки с движением</translation>
+        <source>&amp;Highlight areas with motion</source>
+        <oldsource>&amp;Display cells with motion</oldsource>
+        <translation>Выделять &amp;ячейки с движением</translation>
     </message>
     <message>
         <source>&amp;Start recording only after the motion is detected</source>
@@ -1795,38 +1815,38 @@ Are you want to continue?</source>
 <context>
     <name>VideoSourceSettings</name>
     <message>
-        <location filename="src/settings/videosourcesettings.cpp" line="55"/>
+        <location filename="src/settings/videosourcesettings.cpp" line="56"/>
         <source>Video &amp;device</source>
         <translation>&amp;Устройство</translation>
     </message>
     <message>
-        <location filename="src/settings/videosourcesettings.cpp" line="57"/>
+        <location filename="src/settings/videosourcesettings.cpp" line="58"/>
         <source>I&amp;nput channel</source>
         <translation>&amp;Входной канал</translation>
     </message>
     <message>
-        <location filename="src/settings/videosourcesettings.cpp" line="59"/>
+        <location filename="src/settings/videosourcesettings.cpp" line="60"/>
         <source>Pixel &amp;format</source>
         <translation>&amp;Формат</translation>
     </message>
     <message>
-        <location filename="src/settings/videosourcesettings.cpp" line="61"/>
+        <location filename="src/settings/videosourcesettings.cpp" line="62"/>
         <source>Frame &amp;size</source>
         <translation>&amp;Размер кадра</translation>
     </message>
     <message>
-        <location filename="src/settings/videosourcesettings.cpp" line="62"/>
+        <location filename="src/settings/videosourcesettings.cpp" line="63"/>
         <source>Video &amp;codec</source>
         <translation>&amp;Кодек видео</translation>
     </message>
     <message>
-        <location filename="src/settings/videosourcesettings.cpp" line="67"/>
+        <location filename="src/settings/videosourcesettings.cpp" line="68"/>
         <source>&amp;Limit rate</source>
         <oldsource>M&amp;ax rate</oldsource>
         <translation>&amp;Ограничить до</translation>
     </message>
     <message>
-        <location filename="src/settings/videosourcesettings.cpp" line="73"/>
+        <location filename="src/settings/videosourcesettings.cpp" line="74"/>
         <source> frames per second</source>
         <translation> кадров в секунду</translation>
     </message>
@@ -1835,27 +1855,27 @@ Are you want to continue?</source>
         <translation type="obsolete">0, чтобы не ограничивать</translation>
     </message>
     <message>
-        <location filename="src/settings/videosourcesettings.cpp" line="76"/>
+        <location filename="src/settings/videosourcesettings.cpp" line="77"/>
         <source>Video &amp;bitrate</source>
         <translation>Скорость &amp;потока</translation>
     </message>
     <message>
-        <location filename="src/settings/videosourcesettings.cpp" line="79"/>
+        <location filename="src/settings/videosourcesettings.cpp" line="80"/>
         <source> kbit per second</source>
         <translation> kbit в секунду</translation>
     </message>
     <message>
-        <location filename="src/settings/videosourcesettings.cpp" line="82"/>
+        <location filename="src/settings/videosourcesettings.cpp" line="83"/>
         <source>De&amp;interlace</source>
         <translation>Устранять &amp;чересстрочность</translation>
     </message>
     <message>
-        <location filename="src/settings/videosourcesettings.cpp" line="85"/>
+        <location filename="src/settings/videosourcesettings.cpp" line="86"/>
         <source>Video &amp;muxer</source>
         <translation>Конте&amp;йнер видео</translation>
     </message>
     <message>
-        <location filename="src/settings/videosourcesettings.cpp" line="86"/>
+        <location filename="src/settings/videosourcesettings.cpp" line="87"/>
         <source>&amp;Image codec</source>
         <translation>Кодек &amp;снимков</translation>
     </message>
@@ -1868,43 +1888,43 @@ Are you want to continue?</source>
         <translation type="obsolete">Записывать видео &amp;целиком</translation>
     </message>
     <message>
-        <location filename="src/settings/videosourcesettings.cpp" line="87"/>
+        <location filename="src/settings/videosourcesettings.cpp" line="88"/>
         <source>RTP &amp;payloader</source>
         <translation>Контейнер &amp;RTP</translation>
     </message>
     <message>
-        <location filename="src/settings/videosourcesettings.cpp" line="89"/>
+        <location filename="src/settings/videosourcesettings.cpp" line="90"/>
         <source>&amp;RTP clients</source>
         <translation>Клиенты R&amp;TP</translation>
     </message>
     <message>
-        <location filename="src/settings/videosourcesettings.cpp" line="90"/>
+        <location filename="src/settings/videosourcesettings.cpp" line="91"/>
         <source>&amp;Enable RTP</source>
         <translation>Вкл&amp;ючить RTP</translation>
     </message>
     <message>
-        <location filename="src/settings/videosourcesettings.cpp" line="102"/>
-        <location filename="src/settings/videosourcesettings.cpp" line="108"/>
+        <location filename="src/settings/videosourcesettings.cpp" line="103"/>
+        <location filename="src/settings/videosourcesettings.cpp" line="109"/>
         <source>(none)</source>
         <translation>(нет)</translation>
     </message>
     <message>
-        <location filename="src/settings/videosourcesettings.cpp" line="117"/>
-        <location filename="src/settings/videosourcesettings.cpp" line="244"/>
-        <location filename="src/settings/videosourcesettings.cpp" line="251"/>
-        <location filename="src/settings/videosourcesettings.cpp" line="295"/>
-        <location filename="src/settings/videosourcesettings.cpp" line="344"/>
+        <location filename="src/settings/videosourcesettings.cpp" line="118"/>
+        <location filename="src/settings/videosourcesettings.cpp" line="246"/>
+        <location filename="src/settings/videosourcesettings.cpp" line="253"/>
+        <location filename="src/settings/videosourcesettings.cpp" line="297"/>
+        <location filename="src/settings/videosourcesettings.cpp" line="346"/>
         <source>(default)</source>
         <translation>(по умолчанию)</translation>
     </message>
     <message>
-        <location filename="src/settings/videosourcesettings.cpp" line="156"/>
+        <location filename="src/settings/videosourcesettings.cpp" line="158"/>
         <source>Failed to create element &apos;%1&apos;</source>
         <oldsource>Failed to create element &quot;%1&quot;</oldsource>
         <translation>Не удалось создать элемент &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="src/settings/videosourcesettings.cpp" line="411"/>
+        <location filename="src/settings/videosourcesettings.cpp" line="413"/>
         <source>%1x%2</source>
         <translation>%1х%2</translation>
     </message>
@@ -2015,143 +2035,143 @@ date</source>
 <context>
     <name>cmdline</name>
     <message>
-        <location filename="src/beryllium.cpp" line="110"/>
+        <location filename="src/beryllium.cpp" line="109"/>
         <source>Bad argument &apos;%s&apos; (must be name=value)</source>
         <translation>Неправильный параметр &apos;%s&apos; (должен быть в виде имя=значение)</translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="200"/>
+        <location filename="src/beryllium.cpp" line="199"/>
         <source>DCMTK log output file.</source>
         <translation>Файл журнала DCMTK.</translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="200"/>
-        <location filename="src/beryllium.cpp" line="204"/>
-        <location filename="src/beryllium.cpp" line="240"/>
+        <location filename="src/beryllium.cpp" line="199"/>
+        <location filename="src/beryllium.cpp" line="203"/>
+        <location filename="src/beryllium.cpp" line="239"/>
         <source>FILE</source>
         <translation>ФАЙЛ</translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="202"/>
+        <location filename="src/beryllium.cpp" line="201"/>
         <source>DCMTK logging level: fatal, error, warn, info, debug, trace.</source>
         <translation>Уровень отладки DCMTK: fatal, error, warn, info, debug, trace.</translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="202"/>
+        <location filename="src/beryllium.cpp" line="201"/>
         <source>LEVEL</source>
         <translation>УРОВЕНЬ</translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="204"/>
+        <location filename="src/beryllium.cpp" line="203"/>
         <source>Config file for DCMTK logger.</source>
         <translation>Файл настроек журнала DCMTK.</translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="238"/>
+        <location filename="src/beryllium.cpp" line="237"/>
         <source>Show the archive window.</source>
         <translation>Открыть окно архива.</translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="238"/>
-        <location filename="src/beryllium.cpp" line="248"/>
+        <location filename="src/beryllium.cpp" line="237"/>
+        <location filename="src/beryllium.cpp" line="247"/>
         <source>PATH</source>
         <translation>ПУТЬ</translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="240"/>
+        <location filename="src/beryllium.cpp" line="239"/>
         <source>Show the video editor window.</source>
         <translation>Открыть редактор видео.</translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="242"/>
+        <location filename="src/beryllium.cpp" line="241"/>
         <source>Show the settings window.</source>
         <translation>Открыть окно настроек.</translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="242"/>
+        <location filename="src/beryllium.cpp" line="241"/>
         <source>PAGE</source>
         <translation>ВКЛАДКА</translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="244"/>
+        <location filename="src/beryllium.cpp" line="243"/>
         <source>Run the program in safe mode.</source>
         <translation>Запустить программу в безопасном режиме.</translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="246"/>
+        <location filename="src/beryllium.cpp" line="245"/>
         <source>Run the program in X synchronous mode.</source>
         <translation>Запустить программу в синхронном режиме X11.</translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="248"/>
+        <location filename="src/beryllium.cpp" line="247"/>
         <source>Set root path to the settings file.</source>
         <translation>Задать путь к файлу настроек.</translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="251"/>
+        <location filename="src/beryllium.cpp" line="250"/>
         <source>Study accession number (id).</source>
         <translation>Код исследования.</translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="251"/>
-        <location filename="src/beryllium.cpp" line="257"/>
+        <location filename="src/beryllium.cpp" line="250"/>
+        <location filename="src/beryllium.cpp" line="256"/>
         <source>ID</source>
         <translation>КОД</translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="253"/>
+        <location filename="src/beryllium.cpp" line="252"/>
         <source>Patient birthdate.</source>
         <translation>Дата рождения пациента.</translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="253"/>
+        <location filename="src/beryllium.cpp" line="252"/>
         <source>YYYYMMDD</source>
         <translation>ГГГГММДД</translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="255"/>
+        <location filename="src/beryllium.cpp" line="254"/>
         <source>Study description.</source>
         <translation>Описание исследования.</translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="255"/>
-        <location filename="src/beryllium.cpp" line="259"/>
-        <location filename="src/beryllium.cpp" line="261"/>
+        <location filename="src/beryllium.cpp" line="254"/>
+        <location filename="src/beryllium.cpp" line="258"/>
+        <location filename="src/beryllium.cpp" line="260"/>
         <source>STRING</source>
         <translation>СТРОКА</translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="257"/>
+        <location filename="src/beryllium.cpp" line="256"/>
         <source>Patient id.</source>
         <translation>Карта пациента.</translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="259"/>
+        <location filename="src/beryllium.cpp" line="258"/>
         <source>Patient name.</source>
         <translation>Имя пациента.</translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="261"/>
+        <location filename="src/beryllium.cpp" line="260"/>
         <source>Performing physician name.</source>
         <translation>Имя выполняющего исследование врача.</translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="263"/>
+        <location filename="src/beryllium.cpp" line="262"/>
         <source>Patient sex.</source>
         <translation>Пол пациента.</translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="263"/>
+        <location filename="src/beryllium.cpp" line="262"/>
         <source>F|M|O|U</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="265"/>
+        <location filename="src/beryllium.cpp" line="264"/>
         <source>Automatically start the study.</source>
         <translation>Автоматически начинать исследование.</translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="332"/>
+        <location filename="src/beryllium.cpp" line="331"/>
         <source>Error initializing: %s
 </source>
         <translation>Ошибка инициализации: %s</translation>

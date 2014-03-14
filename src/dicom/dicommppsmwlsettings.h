@@ -29,7 +29,6 @@ class DicomMppsMwlSettings : public QWidget
     Q_OBJECT
     QCheckBox* checkUseMwl;
     QComboBox* cbMwlServer;
-    QCheckBox* checkTransCyr;
 
     QCheckBox* checkStartWithMpps;
     QCheckBox* checkCompleteWithMpps;
