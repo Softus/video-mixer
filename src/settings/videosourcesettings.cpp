@@ -17,6 +17,7 @@
 #include "videosourcesettings.h"
 #include "../defaults.h"
 #include <algorithm>
+#include <QApplication>
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDebug>
@@ -129,10 +130,11 @@ void VideoSourceSettings::showEvent(QShowEvent *e)
 
 QString VideoSourceSettings::updateGstList(const char* setting, const char* def, unsigned long long type, QComboBox* cb)
 {
+    QSettings settings;
     cb->clear();
-    auto selectedCodec = QSettings().value(setting, def).toString();
-
-    auto elmList = gst_element_factory_list_get_elements(type, GST_RANK_NONE);
+    auto selectedCodec = settings.value(setting, def).toString();
+    auto extra = settings.value(QString(setting)+"-extra").toBool() || qApp->keyboardModifiers().testFlag(Qt::ShiftModifier);
+    auto elmList = gst_element_factory_list_get_elements(type, extra? GST_RANK_NONE: GST_RANK_SECONDARY);
     for (auto curr = elmList; curr; curr = curr->next)
     {
         auto factory = QGst::ElementFactoryPtr::wrap(GST_ELEMENT_FACTORY(curr->data), true);
