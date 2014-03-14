@@ -32,7 +32,6 @@
 
 #ifdef WITH_DICOM
 #define HAVE_CONFIG_H
-#include "dcmtk/config/cfunix.h"
 #include <dcmtk/config/osconfig.h>   /* make sure OS specific configuration is included first */
 #include <dcmtk/oflog/logger.h>
 #if PACKAGE_VERSION_NUMBER > 360
