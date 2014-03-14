@@ -1,3 +1,10 @@
+beryllium (0.8.1) debian;
+
+  * Debug settings page
+  * --config-path arg
+
+ -- Pavel Bludov <pbludov@gmail.com>  Fri, 14 Mar 2014 13:44:00 +0900
+
 beryllium (0.8.0) debian;
 
   * Pipline fix
