@@ -49,6 +49,9 @@ public slots:
         ( const QString &name
         , const QString &value = QString()
         );
+    void setConfigPath
+        ( const QString &path
+        );
 };
 
 #endif // MAINWINDOWDBUSADAPTOR_H

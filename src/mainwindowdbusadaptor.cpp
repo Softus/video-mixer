@@ -76,3 +76,11 @@ void MainWindowDBusAdaptor::setValue
 {
     QSettings().setValue(name, value);
 }
+
+void MainWindowDBusAdaptor::setConfigPath
+    ( const QString &path
+    )
+{
+    QSettings::setPath(QSettings::NativeFormat, QSettings::UserScope, path);
+}
+
