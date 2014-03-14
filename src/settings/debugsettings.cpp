@@ -139,7 +139,7 @@ DebugSettings::DebugSettings(QWidget *parent) :
 #endif
 
     layoutMain->addStretch();
-    layoutMain->addWidget(new QLabel(tr("NOTE: The changes will take effect the next time the application starts.")));
+    layoutMain->addWidget(new QLabel(tr("NOTE: some changes on this page will take effect the next time the application starts.")));
     setLayout(layoutMain);
 }
 
@@ -156,6 +156,11 @@ void DebugSettings::onClickBrowse()
     }
 }
 
+extern void setupGstDebug(const QSettings& settings);
+#ifdef WITH_DICOM
+extern void setupDcmtkDebug(const QSettings& settings);
+#endif
+
 void DebugSettings::save()
 {
     QSettings settings;
@@ -166,11 +171,13 @@ void DebugSettings::save()
     settings.setValue("gst-debug-no-color", checkGstNoColor->isChecked());
     settings.setValue("gst-debug-dot-dir", textGstDot->text());
     settings.setValue("gst-debug", textGstDebug->text());
+    setupGstDebug(settings);
 
 #ifdef WITH_DICOM
     settings.setValue("dcmtk-debug-on", grpDicom->isChecked());
     settings.setValue("dcmtk-log-level", cbDicomLogLevel->currentText());
     settings.setValue("dcmtk-log-file", textDicomOutput->text());
     settings.setValue("dcmtk-log-config", textDicomConfig->text());
+    setupDcmtkDebug(settings);
 #endif
 }

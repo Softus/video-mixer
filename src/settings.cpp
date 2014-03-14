@@ -42,7 +42,9 @@
 #include <QListWidget>
 #include <QBoxLayout>
 #include <QDebug>
+#include <QLabel>
 #include <QStackedWidget>
+#include <QSettings>
 #include <QPushButton>
 #include "qwaitcursor.h"
 
@@ -52,6 +54,8 @@ static int QMetaObjectMetaType = qRegisterMetaType<QMetaObject>();
 Settings::Settings(const QString& pageTitle, QWidget *parent, Qt::WindowFlags flags)
     : QDialog(parent, flags)
 {
+    QSettings settings;
+
     listWidget = new QListWidget;
     listWidget->setMovement(QListView::Static);
     listWidget->setMaximumWidth(280);
@@ -68,6 +72,10 @@ Settings::Settings(const QString& pageTitle, QWidget *parent, Qt::WindowFlags fl
     layoutContent->addWidget(pagesWidget, 1);
 
     auto layoutBtns = new QHBoxLayout;
+    if (!settings.isWritable())
+    {
+        layoutBtns->addWidget(new QLabel(tr("NOTE: all changes will be lost when the application closes.")));
+    }
     layoutBtns->addStretch(1);
 
     auto btnApply = new QPushButton(tr("Appl&y"));
@@ -88,17 +96,18 @@ Settings::Settings(const QString& pageTitle, QWidget *parent, Qt::WindowFlags fl
     setLayout(mainLayout);
 
     setWindowTitle(tr("Settings"));
+    QString selectedPage = pageTitle.isEmpty()? settings.value("settings-page").toString(): pageTitle;
 
-    if (!pageTitle.isEmpty())
+    if (!selectedPage.isEmpty())
     {
-        auto idx = pageTitle.toInt();
+        auto idx = selectedPage.toInt();
         if (idx > 0)
         {
             listWidget->setCurrentRow(idx - 1);
         }
         else
         {
-            auto pages = listWidget->findItems(pageTitle, Qt::MatchContains);
+            auto pages = listWidget->findItems(selectedPage, Qt::MatchContains);
             if (!pages.empty())
             {
                 listWidget->setCurrentItem(pages.first());
@@ -164,6 +173,8 @@ void Settings::changePage(QListWidgetItem *current, QListWidgetItem *previous)
     {
         pagesWidget->setCurrentIndex(current->data(Qt::UserRole).toInt());
     }
+
+    QSettings().setValue("settings-page", current->text());
 }
 
 void Settings::onClickApply()

@@ -64,10 +64,10 @@ HotKeySettings::HotKeySettings(QWidget *parent) :
     itemCapture->addChild(newItem(settings, tr("Take snapshot"),        "hotkey-snapshot",     DEFAULT_HOTKEY_SNAPSHOT));
     itemCapture->addChild(newItem(settings, tr("Start clip"),           "hotkey-record-start", DEFAULT_HOTKEY_RECORD_START));
     itemCapture->addChild(newItem(settings, tr("Clip done"),            "hotkey-record-stop",  DEFAULT_HOTKEY_RECORD_STOP));
-    itemCapture->addChild(newItem(settings, tr("Show Archive window"),  "hotkey-archive",      DEFAULT_HOTKEY_ARCHIVE));
-    itemCapture->addChild(newItem(settings, tr("Show Settings window"), "hotkey-settings",     DEFAULT_HOTKEY_SETTINGS));
+    itemCapture->addChild(newItem(settings, tr("Show the Archive window"),  "hotkey-archive",      DEFAULT_HOTKEY_ARCHIVE));
+    itemCapture->addChild(newItem(settings, tr("Show the Settings window"), "hotkey-settings",     DEFAULT_HOTKEY_SETTINGS));
 #ifdef WITH_DICOM
-    itemCapture->addChild(newItem(settings, tr("Show Worklist window"), "hotkey-worklist",     DEFAULT_HOTKEY_WORKLIST));
+    itemCapture->addChild(newItem(settings, tr("Show the Worklist window"), "hotkey-worklist",     DEFAULT_HOTKEY_WORKLIST));
 #endif
     auto itemArchive = new QTreeWidgetItem(QStringList(tr("Archive window")));
     itemArchive->setFlags(Qt::ItemIsEnabled);

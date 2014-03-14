@@ -87,6 +87,13 @@ void sighandler(int signum)
 }
 
 static gboolean
+cfgPathCallback(const gchar *, const gchar *value, gpointer, GError **)
+{
+    QSettings::setPath(QSettings::NativeFormat, QSettings::UserScope, QString::fromLocal8Bit(value));
+    return true;
+}
+
+static gboolean
 setValueCallback(const gchar *name, const gchar *value, gpointer, GError **err)
 {
     if (0 == qstrcmp(name, "--safe-mode"))
@@ -100,7 +107,7 @@ setValueCallback(const gchar *name, const gchar *value, gpointer, GError **err)
         if (err)
         {
             *err = g_error_new(G_OPTION_ERROR,
-                G_OPTION_ERROR_BAD_VALUE, N_("Bad argument '%s' (must be name=value)"), value);
+                G_OPTION_ERROR_BAD_VALUE, QT_TRANSLATE_NOOP_UTF8("cmdline", "Bad argument '%s' (must be name=value)"), value);
         }
         return false;
     }
@@ -129,7 +136,7 @@ setModeCallback(const gchar *name, const gchar *value, gpointer, GError **)
     return true;
 }
 
-static void setupGstDebug(const QSettings& settings)
+void setupGstDebug(const QSettings& settings)
 {
     if (!settings.value("gst-debug-on", DEFAULT_GST_DEBUG_ON).toBool())
     {
@@ -190,16 +197,16 @@ dcmtkLogConfigCallback(const gchar *, const gchar *value, gpointer, GError **)
 //
 static GOptionEntry dcmtkOptions[] = {
     {"dcmtk-log-file", '\x0', 0, G_OPTION_ARG_CALLBACK, (gpointer)dcmtkLogFileCallback,
-        N_("DCMTK log output file."), N_("FILE")},
+        QT_TRANSLATE_NOOP_UTF8("cmdline", "DCMTK log output file."), QT_TRANSLATE_NOOP_UTF8("cmdline", "FILE")},
     {"dcmtk-log-level", '\x0', 0, G_OPTION_ARG_CALLBACK, (gpointer)dcmtkLogLevelCallback,
-        N_("DCMTK logging level: fatal, error, warn, info, debug, trace."), N_("LEVEL")},
+        QT_TRANSLATE_NOOP_UTF8("cmdline", "DCMTK logging level: fatal, error, warn, info, debug, trace."), QT_TRANSLATE_NOOP_UTF8("cmdline", "LEVEL")},
     {"dcmtk-log-config", '\x0', 0, G_OPTION_ARG_CALLBACK, (gpointer)dcmtkLogConfigCallback,
-        N_("Config file for DCMTK logger."), N_("FILE")},
+        QT_TRANSLATE_NOOP_UTF8("cmdline", "Config file for DCMTK logger."), QT_TRANSLATE_NOOP_UTF8("cmdline", "FILE")},
     {nullptr, '\x0', 0, G_OPTION_ARG_NONE, nullptr,
         nullptr, nullptr},
 };
 
-static void setupDcmtkDebug(const QSettings& settings)
+void setupDcmtkDebug(const QSettings& settings)
 {
     if (!settings.value("dcmtk-debug-on", DEFAULT_DCMTK_DEBUG_ON).toBool())
     {
@@ -228,32 +235,34 @@ static gboolean autoStart = false;
 
 static GOptionEntry options[] = {
     {"archive", '\x0', G_OPTION_FLAG_OPTIONAL_ARG, G_OPTION_ARG_CALLBACK, (gpointer)setModeCallback,
-        N_("Show the archive window."), N_("PATH")},
+        QT_TRANSLATE_NOOP_UTF8("cmdline", "Show the archive window."), QT_TRANSLATE_NOOP_UTF8("cmdline", "PATH")},
     {"edit-video", '\x0', G_OPTION_FLAG_OPTIONAL_ARG, G_OPTION_ARG_CALLBACK, (gpointer)setModeCallback,
-        N_("Show the video editor window."), N_("FILE")},
+        QT_TRANSLATE_NOOP_UTF8("cmdline", "Show the video editor window."), QT_TRANSLATE_NOOP_UTF8("cmdline", "FILE")},
     {"settings", '\x0', G_OPTION_FLAG_OPTIONAL_ARG, G_OPTION_ARG_CALLBACK, (gpointer)setModeCallback,
-        N_("Show the settings window."), N_("PAGE")},
+        QT_TRANSLATE_NOOP_UTF8("cmdline", "Show the settings window."), QT_TRANSLATE_NOOP_UTF8("cmdline", "PAGE")},
     {"safe-mode", '\x0', G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK, (gpointer)setValueCallback,
-        N_("Run the program in safe mode."), nullptr},
+        QT_TRANSLATE_NOOP_UTF8("cmdline", "Run the program in safe mode."), nullptr},
     {"sync", '\x0', G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK, (gpointer)xSyncCallback,
-        N_("Run the program in X synchronous mode."), nullptr},
+        QT_TRANSLATE_NOOP_UTF8("cmdline", "Run the program in X synchronous mode."), nullptr},
+    {"config-path", 'c', G_OPTION_FLAG_FILENAME, G_OPTION_ARG_CALLBACK, (gpointer)cfgPathCallback,
+        QT_TRANSLATE_NOOP_UTF8("cmdline", "Set root path to the settings file."), QT_TRANSLATE_NOOP_UTF8("cmdline", "PATH")},
 
     {"study-id", 'a', 0, G_OPTION_ARG_STRING, (gpointer)&accessionNumber,
-        N_("Study accession number (id)."), "ID"},
+        QT_TRANSLATE_NOOP_UTF8("cmdline", "Study accession number (id)."), QT_TRANSLATE_NOOP_UTF8("cmdline", "ID")},
     {"patient-birthdate", 'b', 0, G_OPTION_ARG_STRING, (gpointer)&patientBirthdate,
-        N_("Patient birthdate."), "YYYYMMDD"},
+        QT_TRANSLATE_NOOP_UTF8("cmdline", "Patient birthdate."), QT_TRANSLATE_NOOP_UTF8("cmdline", "YYYYMMDD")},
     {"study-description", 'd', 0, G_OPTION_ARG_STRING, (gpointer)&studyDescription,
-        N_("Study description."), "STRING"},
+        QT_TRANSLATE_NOOP_UTF8("cmdline", "Study description."), QT_TRANSLATE_NOOP_UTF8("cmdline", "STRING")},
     {"patient-id", 'i', 0, G_OPTION_ARG_STRING, (gpointer)&patientId,
-        N_("Patient id."), "ID"},
+        QT_TRANSLATE_NOOP_UTF8("cmdline", "Patient id."), QT_TRANSLATE_NOOP_UTF8("cmdline", "ID")},
     {"patient-name", 'n', 0, G_OPTION_ARG_STRING, (gpointer)&patientName,
-        N_("Patient name."), "STRING"},
+        QT_TRANSLATE_NOOP_UTF8("cmdline", "Patient name."), QT_TRANSLATE_NOOP_UTF8("cmdline", "STRING")},
     {"physician", 'p', 0, G_OPTION_ARG_STRING, (gpointer)&physician,
-        N_("Performing physician name."), "STRING"},
+        QT_TRANSLATE_NOOP_UTF8("cmdline", "Performing physician name."), QT_TRANSLATE_NOOP_UTF8("cmdline", "STRING")},
     {"patient-sex", 's', 0, G_OPTION_ARG_STRING, (gpointer)&patientSex,
-        N_("Patient sex."), "F|M|O|U"},
+        QT_TRANSLATE_NOOP_UTF8("cmdline", "Patient sex."), QT_TRANSLATE_NOOP_UTF8("cmdline", "F|M|O|U")},
     {"auto-start", '\x0', 0, G_OPTION_ARG_NONE, (gpointer)&autoStart,
-        N_("Automatically start the study."), nullptr},
+        QT_TRANSLATE_NOOP_UTF8("cmdline", "Automatically start the study."), nullptr},
 
     {G_OPTION_REMAINING, '\x0', 0, G_OPTION_ARG_CALLBACK, (gpointer)setValueCallback,
         nullptr, nullptr},
@@ -289,12 +298,6 @@ int main(int argc, char *argv[])
     QApplication::setApplicationName(PRODUCT_SHORT_NAME);
     QApplication::setApplicationVersion(PRODUCT_VERSION_STR);
 
-    // At this time it is safe to use QSettings
-    //
-    QSettings settings;
-
-    setupGstDebug(settings);
-
 #if !GLIB_CHECK_VERSION(2, 32, 0)
     // Must initialise the threading system before using any other GLib funtion
     //
@@ -312,7 +315,6 @@ int main(int argc, char *argv[])
     g_option_context_add_main_entries(ctx, options, PRODUCT_SHORT_NAME);
 
 #ifdef WITH_DICOM
-    setupDcmtkDebug(settings);
     auto dcmtkGroup = g_option_group_new ("dcmtk", _("DCMTK Options"),
         _("Show DCMTK Options"), NULL, NULL);
     g_option_context_add_group(ctx, dcmtkGroup);
@@ -327,11 +329,18 @@ int main(int argc, char *argv[])
 
     if (err)
     {
-      g_print(N_("Error initializing: %s\n"), GST_STR_NULL(err->message));
+      g_print(QT_TRANSLATE_NOOP_UTF8("cmdline", "Error initializing: %s\n"), GST_STR_NULL(err->message));
       g_error_free(err);
       return 1;
     }
 
+    // At this time it is safe to use QSettings
+    //
+    QSettings settings;
+    setupGstDebug(settings);
+#ifdef WITH_DICOM
+    setupDcmtkDebug(settings);
+#endif
     gstApplyFixes();
 
     // QGStreamer stuff
