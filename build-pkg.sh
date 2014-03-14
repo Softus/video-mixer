@@ -24,9 +24,9 @@ for arg in "$@"; do
 done
 
 if [ $dicom == 0 ]; then
+rm -fr src/dicom*
   # Remove all non-free code
-  rm -fr src/dicom*
-  for f in $(grep -rl WITH_DICOM src)
+  for f in $(grep -l WITH_DICOM src)
     do unifdef -o $f -UWITH_DICOM $f
   done
   sed -i '$d' beryllium.pro
@@ -47,7 +47,7 @@ if [ $touch == 1 ]; then
   ' beryllium.pro
 fi
 
-distro=$(lsb_release -is | awk '{print $1}')
+distro=$((lsb_release -is || echo windows) | awk '{print $1}')
 case $distro in
 Ubuntu | Debian)  echo "Building DEB package"
     rm -f ../*.deb ../*.tar.gz ../*.dsc ../*.changes
@@ -58,6 +58,9 @@ openSUSE | fedora | SUSE | CentOS)  echo "Building RPM package"
     rm -f ../*.rpm ../*.tar.gz
     tar czf ../beryllium.tar.gz * --exclude=.git --exclude=*.sh && rpmbuild -D"dicom $dicom" -D"debug $debug" -D"touch $touch" -D"distro $distro" -ta ../beryllium.tar.gz
     mv ~/rpmbuild/RPMS/*-beryllium-*.rpm ..
+    ;;
+windows)  echo "Building MSI package"
+    qmake && nmake -f Makefile.Release && msbuild "/property:configuration=Release" "wix\msi.wixproj"
     ;;
 *) echo "$distro is not supported yet"
    ;;

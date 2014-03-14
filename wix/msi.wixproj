@@ -6,7 +6,7 @@
     <ProductVersion>3.0</ProductVersion>
     <ProjectGuid>{a70f0c0c-8b35-48c9-bce4-e5f7a82ba774}</ProjectGuid>
     <SchemaVersion>2.0</SchemaVersion>
-    <OutputName>beryllium_i386</OutputName>
+    <OutputName>beryllium-0.8.2_i386</OutputName>
     <OutputType>Package</OutputType>
     <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' ">$(MSBuildExtensionsPath)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
   </PropertyGroup>
@@ -20,16 +20,20 @@
     </Cultures>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
-    <OutputPath>$(SolutionDir)\dist\$(Configuration)$(Platform)\</OutputPath>
+    <OutputPath>..\</OutputPath>
     <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
     <DefineConstants>
     </DefineConstants>
-    <CompilerAdditionalOptions>-ext WixUtilExtension
--ext WixFirewallExtension</CompilerAdditionalOptions>
-    <LinkerAdditionalOptions>-ext WixUtilExtension
--ext WixFirewallExtension</LinkerAdditionalOptions>
-    <WixVariables>Platform=$(PlatformName)</WixVariables>
-    <SuppressSpecificWarnings>1076</SuppressSpecificWarnings>
+    <CompilerAdditionalOptions>
+    </CompilerAdditionalOptions>
+    <LinkerAdditionalOptions>
+    </LinkerAdditionalOptions>
+    <WixVariables>
+    </WixVariables>
+    <SuppressSpecificWarnings>
+    </SuppressSpecificWarnings>
+    <SuppressPdbOutput>True</SuppressPdbOutput>
+    <Cultures>ru-ru</Cultures>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
     <DefineConstants>Debug;</DefineConstants>

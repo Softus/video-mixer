@@ -7,8 +7,8 @@
 <?define Manufacturer    = "dc.baikal.ru" ?>
 <?define ProductVersion  = "$(var.ProductBuild).$(var.ProductRevision)" ?>
 <?define UpgradeCode     = "{B100D0FF-AF56-0000-0314-079500628307}" ?>
-<?define SrcDir32        = "$(var.SolutionDir)\$(var.Configuration)\" ?>
-<?define SrcDir64        = "$(var.SolutionDir)\X64\$(var.Configuration)\" ?>
+<?define SrcDir32        = "../$(var.Configuration)\" ?>
+<?define SrcDir64        = "../$(var.Configuration)\" ?>
 
 <?define RequiresAdmin    = "True" ?>
 <?define QtVersion        = "5" ?>
