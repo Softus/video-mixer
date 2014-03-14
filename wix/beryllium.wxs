@@ -74,7 +74,7 @@
             <Directory Id='DBusFolder' Name='dbus-1'>
               <Directory Id='ServicesFolder' Name='services'>
                 <Component Id="Comp_DBusService32" Guid="B100D0FF-AF56-0107-0314-079500628307" Win64="no">
-                  <File Id="File_com_irk_dc_beryllium_service" Name="com.irk-dc.beryllium.service" Source="com.irk-dc.beryllium.service.win" />
+                  <File Id="File_com_irk_dc_beryllium_service" Name="com.irk-dc.beryllium.service" Source="../com.irk-dc.beryllium.service.win" />
                 </Component>
               </Directory>
             </Directory>
@@ -86,7 +86,7 @@
               <Environment Id="PATH" Name="PATH" Value="[GSTREAMERSDKROOT_X86]\[GSTREAMERSDKVERSION_X86]\x86\bin" Permanent="no" Part="last" Action="set" System="no" />
               <File Id="File_Beryllium_x86" Name="beryllium.exe" KeyPath="yes">
                 <Shortcut Id="Shortcut_Beryllium_x86" Directory="ProgramMenuFolder" Name="Beryllium" Advertise="yes" Icon="beryllium.ico">
-                  <Icon Id="beryllium.ico" SourceFile="beryllium.ico" />
+                  <Icon Id="beryllium.ico" SourceFile="../beryllium.ico" />
                 </Shortcut>
               </File>
               <?if $(var.Configuration)=Debug ?>
@@ -94,12 +94,12 @@
               <?endif ?>
             </Component>
             <?include opencv32.wxi ?>
-            <Directory Id="Translations32" Name="translations">
+            <Directory Id="Translations32" Name="translations" FileSource="../">
               <Component Id="Comp_Translations32" Guid="B100D0FF-AF56-0102-0314-079500628307" Win64="no">
-                <File Id="File_Beryllium_ru_qm_x86" Name="beryllium_ru.qm"  Source="beryllium_ru.qm"/>
+                <File Id="File_Beryllium_ru_qm_x86" Name="beryllium_ru.qm"  Source="../beryllium_ru.qm"/>
               </Component>
             </Directory>
-            <Directory Id="Sound32" Name="sound" FileSource="sound">
+            <Directory Id="Sound32" Name="sound" FileSource="../sound">
               <Component Id="Comp_Sound32" Guid="B100D0FF-AF56-0103-0314-079500628307" Win64="no">
                 <File Id="File_notify_ac3_x86" Name="notify.ac3" />
                 <File Id="File_shutter_ac3_x86" Name="shutter.ac3" />
