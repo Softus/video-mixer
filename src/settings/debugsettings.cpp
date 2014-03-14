@@ -34,9 +34,8 @@
 #define HAVE_CONFIG_H
 #include <dcmtk/config/osconfig.h>   /* make sure OS specific configuration is included first */
 #include <dcmtk/oflog/logger.h>
-#if PACKAGE_VERSION_NUMBER > 360
+namespace dcmtk{}
 using namespace dcmtk;
-#endif
 #endif
 
 DebugSettings::DebugSettings(QWidget *parent) :

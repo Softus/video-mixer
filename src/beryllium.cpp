@@ -50,9 +50,8 @@
 #include <dcmtk/oflog/logger.h>
 #include <dcmtk/oflog/fileap.h>
 #include <dcmtk/oflog/configrt.h>
-#if PACKAGE_VERSION_NUMBER > 360
+namespace dcmtk{}
 using namespace dcmtk;
-#endif
 #endif
 
 #ifdef Q_OS_WIN
