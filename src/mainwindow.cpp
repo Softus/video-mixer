@@ -182,6 +182,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //
     connect(this, SIGNAL(enableWidget(QWidget*, bool)), this, SLOT(onEnableWidget(QWidget*, bool)), Qt::QueuedConnection);
     connect(this, SIGNAL(clipFrameReady()), this, SLOT(onClipFrameReady()), Qt::QueuedConnection);
+    connect(this, SIGNAL(updateOverlayText()), this, SLOT(onUpdateOverlayText()), Qt::QueuedConnection);
 
     auto layoutMain = new QVBoxLayout();
 #ifndef WITH_TOUCH
@@ -611,10 +612,10 @@ QString MainWindow::buildPipeline()
                 .append(" sensitivity=").append(motionSensitivity)
                 .append(" threshold=").append(motionThreshold)
                 .append(" minimummotionframes=").append(motionMinFrames)
-                .append(" gap=").append(motionGap)
-                .append(colorConverter);
+                .append(" gap=").append(motionGap);
         }
-        pipe.append(" ! textoverlay name=displayoverlay color=-1 halignment=right valignment=top text=* xpad=2 ypad=0 font-desc=16")
+        pipe.append(" ! textoverlay name=displayoverlay color=-1 halignment=right valignment=top text=* xpad=8 ypad=0 font-desc=16")
+            .append(colorConverter)
             .append(" ! " ).append(displaySinkDef).append(" name=displaysink async=0 ").append(displayParams);
     }
 
@@ -693,11 +694,11 @@ QGst::PipelinePtr MainWindow::createPipeline()
             qCritical() << "Element displaysink not found";
         }
 
-        auto clipValve = pl->getElementByName("clipinspect");
-        clipValve && QGlib::connect(clipValve, "handoff", this, &MainWindow::onClipFrame);
+        auto clipInspect = pl->getElementByName("clipinspect");
+        clipInspect && QGlib::connect(clipInspect, "handoff", this, &MainWindow::onClipFrame);
 
-        auto videoValve = pl->getElementByName("videoinspect");
-        videoValve && QGlib::connect(videoValve, "handoff", this, &MainWindow::onVideoFrame);
+        auto videoInspect = pl->getElementByName("videoinspect");
+        videoInspect && QGlib::connect(videoInspect, "handoff", this, &MainWindow::onVideoFrame);
 
         displayOverlay    = pl->getElementByName("displayoverlay");
         videoEncoder      = pl->getElementByName("videoencoder");
@@ -930,10 +931,10 @@ void MainWindow::updateWindowTitle()
     QString windowTitle(PRODUCT_FULL_NAME);
     if (running)
     {
-        if (!accessionNumber.isEmpty())
-        {
-            windowTitle.append(tr(" - ")).append(accessionNumber);
-        }
+//      if (!accessionNumber.isEmpty())
+//      {
+//          windowTitle.append(tr(" - ")).append(accessionNumber);
+//      }
 
         if (!patientId.isEmpty())
         {
@@ -1068,6 +1069,7 @@ void MainWindow::onClipFrame(const QGst::BufferPtr& buf)
         enableWidget(btnSnapshot, false);
     }
 }
+
 void MainWindow::onClipFrameReady()
 {
     recordTimerId = startTimer(1000);
@@ -1083,6 +1085,7 @@ void MainWindow::onVideoFrame(const QGst::BufferPtr& buf)
     // Once we got an I-Frame, open second valve
     //
     setElementProperty("videovalve", "drop", false);
+    updateOverlayText();
 }
 
 void MainWindow::onImageReady(const QGst::BufferPtr& buf)
@@ -1498,19 +1501,30 @@ void MainWindow::onRecordStopClick()
     updateOverlayText();
 }
 
-void MainWindow::updateOverlayText()
+void MainWindow::onUpdateOverlayText()
 {
     if (!displayOverlay)
         return;
 
-    int color = recording? 0xFF0000FF: // red
-        !motionStart || motionDetected? 0xFF00FF00: // green
-        pipeline->getElementByName("videomux")? 0xFFFF0000: // blue
-        0xFFFFFFFF; // white
+    QString text;
+    if (countdown > 0)
+    {
+        text.setNum(countdown);
+    }
+    else if (recording)
+    {
+        text.append('*');
+    }
 
-    displayOverlay->setProperty("color", color);
-    displayOverlay->setProperty("outline-color", color);
-    displayOverlay->setProperty("text",  countdown > 0? QString::number(countdown): "*");
+    auto videovalve = pipeline->getElementByName("videovalve");
+    if (running && videovalve && !videovalve->property("drop").toBool())
+    {
+        text.append(" log");
+    }
+
+    displayOverlay->setProperty("color", 0xFFFF0000);
+    displayOverlay->setProperty("outline-color", 0xFFFF0000);
+    displayOverlay->setProperty("text", text);
 }
 
 void MainWindow::updateStartButton()

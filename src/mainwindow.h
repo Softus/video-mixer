@@ -103,7 +103,6 @@ class MainWindow : public QWidget
     QMenuBar* createMenuBar();
     QToolBar* createToolBar();
     void updateStartButton();
-    void updateOverlayText();
 
     // State machine
     //
@@ -154,6 +153,7 @@ protected:
 signals:
     void enableWidget(QWidget*, bool);
     void clipFrameReady();
+    void updateOverlayText();
 
 private slots:
 #ifdef WITH_DICOM
@@ -175,6 +175,7 @@ private slots:
     void updatePipeline();
     void onEnableWidget(QWidget*, bool);
     void onClipFrameReady();
+    void onUpdateOverlayText();
 
     friend class MainWindowDBusAdaptor;
 };
