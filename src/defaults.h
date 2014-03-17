@@ -17,6 +17,7 @@
 #ifndef BERYLLIUM_DEFAULTS_H
 #define BERYLLIUM_DEFAULTS_H
 
+#define DEFAULT_ENABLE_SETTINGS       true
 #define DEFAULT_DISPLAY_SINK          "autovideosink"
 #define DEFAULT_FOLDER_TEMPLATE       "/%yyyy%-%MM%/%dd%/%name%-%id%/"
 #define DEFAULT_HOTKEY_ABOUT          (int)(Qt::AltModifier | Qt::Key_Question)

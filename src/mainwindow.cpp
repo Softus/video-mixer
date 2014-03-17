@@ -233,13 +233,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
     updateStartButton();
 
-    auto safeMode    =
+    auto safeMode    = settings.value("enable-settings", DEFAULT_ENABLE_SETTINGS).toBool() && (
 #if (QT_VERSION >= QT_VERSION_CHECK(4, 8, 0))
-                        qApp->queryKeyboardModifiers() == SAFE_MODE_KEYS ||
+                       qApp->queryKeyboardModifiers() == SAFE_MODE_KEYS ||
 #else
-                        qApp->keyboardModifiers() == SAFE_MODE_KEYS ||
+                       qApp->keyboardModifiers() == SAFE_MODE_KEYS ||
 #endif
-                       settings.value("safe-mode", true).toBool();
+                       settings.value("safe-mode", true).toBool());
 
     sound = new Sound(this);
 
@@ -887,6 +887,10 @@ void MainWindow::updatePipeline()
     {
         archiveWindow->updateRoot();
     }
+
+    auto showSettings = settings.value("enable-settings", DEFAULT_ENABLE_SETTINGS).toBool();
+    actionSettings->setEnabled(showSettings);
+    actionSettings->setVisible(showSettings);
 
     updateShortcut(btnStart,    settings.value("hotkey-start",    DEFAULT_HOTKEY_START).toInt());
     updateShortcut(btnSnapshot, settings.value("hotkey-snapshot", DEFAULT_HOTKEY_SNAPSHOT).toInt());
