@@ -49,11 +49,13 @@ VideoRecordSettings::VideoRecordSettings(QWidget *parent) :
     grpClips->setLayout(layoutClips);
     layoutMain->addWidget(grpClips);
 
-    layoutMain->addWidget(checkRecordLog = new QCheckBox(tr("Record &video log")));
-    checkRecordLog->setChecked(settings.value("enable-video").toBool());
+    layoutMain->addWidget(grpRecordLog = new QGroupBox(tr("Record &video log")));
+    auto layoutLog = new QVBoxLayout;
+    grpRecordLog->setCheckable(true);
+    grpRecordLog->setChecked(settings.value("enable-video").toBool());
+    grpRecordLog->setLayout(layoutLog);
 
     grpMotionDetection = new QGroupBox(tr("Use &motion detection"));
-    layoutClips->addWidget(grpMotionDetection);
     grpMotionDetection->setCheckable(true);
     grpMotionDetection->setChecked(settings.value("detect-motion", DEFAULT_MOTION_DETECTION).toBool());
     auto layoutVideoLog = new QFormLayout;
@@ -83,7 +85,7 @@ VideoRecordSettings::VideoRecordSettings(QWidget *parent) :
     layoutVideoLog->addRow(nullptr, checkMotionDebug = new QCheckBox(tr("&Highlight areas with motion")));
     checkMotionDebug->setChecked(settings.value("motion-debug").toBool());
     grpMotionDetection->setLayout(layoutVideoLog);
-    layoutMain->addWidget(grpMotionDetection);
+    layoutLog->addWidget(grpMotionDetection);
 
     layoutMain->addStretch();
 
@@ -110,7 +112,7 @@ void VideoRecordSettings::save()
     settings.setValue("clip-countdown",         spinCountdown->value());
     settings.setValue("notify-clip-limit",      checkNotify->isChecked());
     settings.setValue("notify-clip-countdown",  spinNotify->value());
-    settings.setValue("enable-video",           checkRecordLog->isChecked());
+    settings.setValue("enable-video",           grpRecordLog->isChecked());
     settings.setValue("detect-motion",          useDetection);
     settings.setValue("motion-start",           checkMotionStart->isChecked());
     settings.setValue("motion-stop",            checkMotionStop->isChecked());
