@@ -75,7 +75,7 @@ VideoSourceSettings::VideoSourceSettings(QWidget *parent)
         spinFps->setEnabled(checkFps->isChecked());
     }
     layout->addRow(tr("Video &bitrate"), spinBitrate = new QSpinBox());
-    spinBitrate->setRange(300, 102400);
+    spinBitrate->setRange(0, 102400);
     spinBitrate->setSingleStep(100);
     spinBitrate->setSuffix(tr(" kbit per second"));
     spinBitrate->setValue(settings.value("bitrate", DEFAULT_VIDEOBITRATE).toInt());

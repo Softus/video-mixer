@@ -878,7 +878,9 @@ void MainWindow::updatePipeline()
             //
             videoEncBitrate *= 1024;
         }
-        setElementProperty(videoEncoder, "bitrate", videoEncBitrate);
+
+        videoEncoder->setProperty("bitrate", videoEncBitrate);
+        qDebug() << "video bitrate" << videoEncoder->property("bitrate").toInt();
     }
 
     if (archiveWindow != nullptr)
