@@ -48,7 +48,7 @@ bool MainWindowDBusAdaptor::startStudy
     if (!sex.isEmpty())
         wnd->patientSex = sex;
     if (!birthdate.isEmpty())
-        wnd->patientBirthDate = birthdate;
+        wnd->patientBirthDate = QString(birthdate).remove(QRegExp("[^0-9]"));
     if (!physician.isEmpty())
         wnd->physician = physician;
     if (!studyName.isEmpty())
