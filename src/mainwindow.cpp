@@ -595,7 +595,8 @@ QString MainWindow::buildPipeline()
     //
     auto displaySinkDef  = settings.value("display-sink", DEFAULT_DISPLAY_SINK).toString();
     auto displayParams   = settings.value(displaySinkDef + "-parameters").toString();
-    auto detectMotion    = settings.value("detect-motion", DEFAULT_MOTION_DETECTION).toBool();
+    auto detectMotion    = settings.value("enable-video").toBool() &&
+                           settings.value("detect-motion", DEFAULT_MOTION_DETECTION).toBool();
     pipe.append(" ! tee name=splitter");
     if (!displaySinkDef.isEmpty())
     {
@@ -916,10 +917,11 @@ void MainWindow::updatePipeline()
 #endif
     updateShortcut(actionAbout, settings.value("hotkey-about",  DEFAULT_HOTKEY_ABOUT).toInt());
 
-    recordLimit = settings.value("clip-limit", DEFAULT_CLIP_LIMIT).toBool()? settings.value("clip-countdown").toInt(): 0;
+    recordLimit  = settings.value("clip-limit", DEFAULT_CLIP_LIMIT).toBool()? settings.value("clip-countdown").toInt(): 0;
     recordNotify = settings.value("notify-clip-limit", DEFAULT_NOTIFY_CLIP_LIMIT).toBool()? settings.value("notify-clip-countdown").toInt(): 0;
 
-    auto detectMotion = settings.value("detect-motion", DEFAULT_MOTION_DETECTION).toBool();
+    auto detectMotion = settings.value("enable-video").toBool() &&
+                        settings.value("detect-motion", DEFAULT_MOTION_DETECTION).toBool();
     motionStart  = detectMotion && settings.value("motion-start").toBool();
     motionStop   = detectMotion && settings.value("motion-stop").toBool();
 
