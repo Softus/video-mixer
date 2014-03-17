@@ -12,6 +12,6 @@ Package: beryllium
 Architecture: i386 amd64
 Pre-Depends: debconf (>= 1.1) | debconf-2.0
 Depends: ${shlibs:Depends}, gstreamer0.10-gnonlin
-Recommends: gstreamer0.10-ffmpeg | gstreamer0.10-libav, gstreamer0.10-vaapi
+Suggests: gstreamer0.10-ffmpeg | gstreamer0.10-libav, gstreamer0.10-vaapi
 Description: Beryllium DICOM edition
   Video and image capturing for medicine.
