@@ -60,7 +60,7 @@ openSUSE | fedora | SUSE | CentOS)  echo "Building RPM package"
     mv ~/rpmbuild/RPMS/*-beryllium-*.rpm ..
     ;;
 windows)  echo "Building MSI package"
-    qmake && nmake -f Makefile.Release && msbuild "/property:configuration=Release" "wix\msi.wixproj"
+    qmake && nmake -f Makefile.Release && cmd.exe "/c" "wix\build.cmd"
     ;;
 *) echo "$distro is not supported yet"
    ;;
