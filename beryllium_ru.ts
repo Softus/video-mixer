@@ -349,7 +349,7 @@ Continue?</source>
     <message>
         <location filename="src/settings/debugsettings.cpp" line="81"/>
         <source>&amp;Pipelines dump folder</source>
-        <translation>&amp;Папка для снимков конвеера</translation>
+        <translation>&amp;Папка для снимков конвейера</translation>
     </message>
     <message>
         <location filename="src/settings/debugsettings.cpp" line="88"/>
@@ -475,7 +475,7 @@ Continue?</source>
     <message>
         <location filename="src/dicom/dicomdevicesettings.cpp" line="134"/>
         <source>Export &amp;video log to DICOM</source>
-        <translation>&amp;Экспорт видеожурнала в DICOM</translation>
+        <translation>&amp;Экспорт видео журнала в DICOM</translation>
     </message>
     <message>
         <location filename="src/dicom/dicomdevicesettings.cpp" line="136"/>
@@ -1462,7 +1462,7 @@ Another study is in progress.</source>
     <message>
         <location filename="src/settings/storagesettings.cpp" line="43"/>
         <source>Images and clips</source>
-        <translation>Снимки и видеофрагменты</translation>
+        <translation>Снимки и видео фрагменты</translation>
     </message>
     <message>
         <location filename="src/settings/storagesettings.cpp" line="46"/>
@@ -1493,13 +1493,13 @@ Another study is in progress.</source>
     <message>
         <location filename="src/settings/storagesettings.cpp" line="64"/>
         <source>Video logs</source>
-        <translation>Видеожурнал</translation>
+        <translation>Видео журнал</translation>
     </message>
     <message>
         <location filename="src/settings/storagesettings.cpp" line="69"/>
         <location filename="src/settings/storagesettings.cpp" line="79"/>
         <source>(share with images and clips)</source>
-        <translation>(как для снимков и видеофрагментов)</translation>
+        <translation>(как для снимков и видео фрагментов)</translation>
     </message>
     <message>
         <location filename="src/settings/storagesettings.cpp" line="72"/>
@@ -1674,7 +1674,7 @@ Another study is in progress.</source>
     <message>
         <location filename="src/videoeditor.cpp" line="238"/>
         <source>Failed to create the pipeline</source>
-        <translation>Не удалось создать конвеер</translation>
+        <translation>Не удалось создать конвейер</translation>
     </message>
     <message>
         <location filename="src/videoeditor.cpp" line="249"/>
@@ -1709,7 +1709,7 @@ Another study is in progress.</source>
         <location filename="src/settings/videorecordsettings.cpp" line="39"/>
         <source>&amp;Limit clip duration at</source>
         <oldsource>&amp;Limit clips to</oldsource>
-        <translation>&amp;Ограничить видеофрагметы по</translation>
+        <translation>&amp;Ограничить видео фрагметы по</translation>
     </message>
     <message>
         <location filename="src/settings/videorecordsettings.cpp" line="41"/>
@@ -1731,7 +1731,7 @@ Another study is in progress.</source>
     <message>
         <location filename="src/settings/videorecordsettings.cpp" line="52"/>
         <source>Record &amp;video log</source>
-        <translation>Записывать видео&amp;журнал</translation>
+        <translation>Записывать видео &amp;журнал</translation>
     </message>
     <message>
         <location filename="src/settings/videorecordsettings.cpp" line="55"/>
