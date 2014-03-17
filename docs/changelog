@@ -1,3 +1,9 @@
+beryllium (0.8.3) debian;
+
+  * Allow bitrate=0 for automatic bitrate calc
+
+ -- Pavel Bludov <pbludov@gmail.com>  Mon, 17 Mar 2014 13:50:00 +0900
+
 beryllium (0.8.2) debian;
 
   * TranslateToLatin for non ASCII characters
