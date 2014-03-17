@@ -47,7 +47,7 @@ if [ $touch == 1 ]; then
   ' beryllium.pro
 fi
 
-distro=$((lsb_release -is || echo windows) | awk '{print $1}')
+distro=$( (lsb_release -is || echo windows) | awk '{print $1}')
 case $distro in
 Ubuntu | Debian)  echo "Building DEB package"
     rm -f ../*.deb ../*.tar.gz ../*.dsc ../*.changes
