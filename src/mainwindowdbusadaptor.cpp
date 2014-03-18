@@ -39,6 +39,22 @@ bool MainWindowDBusAdaptor::startStudy
     , bool autoStart
     )
 {
+    if (busy())
+    {
+        if (accessionNumber == wnd->accessionNumber && id == wnd->patientId)
+        {
+            // Duplicate study, just ignore
+            //
+            return false;
+        }
+        else
+        {
+            // The user forgot to stop previous study => stop right now
+            //
+            wnd->onStopStudy();
+        }
+    }
+
     if (!accessionNumber.isEmpty())
         wnd->accessionNumber = accessionNumber;
     if (!id.isEmpty())
