@@ -13,7 +13,7 @@ Packager: Beryllium team <beryllium@dc.baikal.ru>
 Requires: opencv
 BuildRequires: boost-devel, make, opencv-devel
 
-%if %distro == CentOS
+%if %distro == centos
 BuildRequires: gstreamer-devel, qt-devel
 Requires: gstreamer >= 0.10.35, qt4 >= 4.6.0
 Requires: gstreamer-plugins-base >= 0.10.31, gstreamer-plugins-good >= 0.10.23
