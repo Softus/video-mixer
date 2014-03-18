@@ -47,20 +47,26 @@ if [ $touch == 1 ]; then
   ' beryllium.pro
 fi
 
-distro=$( (lsb_release -is || echo windows) | awk '{print $1}')
+distro=$( (lsb_release -is || echo windows) | awk '{print tolower($1)}')
+rev=$( (lsb_release -rs || echo xp) | awk '{print tolower($1)}')
 case $distro in
-Ubuntu | Debian)  echo "Building DEB package"
+ubuntu | debian)  echo "Building DEB package"
     rm -f ../*.deb ../*.tar.gz ../*.dsc ../*.changes
     cp docs/* debian/
     dpkg-buildpackage -I.git -I*.sh -rfakeroot
+    cd ..
+    for fname in *.deb *.tar.gz *.dsc *.changes;
+    do
+        mv $fname $distro-$rev-$fname;
+    done
     ;;
-openSUSE | fedora | SUSE | CentOS)  echo "Building RPM package"
+opensuse | fedora | suse | centos)  echo "Building RPM package"
     rm -f ../*.rpm ../*.tar.gz
-    tar czf ../beryllium.tar.gz * --exclude=.git --exclude=*.sh && rpmbuild -D"dicom $dicom" -D"debug $debug" -D"touch $touch" -D"distro $distro" -ta ../beryllium.tar.gz
+    tar czf ../beryllium.tar.gz * --exclude=.git --exclude=*.sh && rpmbuild -D"dicom $dicom" -D"debug $debug" -D"touch $touch" -D"distro $distro" -D"rev $rev" -ta ../beryllium.tar.gz
     mv ~/rpmbuild/RPMS/*-beryllium-*.rpm ..
     ;;
 windows)  echo "Building MSI package"
-    qmake && nmake -f Makefile.Release && cmd.exe "/c" "wix\build.cmd"
+    qmake && nmake -f Makefile.Release && cp -r c:/tmp/release . && cmd.exe "/c" "wix\build.cmd"
     ;;
 *) echo "$distro is not supported yet"
     ;;

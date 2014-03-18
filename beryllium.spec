@@ -1,7 +1,7 @@
 Summary: Beryllium DICOM edition.
 Name: beryllium
 Provides: beryllium
-Version: 0.8.3
+Version: 0.8.4
 Release: 1
 License: LGPL-2.1+
 Source: %{name}.tar.gz
@@ -46,7 +46,7 @@ Beryllium DICOM edition.
 
 Video and image capturing for medicine.
 
-%define _rpmfilename %{distro}-%%{NAME}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm
+%define _rpmfilename %{distro}-%{rev}-%%{NAME}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm
 
 %prep
 %setup -c %{name}
