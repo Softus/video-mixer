@@ -11,7 +11,7 @@ build: build-stamp
 build-stamp: builddir/Makefile
 	dh_testdir
 	# Add here commands to compile the package.
-        cd builddir && $(MAKE) -j 2
+	cd builddir && $(MAKE) -j 2
 	touch $@
 
 clean:
