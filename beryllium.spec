@@ -30,7 +30,7 @@ Requires: libgstreamer-0_10-0 >= 0.10.35, libqt4 >= 4.6.0
 %if %dicom == 1
 Requires: libmediainfo0, libzen0
 BuildRequires: libmediainfo-devel, dcmtk-devel, tcp_wrappers-devel
-%if %distro == CentOS
+%if %distro == centos
 Requires: dcmtk, openssl
 BuildRequires: openssl-devel
 %else
