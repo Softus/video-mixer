@@ -1,3 +1,9 @@
+beryllium (0.8.5) debian;
+
+  * Global hotkeys
+
+ -- Pavel Bludov <pbludov@gmail.com>  Wed, 19 Mar 2014 16:25:00 +0900
+
 beryllium (0.8.4) debian;
 
   * Ignore duplicate studies via d-bus
