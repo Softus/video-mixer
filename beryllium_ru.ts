@@ -660,145 +660,151 @@ Continue?</source>
 <context>
     <name>HotKeySettings</name>
     <message>
-        <location filename="src/settings/hotkeysettings.cpp" line="54"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="57"/>
         <source>Action</source>
         <translation>Действие</translation>
     </message>
     <message>
-        <location filename="src/settings/hotkeysettings.cpp" line="54"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="57"/>
         <source>Hotkey</source>
         <translation>Клавиша</translation>
     </message>
     <message>
-        <location filename="src/settings/hotkeysettings.cpp" line="59"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="57"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="113"/>
+        <source>Global</source>
+        <translation>Глобальная</translation>
+    </message>
+    <message>
+        <location filename="src/settings/hotkeysettings.cpp" line="62"/>
         <source>Capture window</source>
         <translation>Окно захвата</translation>
     </message>
     <message>
-        <location filename="src/settings/hotkeysettings.cpp" line="63"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="66"/>
         <source>Start/stop study</source>
         <translation>Начать/закончить исследование</translation>
     </message>
     <message>
-        <location filename="src/settings/hotkeysettings.cpp" line="64"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="67"/>
         <source>Take snapshot</source>
         <translation>Сделать снимок</translation>
     </message>
     <message>
-        <location filename="src/settings/hotkeysettings.cpp" line="65"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="68"/>
         <source>Start clip</source>
         <translation>Записать фрагмент</translation>
     </message>
     <message>
-        <location filename="src/settings/hotkeysettings.cpp" line="66"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="69"/>
         <source>Clip done</source>
         <translation>Завершить фрагмент</translation>
     </message>
     <message>
-        <location filename="src/settings/hotkeysettings.cpp" line="67"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="70"/>
         <source>Show the Archive window</source>
         <oldsource>Show Archive window</oldsource>
         <translation>Открыть окно архива</translation>
     </message>
     <message>
-        <location filename="src/settings/hotkeysettings.cpp" line="68"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="71"/>
         <source>Show the Settings window</source>
         <oldsource>Show Settings window</oldsource>
         <translation>Открыть окно настроек</translation>
     </message>
     <message>
-        <location filename="src/settings/hotkeysettings.cpp" line="70"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="73"/>
         <source>Show the Worklist window</source>
         <oldsource>Show Worklist window</oldsource>
         <translation>Открыть рабочий лист</translation>
     </message>
     <message>
-        <location filename="src/settings/hotkeysettings.cpp" line="72"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="75"/>
         <source>Archive window</source>
         <translation>Окно архива</translation>
     </message>
     <message>
-        <location filename="src/settings/hotkeysettings.cpp" line="75"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="78"/>
         <source>Delete</source>
         <translation>Удалить</translation>
     </message>
     <message>
-        <location filename="src/settings/hotkeysettings.cpp" line="76"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="79"/>
         <source>Upload</source>
         <translation>В хранилище</translation>
     </message>
     <message>
-        <location filename="src/settings/hotkeysettings.cpp" line="77"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="80"/>
         <source>Edit</source>
         <translation>Правка</translation>
     </message>
     <message>
-        <location filename="src/settings/hotkeysettings.cpp" line="78"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="81"/>
         <source>Up</source>
         <translation>Вверх</translation>
     </message>
     <message>
-        <location filename="src/settings/hotkeysettings.cpp" line="79"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="82"/>
         <source>File browser</source>
         <translation>Проводник</translation>
     </message>
     <message>
-        <location filename="src/settings/hotkeysettings.cpp" line="81"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="84"/>
         <source>Switch mode</source>
         <translation>Переключить режим</translation>
     </message>
     <message>
-        <location filename="src/settings/hotkeysettings.cpp" line="82"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="85"/>
         <source>List mode</source>
         <translation>Режим списка</translation>
     </message>
     <message>
-        <location filename="src/settings/hotkeysettings.cpp" line="83"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="86"/>
         <source>Icon mode</source>
         <translation>Режим значков</translation>
     </message>
     <message>
-        <location filename="src/settings/hotkeysettings.cpp" line="84"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="87"/>
         <source>Gallery mode</source>
         <translation>Режим галереи</translation>
     </message>
     <message>
-        <location filename="src/settings/hotkeysettings.cpp" line="86"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="89"/>
         <source>Seek backward</source>
         <translation>Отмотать назад</translation>
     </message>
     <message>
-        <location filename="src/settings/hotkeysettings.cpp" line="87"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="90"/>
         <source>Seek forward</source>
         <translation>Отмотать вперёд</translation>
     </message>
     <message>
-        <location filename="src/settings/hotkeysettings.cpp" line="88"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="91"/>
         <source>Play video</source>
         <translation>Проиграть видео</translation>
     </message>
     <message>
-        <location filename="src/settings/hotkeysettings.cpp" line="89"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="92"/>
         <source>Select</source>
         <translation>Выбрать</translation>
     </message>
     <message>
-        <location filename="src/settings/hotkeysettings.cpp" line="98"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="101"/>
         <source>Show details</source>
         <translation>Показать детали</translation>
     </message>
     <message>
-        <location filename="src/settings/hotkeysettings.cpp" line="99"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="102"/>
         <source>Reload worklist</source>
         <translation>Обновить рабочий лист</translation>
     </message>
     <message>
-        <location filename="src/settings/hotkeysettings.cpp" line="106"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="109"/>
         <source>&amp;Set key</source>
         <translation>&amp;Задать клавишу</translation>
     </message>
     <message>
-        <location filename="src/settings/hotkeysettings.cpp" line="111"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="115"/>
         <source>&amp;Reset</source>
         <translation>&amp;Сбросить</translation>
     </message>
@@ -843,7 +849,7 @@ Continue?</source>
         <translation type="obsolete">Открыть &amp;Рабочий лист</translation>
     </message>
     <message>
-        <location filename="src/settings/hotkeysettings.cpp" line="95"/>
+        <location filename="src/settings/hotkeysettings.cpp" line="98"/>
         <source>Worklist window</source>
         <translation>Окно рабочего листа</translation>
     </message>
@@ -872,22 +878,22 @@ Continue?</source>
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="src/mainwindow.cpp" line="396"/>
+        <location filename="src/mainwindow.cpp" line="397"/>
         <source>&amp;Archive</source>
         <translation>&amp;Архив</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="393"/>
+        <location filename="src/mainwindow.cpp" line="394"/>
         <source>&amp;Worlkist</source>
         <translation>&amp;Рабочий лист</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="399"/>
+        <location filename="src/mainwindow.cpp" line="400"/>
         <source>&amp;Preferences</source>
         <translation>&amp;Настройки</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="351"/>
+        <location filename="src/mainwindow.cpp" line="352"/>
         <source>Main</source>
         <oldsource>main</oldsource>
         <translation>Главная</translation>
@@ -897,52 +903,51 @@ Continue?</source>
         <translation type="obsolete">Сделать &amp;снимок</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="397"/>
+        <location filename="src/mainwindow.cpp" line="398"/>
         <source>Show studies archive</source>
         <translation>Открыть архив исследований</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="400"/>
+        <location filename="src/mainwindow.cpp" line="401"/>
         <source>Edit settings</source>
         <translation>Открыть окно настроек</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="403"/>
+        <location filename="src/mainwindow.cpp" line="404"/>
         <source>About %1</source>
         <oldsource>About berillyum</oldsource>
         <translation>О программе %1</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="929"/>
-        <location filename="src/mainwindow.cpp" line="934"/>
-        <location filename="src/mainwindow.cpp" line="939"/>
-        <location filename="src/mainwindow.cpp" line="944"/>
-        <location filename="src/mainwindow.cpp" line="949"/>
+        <location filename="src/mainwindow.cpp" line="943"/>
+        <location filename="src/mainwindow.cpp" line="948"/>
+        <location filename="src/mainwindow.cpp" line="953"/>
+        <location filename="src/mainwindow.cpp" line="958"/>
         <source> - </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="976"/>
+        <location filename="src/mainwindow.cpp" line="985"/>
         <source>Failed to create &apos;%1&apos;</source>
         <translation>Не удалось создать &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1249"/>
+        <location filename="src/mainwindow.cpp" line="1260"/>
         <source>Failed to start recording.
 Please, adjust the video source settings.</source>
         <translation>Невозможно начать запись.
 Проверьте настройки видео.</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1260"/>
-        <location filename="src/mainwindow.cpp" line="1468"/>
+        <location filename="src/mainwindow.cpp" line="1273"/>
+        <location filename="src/mainwindow.cpp" line="1480"/>
         <source>Failed to start recording.
 Check the error log for details.</source>
         <translation>Невозможно начать запись.
 Проверьте журнал ожибок.</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1633"/>
+        <location filename="src/mainwindow.cpp" line="1656"/>
         <source>Failed to start a study.
 Another study is in progress.</source>
         <translation>Невозможно начать исследование.
@@ -965,17 +970,17 @@ Another study is in progress.</source>
         <translation type="obsolete">Отправить</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1279"/>
+        <location filename="src/mainwindow.cpp" line="1292"/>
         <source>End the study?</source>
         <translation>Завершить исследование?</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1513"/>
+        <location filename="src/mainwindow.cpp" line="1536"/>
         <source>End study</source>
         <translation>Завершить исследование</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1513"/>
+        <location filename="src/mainwindow.cpp" line="1536"/>
         <source>Start study</source>
         <translation>Начать исследование</translation>
     </message>
@@ -1004,47 +1009,47 @@ Another study is in progress.</source>
         <translation type="obsolete">З&amp;апись</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="317"/>
+        <location filename="src/mainwindow.cpp" line="318"/>
         <source>&amp;Menu</source>
         <translation>&amp;Меню</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="402"/>
+        <location filename="src/mainwindow.cpp" line="403"/>
         <source>A&amp;bout %1</source>
         <translation>&amp;О %1</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="328"/>
+        <location filename="src/mainwindow.cpp" line="329"/>
         <source>&amp;Enable RTP streaming</source>
         <translation>Включить RTP &amp;поток</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="332"/>
+        <location filename="src/mainwindow.cpp" line="333"/>
         <source>&amp;Record entire study</source>
         <translation>Записывать исследование &amp;целиком</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="339"/>
+        <location filename="src/mainwindow.cpp" line="340"/>
         <source>E&amp;xit</source>
         <translation>В&amp;ыход</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="364"/>
+        <location filename="src/mainwindow.cpp" line="365"/>
         <source>Take snapshot</source>
         <translation>Сделать снимок</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="373"/>
+        <location filename="src/mainwindow.cpp" line="374"/>
         <source>Start clip</source>
         <translation>Записать фрагмент</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="382"/>
+        <location filename="src/mainwindow.cpp" line="383"/>
         <source>Clip done</source>
         <translation>Завершить фрагмент</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1178"/>
+        <location filename="src/mainwindow.cpp" line="1189"/>
         <source>Failed to load image %1</source>
         <translation>Не удалось загрузить снимок %1</translation>
     </message>
@@ -1099,9 +1104,8 @@ Another study is in progress.</source>
 <context>
     <name>MouseShortcut</name>
     <message>
-        <location filename="src/mouseshortcut.cpp" line="41"/>
         <source>(not set)</source>
-        <translation>(не задано)</translation>
+        <translation type="obsolete">(не задано)</translation>
     </message>
 </context>
 <context>
@@ -1387,6 +1391,14 @@ Another study is in progress.</source>
     </message>
 </context>
 <context>
+    <name>SmartShortcut</name>
+    <message>
+        <location filename="src/smartshortcut.cpp" line="55"/>
+        <source>(not set)</source>
+        <translation>(не задано)</translation>
+    </message>
+</context>
+<context>
     <name>StartStudyDialog</name>
     <message>
         <source>New study</source>
@@ -1460,90 +1472,91 @@ Another study is in progress.</source>
 <context>
     <name>StorageSettings</name>
     <message>
-        <location filename="src/settings/storagesettings.cpp" line="43"/>
+        <location filename="src/settings/storagesettings.cpp" line="40"/>
         <source>Images and clips</source>
         <translation>Снимки и видео фрагменты</translation>
     </message>
     <message>
-        <location filename="src/settings/storagesettings.cpp" line="46"/>
-        <location filename="src/settings/storagesettings.cpp" line="70"/>
         <source>Browse</source>
-        <translation>Обзор</translation>
+        <translation type="obsolete">Обзор</translation>
     </message>
     <message>
-        <location filename="src/settings/storagesettings.cpp" line="48"/>
+        <location filename="src/settings/storagesettings.cpp" line="42"/>
         <source>&amp;Output path</source>
         <translation>С&amp;охранять в</translation>
     </message>
     <message>
-        <location filename="src/settings/storagesettings.cpp" line="56"/>
+        <location filename="src/settings/storagesettings.cpp" line="49"/>
         <source>&amp;Folder template</source>
         <translation>Шаблон &amp;папки</translation>
     </message>
     <message>
-        <location filename="src/settings/storagesettings.cpp" line="58"/>
+        <location filename="src/settings/storagesettings.cpp" line="51"/>
         <source>&amp;Pictures template</source>
         <translation>Шаблон &amp;снимков</translation>
     </message>
     <message>
-        <location filename="src/settings/storagesettings.cpp" line="59"/>
+        <location filename="src/settings/storagesettings.cpp" line="52"/>
         <source>&amp;Clips template</source>
         <translation>Шаблон &amp;клипов</translation>
     </message>
     <message>
-        <location filename="src/settings/storagesettings.cpp" line="64"/>
+        <location filename="src/settings/storagesettings.cpp" line="57"/>
         <source>Video logs</source>
         <translation>Видео журнал</translation>
     </message>
     <message>
-        <location filename="src/settings/storagesettings.cpp" line="69"/>
-        <location filename="src/settings/storagesettings.cpp" line="79"/>
+        <location filename="src/settings/storagesettings.cpp" line="61"/>
+        <location filename="src/settings/storagesettings.cpp" line="68"/>
         <source>(share with images and clips)</source>
         <translation>(как для снимков и видео фрагментов)</translation>
     </message>
     <message>
-        <location filename="src/settings/storagesettings.cpp" line="72"/>
+        <location filename="src/settings/storagesettings.cpp" line="77"/>
+        <source>%yyyy%|year|%mm%|month|%dd%|day|%hh%|hour|%min%|minute|%nn%|sequential number|%id%|patient id|%name%|patient name|%sex%|patient sex|%birthdate%|patient birthdate|%physician%|physician name|%study%|study name</source>
+        <translation>%yyyy%|год|%mm%|месяц|%dd%|день|%hh%|час|%min%|минуты|%nn%|порядковый номер|%id%|номер карты|%name%|ФИО|%sex%|пол|%birthdate%|дата рождения|%physician%|врач|%study%|тип исследования
+</translation>
+    </message>
+    <message>
+        <location filename="src/settings/storagesettings.cpp" line="60"/>
         <source>O&amp;utput path</source>
         <translation>Со&amp;хранять в</translation>
     </message>
     <message>
-        <location filename="src/settings/storagesettings.cpp" line="80"/>
+        <location filename="src/settings/storagesettings.cpp" line="69"/>
         <source>Fol&amp;der template</source>
         <translation>&amp;Шаблон папки</translation>
     </message>
     <message>
-        <location filename="src/settings/storagesettings.cpp" line="81"/>
+        <location filename="src/settings/storagesettings.cpp" line="70"/>
         <source>&amp;Video template</source>
         <translation>Шаблон &amp;видео</translation>
     </message>
     <message>
-        <location filename="src/settings/storagesettings.cpp" line="86"/>
         <source>&amp;Split files by</source>
-        <translation>&amp;Разбивать файлы по</translation>
+        <translation type="obsolete">&amp;Разбивать файлы по</translation>
     </message>
     <message>
-        <location filename="src/settings/storagesettings.cpp" line="90"/>
         <source> Mb</source>
-        <translation> Мб</translation>
+        <translation type="obsolete"> Мб</translation>
     </message>
     <message>
         <source>0 for unlimited</source>
         <translation type="obsolete">0, чтобы не ограничивать</translation>
     </message>
     <message>
-        <location filename="src/settings/storagesettings.cpp" line="99"/>
+        <location filename="src/settings/storagesettings.cpp" line="75"/>
         <source>Substitutes</source>
         <translation>Подстановки</translation>
     </message>
     <message>
-        <location filename="src/settings/storagesettings.cpp" line="101"/>
         <source>%yyyy%		year			%mm%		month
 %dd%		day			%hh%		hour
 %min%		minute			%nn%		sequential number
 %id%		patient id		%name%	patient name
 %sex%		patient sex		%birthdate%	patient birthdate
 %physician%	physician name		%study%	study name</source>
-        <translation>%yyyy%		год		%mm%		месяц
+        <translation type="obsolete">%yyyy%		год		%mm%		месяц
 %dd%		день		%hh%		час
 %min%		минуты		%nn%		порядковый номер
 %id%		номер карты	%name%	ФИО
@@ -1700,72 +1713,95 @@ Another study is in progress.</source>
 <context>
     <name>VideoRecordSettings</name>
     <message>
-        <location filename="src/settings/videorecordsettings.cpp" line="37"/>
+        <location filename="src/settings/videorecordsettings.cpp" line="39"/>
         <source>Video clips</source>
         <oldsource>Video cips</oldsource>
         <translation>Фрагменты видео</translation>
     </message>
     <message>
-        <location filename="src/settings/videorecordsettings.cpp" line="39"/>
+        <location filename="src/settings/videorecordsettings.cpp" line="41"/>
         <source>&amp;Limit clip duration at</source>
         <oldsource>&amp;Limit clips to</oldsource>
         <translation>&amp;Ограничить видео фрагметы по</translation>
     </message>
     <message>
-        <location filename="src/settings/videorecordsettings.cpp" line="41"/>
+        <location filename="src/settings/videorecordsettings.cpp" line="43"/>
         <source> seconds</source>
         <translation> секунд</translation>
     </message>
     <message>
-        <location filename="src/settings/videorecordsettings.cpp" line="44"/>
+        <location filename="src/settings/videorecordsettings.cpp" line="46"/>
         <source>&amp;Play alert at</source>
         <oldsource>&amp;Play a sound on</oldsource>
         <translation>&amp;Проигрывать звук за</translation>
     </message>
     <message>
-        <location filename="src/settings/videorecordsettings.cpp" line="46"/>
+        <location filename="src/settings/videorecordsettings.cpp" line="48"/>
         <source> seconds till stop</source>
         <oldsource> seconds before stopping</oldsource>
         <translation> секунд до остановки</translation>
     </message>
     <message>
-        <location filename="src/settings/videorecordsettings.cpp" line="52"/>
+        <location filename="src/settings/videorecordsettings.cpp" line="54"/>
         <source>Record &amp;video log</source>
         <translation>Записывать видео &amp;журнал</translation>
     </message>
     <message>
-        <location filename="src/settings/videorecordsettings.cpp" line="55"/>
+        <location filename="src/settings/videorecordsettings.cpp" line="63"/>
+        <source>&amp;Split files by</source>
+        <translation>&amp;Разбивать файлы по</translation>
+    </message>
+    <message>
+        <location filename="src/settings/videorecordsettings.cpp" line="67"/>
+        <source> Mb</source>
+        <translation> Мб</translation>
+    </message>
+    <message>
+        <location filename="src/settings/videorecordsettings.cpp" line="73"/>
         <source>Use &amp;motion detection</source>
         <translation>&amp;Использовать детектор движения</translation>
     </message>
     <message>
-        <location filename="src/settings/videorecordsettings.cpp" line="61"/>
-        <source>&amp;Start after</source>
+        <location filename="src/settings/videorecordsettings.cpp" line="79"/>
+        <source>St&amp;art after</source>
         <translation>&amp;Начать после</translation>
     </message>
     <message>
-        <location filename="src/settings/videorecordsettings.cpp" line="65"/>
+        <location filename="src/settings/videorecordsettings.cpp" line="86"/>
+        <source>St&amp;op after</source>
+        <translation>&amp;Остановить после</translation>
+    </message>
+    <message>
+        <source>&amp;Start after</source>
+        <translation type="obsolete">&amp;Начать после</translation>
+    </message>
+    <message>
+        <location filename="src/settings/videorecordsettings.cpp" line="83"/>
         <source> frames with motion</source>
         <translation> кадров с движением</translation>
     </message>
     <message>
-        <location filename="src/settings/videorecordsettings.cpp" line="68"/>
         <source>S&amp;top after</source>
-        <translation>&amp;Остановить после</translation>
+        <translation type="obsolete">&amp;Остановить после</translation>
     </message>
     <message>
-        <location filename="src/settings/videorecordsettings.cpp" line="72"/>
+        <location filename="src/settings/videorecordsettings.cpp" line="90"/>
         <source> seconds without motion</source>
         <translation> секунд без движения</translation>
     </message>
     <message>
-        <location filename="src/settings/videorecordsettings.cpp" line="77"/>
-        <location filename="src/settings/videorecordsettings.cpp" line="81"/>
+        <location filename="src/settings/videorecordsettings.cpp" line="95"/>
+        <location filename="src/settings/videorecordsettings.cpp" line="99"/>
         <source>%</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="src/settings/videorecordsettings.cpp" line="83"/>
+        <location filename="src/settings/videorecordsettings.cpp" line="97"/>
+        <source>&amp;Threshold</source>
+        <translation>По&amp;рог</translation>
+    </message>
+    <message>
+        <location filename="src/settings/videorecordsettings.cpp" line="101"/>
         <source>&amp;Highlight areas with motion</source>
         <oldsource>&amp;Display cells with motion</oldsource>
         <translation>Выделять &amp;ячейки с движением</translation>
@@ -1779,7 +1815,7 @@ Another study is in progress.</source>
         <translation type="obsolete">О&amp;станавливать запись если движение прекратилось</translation>
     </message>
     <message>
-        <location filename="src/settings/videorecordsettings.cpp" line="75"/>
+        <location filename="src/settings/videorecordsettings.cpp" line="93"/>
         <source>S&amp;ensitivity</source>
         <translation>&amp;Чувствительность</translation>
     </message>
@@ -1788,9 +1824,8 @@ Another study is in progress.</source>
         <translation type="obsolete"> процентов</translation>
     </message>
     <message>
-        <location filename="src/settings/videorecordsettings.cpp" line="79"/>
         <source>T&amp;hreshold</source>
-        <translation>По&amp;рог</translation>
+        <translation type="obsolete">По&amp;рог</translation>
     </message>
     <message>
         <source>T&amp;rigger after</source>
@@ -1805,7 +1840,7 @@ Another study is in progress.</source>
         <translation type="obsolete">Показывать &amp;ячейки с движением</translation>
     </message>
     <message>
-        <location filename="src/settings/videorecordsettings.cpp" line="102"/>
+        <location filename="src/settings/videorecordsettings.cpp" line="120"/>
         <source>Motion detection requires the opencv plugin which is not found.
 Are you want to continue?</source>
         <translation>Обнаружение движения пробует плагин opencv, не обнаруженный в системе.
@@ -1876,7 +1911,8 @@ Are you want to continue?</source>
     </message>
     <message>
         <location filename="src/settings/videosourcesettings.cpp" line="87"/>
-        <source>&amp;Image codec</source>
+        <source>Im&amp;age codec</source>
+        <oldsource>&amp;Image codec</oldsource>
         <translation>Кодек &amp;снимков</translation>
     </message>
     <message>
