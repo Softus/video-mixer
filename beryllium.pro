@@ -73,13 +73,18 @@ SOURCES += \
     src/mainwindow.cpp \
     src/mainwindowdbusadaptor.cpp \
     src/mandatoryfieldgroup.cpp \
-    src/mouseshortcut.cpp \
     src/patientdatadialog.cpp \
     src/sound.cpp \
     src/thumbnaillist.cpp \
     src/typedetect.cpp \
     src/videoeditor.cpp \
-    src/videoencodingprogressdialog.cpp
+    src/videoencodingprogressdialog.cpp \
+    libqxt/qxtglobalshortcut.cpp \
+    src/smartshortcut.cpp
+
+macx: SOURCES += libqxt/mac/qxtglobalshortcut_mac.cpp
+unix: SOURCES += libqxt/x11/qxtglobalshortcut_x11.cpp
+win32:SOURCES += libqxt/win/qxtglobalshortcut_win.cpp
 
 HEADERS += \
     libqxt/qxtconfirmationmessage.h \
@@ -107,7 +112,6 @@ HEADERS += \
     src/mainwindow.h \
     src/mainwindowdbusadaptor.h \
     src/mandatoryfieldgroup.h \
-    src/mouseshortcut.h \
     src/patientdatadialog.h \
     src/product.h \
     src/qwaitcursor.h \
@@ -115,7 +119,11 @@ HEADERS += \
     src/thumbnaillist.h \
     src/typedetect.h \
     src/videoeditor.h \
-    src/videoencodingprogressdialog.h
+    src/videoencodingprogressdialog.h \
+    libqxt/qxtglobalshortcut_p.h \
+    libqxt/qxtglobalshortcut.h \
+    libqxt/QxtGlobalShortcut \
+    src/smartshortcut.h
 
 FORMS   +=
 

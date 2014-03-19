@@ -17,9 +17,11 @@
 #include "hotkeysettings.h"
 #include "../defaults.h"
 #include "../hotkeyedit.h"
-#include "../mouseshortcut.h"
+#include "../smartshortcut.h"
 
 #include <QBoxLayout>
+#include <QCheckBox>
+#include <QDebug>
 #include <QLabel>
 #include <QMap>
 #include <QPushButton>
@@ -33,7 +35,8 @@ newItem(const QSettings& settings , const QString& title, const QString& setting
     auto key = settings.value(settingsKey, defaultValue).toInt();
     auto item = new QTreeWidgetItem(QStringList()
        << title
-       << MouseShortcut::toString(key)
+       << SmartShortcut::toString(key)
+       << (SmartShortcut::isGlobal(key)? "*": "")
        << settingsKey
        );
     item->setData(0, Qt::UserRole, defaultValue);
@@ -51,9 +54,9 @@ HotKeySettings::HotKeySettings(QWidget *parent) :
 
     tree = new QTreeWidget;
     tree->setColumnCount(2);
-    tree->setHeaderLabels(QStringList() << tr("Action") << tr("Hotkey"));
-    tree->setColumnWidth(0, 350);
-    tree->setColumnWidth(1, 150);
+    tree->setHeaderLabels(QStringList() << tr("Action") << tr("Hotkey") << tr("Global"));
+    tree->setColumnWidth(0, 300);
+    tree->setColumnWidth(1, 200);
     tree->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     layoutMain->addWidget(tree);
     auto itemCapture = new QTreeWidgetItem(QStringList(tr("Capture window")));
@@ -106,11 +109,15 @@ HotKeySettings::HotKeySettings(QWidget *parent) :
     auto lbl = new QLabel(tr("&Set key"));
     layoutEditor->addWidget(lbl);
     layoutEditor->addWidget(editor = new HotKeyEdit);
-    editor->setEnabled(false);
     connect(editor, SIGNAL(keyChanged(int)), this, SLOT(keyChanged(int)));
+    layoutEditor->addWidget(checkGlobal = new QCheckBox(tr("Global")));
+    connect(checkGlobal, SIGNAL(toggled(bool)), this, SLOT(onSetGlobal(bool)));
     layoutEditor->addWidget(btnReset = new QPushButton(tr("&Reset")));
     connect(btnReset, SIGNAL(clicked()), this, SLOT(resetClicked()));
     lbl->setBuddy(editor);
+
+    editor->setEnabled(false);
+    checkGlobal->setEnabled(false);
 
     setLayout(layoutMain);
     for (auto grpIdx = 0; grpIdx < tree->topLevelItemCount(); ++grpIdx)
@@ -124,10 +131,22 @@ void HotKeySettings::keyChanged(int key)
     auto item = tree->currentItem();
     if (item)
     {
-        item->setText(1, MouseShortcut::toString(key));
+        item->setText(1, SmartShortcut::toString(key));
+        item->setText(2, checkGlobal->isChecked() ? "*": "");
         item->setData(1, Qt::UserRole, key);
+        checkKeys(item->parent());
     }
-    checkKeys(item->parent());
+
+    if (!key || SmartShortcut::isMouse(key))
+    {
+        checkGlobal->setEnabled(false);
+        checkGlobal->setChecked(false);
+    }
+    else
+    {
+        checkGlobal->setEnabled(true);
+        checkGlobal->setChecked(SmartShortcut::isGlobal(key));
+    }
 }
 
 void HotKeySettings::checkKeys(QTreeWidgetItem *top)
@@ -159,11 +178,17 @@ void HotKeySettings::resetClicked()
     keyChanged(key);
 }
 
+void HotKeySettings::onSetGlobal(bool global)
+{
+    auto key = editor->key();
+    keyChanged(global && key? key | GLOBAL_SHORTCUT_MASK: key & ~GLOBAL_SHORTCUT_MASK);
+}
+
 void HotKeySettings::treeItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous)
 {
     if (previous && editor->isEnabled())
     {
-        previous->setText(1, MouseShortcut::toString(editor->key()));
+        previous->setText(1, SmartShortcut::toString(editor->key()));
     }
 
     if (!current || current->text(1).isEmpty())
@@ -172,13 +197,26 @@ void HotKeySettings::treeItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *
         editor->setKey(0);
         editor->setEnabled(false);
         btnReset->setEnabled(false);
+        checkGlobal->setEnabled(false);
+        checkGlobal->setChecked(false);
         return;
     }
 
+    auto key = current->data(1, Qt::UserRole).toInt();
     editor->setProperty("default-value", current->data(0, Qt::UserRole).toInt());
-    editor->setKey(current->data(1, Qt::UserRole).toInt());
+    editor->setKey(key);
     editor->setEnabled(true);
     btnReset->setEnabled(true);
+    if (!key || SmartShortcut::isMouse(key))
+    {
+        checkGlobal->setEnabled(false);
+        checkGlobal->setChecked(false);
+    }
+    else
+    {
+        checkGlobal->setEnabled(true);
+        checkGlobal->setChecked(SmartShortcut::isGlobal(key));
+    }
 }
 
 void HotKeySettings::save()
@@ -191,7 +229,13 @@ void HotKeySettings::save()
        for (auto keyIdx = 0; keyIdx < top->childCount(); ++keyIdx)
        {
            auto item = top->child(keyIdx);
-           settings.setValue(item->text(2), item->data(1, Qt::UserRole));
+           auto key = item->data(1, Qt::UserRole).toInt();
+           if (!item->text(2).isEmpty())
+           {
+               key |= GLOBAL_SHORTCUT_MASK;
+           }
+           qDebug() <<  item->text(3) << key;
+           settings.setValue(item->text(3), key);
        }
    }
 }

@@ -16,7 +16,7 @@
 
 #include "worklist.h"
 #include "../defaults.h"
-#include "../mouseshortcut.h"
+#include "../smartshortcut.h"
 #include "../qwaitcursor.h"
 #include "detailsdialog.h"
 #include "dcmclient.h"

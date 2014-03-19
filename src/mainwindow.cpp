@@ -19,7 +19,7 @@
 #include "aboutdialog.h"
 #include "archivewindow.h"
 #include "defaults.h"
-#include "mouseshortcut.h"
+#include "smartshortcut.h"
 #include "patientdatadialog.h"
 #include "qwaitcursor.h"
 #include "settings.h"

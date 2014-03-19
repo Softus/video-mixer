@@ -26,18 +26,27 @@ class QAbstractButton;
 class QAction;
 QT_END_NAMESPACE
 
-class MouseShortcut : public QObject
+#define MOUSE_SHORTCUT_MASK  0x80000000
+#define GLOBAL_SHORTCUT_MASK 0x00800000
+
+class SmartShortcut : public QObject
 {
     Q_OBJECT
     int m_key;
+    void init();
 
 public:
-    static void removeMouseShortcut(QObject *parent);
+    static void remove(QObject *parent);
     static QString toString(int key, QKeySequence::SequenceFormat format = QKeySequence::PortableText);
+    static bool isGlobal(int key);
+    static bool isMouse(int key);
     QString toString(QKeySequence::SequenceFormat format = QKeySequence::PortableText) const;
-    MouseShortcut(int key, QAbstractButton *parent);
-    MouseShortcut(int key, QAction *parent);
-    ~MouseShortcut();
+    SmartShortcut(int key, QAbstractButton *parent);
+    SmartShortcut(int key, QAction *parent);
+    ~SmartShortcut();
+
+private slots:
+    void trigger();
 
 protected:
     bool eventFilter(QObject *o, QEvent *e);
@@ -48,7 +57,7 @@ protected:
 template <class T>
 static void updateShortcut(T* btn, int key)
 {
-    MouseShortcut::removeMouseShortcut(btn);
+    SmartShortcut::remove(btn);
     btn->setShortcut(0);
 
     if (key == 0)
@@ -57,17 +66,17 @@ static void updateShortcut(T* btn, int key)
         return;
     }
 
-    if (key > 0)
-    {
-        btn->setShortcut(QKeySequence(key));
-    }
-    else if (key < 0)
+    if (key & (MOUSE_SHORTCUT_MASK | GLOBAL_SHORTCUT_MASK))
     {
         // Will be deleted with parent, or explicitly via removeMouseShortcut
         //
-        new MouseShortcut(key, btn);
+        new SmartShortcut(key, btn);
     }
-    btn->setToolTip(btn->text().remove("&") + " (" + MouseShortcut::toString(key) + ")");
+    else
+    {
+        btn->setShortcut(QKeySequence(key));
+    }
+    btn->setToolTip(btn->text().remove("&") + " (" + SmartShortcut::toString(key) + ")");
 }
 
 #endif // MOUSESHORTCUT_H

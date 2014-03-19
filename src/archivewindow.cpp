@@ -17,7 +17,7 @@
 #include "archivewindow.h"
 #include "patientdatadialog.h"
 #include "defaults.h"
-#include "mouseshortcut.h"
+#include "smartshortcut.h"
 #include "qwaitcursor.h"
 #include "thumbnaillist.h"
 #include "typedetect.h"

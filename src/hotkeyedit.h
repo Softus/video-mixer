@@ -18,9 +18,9 @@
 #ifndef HOTKEYEDIT_H
 #define HOTKEYEDIT_H
 
-#include <QLineEdit>
+#include <QxtLineEdit>
 
-class HotKeyEdit : public QLineEdit
+class HotKeyEdit : public QxtLineEdit
 {
     Q_OBJECT
 
@@ -46,7 +46,7 @@ protected:
     virtual bool event(QEvent *evt);
 private:
     int m_key;
-    bool m_ignoreNextMoseEvent;
+    bool m_ignoreNextMouseEvent;
     void handleMousePressEvent(QMouseEvent *evt);
     void updateText();
 };

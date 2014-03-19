@@ -14,28 +14,42 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "mouseshortcut.h"
+#include "smartshortcut.h"
 
-#include <QApplication>
-#include <QMouseEvent>
 #include <QAbstractButton>
 #include <QAction>
+#include <QApplication>
+#include <QDebug>
+#include <QMouseEvent>
+#include <QxtGlobalShortcut>
 
-void MouseShortcut::removeMouseShortcut(QObject *parent)
+void SmartShortcut::remove(QObject *parent)
 {
     // Remove any existent mouse shortcut
     //
-    Q_FOREACH(auto ch, parent->children())
+    Q_FOREACH(auto child, parent->children())
     {
-        if (ch->inherits("MouseShortcut"))
+        if (child->inherits("SmartShortcut"))
         {
-            delete(ch);
+            delete child;
         }
     }
 }
 
-QString MouseShortcut::toString(int key, QKeySequence::SequenceFormat format)
+bool SmartShortcut::isGlobal(int key)
 {
+    return !!(key & GLOBAL_SHORTCUT_MASK);
+}
+
+bool SmartShortcut::isMouse(int key)
+{
+    return !!(key & MOUSE_SHORTCUT_MASK);
+}
+
+QString SmartShortcut::toString(int key, QKeySequence::SequenceFormat format)
+{
+    key &= ~GLOBAL_SHORTCUT_MASK;
+
     if (key == 0)
     {
         return tr("(not set)");
@@ -55,7 +69,7 @@ QString MouseShortcut::toString(int key, QKeySequence::SequenceFormat format)
 
     QStringList returnText;
 
-    auto modifiers = key & Qt::MODIFIER_MASK & ~0x80000000;
+    auto modifiers = key & Qt::MODIFIER_MASK & ~MOUSE_SHORTCUT_MASK;
     if (modifiers)
     {
         auto modifiersStr = QKeySequence(modifiers).toString(format);
@@ -103,60 +117,85 @@ QString MouseShortcut::toString(int key, QKeySequence::SequenceFormat format)
     return returnText.join("+");
 }
 
-QString MouseShortcut::toString(QKeySequence::SequenceFormat format) const
+QString SmartShortcut::toString(QKeySequence::SequenceFormat format) const
 {
     return toString(m_key, format);
 }
 
-MouseShortcut::MouseShortcut(int key, QAbstractButton *parent) :
+SmartShortcut::SmartShortcut(int key, QAbstractButton *parent) :
     QObject(parent), m_key(key)
 {
-    qApp->installEventFilter(this);
+    init();
 }
 
-MouseShortcut::MouseShortcut(int key, QAction *parent) :
+SmartShortcut::SmartShortcut(int key, QAction *parent) :
     QObject(parent), m_key(key)
 {
-    qApp->installEventFilter(this);
+    init();
 }
 
-MouseShortcut::~MouseShortcut()
+void SmartShortcut::init()
 {
-    qApp->removeEventFilter(this);
+    if (isMouse(m_key))
+    {
+        qApp->installEventFilter(this);
+    }
+    else
+    {
+        auto shortcut = new QxtGlobalShortcut(QKeySequence(m_key & ~GLOBAL_SHORTCUT_MASK), this);
+        connect(shortcut, SIGNAL(activated()), this, SLOT(trigger()));
+    }
 }
 
-bool MouseShortcut::eventFilter(QObject *o, QEvent *e)
+SmartShortcut::~SmartShortcut()
+{
+    if (isMouse(m_key))
+    {
+        qApp->removeEventFilter(this);
+    }
+}
+
+bool SmartShortcut::eventFilter(QObject *o, QEvent *e)
 {
     if (e->type() == QEvent::MouseButtonPress)
     {
         QMouseEvent *evt = static_cast<QMouseEvent*>(e);
-        int btn = 0x80000000 | evt->modifiers() | evt->buttons();
+        int btn = MOUSE_SHORTCUT_MASK | evt->modifiers() | evt->buttons();
 
         if (m_key == btn)
         {
-            if (parent()->inherits("QAction"))
-            {
-                auto action = static_cast<QAction*>(parent());
-                auto widget = action->parentWidget();
-                if (!widget || widget->window() == qApp->activeWindow())
-                {
-                    action->trigger();
-                    e->accept();
-                    return true;
-                }
-            }
-            else if (parent()->inherits("QAbstractButton"))
-            {
-                auto btn = static_cast<QAbstractButton*>(parent());
-                if (btn->window() == qApp->activeWindow())
-                {
-                    btn->click();
-                    e->accept();
-                    return true;
-                }
-            }
+            trigger();
+            e->accept();
+            return true;
         }
     }
 
     return QObject::eventFilter(o, e);
+}
+
+void SmartShortcut::trigger()
+{
+    if (isGlobal(m_key) && qApp->activeModalWidget())
+    {
+        qApp->beep();
+        return;
+    }
+
+    if (parent()->inherits("QAction"))
+    {
+        auto action = static_cast<QAction*>(parent());
+        auto widget = action->parentWidget();
+        if (isGlobal(m_key) || !widget || widget->window() == qApp->activeWindow())
+        {
+            action->trigger();
+        }
+    }
+    else if (parent()->inherits("QAbstractButton"))
+    {
+        auto btn = static_cast<QAbstractButton*>(parent());
+        if (isGlobal(m_key) || btn->window() == qApp->activeWindow())
+        {
+            btn->click();
+        }
+    }
 }

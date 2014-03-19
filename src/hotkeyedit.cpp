@@ -16,7 +16,7 @@
  */
 
 #include "hotkeyedit.h"
-#include "mouseshortcut.h"
+#include "smartshortcut.h"
 
 #include <QDebug>
 #include <QKeyEvent>
@@ -24,16 +24,16 @@
 #include <QMetaEnum>
 
 HotKeyEdit::HotKeyEdit(QWidget *parent)
-    : QLineEdit(parent)
+    : QxtLineEdit(parent)
     , m_key(0)
-    , m_ignoreNextMoseEvent(false)
+    , m_ignoreNextMouseEvent(false)
 {
     updateText();
 }
 
 void HotKeyEdit::updateText()
 {
-    setText(MouseShortcut::toString(m_key));
+    setText(m_key? SmartShortcut::toString(m_key): nullptr);
 }
 
 void HotKeyEdit::setKey(int key)
@@ -93,12 +93,12 @@ void HotKeyEdit::handleMousePressEvent(QMouseEvent *evt)
     // 'Unknown' mouse buttons still generates the event,
     // but no buttons specified with it. Just ignore them.
     //
-    if (!m_ignoreNextMoseEvent && evt->buttons())
+    if (!m_ignoreNextMouseEvent && evt->buttons() && isEnabled())
     {
         setKey(0x80000000 | evt->modifiers() | evt->buttons());
         emit keyChanged(m_key);
     }
-    m_ignoreNextMoseEvent = false;
+    m_ignoreNextMouseEvent = false;
 }
 
 void HotKeyEdit::focusInEvent(QFocusEvent *evt)
@@ -106,7 +106,7 @@ void HotKeyEdit::focusInEvent(QFocusEvent *evt)
     switch (evt->reason())
     {
     case Qt::MouseFocusReason:
-        m_ignoreNextMoseEvent = true;
+        m_ignoreNextMouseEvent = true;
         // passthrough
     case Qt::TabFocusReason:
     case Qt::BacktabFocusReason:
