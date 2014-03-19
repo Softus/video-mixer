@@ -33,6 +33,8 @@ class VideoRecordSettings : public QWidget
     QSpinBox  *spinNotify;
     QCheckBox *checkNotify;
     QGroupBox *grpRecordLog;
+    QCheckBox *checkMaxVideoSize;
+    QSpinBox  *spinMaxVideoSize;
     QGroupBox *grpMotionDetection;
     QCheckBox *checkMotionStart;
     QCheckBox *checkMotionStop;

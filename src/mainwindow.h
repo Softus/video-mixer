@@ -126,7 +126,7 @@ class MainWindow : public QWidget
     void updateWindowTitle();
     QDir checkPath(const QString tpl, bool needUnique);
     void updateOutputPath(bool needUnique);
-    QString appendVideoTail(const QDir &dir, const QString& prefix, int idx);
+    QString appendVideoTail(const QDir &dir, const QString& prefix, int idx, bool split);
     void removeVideoTail(const QString& prefix);
 
     void onBusMessage(const QGst::MessagePtr& msg);

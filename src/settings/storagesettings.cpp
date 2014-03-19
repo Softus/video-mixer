@@ -29,12 +29,8 @@
 #include <QSpinBox>
 #include <QxtLineEdit>
 
-#include <QGst/ElementFactory>
-
 StorageSettings::StorageSettings(QWidget *parent)
     : QWidget(parent)
-    , checkMaxVideoSize(nullptr)
-    , spinMaxVideoSize(nullptr)
 {
     QSettings settings;
     auto layoutMain = new QVBoxLayout;
@@ -79,19 +75,6 @@ StorageSettings::StorageSettings(QWidget *parent)
     textVideoFolderTemplate->setSampleText(tr("(share with images and clips)"));
     layoutVideoLog->addRow(tr("Fol&der template"), textVideoFolderTemplate);
     layoutVideoLog->addRow(tr("&Video template"), textVideoTemplate = new QLineEdit(settings.value("video-template", DEFAULT_VIDEO_TEMPLATE).toString()));
-
-    auto elm = QGst::ElementFactory::make("multifilesink");
-    if (elm && elm->findProperty("max-file-size"))
-    {
-        layoutVideoLog->addRow(checkMaxVideoSize = new QCheckBox(tr("&Split files by")), spinMaxVideoSize = new QSpinBox);
-        connect(checkMaxVideoSize, SIGNAL(toggled(bool)), spinMaxVideoSize, SLOT(setEnabled(bool)));
-        checkMaxVideoSize->setChecked(settings.value("split-video-files", DEFAULT_SPLIT_VIDEO_FILES).toBool());
-
-        spinMaxVideoSize->setSuffix(tr(" Mb"));
-        spinMaxVideoSize->setRange(1, 1024*1024);
-        spinMaxVideoSize->setValue(settings.value("video-max-file-size", DEFAULT_VIDEO_MAX_FILE_SIZE).toInt());
-        spinMaxVideoSize->setEnabled(checkMaxVideoSize->isChecked());
-    }
     grpVideo->setLayout(layoutVideoLog);
 
     layoutMain->addWidget(grpVideo);
@@ -144,9 +127,4 @@ void StorageSettings::save()
     settings.setValue("image-template", textImageTemplate->text());
     settings.setValue("clip-template", textClipTemplate->text());
     settings.setValue("video-template", textVideoTemplate->text());
-    if (spinMaxVideoSize)
-    {
-        settings.setValue("split-video-files", checkMaxVideoSize->isChecked());
-        settings.setValue("video-max-file-size", spinMaxVideoSize->value());
-    }
 }

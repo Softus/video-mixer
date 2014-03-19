@@ -84,7 +84,7 @@ VideoSourceSettings::VideoSourceSettings(QWidget *parent)
     checkDeinterlace->setChecked(settings.value("video-deinterlace").toBool());
 
     layout->addRow(tr("Video &muxer"), listVideoMuxers = new QComboBox());
-    layout->addRow(tr("&Image codec"), listImageCodecs = new QComboBox());
+    layout->addRow(tr("Im&age codec"), listImageCodecs = new QComboBox());
     layout->addRow(tr("RTP &payloader"), listRtpPayloaders = new QComboBox());
     textRtpClients = new QLineEdit(settings.value("rtp-clients").toString());
     layout->addRow(tr("&RTP clients"), textRtpClients);

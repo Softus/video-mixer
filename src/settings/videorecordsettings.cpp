@@ -27,8 +27,10 @@
 
 #include <QGst/ElementFactory>
 
-VideoRecordSettings::VideoRecordSettings(QWidget *parent) :
-    QWidget(parent)
+VideoRecordSettings::VideoRecordSettings(QWidget *parent)
+    : QWidget(parent)
+    , checkMaxVideoSize(nullptr)
+    , spinMaxVideoSize(nullptr)
 {
     QSettings settings;
     auto layoutMain = new QVBoxLayout;
@@ -50,42 +52,56 @@ VideoRecordSettings::VideoRecordSettings(QWidget *parent) :
     layoutMain->addWidget(grpClips);
 
     layoutMain->addWidget(grpRecordLog = new QGroupBox(tr("Record &video log")));
-    auto layoutLog = new QVBoxLayout;
+    auto layoutLog = new QFormLayout;
     grpRecordLog->setCheckable(true);
     grpRecordLog->setChecked(settings.value("enable-video").toBool());
     grpRecordLog->setLayout(layoutLog);
 
+    auto elm = QGst::ElementFactory::make("multifilesink");
+    if (elm && elm->findProperty("max-file-size"))
+    {
+        layoutLog->addRow(checkMaxVideoSize = new QCheckBox(tr("&Split files by")), spinMaxVideoSize = new QSpinBox);
+        connect(checkMaxVideoSize, SIGNAL(toggled(bool)), spinMaxVideoSize, SLOT(setEnabled(bool)));
+        checkMaxVideoSize->setChecked(settings.value("split-video-files", DEFAULT_SPLIT_VIDEO_FILES).toBool());
+
+        spinMaxVideoSize->setSuffix(tr(" Mb"));
+        spinMaxVideoSize->setRange(1, 1024*1024);
+        spinMaxVideoSize->setValue(settings.value("video-max-file-size", DEFAULT_VIDEO_MAX_FILE_SIZE).toInt());
+        spinMaxVideoSize->setEnabled(checkMaxVideoSize->isChecked());
+    }
+
     grpMotionDetection = new QGroupBox(tr("Use &motion detection"));
     grpMotionDetection->setCheckable(true);
     grpMotionDetection->setChecked(settings.value("detect-motion", DEFAULT_MOTION_DETECTION).toBool());
-    auto layoutVideoLog = new QFormLayout;
+    auto layoutMotionDetection = new QFormLayout;
+    layoutMotionDetection->setContentsMargins(0,8,0,8);
 
-    layoutVideoLog->addRow(checkMotionStart = new QCheckBox(tr("&Start after")), spinMinTime = new QSpinBox);
+    layoutMotionDetection->addRow(checkMotionStart = new QCheckBox(tr("St&art after")), spinMinTime = new QSpinBox);
     checkMotionStart->setChecked(settings.value("motion-start", true).toBool());
     connect(checkMotionStart, SIGNAL(toggled(bool)), spinMinTime, SLOT(setEnabled(bool)));
     spinMinTime->setValue(settings.value("motion-min-frames", DEFAULT_MOTION_MIN_FRAMES).toInt());
     spinMinTime->setSuffix(tr(" frames with motion"));
     spinMinTime->setEnabled(checkMotionStart->isChecked());
 
-    layoutVideoLog->addRow(checkMotionStop = new QCheckBox(tr("S&top after")), spinGap = new QSpinBox);
+    layoutMotionDetection->addRow(checkMotionStop = new QCheckBox(tr("St&op after")), spinGap = new QSpinBox);
     checkMotionStop->setChecked(settings.value("motion-stop", true).toBool());
     connect(checkMotionStop, SIGNAL(toggled(bool)), spinGap, SLOT(setEnabled(bool)));
     spinGap->setValue(settings.value("motion-gap", DEFAULT_MOTION_GAP).toInt());
     spinGap->setSuffix(tr(" seconds without motion"));
     spinGap->setEnabled(checkMotionStop->isChecked());
 
-    layoutVideoLog->addRow(tr("S&ensitivity"), spinSensitivity = new QSpinBox);
+    layoutMotionDetection->addRow(tr("S&ensitivity"), spinSensitivity = new QSpinBox);
     spinSensitivity->setValue(settings.value("motion-sensitivity", DEFAULT_MOTION_SENSITIVITY).toReal()* 100);
     spinSensitivity->setSuffix(tr("%"));
 
-    layoutVideoLog->addRow(tr("T&hreshold"), spinThreshold = new QSpinBox);
+    layoutMotionDetection->addRow(tr("&Threshold"), spinThreshold = new QSpinBox);
     spinThreshold->setValue(settings.value("motion-threshold", DEFAULT_MOTION_THRESHOLD).toReal()* 100);
     spinThreshold->setSuffix(tr("%"));
 
-    layoutVideoLog->addRow(nullptr, checkMotionDebug = new QCheckBox(tr("&Highlight areas with motion")));
+    layoutMotionDetection->addRow(nullptr, checkMotionDebug = new QCheckBox(tr("&Highlight areas with motion")));
     checkMotionDebug->setChecked(settings.value("motion-debug").toBool());
-    grpMotionDetection->setLayout(layoutVideoLog);
-    layoutLog->addWidget(grpMotionDetection);
+    grpMotionDetection->setLayout(layoutMotionDetection);
+    layoutLog->addRow(grpMotionDetection);
 
     layoutMain->addStretch();
 
@@ -106,6 +122,12 @@ void VideoRecordSettings::save()
         {
             useDetection = false;
         }
+    }
+
+    if (spinMaxVideoSize)
+    {
+        settings.setValue("split-video-files", checkMaxVideoSize->isChecked());
+        settings.setValue("video-max-file-size", spinMaxVideoSize->value());
     }
 
     settings.setValue("clip-limit",             checkLimit->isChecked());

@@ -1261,9 +1261,11 @@ bool MainWindow::startVideoRecord()
         return false;
     }
 
-    if (QSettings().value("enable-video").toBool())
+    QSettings settings;
+    if (settings.value("enable-video").toBool())
     {
-        auto videoFileName = appendVideoTail(videoOutputPath, "video", studyNo);
+        auto split = settings.value("split-video-files", DEFAULT_SPLIT_VIDEO_FILES).toBool();
+        auto videoFileName = appendVideoTail(videoOutputPath, "video", studyNo, split);
         if (videoFileName.isEmpty())
         {
             removeVideoTail("video");
@@ -1331,15 +1333,14 @@ void MainWindow::onSnapshotClick()
     btnSnapshot->setEnabled(false);
 }
 
-QString MainWindow::appendVideoTail(const QDir& dir, const QString& prefix, int idx)
+QString MainWindow::appendVideoTail(const QDir& dir, const QString& prefix, int idx, bool split)
 {
     QSettings settings;
     auto muxDef  = settings.value("video-muxer",    DEFAULT_VIDEO_MUXER).toString();
-    auto maxSize = settings.value("split-video-files", DEFAULT_SPLIT_VIDEO_FILES).toBool()?
-        settings.value("video-max-file-size", DEFAULT_VIDEO_MAX_FILE_SIZE).toLongLong() * 1024 * 1024: 0;
+    auto maxSize = split? settings.value("video-max-file-size", DEFAULT_VIDEO_MAX_FILE_SIZE).toLongLong() * 1024 * 1024: 0;
 
     QString videoExt;
-    bool useMulti = maxSize > 0;
+    split = maxSize > 0;
 
     QGst::ElementPtr mux;
     auto valve   = pipeline->getElementByName((prefix + "valve").toUtf8());
@@ -1362,7 +1363,7 @@ QString MainWindow::appendVideoTail(const QDir& dir, const QString& prefix, int 
 
 
     QGst::ElementPtr sink;
-    if (!useMulti)
+    if (!split)
     {
         sink = QGst::ElementFactory::make("filesink", (prefix + "sink").toUtf8());
     }
@@ -1371,7 +1372,7 @@ QString MainWindow::appendVideoTail(const QDir& dir, const QString& prefix, int 
         sink = QGst::ElementFactory::make("multifilesink", (prefix + "sink").toUtf8());
         if (!sink || !sink->findProperty("max-file-size"))
         {
-            useMulti = false;
+            split = false;
             qDebug() << "multiflesink does not support 'max-file-size' property, replaced with filesink";
             sink = QGst::ElementFactory::make("filesink", (prefix + "sink").toUtf8());
         }
@@ -1407,10 +1408,10 @@ QString MainWindow::appendVideoTail(const QDir& dir, const QString& prefix, int 
     // Manually increment video/clip file name
     //
     QString clipFileName = replace(settings.value(prefix + "-template", prefix + "-%study%-%nn%").toString(), idx)
-            .append(useMulti? "%02d": "").append(videoExt);
+            .append(split? "%02d": "").append(videoExt);
     auto absPath = dir.absoluteFilePath(clipFileName);
     sink->setProperty("location", absPath);
-    if (useMulti)
+    if (split)
     {
         sink->setProperty("next-file", 4);
         sink->setProperty("max-file-size", maxSize);
@@ -1421,7 +1422,7 @@ QString MainWindow::appendVideoTail(const QDir& dir, const QString& prefix, int 
 
     // Replace '%02d' with '00' to get the real clip name
     //
-    return useMulti? absPath.replace("%02d","00"): absPath;
+    return split? absPath.replace("%02d","00"): absPath;
 }
 
 void MainWindow::removeVideoTail(const QString& prefix)
@@ -1460,7 +1461,7 @@ void MainWindow::onRecordStartClick()
     if (!recording)
     {
         QString imageExt = getExt(QSettings().value("image-encoder", DEFAULT_IMAGE_ENCODER).toString());
-        auto clipFileName = appendVideoTail(outputPath, "clip", ++clipNo);
+        auto clipFileName = appendVideoTail(outputPath, "clip", ++clipNo, false);
         if (!clipFileName.isEmpty())
         {
             clipPreviewFileName = clipFileName.append(imageExt);

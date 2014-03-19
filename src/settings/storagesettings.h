@@ -36,8 +36,6 @@ class StorageSettings : public QWidget
     QLineEdit   *textImageTemplate;
     QLineEdit   *textClipTemplate;
     QLineEdit   *textVideoTemplate;
-    QCheckBox   *checkMaxVideoSize;
-    QSpinBox    *spinMaxVideoSize;
 
 public:
     Q_INVOKABLE explicit StorageSettings(QWidget *parent = 0);
