@@ -21,12 +21,13 @@
 #include <QCheckBox>
 #include <QFileDialog>
 #include <QFormLayout>
+#include <QGridLayout>
 #include <QGroupBox>
-#include <QHBoxLayout>
 #include <QLabel>
 #include <QPushButton>
 #include <QSettings>
 #include <QSpinBox>
+#include <QVBoxLayout>
 #include <QxtLineEdit>
 
 StorageSettings::StorageSettings(QWidget *parent)
@@ -37,18 +38,14 @@ StorageSettings::StorageSettings(QWidget *parent)
     auto layoutImages = new QFormLayout;
 
     auto grpImages = new QGroupBox(tr("Images and clips"));
-    auto layoutPath = new QHBoxLayout;
-    textOutputPath = new QLineEdit(settings.value("output-path", DEFAULT_OUTPUT_PATH).toString());
-    auto browseButton = new QPushButton(tr("Browse").append(QString(0x2026)));
-    connect(browseButton, SIGNAL(clicked()), this, SLOT(onClickBrowse()));
-    auto lblPath = new QLabel(tr("&Output path"));
-    lblPath->setBuddy(textOutputPath);
-    layoutPath->addWidget(lblPath);
-    layoutPath->addWidget(textOutputPath, 1);
-    layoutPath->addWidget(browseButton);
-    layoutImages->addRow(layoutPath);
 
-    textFolderTemplate = new QLineEdit(settings.value("folder-template", DEFAULT_FOLDER_TEMPLATE).toString());
+    layoutImages->addRow(tr("&Output path"), textOutputPath = new QxtLineEdit(settings.value("output-path", DEFAULT_OUTPUT_PATH).toString()));
+    textOutputPath->setButtonIcon(QIcon(":/buttons/folder"));
+    textOutputPath->setButtonPosition(QxtLineEdit::OuterRight);
+    textOutputPath->setResetButtonMode(QxtLineEdit::ShowResetNotEmpty);
+    connect(textOutputPath, SIGNAL(buttonClicked()), this, SLOT(onClickBrowse()));
+
+    textFolderTemplate = new QxtLineEdit(settings.value("folder-template", DEFAULT_FOLDER_TEMPLATE).toString());
     layoutImages->addRow(tr("&Folder template"), textFolderTemplate);
 
     layoutImages->addRow(tr("&Pictures template"), textImageTemplate = new QLineEdit(settings.value("image-template", DEFAULT_IMAGE_TEMPLATE).toString()));
@@ -60,17 +57,13 @@ StorageSettings::StorageSettings(QWidget *parent)
     auto grpVideo = new QGroupBox(tr("Video logs"));
     auto layoutVideoLog = new QFormLayout;
 
-    auto layoutVideoPath = new QHBoxLayout;
-    textVideoOutputPath = new QxtLineEdit(settings.value("video-output-path").toString());
+    layoutVideoLog->addRow(tr("O&utput path"), textVideoOutputPath = new QxtLineEdit(settings.value("video-output-path").toString()));
     textVideoOutputPath->setSampleText(tr("(share with images and clips)"));
-    auto browseVideoButton = new QPushButton(tr("Browse").append(QString(0x2026)));
-    connect(browseVideoButton, SIGNAL(clicked()), this, SLOT(onClickVideoBrowse()));
-    auto lblVideoPath = new QLabel(tr("O&utput path"));
-    lblVideoPath->setBuddy(textVideoOutputPath);
-    layoutVideoPath->addWidget(lblVideoPath);
-    layoutVideoPath->addWidget(textVideoOutputPath, 1);
-    layoutVideoPath->addWidget(browseVideoButton);
-    layoutVideoLog->addRow(layoutVideoPath);
+    textVideoOutputPath->setButtonIcon(QIcon(":/buttons/folder"));
+    textVideoOutputPath->setButtonPosition(QxtLineEdit::OuterRight);
+    textVideoOutputPath->setResetButtonMode(QxtLineEdit::ShowResetNotEmpty);
+    connect(textVideoOutputPath, SIGNAL(buttonClicked()), this, SLOT(onClickVideoBrowse()));
+
     textVideoFolderTemplate = new QxtLineEdit(settings.value("video-folder-template").toString());
     textVideoFolderTemplate->setSampleText(tr("(share with images and clips)"));
     layoutVideoLog->addRow(tr("Fol&der template"), textVideoFolderTemplate);
@@ -80,14 +73,18 @@ StorageSettings::StorageSettings(QWidget *parent)
     layoutMain->addWidget(grpVideo);
 
     auto grpLegend = new QGroupBox(tr("Substitutes"));
-    auto layoutLegend = new QVBoxLayout;
-    layoutLegend->addWidget(new QLabel(tr("%yyyy%\t\tyear\t\t\t%mm%\t\tmonth\n"
-                                        "%dd%\t\tday\t\t\t%hh%\t\thour\n"
-                                        "%min%\t\tminute\t\t\t%nn%\t\tsequential number\n"
-                                        "%id%\t\tpatient id\t\t%name%\tpatient name\n"
-                                        "%sex%\t\tpatient sex\t\t%birthdate%\tpatient birthdate\n"
-                                        "%physician%\tphysician name\t\t%study%\tstudy name"
-                                     )));
+    auto layoutLegend = new QGridLayout;
+    auto str = tr("%yyyy%|year|%mm%|month|%dd%|day|%hh%|hour|%min%|minute|"
+                  "%nn%|sequential number|%id%|patient id|%name%|patient name|%sex%|patient sex|"
+                  "%birthdate%|patient birthdate|%physician%|physician name|%study%|study name");
+
+    int cnt = 0;
+    Q_FOREACH(auto lbl, str.split('|'))
+    {
+        layoutLegend->addWidget(new QLabel(lbl), cnt / 4, cnt % 4);
+        ++cnt;
+    }
+
     grpLegend->setLayout(layoutLegend);
     layoutMain->addWidget(grpLegend);
     setLayout(layoutMain);

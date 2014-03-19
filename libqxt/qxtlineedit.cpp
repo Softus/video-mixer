@@ -66,7 +66,7 @@ public:
 	userBtn = new QToolButton(&p);
 	userBtn->setVisible(false);
 	userBtn->setCursor(Qt::ArrowCursor);
-	userBtn->setFocusPolicy(Qt::NoFocus);
+//	userBtn->setFocusPolicy(Qt::NoFocus);
 	userBtn->setIcon(QIcon(":/icons/search.png"));
 	QObject::connect(userBtn, SIGNAL(clicked(bool)), &p,
 		SIGNAL(buttonClicked()));

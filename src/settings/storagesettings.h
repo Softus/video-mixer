@@ -29,9 +29,9 @@ QT_END_NAMESPACE
 class StorageSettings : public QWidget
 {
     Q_OBJECT
-    QLineEdit   *textOutputPath;
+    QxtLineEdit *textOutputPath;
     QxtLineEdit *textVideoOutputPath;
-    QLineEdit   *textFolderTemplate;
+    QxtLineEdit *textFolderTemplate;
     QxtLineEdit *textVideoFolderTemplate;
     QLineEdit   *textImageTemplate;
     QLineEdit   *textClipTemplate;
