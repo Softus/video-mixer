@@ -1,3 +1,10 @@
+beryllium (0.8.6) debian;
+
+  * Fix for dicom raw data storage
+  * Force raw data storage for Ultrasonic videos
+
+ -- Pavel Bludov <pbludov@gmail.com>  Wed, 20 Mar 2014 16:13:00 +0900
+
 beryllium (0.8.5) debian;
 
   * Global hotkeys

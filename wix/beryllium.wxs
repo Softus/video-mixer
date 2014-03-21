@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?define ProductBuild     = "0.8" ?>
-<?define ProductRevision  = "5" ?>
+<?define ProductRevision  = "6" ?>
 <?define ProductName      = "Beryllium" ?>
 
 <?define Manufacturer    = "dc.baikal.ru" ?>

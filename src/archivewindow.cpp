@@ -732,7 +732,7 @@ void ArchiveWindow::onStoreClick()
     dlg.savePatientData(&patientDs);
     QFileInfoList files = curr.entryInfoList(QDir::Files);
 
-    DcmClient client; // UID_SecondaryCaptureImageStorage | UID_VideoEndoscopicImageStorage | UID_RawDataStorage
+    DcmClient client;
     if (client.sendToServer(this, &patientDs, files))
     {
         int userChoice = QMessageBox::information(this, windowTitle(),

@@ -44,9 +44,15 @@
 #undef UNICODE
 #endif
 
-static const char* getImageSopClass()
+static QString getImageSopClass(const QSettings& settings)
 {
-    auto modality = QSettings().value("modality", DEFAULT_MODALITY).toString();
+    auto sopClass = settings.value("image-sopclass").toString();
+    if (!sopClass.isEmpty())
+    {
+        return sopClass;
+    }
+
+    auto modality = settings.value("modality", DEFAULT_MODALITY).toString();
 
     return
         modality == "ES"? UID_VLEndoscopicImageStorage:
@@ -56,13 +62,19 @@ static const char* getImageSopClass()
         "??";
 }
 
-static const char* getVideoSopClass()
+static QString getVideoSopClass(const QSettings& settings)
 {
-    auto modality = QSettings().value("modality", DEFAULT_MODALITY).toString();
+    auto sopClass = settings.value("video-sopclass").toString();
+    if (!sopClass.isEmpty())
+    {
+        return sopClass;
+    }
+
+    auto modality = settings.value("modality", DEFAULT_MODALITY).toString();
 
     return
         modality == "ES"? UID_VideoEndoscopicImageStorage:
-        modality == "US"? UID_UltrasoundMultiframeImageStorage:
+        modality == "US"? UID_RawDataStorage:
         modality == "GM"? UID_VideoMicroscopicImageStorage:
         modality == "XC"? UID_VideoPhotographicImageStorage:
         "??";
@@ -102,6 +114,7 @@ public:
         )
     {
         OFCondition cond;
+        QSettings settings;
 
         if (!mi.Open_Buffer_Init(length))
         {
@@ -198,7 +211,7 @@ public:
 
         if (type == MediaInfoLib::Stream_Image)
         {
-            cond = dset->putAndInsertString(DCM_SOPClassUID, getImageSopClass());
+            cond = dset->putAndInsertString(DCM_SOPClassUID, getImageSopClass(settings).toUtf8());
             if (cond.bad())
               return cond;
 
@@ -228,26 +241,10 @@ public:
         }
         else
         {
-            auto frameRate = getStr(__T("FrameRate")).toDouble();
+            auto sopClass = getVideoSopClass(settings);
 
-            cond = dset->putAndInsertString(DCM_CineRate, QString::number((Uint16)(frameRate + 0.5)).toUtf8());
-            if (cond.bad())
-              return cond;
-
-            cond = dset->putAndInsertString(DCM_FrameTime, QString::number(1000.0 / frameRate).toUtf8());
-            if (cond.bad())
-              return cond;
-
-            cond = dset->putAndInsertString(DCM_NumberOfFrames, getStr(__T("FrameCount")).toUtf8());
-            if (cond.bad())
-              return cond;
-
-#if OFFIS_DCMTK_VER >= 0x030601
-            cond = dset->putAndInsertTagKey(DCM_FrameIncrementPointer, DCM_FrameTime);
-            if (cond.bad())
-              return cond;
-#endif
-            if (QSettings().value("store-video-as-binary", DEFAULT_STORE_VIDEO_AS_BINARY).toBool())
+            if (settings.value("store-video-as-binary", DEFAULT_STORE_VIDEO_AS_BINARY).toBool() ||
+                0 == sopClass.compare(UID_RawDataStorage))
             {
                 ts = EXS_LittleEndianImplicit;
 
@@ -257,7 +254,25 @@ public:
             }
             else
             {
-                cond = dset->putAndInsertString(DCM_SOPClassUID, getVideoSopClass());
+                auto frameRate = getStr(__T("FrameRate")).toDouble();
+                cond = dset->putAndInsertString(DCM_CineRate, QString::number((Uint16)(frameRate + 0.5)).toUtf8());
+                if (cond.bad())
+                  return cond;
+
+                cond = dset->putAndInsertString(DCM_FrameTime, QString::number(1000.0 / frameRate).toUtf8());
+                if (cond.bad())
+                  return cond;
+
+                cond = dset->putAndInsertString(DCM_NumberOfFrames, getStr(__T("FrameCount")).toUtf8());
+                if (cond.bad())
+                  return cond;
+
+    #if OFFIS_DCMTK_VER >= 0x030601
+                cond = dset->putAndInsertTagKey(DCM_FrameIncrementPointer, DCM_FrameTime);
+                if (cond.bad())
+                  return cond;
+    #endif
+                cond = dset->putAndInsertString(DCM_SOPClassUID, sopClass.toUtf8());
                 if (cond.bad())
                   return cond;
 

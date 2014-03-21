@@ -36,7 +36,9 @@ MR = Magnetic Resonance
 NM = Nuclear Medicine
 *US = Ultrasound
     #define UID_UltrasoundImageStorage                                 "1.2.840.10008.5.1.4.1.1.6.1"
-    #define UID_UltrasoundMultiframeImageStorage                       "1.2.840.10008.5.1.4.1.1.3.1"
+    // Doesnt't work #define UID_UltrasoundMultiframeImageStorage                       "1.2.840.10008.5.1.4.1.1.3.1"
+    #define UID_RawDataStorage                                         "1.2.840.10008.5.1.4.1.1.66"
+
 OT = Other
 BI = Biomagnetic imaging
 CD = Color flow Doppler
