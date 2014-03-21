@@ -74,7 +74,7 @@ static QString getVideoSopClass(const QSettings& settings)
 
     return
         modality == "ES"? UID_VideoEndoscopicImageStorage:
-        modality == "US"? UID_RawDataStorage:
+        modality == "US"? UID_UltrasoundMultiframeImageStorage:
         modality == "GM"? UID_VideoMicroscopicImageStorage:
         modality == "XC"? UID_VideoPhotographicImageStorage:
         "??";
@@ -241,12 +241,28 @@ public:
         }
         else
         {
-            auto sopClass = getVideoSopClass(settings);
+            auto frameRate = getStr(__T("FrameRate")).toDouble();
+            cond = dset->putAndInsertString(DCM_CineRate, QString::number((Uint16)(frameRate + 0.5)).toUtf8());
+            if (cond.bad())
+              return cond;
 
-            if (settings.value("store-video-as-binary", DEFAULT_STORE_VIDEO_AS_BINARY).toBool() ||
-                0 == sopClass.compare(UID_RawDataStorage))
+            cond = dset->putAndInsertString(DCM_FrameTime, QString::number(1000.0 / frameRate).toUtf8());
+            if (cond.bad())
+              return cond;
+
+            cond = dset->putAndInsertString(DCM_NumberOfFrames, getStr(__T("FrameCount")).toUtf8());
+            if (cond.bad())
+              return cond;
+
+#if OFFIS_DCMTK_VER >= 0x030601
+            cond = dset->putAndInsertTagKey(DCM_FrameIncrementPointer, DCM_FrameTime);
+            if (cond.bad())
+              return cond;
+#endif
+
+            if (settings.value("store-video-as-binary", DEFAULT_STORE_VIDEO_AS_BINARY).toBool())
             {
-                ts = EXS_LittleEndianImplicit;
+                ts = EXS_LittleEndianExplicit;
 
                 cond = dset->putAndInsertString(DCM_SOPClassUID, UID_RawDataStorage);
                 if (cond.bad())
@@ -254,24 +270,7 @@ public:
             }
             else
             {
-                auto frameRate = getStr(__T("FrameRate")).toDouble();
-                cond = dset->putAndInsertString(DCM_CineRate, QString::number((Uint16)(frameRate + 0.5)).toUtf8());
-                if (cond.bad())
-                  return cond;
-
-                cond = dset->putAndInsertString(DCM_FrameTime, QString::number(1000.0 / frameRate).toUtf8());
-                if (cond.bad())
-                  return cond;
-
-                cond = dset->putAndInsertString(DCM_NumberOfFrames, getStr(__T("FrameCount")).toUtf8());
-                if (cond.bad())
-                  return cond;
-
-    #if OFFIS_DCMTK_VER >= 0x030601
-                cond = dset->putAndInsertTagKey(DCM_FrameIncrementPointer, DCM_FrameTime);
-                if (cond.bad())
-                  return cond;
-    #endif
+                auto sopClass = getVideoSopClass(settings);
                 cond = dset->putAndInsertString(DCM_SOPClassUID, sopClass.toUtf8());
                 if (cond.bad())
                   return cond;
@@ -304,7 +303,7 @@ public:
                 else
                 {
                     qDebug() << "Unknown 'codec " << codec << "' the file will be stored as binary";
-                    ts = EXS_LittleEndianImplicit;
+                    ts = EXS_LittleEndianExplicit;
                 }
             }
         }
