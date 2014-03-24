@@ -57,7 +57,7 @@ void ConfirmationSettings::save()
     QSettings settings;
 
     settings.beginGroup("confirmations");
-    settings.setValue("archive-delete",  checkDelete->isChecked()? -1: QMessageBox::Yes);
+    settings.setValue("archive-delete",  checkDelete->isChecked()? -1: QMessageBox::Ok);
     settings.setValue("archive-store",  !checkStore->isChecked());
     settings.setValue("end-study",       checkEndStudy->isChecked()? -1: QMessageBox::Yes);
     settings.setValue("start-study",    !checkStartStudy->isChecked());
