@@ -188,7 +188,7 @@ bool QxtGlobalShortcutPrivate::nativeEventFilter(const QByteArray & eventType,
 #if QT_VERSION < QT_VERSION_CHECK(5,0,0)
     return prevEventFilter ? prevEventFilter(message) : false;
 #else
-	return false;
+    return false;
 #endif
 }
 

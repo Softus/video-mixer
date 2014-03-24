@@ -18,8 +18,6 @@ DEFINES += PREFIX=$$PREFIX
 QT += core gui dbus opengl
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-unix: DISTRO = $$system(cat /proc/version)
-
 # GCC tuning
 *-g++*:QMAKE_CXXFLAGS += -std=c++0x -Wno-multichar
 
@@ -27,10 +25,19 @@ win32 {
     INCLUDEPATH += c:/usr/include
     QMAKE_LIBDIR += c:/usr/lib
     LIBS += advapi32.lib netapi32.lib wsock32.lib
+
+    USERNAME    = $$(USERNAME)
+    OS_DISTRO   = windows
+    OS_REVISION = $$system(wmic os get version | gawk -F . \'NR==2\{print \$1 \".\" \$2\}\')
 }
 unix {
     LIBS += -lX11
+
+    USERNAME    = $$(USER)
+    OS_DISTRO   = $$system(lsb_release -is | awk \'\{print \$1\}\')
+    OS_REVISION = $$system(lsb_release -rs)
 }
+DEFINES += OS_DISTRO=$$OS_DISTRO OS_REVISION=$$OS_REVISION USERNAME=$$USERNAME
 
 CONFIG += link_pkgconfig
 greaterThan(QT_MAJOR_VERSION, 4) {

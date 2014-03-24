@@ -43,6 +43,7 @@
 #include <glib/gi18n.h>
 #include <gst/gst.h>
 #include <QGst/Init>
+#include <opencv/cv.h>
 
 #ifdef WITH_DICOM
 #define HAVE_CONFIG_H
@@ -288,7 +289,9 @@ bool switchToRunningInstance()
 
 int main(int argc, char *argv[])
 {
-    qDebug() << PRODUCT_FULL_NAME << PRODUCT_VERSION_STR << "(" __DATE__ " " __TIME__ ")";
+    qDebug() << PRODUCT_FULL_NAME << PRODUCT_VERSION_STR << "\nBuilt by " CVAUX_STR(USERNAME) " on " \
+                CVAUX_STR(OS_DISTRO) " " CVAUX_STR(OS_REVISION) " at " __DATE__ " " __TIME__;
+
     signal(SIGSEGV, sighandler);
 
     int errCode = 0;

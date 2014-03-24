@@ -64,10 +64,6 @@ AboutDialog::AboutDialog(QWidget *parent) :
     layoutText->setContentsMargins(16,0,16,0);
 
     auto str = QString(tr(PRODUCT_FULL_NAME)).append(" ").append(PRODUCT_VERSION_STR);
-    if (qApp->keyboardModifiers().testFlag(Qt::ShiftModifier))
-    {
-        str.append(" (" __DATE__ " " __TIME__ ")");
-    }
     auto lblTitle = new QLabel(str);
     auto titleFont = lblTitle->font();
     titleFont.setBold(true);
@@ -142,6 +138,13 @@ AboutDialog::AboutDialog(QWidget *parent) :
     //
     // Footer
     //
+
+    if (qApp->keyboardModifiers().testFlag(Qt::ShiftModifier))
+    {
+        auto buildInfo = "Built by " CVAUX_STR(USERNAME) " on " \
+          CVAUX_STR(OS_DISTRO) " " CVAUX_STR(OS_REVISION) " at " __DATE__ " " __TIME__;
+        layoutText->addWidget(new QLabel(buildInfo));
+    }
 
     layoutText->addSpacing(16);
     auto btnClose = new QPushButton(tr("OK"));
