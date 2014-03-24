@@ -922,8 +922,8 @@ void MainWindow::updatePipeline()
 
     auto detectMotion = settings.value("enable-video").toBool() &&
                         settings.value("detect-motion", DEFAULT_MOTION_DETECTION).toBool();
-    motionStart  = detectMotion && settings.value("motion-start").toBool();
-    motionStop   = detectMotion && settings.value("motion-stop").toBool();
+    motionStart  = detectMotion && settings.value("motion-start", DEFAULT_MOTION_START).toBool();
+    motionStop   = detectMotion && settings.value("motion-stop", DEFAULT_MOTION_STOP).toBool();
 
     updateOverlayText();
 }

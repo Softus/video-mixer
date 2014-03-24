@@ -42,12 +42,12 @@ VideoRecordSettings::VideoRecordSettings(QWidget *parent)
     checkLimit->setChecked(settings.value("clip-limit", DEFAULT_CLIP_LIMIT).toBool());
     spinCountdown->setSuffix(tr(" seconds"));
     spinCountdown->setRange(1, 3600);
-    spinCountdown->setValue(settings.value("clip-countdown", DEFAULT_VIDEO_RECORD_LIMIT).toInt());
+    spinCountdown->setValue(settings.value("clip-countdown", DEFAULT_CLIP_COUNTDOWN).toInt());
     layoutClips->addRow(checkNotify = new QCheckBox(tr("&Play alert at")), spinNotify = new QSpinBox);
     checkNotify->setChecked(settings.value("notify-clip-limit", DEFAULT_NOTIFY_CLIP_LIMIT).toBool());
     spinNotify->setSuffix(tr(" seconds till stop"));
-    spinNotify->setRange(1, 3600);
-    spinNotify->setValue(settings.value("notify-clip-countdown", DEFAULT_VIDEO_RECORD_NOTIFY).toInt());
+    spinNotify->setRange(0, 3600);
+    spinNotify->setValue(settings.value("notify-clip-countdown", DEFAULT_NOTIFY_CLIP_COUNTDOWN).toInt());
     grpClips->setLayout(layoutClips);
     layoutMain->addWidget(grpClips);
 
@@ -77,14 +77,14 @@ VideoRecordSettings::VideoRecordSettings(QWidget *parent)
     layoutMotionDetection->setContentsMargins(0,8,0,8);
 
     layoutMotionDetection->addRow(checkMotionStart = new QCheckBox(tr("St&art after")), spinMinTime = new QSpinBox);
-    checkMotionStart->setChecked(settings.value("motion-start", true).toBool());
+    checkMotionStart->setChecked(settings.value("motion-start", DEFAULT_MOTION_START).toBool());
     connect(checkMotionStart, SIGNAL(toggled(bool)), spinMinTime, SLOT(setEnabled(bool)));
     spinMinTime->setValue(settings.value("motion-min-frames", DEFAULT_MOTION_MIN_FRAMES).toInt());
     spinMinTime->setSuffix(tr(" frames with motion"));
     spinMinTime->setEnabled(checkMotionStart->isChecked());
 
     layoutMotionDetection->addRow(checkMotionStop = new QCheckBox(tr("St&op after")), spinGap = new QSpinBox);
-    checkMotionStop->setChecked(settings.value("motion-stop", true).toBool());
+    checkMotionStop->setChecked(settings.value("motion-stop", DEFAULT_MOTION_STOP).toBool());
     connect(checkMotionStop, SIGNAL(toggled(bool)), spinGap, SLOT(setEnabled(bool)));
     spinGap->setValue(settings.value("motion-gap", DEFAULT_MOTION_GAP).toInt());
     spinGap->setSuffix(tr(" seconds without motion"));
