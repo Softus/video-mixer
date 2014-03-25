@@ -894,13 +894,13 @@ void MainWindow::updatePipeline()
     actionSettings->setEnabled(showSettings);
     actionSettings->setVisible(showSettings);
 
-    updateShortcut(btnStart,    settings.value("hotkey-start",    DEFAULT_HOTKEY_START).toInt());
-    updateShortcut(btnSnapshot, settings.value("hotkey-snapshot", DEFAULT_HOTKEY_SNAPSHOT).toInt());
-    updateShortcut(btnRecordStart, settings.value("hotkey-record-start", DEFAULT_HOTKEY_RECORD_START).toInt());
-    updateShortcut(btnRecordStop,  settings.value("hotkey-record-stop",  DEFAULT_HOTKEY_RECORD_STOP).toInt());
+    updateShortcut(btnStart,    settings.value("hotkey-capture-start",    DEFAULT_HOTKEY_START).toInt());
+    updateShortcut(btnSnapshot, settings.value("hotkey-capture-snapshot", DEFAULT_HOTKEY_SNAPSHOT).toInt());
+    updateShortcut(btnRecordStart, settings.value("hotkey-capture-record-start", DEFAULT_HOTKEY_RECORD_START).toInt());
+    updateShortcut(btnRecordStop,  settings.value("hotkey-capture-record-stop",  DEFAULT_HOTKEY_RECORD_STOP).toInt());
 
-    updateShortcut(actionArchive,  settings.value("hotkey-archive",   DEFAULT_HOTKEY_ARCHIVE).toInt());
-    updateShortcut(actionSettings, settings.value("hotkey-settings",  DEFAULT_HOTKEY_SETTINGS).toInt());
+    updateShortcut(actionArchive,  settings.value("hotkey-capture-archive",   DEFAULT_HOTKEY_ARCHIVE).toInt());
+    updateShortcut(actionSettings, settings.value("hotkey-capture-settings",  DEFAULT_HOTKEY_SETTINGS).toInt());
 
 #ifdef WITH_DICOM
     // Recreate worklist just in case the columns/servers were changed
@@ -912,10 +912,10 @@ void MainWindow::updatePipeline()
     worklist->setObjectName("Worklist");
     mainStack->addWidget(worklist);
 #endif
-    updateShortcut(actionWorklist, settings.value("hotkey-worklist",   DEFAULT_HOTKEY_WORKLIST).toInt());
+    updateShortcut(actionWorklist, settings.value("hotkey-capture-worklist",   DEFAULT_HOTKEY_WORKLIST).toInt());
     actionWorklist->setEnabled(!settings.value("mwl-server").toString().isEmpty());
 #endif
-    updateShortcut(actionAbout, settings.value("hotkey-about",  DEFAULT_HOTKEY_ABOUT).toInt());
+    updateShortcut(actionAbout, settings.value("hotkey-capture-about",  DEFAULT_HOTKEY_ABOUT).toInt());
 
     recordLimit  = settings.value("clip-limit", DEFAULT_CLIP_LIMIT).toBool()? settings.value("clip-countdown").toInt(): 0;
     recordNotify = settings.value("notify-clip-limit", DEFAULT_NOTIFY_CLIP_LIMIT).toBool()? settings.value("notify-clip-countdown").toInt(): 0;

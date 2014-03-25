@@ -113,9 +113,9 @@ Worklist::Worklist(QWidget *parent) :
 #endif
     table->horizontalHeader()->restoreState(settings.value("worklist-columns-width").toByteArray());
 
-    updateShortcut(actionDetail,     settings.value("hotkey-show-details", DEFAULT_HOTKEY_SHOW_DETAILS).toInt());
-    updateShortcut(actionStartStudy, settings.value("hotkey-start",        DEFAULT_HOTKEY_START).toInt());
-    updateShortcut(actionLoad,       settings.value("hotkey-refresh",      DEFAULT_HOTKEY_REFRESH).toInt());
+    updateShortcut(actionDetail,     settings.value("hotkey-worklist-show-details", DEFAULT_HOTKEY_SHOW_DETAILS).toInt());
+    updateShortcut(actionStartStudy, settings.value("hotkey-worklist-start",        DEFAULT_HOTKEY_START).toInt());
+    updateShortcut(actionLoad,       settings.value("hotkey-worklist-refresh",      DEFAULT_HOTKEY_REFRESH).toInt());
 
     setAttribute(Qt::WA_DeleteOnClose, false);
 }
