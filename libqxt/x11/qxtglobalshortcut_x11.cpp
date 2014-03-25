@@ -30,12 +30,13 @@
 *****************************************************************************/
 
 #include <QVector>
-#if QT_VERSION < QT_VERSION_CHECK(5,0,0)
+#if QT_VERSION < QT_VERSION_CHECK(5,0,0) || QT_VERSION >= QT_VERSION_CHECK(5,1,0)
 #   include <QX11Info>
 #else
 #   include <QApplication>
-#   include <xcb/xcb.h>
 #endif
+
+#include <xcb/xcb.h>
 #include <X11/Xlib.h>
 
 namespace {
@@ -90,7 +91,7 @@ class QxtX11Data {
 public:
     QxtX11Data()
     {
-#if QT_VERSION < QT_VERSION_CHECK(5,0,0)
+#if QT_VERSION < QT_VERSION_CHECK(5,0,0) || QT_VERSION >= QT_VERSION_CHECK(5,1,0)
         m_display = QX11Info::display();
 #else
         m_display = reinterpret_cast<Display *>(XOpenDisplay(0));
