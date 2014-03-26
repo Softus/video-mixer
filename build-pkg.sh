@@ -48,7 +48,7 @@ if [ $touch == 1 ]; then
 fi
 
 distro=$( (lsb_release -is || echo windows) | awk '{print tolower($1)}' )
-rev=$( lsb_release -rs || (wmic os get version | gawk -F . "NR==2{print $1 \".\" $2}") )
+rev=$( lsb_release -rs || (cmd.exe /c ver | gawk 'match($0,/[0-9]\.[0-9]/){print substr($0,RSTART,RLENGTH)}') )
 case $distro in
 ubuntu | debian)  echo "Building DEB package"
     rm -f ../*.deb ../*.tar.gz ../*.dsc ../*.changes
