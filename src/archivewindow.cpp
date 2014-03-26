@@ -485,6 +485,7 @@ void ArchiveWindow::updateList()
 
         auto item = new QListWidgetItem(icon, fi.fileName(), listFiles);
         item->setToolTip(toolTip);
+        item->setSizeHint(QSize(176, 144));
         if (item->text() == currText)
         {
             listFiles->setCurrentItem(item);

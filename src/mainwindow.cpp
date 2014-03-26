@@ -1237,6 +1237,7 @@ void MainWindow::onElementMessage(const QGst::ElementMessagePtr& msg)
         auto item = !existent.isEmpty()? existent.first(): new QListWidgetItem(baseName, listImagesAndClips);
         item->setToolTip(toolTip);
         item->setIcon(QIcon(pm));
+        item->setSizeHint(QSize(176, 144));
         listImagesAndClips->setItemSelected(item, true);
         listImagesAndClips->scrollToItem(item);
 
