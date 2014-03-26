@@ -32,9 +32,9 @@ private:
 
 public:
     MainWindowDBusAdaptor(MainWindow *wnd);
-    bool busy();
 
 public slots:
+    bool busy();
     bool startStudy
         ( const QString &accessionNumber = QString()
         , const QString &id = QString(), const QString &name = QString()
