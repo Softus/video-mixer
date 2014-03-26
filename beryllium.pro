@@ -29,7 +29,7 @@ win32 {
 
     USERNAME    = $$(USERNAME)
     OS_DISTRO   = windows
-    OS_REVISION = $$system(wmic os get version | gawk -F . \'NR==2\{print \$1 \".\" \$2\}\')
+    OS_REVISION = $$system($$quote("cmd.exe /c ver | gawk 'match($0,/[0-9]\.[0-9]/){print substr($0,RSTART,RLENGTH)}'"))
 }
 unix {
     LIBS += -lX11
