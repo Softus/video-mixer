@@ -141,13 +141,14 @@ class MainWindow : public QWidget
     void setElementProperty(QGst::ElementPtr& elm, const char* prop = nullptr, const QGlib::Value& value = nullptr, QGst::State minimumState = QGst::StatePlaying);
     bool startVideoRecord();
     void updateStartDialog();
+    bool confirmStopStudy();
 
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
 protected:
-    virtual void closeEvent(QCloseEvent*);
+    virtual void closeEvent(QCloseEvent *evt);
     virtual void hideEvent(QHideEvent *);
     virtual void timerEvent(QTimerEvent*);
 signals:

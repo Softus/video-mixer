@@ -70,6 +70,13 @@ bool MainWindowDBusAdaptor::startStudy
     if (!studyName.isEmpty())
         wnd->studyName = studyName;
 
+    if (wnd->isMinimized())
+        wnd->showNormal();
+    if (wnd->isHidden())
+        wnd->show();
+
+    wnd->activateWindow();
+
     if (autoStart)
     {
         QTimer::singleShot(0, wnd, SLOT(onStartClick()));

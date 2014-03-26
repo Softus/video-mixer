@@ -273,8 +273,30 @@ MainWindow::~MainWindow()
 #endif
 }
 
-void MainWindow::closeEvent(QCloseEvent *)
+void MainWindow::closeEvent(QCloseEvent *evt)
 {
+    // Save keyboard modifiers state, since it may change after the confirm dialog will be shown.
+    //
+    auto fromMouse = qApp->keyboardModifiers() == Qt::NoModifier;
+
+    // If a study is in progress, the user must confirm stoppping the app.
+    //
+    if (running && !confirmStopStudy())
+    {
+        evt->ignore();
+        return;
+    }
+
+    // Don't trick the user, if she press the Alt+F4/Ctrl+Q.
+    // Only for mouse clicks on close button.
+    //
+    if (fromMouse && QSettings().value("hide-on-close").toBool())
+    {
+        evt->ignore();
+        hide();
+        return;
+    }
+
     if (archiveWindow)
     {
         archiveWindow->close();
@@ -285,6 +307,8 @@ void MainWindow::closeEvent(QCloseEvent *)
         worklist->close();
     }
 #endif
+
+    QWidget::closeEvent(evt);
 }
 
 void MainWindow::hideEvent(QHideEvent *evt)
@@ -1288,30 +1312,38 @@ void MainWindow::onStartClick()
     }
     else
     {
-        QxtConfirmationMessage msg(QMessageBox::Question, windowTitle()
-            , tr("End the study?"), QString(), QMessageBox::Yes | QMessageBox::No, this);
-        msg.setSettingsPath("confirmations");
-        msg.setOverrideSettingsKey("end-study");
-        msg.setRememberOnReject(false);
-        msg.setDefaultButton(QMessageBox::Yes);
-#if (QT_VERSION >= QT_VERSION_CHECK(4, 8, 0))
-        if (qApp->queryKeyboardModifiers().testFlag(Qt::ShiftModifier))
-#else
-        if (qApp->keyboardModifiers().testFlag(Qt::ShiftModifier))
-#endif
-        {
-            msg.reset();
-        }
-
-        if (QMessageBox::Yes == msg.exec())
-        {
-            onStopStudy();
-
-            // Open the archive window after end of study
-            //
-            QTimer::singleShot(0, this, SLOT(onShowArchiveClick()));
-        }
+        confirmStopStudy();
     }
+}
+
+bool MainWindow::confirmStopStudy()
+{
+    QxtConfirmationMessage msg(QMessageBox::Question, windowTitle()
+        , tr("End the study?"), QString(), QMessageBox::Yes | QMessageBox::No, this);
+    msg.setSettingsPath("confirmations");
+    msg.setOverrideSettingsKey("end-study");
+    msg.setRememberOnReject(false);
+    msg.setDefaultButton(QMessageBox::Yes);
+#if (QT_VERSION >= QT_VERSION_CHECK(4, 8, 0))
+    if (qApp->queryKeyboardModifiers().testFlag(Qt::ShiftModifier))
+#else
+    if (qApp->keyboardModifiers().testFlag(Qt::ShiftModifier))
+#endif
+    {
+        msg.reset();
+    }
+
+    if (QMessageBox::Yes == msg.exec())
+    {
+        onStopStudy();
+
+        // Open the archive window after end of study
+        //
+        QTimer::singleShot(100, this, SLOT(onShowArchiveClick()));
+        return true;
+    }
+
+    return false;
 }
 
 void MainWindow::onSnapshotClick()
