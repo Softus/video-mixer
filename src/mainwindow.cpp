@@ -1228,10 +1228,13 @@ void MainWindow::onElementMessage(const QGst::ElementMessagePtr& msg)
 #endif
         }
 
-        auto existent = listImagesAndClips->findItems(QFileInfo(fileName).baseName(), Qt::MatchExactly);
-        auto item = !existent.isEmpty()? existent.first():
-            new QListWidgetItem(QFileInfo(fileName).baseName(), listImagesAndClips);
-
+        auto baseName = QFileInfo(fileName).completeBaseName();
+        if (baseName.startsWith('.'))
+        {
+            baseName = QFileInfo(baseName.mid(1)).completeBaseName();
+        }
+        auto existent = listImagesAndClips->findItems(baseName, Qt::MatchExactly);
+        auto item = !existent.isEmpty()? existent.first(): new QListWidgetItem(baseName, listImagesAndClips);
         item->setToolTip(toolTip);
         item->setIcon(QIcon(pm));
         listImagesAndClips->setItemSelected(item, true);
