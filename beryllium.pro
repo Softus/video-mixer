@@ -17,7 +17,7 @@ DEFINES += PREFIX=$$PREFIX
 
 QT += core gui dbus opengl
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
-!lessThan(QT_VERSION, 5.1):       QT += x11extras
+unix: !lessThan(QT_VERSION, 5.1): QT += x11extras
 
 # GCC tuning
 *-g++*:QMAKE_CXXFLAGS += -std=c++0x -Wno-multichar
