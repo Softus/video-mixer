@@ -272,7 +272,7 @@ static GOptionEntry options[] = {
 
 bool switchToRunningInstance()
 {
-    auto msg = QDBusInterface(PRODUCT_NAMESPACE, "/com/irkdc/Beryllium/Main", "com.irkdc.beryllium.Main")
+    auto msg = QDBusInterface(PRODUCT_NAMESPACE, "/ru/baikal/dc/Beryllium/Main", "ru.baikal.dc.beryllium.Main")
          .call("startStudy"
             , accessionNumber
             , patientId
@@ -411,12 +411,12 @@ int main(int argc, char *argv[])
             // connect to DBus and register as an object
             //
             auto adapter = new MainWindowDBusAdaptor(wndMain);
-            bus.registerObject("/com/irkdc/Beryllium/Main", wndMain);
+            bus.registerObject("/ru/baikal/dc/Beryllium/Main", wndMain);
 
             // If registerService succeeded, there is no other instances.
             // If failed, then another instance is possible running, or DBus is complitelly broken.
             //
-            if (bus.registerService("com.irkdc.beryllium") || !switchToRunningInstance())
+            if (bus.registerService(PRODUCT_NAMESPACE) || !switchToRunningInstance())
             {
                 adapter->startStudy(accessionNumber
                                     , patientId
@@ -446,7 +446,7 @@ int main(int argc, char *argv[])
         fullScreen? wnd->showFullScreen(): wnd->show();
         errCode = app.exec();
         delete wnd;
-        QDBusConnection::sessionBus().unregisterObject("/com/irkdc/Beryllium/Main");
+        QDBusConnection::sessionBus().unregisterObject("/ru/baikal/dc/Beryllium/Main");
     }
 
     QGst::cleanup();

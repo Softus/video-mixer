@@ -24,7 +24,7 @@ class MainWindow;
 class MainWindowDBusAdaptor : public QDBusAbstractAdaptor
 {
     Q_OBJECT
-    Q_CLASSINFO("D-Bus Interface", "com.irkdc.beryllium.Main") // Preprocessor won't work here
+    Q_CLASSINFO("D-Bus Interface", "ru.baikal.dc.beryllium.Main") // Preprocessor won't work here
     Q_PROPERTY(bool busy READ busy)
 
 private:

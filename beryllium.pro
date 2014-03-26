@@ -153,7 +153,7 @@ unix {
     translations.path = $$PREFIX/share/beryllium/translations
     sound.files = sound/*
     sound.path = $$PREFIX/share/beryllium/sound
-    dbus.files = com.irk-dc.beryllium.service
+    dbus.files = ru.baikal.dc.beryllium.service
     dbus.path = $$PREFIX/share/dbus-1/services
 
     INSTALLS += dbus translations sound shortcut icon man

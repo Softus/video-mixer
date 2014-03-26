@@ -74,7 +74,7 @@
             <Directory Id='DBusFolder' Name='dbus-1'>
               <Directory Id='ServicesFolder' Name='services'>
                 <Component Id="Comp_DBusService32" Guid="B100D0FF-AF56-0107-0314-079500628307" Win64="no">
-                  <File Id="File_com_irk_dc_beryllium_service" Name="com.irk-dc.beryllium.service" Source="../com.irk-dc.beryllium.service.win" />
+                  <File Id="File_com_irk_dc_beryllium_service" Name="ru.baikal.dc.beryllium.service" Source="../ru.baikal.dc.beryllium.service.win" />
                 </Component>
               </Directory>
             </Directory>

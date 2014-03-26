@@ -26,9 +26,9 @@
 #define PRODUCT_VERSION_STR     "0.8.6"
 
 #define ORGANIZATION_FULL_NAME  "Irkutsk Diagnostic Center"
-#define ORGANIZATION_SHORT_NAME "irk-dc" // lowercase, no spaces
+#define ORGANIZATION_SHORT_NAME "dc.baikal.ru" // lowercase, no spaces
 
 #define SITE_UID_ROOT           "1.2.643.2.66"
-#define PRODUCT_NAMESPACE       "com." ORGANIZATION_SHORT_NAME "." PRODUCT_SHORT_NAME
+#define PRODUCT_NAMESPACE       "ru.baikal.dc." PRODUCT_SHORT_NAME
 
 #endif // PRODUCT_H
