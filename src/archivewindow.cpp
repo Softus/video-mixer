@@ -442,7 +442,7 @@ void ArchiveWindow::updateList()
             auto caps = TypeDetect(fi.absoluteFilePath());
             if (caps.startsWith("video/"))
             {
-                auto thumbnailList = curr.entryInfoList(QStringList(fi.fileName() + ".*"));
+                auto thumbnailList = curr.entryInfoList(QStringList("." + fi.fileName() + ".*"), QDir::Hidden | QDir::Files);
                 if (thumbnailList.isEmpty() || !pm.load(thumbnailList.first().absoluteFilePath()))
                 {
                     icon.addFile(":/buttons/movie");

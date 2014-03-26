@@ -1223,6 +1223,9 @@ void MainWindow::onElementMessage(const QGst::ElementMessagePtr& msg)
             painter.setOpacity(0.75);
             painter.drawPixmap(pm.rect(), pmOverlay);
             clipPreviewFileName.clear();
+#ifdef Q_OS_WIN
+            SetFileAttributesW(fileName.toStdWString().c_str(), FILE_ATTRIBUTE_HIDDEN);
+#endif
         }
 
         auto existent = listImagesAndClips->findItems(QFileInfo(fileName).baseName(), Qt::MatchExactly);
@@ -1492,11 +1495,24 @@ void MainWindow::onRecordStartClick()
 {
     if (!recording)
     {
-        QString imageExt = getExt(QSettings().value("image-encoder", DEFAULT_IMAGE_ENCODER).toString());
+        QSettings settings;
+        QString imageExt = getExt(settings.value("image-encoder", DEFAULT_IMAGE_ENCODER).toString());
         auto clipFileName = appendVideoTail(outputPath, "clip", ++clipNo, false);
         if (!clipFileName.isEmpty())
         {
-            clipPreviewFileName = clipFileName.append(imageExt);
+            if (settings.value("save-clip-thumbnails", DEFAULT_SAVE_CLIP_THUMBNAILS).toBool())
+            {
+                QFileInfo fi(clipFileName);
+                clipPreviewFileName = fi.absolutePath().append(QDir::separator()).append('.').append(fi.fileName()).append(imageExt);
+            }
+            else
+            {
+                auto item = new QListWidgetItem(QFileInfo(clipFileName).baseName(), listImagesAndClips);
+                item->setToolTip(clipFileName);
+                item->setIcon(QIcon(":/buttons/movie"));
+                listImagesAndClips->setItemSelected(item, true);
+                listImagesAndClips->scrollToItem(item);
+            }
 
             // Until the real clip recording starts, we should disable this button
             //

@@ -743,8 +743,8 @@ bool DcmClient::sendToServer(QWidget *parent, DcmDataset *dsPatient, const QFile
 
             if (TypeDetect(filePath).startsWith("video/"))
             {
-                auto thumbnailFileTemplate = QStringList(file.fileName() + ".*");
-                auto isClip = !dir.entryList(thumbnailFileTemplate).isEmpty();
+                auto thumbnailFileTemplate = QStringList("." + file.fileName() + ".*");
+                auto isClip = !dir.entryList(thumbnailFileTemplate, QDir::Hidden | QDir::Files).isEmpty();
 
                 if (isClip)
                 {
