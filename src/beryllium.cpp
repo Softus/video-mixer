@@ -416,7 +416,7 @@ int main(int argc, char *argv[])
             // If registerService succeeded, there is no other instances.
             // If failed, then another instance is possible running, or DBus is complitelly broken.
             //
-            if (bus.registerService(PRODUCT_NAMESPACE) || !switchToRunningInstance())
+            if (bus.registerService("com.irkdc.beryllium") || !switchToRunningInstance())
             {
                 adapter->startStudy(accessionNumber
                                     , patientId
