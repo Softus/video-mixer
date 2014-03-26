@@ -26,6 +26,7 @@
 #include "videoeditor.h"
 #include "settings.h"
 
+#include <opencv/cv.h>
 #include <signal.h>
 
 #include <QApplication>
@@ -43,7 +44,6 @@
 #include <glib/gi18n.h>
 #include <gst/gst.h>
 #include <QGst/Init>
-#include <opencv/cv.h>
 
 #ifdef WITH_DICOM
 #define HAVE_CONFIG_H
