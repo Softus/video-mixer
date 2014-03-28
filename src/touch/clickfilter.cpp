@@ -16,9 +16,11 @@
 
 #include "clickfilter.h"
 #include <QApplication>
+#include <QDebug>
 #include <QGesture>
 #include <QGestureEvent>
 #include <QWidget>
+#include <QMenu>
 
 ClickFilter::ClickFilter()
     : me(QEvent::MouseButtonDblClick, QPoint(), QPoint(), Qt::LeftButton, Qt::LeftButton, Qt::NoModifier)
@@ -36,9 +38,13 @@ bool ClickFilter::eventFilter(QObject *o, QEvent *e)
         {
             auto pt = tapGesture->hotSpot().toPoint();
             auto widget = QApplication::widgetAt(pt);
-            if (widget)
+
+            // For some unknown reason, Qt::GestureFinished comes after QToolButton
+            // pops up the menu, so ignore them.
+            //
+            if (widget && !widget->inherits("QToolButton"))
             {
-                me = QMouseEvent(QEvent::MouseButtonDblClick, widget->mapFromGlobal(pt)
+                auto me = QMouseEvent(QEvent::MouseButtonDblClick, widget->mapFromGlobal(pt)
                     , pt, Qt::LeftButton, Qt::LeftButton, Qt::NoModifier);
                 //QSpontaneKeyEvent::setSpontaneous(&me);
                 return qApp->notify(widget, &me);
