@@ -74,7 +74,6 @@ VideoRecordSettings::VideoRecordSettings(QWidget *parent)
     grpMotionDetection->setCheckable(true);
     grpMotionDetection->setChecked(settings.value("detect-motion", DEFAULT_MOTION_DETECTION).toBool());
     auto layoutMotionDetection = new QFormLayout;
-    layoutMotionDetection->setContentsMargins(0,8,0,8);
 
     layoutMotionDetection->addRow(checkMotionStart = new QCheckBox(tr("St&art after")), spinMinTime = new QSpinBox);
     checkMotionStart->setChecked(settings.value("motion-start", DEFAULT_MOTION_START).toBool());
