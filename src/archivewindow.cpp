@@ -320,13 +320,9 @@ void ArchiveWindow::createSubDirMenu(QAction* parentAction)
 
     foreach (auto subDir, dir.entryInfoList(QDir::NoDotAndDotDot | QDir::Dirs))
     {
-        auto action = menu->addAction(subDir.baseName());
+        auto action = menu->addAction(subDir.fileName(), this, SLOT(selectPath()));
         action->setData(subDir.absoluteFilePath());
-
-        // setPath will destroy the menu that owns this action, so
-        // it must be queued.
-        //
-        connect(action, SIGNAL(triggered()), this, SLOT(selectPath()), Qt::QueuedConnection);
+        action->setCheckable(true);
     }
 
     if (!menu->isEmpty())
@@ -342,9 +338,11 @@ void ArchiveWindow::updatePath()
 
     QAction* prev = nullptr;
     QDir dir = curr;
+
     auto group = new QActionGroup(barPath);
     connect(group, SIGNAL(triggered(QAction*)), this, SLOT(selectPath(QAction*)));
     barPath->clear();
+
     do
     {
         auto action = new QAction(dir.dirName(), barPath);
@@ -362,9 +360,11 @@ void ArchiveWindow::updatePath()
 
 void ArchiveWindow::preparePathPopupMenu()
 {
+    auto currPath = curr.absolutePath();
     auto menu = static_cast<QMenu*>(sender());
     foreach (auto action, menu->actions())
     {
+        action->setChecked(currPath == action->data().toString());
         createSubDirMenu(action);
     }
 }
@@ -485,7 +485,10 @@ void ArchiveWindow::updateList()
 
         auto item = new QListWidgetItem(icon, fi.fileName(), listFiles);
         item->setToolTip(toolTip);
-        item->setSizeHint(QSize(176, 144));
+        if (listFiles->viewMode() != QListView::ListMode)
+        {
+            item->setSizeHint(QSize(176, 144));
+        }
         if (item->text() == currText)
         {
             listFiles->setCurrentItem(item);
@@ -607,6 +610,16 @@ void ArchiveWindow::switchViewMode(int mode)
         listFiles->setWrapping(true);
     }
 
+    QVariant sizeHint;
+    if (mode != QListView::ListMode)
+    {
+        sizeHint.setValue(QSize(176, 144));
+    }
+
+    for (int i = 0; i < listFiles->count(); ++i)
+    {
+        listFiles->item(i)->setData(Qt::SizeHintRole, sizeHint);
+    }
     listFiles->setIconSize(mode == QListView::ListMode? QSize(32, 32): QSize(144, 144));
     listFiles->setVerticalScrollBarPolicy(
         mode == QListView::IconMode? Qt::ScrollBarAsNeeded: Qt::ScrollBarAlwaysOff);
