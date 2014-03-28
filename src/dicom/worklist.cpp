@@ -201,16 +201,16 @@ void Worklist::closeEvent(QCloseEvent *e)
     QWidget::closeEvent(e);
 }
 
-#ifndef WITH_TOUCH
 void Worklist::hideEvent(QHideEvent *e)
 {
     QSettings settings;
+#ifndef WITH_TOUCH
     settings.setValue("worklist-geometry", saveGeometry());
     settings.setValue("worklist-state", (int)windowState() & ~Qt::WindowMinimized);
+#endif
     settings.setValue("worklist-columns-width", table->horizontalHeader()->saveState());
     QWidget::hideEvent(e);
 }
-#endif
 
 void Worklist::keyPressEvent(QKeyEvent *e)
 {
