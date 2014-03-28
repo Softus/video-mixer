@@ -956,7 +956,8 @@ void MainWindow::updatePipeline()
 #endif
     updateShortcut(actionAbout, settings.value("hotkey-capture-about",  DEFAULT_HOTKEY_ABOUT).toInt());
 
-    recordNotify = settings.value("notify-clip-limit", DEFAULT_NOTIFY_CLIP_LIMIT).toBool()? settings.value("notify-clip-countdown").toInt(): 0;
+    recordNotify = settings.value("notify-clip-limit", DEFAULT_NOTIFY_CLIP_LIMIT).toBool()?
+        settings.value("notify-clip-countdown", , DEFAULT_NOTIFY_CLIP_COUNTDOWN).toInt(): 0;
 
     auto detectMotion = settings.value("enable-video").toBool() &&
                         settings.value("detect-motion", DEFAULT_MOTION_DETECTION).toBool();
@@ -1534,7 +1535,7 @@ bool MainWindow::startRecord(int duration, const QString &clipFileTemplate)
 
     QSettings settings;
     recordLimit = duration > 0? duration:
-        settings.value("clip-limit", DEFAULT_CLIP_LIMIT).toBool()? settings.value("clip-countdown").toInt(): 0;
+        settings.value("clip-limit", DEFAULT_CLIP_LIMIT).toBool()? settings.value("clip-countdown", DEFAULT_CLIP_COUNTDOWN).toInt(): 0;
 
     if (!recording)
     {
