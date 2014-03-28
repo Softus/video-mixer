@@ -294,9 +294,23 @@ void MainWindow::closeEvent(QCloseEvent *evt)
     {
         evt->ignore();
         hide();
+
+#ifndef WITH_TOUCH
+        if (archiveWindow)
+        {
+            archiveWindow->hide();
+        }
+#ifdef WITH_DICOM
+        if (worklist)
+        {
+            worklist->hide();
+        }
+#endif
+#endif
         return;
     }
 
+#ifndef WITH_TOUCH
     if (archiveWindow)
     {
         archiveWindow->close();
@@ -306,6 +320,7 @@ void MainWindow::closeEvent(QCloseEvent *evt)
     {
         worklist->close();
     }
+#endif
 #endif
 
     QWidget::closeEvent(evt);
