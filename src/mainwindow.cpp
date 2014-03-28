@@ -941,7 +941,6 @@ void MainWindow::updatePipeline()
 #endif
     updateShortcut(actionAbout, settings.value("hotkey-capture-about",  DEFAULT_HOTKEY_ABOUT).toInt());
 
-    recordLimit  = settings.value("clip-limit", DEFAULT_CLIP_LIMIT).toBool()? settings.value("clip-countdown").toInt(): 0;
     recordNotify = settings.value("notify-clip-limit", DEFAULT_NOTIFY_CLIP_LIMIT).toBool()? settings.value("notify-clip-countdown").toInt(): 0;
 
     auto detectMotion = settings.value("enable-video").toBool() &&
@@ -1296,7 +1295,7 @@ bool MainWindow::startVideoRecord()
     if (settings.value("enable-video").toBool())
     {
         auto split = settings.value("split-video-files", DEFAULT_SPLIT_VIDEO_FILES).toBool();
-        auto videoFileName = appendVideoTail(videoOutputPath, "video", studyNo, split);
+        auto videoFileName = appendVideoTail(videoOutputPath, "video", settings.value("video-template", DEFAULT_VIDEO_TEMPLATE).toString(), studyNo, split);
         if (videoFileName.isEmpty())
         {
             removeVideoTail("video");
@@ -1355,10 +1354,21 @@ bool MainWindow::confirmStopStudy()
 
 void MainWindow::onSnapshotClick()
 {
+    takeSnapshot();
+}
+
+bool MainWindow::takeSnapshot(const QString& imageTemplate)
+{
+    if (!running)
+    {
+        return false;
+    }
+
     QSettings settings;
     auto imageExt = getExt(settings.value("image-encoder", DEFAULT_IMAGE_ENCODER).toString());
-    auto imageTemplate = settings.value("image-template", DEFAULT_IMAGE_TEMPLATE).toString();
-    auto imageFileName = replace(imageTemplate, ++imageNo).append(imageExt);
+    auto actualImageTemplate = !imageTemplate.isEmpty()? imageTemplate:
+            settings.value("image-template", DEFAULT_IMAGE_TEMPLATE).toString();
+    auto imageFileName = replace(actualImageTemplate, ++imageNo).append(imageExt);
 
     sound->play(DATA_FOLDER + "/sound/shutter.ac3");
 
@@ -1370,9 +1380,10 @@ void MainWindow::onSnapshotClick()
     //
     // Once an image will be ready, the valve will be turned off again.
     btnSnapshot->setEnabled(false);
+    return true;
 }
 
-QString MainWindow::appendVideoTail(const QDir& dir, const QString& prefix, int idx, bool split)
+QString MainWindow::appendVideoTail(const QDir& dir, const QString& prefix, const QString& fileTemplate, int idx, bool split)
 {
     QSettings settings;
     auto muxDef  = settings.value("video-muxer",    DEFAULT_VIDEO_MUXER).toString();
@@ -1446,8 +1457,7 @@ QString MainWindow::appendVideoTail(const QDir& dir, const QString& prefix, int 
 
     // Manually increment video/clip file name
     //
-    QString clipFileName = replace(settings.value(prefix + "-template", prefix + "-%study%-%nn%").toString(), idx)
-            .append(split? "%02d": "").append(videoExt);
+    QString clipFileName = replace(fileTemplate, idx).append(split? "%02d": "").append(videoExt);
     auto absPath = dir.absoluteFilePath(clipFileName);
     sink->setProperty("location", absPath);
     if (split)
@@ -1497,11 +1507,26 @@ void MainWindow::removeVideoTail(const QString& prefix)
 
 void MainWindow::onRecordStartClick()
 {
+    startRecord(recordLimit);
+}
+
+bool MainWindow::startRecord(int duration, const QString &clipFileTemplate)
+{
+    if (!running)
+    {
+        return false;
+    }
+
+    QSettings settings;
+    recordLimit = duration > 0? duration:
+        settings.value("clip-limit", DEFAULT_CLIP_LIMIT).toBool()? settings.value("clip-countdown").toInt(): 0;
+
     if (!recording)
     {
-        QSettings settings;
         QString imageExt = getExt(settings.value("image-encoder", DEFAULT_IMAGE_ENCODER).toString());
-        auto clipFileName = appendVideoTail(outputPath, "clip", ++clipNo, false);
+        auto actualTemplate = !clipFileTemplate.isEmpty()? clipFileTemplate:
+            settings.value("clip-template", DEFAULT_CLIP_TEMPLATE).toString();
+        auto clipFileName = appendVideoTail(outputPath, "clip", actualTemplate, ++clipNo, false);
         if (!clipFileName.isEmpty())
         {
             if (settings.value("save-clip-thumbnails", DEFAULT_SAVE_CLIP_THUMBNAILS).toBool())
@@ -1538,6 +1563,7 @@ void MainWindow::onRecordStartClick()
         //
         countdown = recordLimit;
     }
+    return true;
 }
 
 void MainWindow::onRecordStopClick()

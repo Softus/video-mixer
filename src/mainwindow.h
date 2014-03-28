@@ -126,7 +126,7 @@ class MainWindow : public QWidget
     void updateWindowTitle();
     QDir checkPath(const QString tpl, bool needUnique);
     void updateOutputPath(bool needUnique);
-    QString appendVideoTail(const QDir &dir, const QString& prefix, int idx, bool split);
+    QString appendVideoTail(const QDir &dir, const QString& prefix, const QString &fileTemplate, int idx, bool split);
     void removeVideoTail(const QString& prefix);
 
     void onBusMessage(const QGst::MessagePtr& msg);
@@ -142,6 +142,8 @@ class MainWindow : public QWidget
     bool startVideoRecord();
     void updateStartDialog();
     bool confirmStopStudy();
+    bool takeSnapshot(const QString& imageTemplate = QString());
+    bool startRecord(int duration = 0, const QString &clipFileTemplate = QString());
 
 public:
     explicit MainWindow(QWidget *parent = 0);

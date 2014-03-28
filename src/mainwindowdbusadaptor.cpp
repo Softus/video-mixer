@@ -31,6 +31,11 @@ bool MainWindowDBusAdaptor::busy()
     return wnd->running;
 }
 
+bool MainWindowDBusAdaptor::recording()
+{
+    return wnd->recording;
+}
+
 bool MainWindowDBusAdaptor::startStudy
     ( const QString &accessionNumber
     , const QString &id, const QString &name
@@ -83,6 +88,42 @@ bool MainWindowDBusAdaptor::startStudy
     }
 
     return true;
+}
+
+bool MainWindowDBusAdaptor::stopStudy()
+{
+    if (busy())
+    {
+        return wnd->confirmStopStudy();
+    }
+
+    return false;
+}
+
+bool MainWindowDBusAdaptor::takeSnapshot
+    (const QString &imageFileTemplate
+    )
+{
+    return wnd->takeSnapshot(imageFileTemplate);
+}
+
+bool MainWindowDBusAdaptor::startRecord
+    (int duration
+    , const QString &clipFileTemplate
+    )
+{
+    return wnd->startRecord(duration, clipFileTemplate);
+}
+
+bool MainWindowDBusAdaptor::stopRecord()
+{
+    if (recording())
+    {
+        wnd->onRecordStopClick();
+        return true;
+    }
+
+    return false;
 }
 
 QString MainWindowDBusAdaptor::value
