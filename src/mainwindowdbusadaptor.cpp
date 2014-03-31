@@ -18,12 +18,28 @@
 #include "mainwindow.h"
 
 #include <QTimer>
+#include <QDBusConnection>
 #include <QDebug>
 #include <QSettings>
 
 MainWindowDBusAdaptor::MainWindowDBusAdaptor(MainWindow *wnd)
     : QDBusAbstractAdaptor(wnd), wnd(wnd)
 {
+}
+
+bool MainWindowDBusAdaptor::connectToService(bool systemBus, const QString &service, const QString &path, const QString &interface)
+{
+    auto ok = true;
+    auto bus = systemBus? QDBusConnection::systemBus(): QDBusConnection::sessionBus();
+
+    ok = ok && (bus.connect(service, path, interface, "takeSnapshot", this, SLOT(takeSnapshot()))
+             || bus.connect(service, path, interface, "takeSnapshot", this, SLOT(takeSnapshot(String))));
+    ok = ok && (bus.connect(service, path, interface, "startRecord",  this, SLOT(startRecord()))
+             || bus.connect(service, path, interface, "startRecord",  this, SLOT(startRecord(String)))
+             || bus.connect(service, path, interface, "startRecord",  this, SLOT(startRecord(int,String))));
+    ok = ok && (bus.connect(service, path, interface, "stopRecord",   this, SLOT(stopRecord())));
+
+    return ok;
 }
 
 bool MainWindowDBusAdaptor::busy()

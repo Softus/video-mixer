@@ -426,6 +426,13 @@ int main(int argc, char *argv[])
                                     , physician
                                     , studyDescription
                                     , (bool)autoStart);
+
+                auto dbusService = settings.value("dbus-service").toStringList();
+                if (dbusService.length() >= 4)
+                {
+                    qDebug() << adapter->connectToService(0 == dbusService.at(0).compare("system", Qt::CaseInsensitive)
+                        , dbusService.at(1), dbusService.at(2), dbusService.at(3));
+                }
                 wnd = wndMain;
             }
             else
