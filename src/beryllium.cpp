@@ -427,11 +427,14 @@ int main(int argc, char *argv[])
                                     , studyDescription
                                     , (bool)autoStart);
 
-                auto dbusService = settings.value("dbus-service").toStringList();
+                auto dbusService = settings.value("connect-to-dbus-service").toStringList();
                 if (dbusService.length() >= 4)
                 {
-                    qDebug() << adapter->connectToService(0 == dbusService.at(0).compare("system", Qt::CaseInsensitive)
-                        , dbusService.at(1), dbusService.at(2), dbusService.at(3));
+                    if (!adapter->connectToService(0 == dbusService.at(0).compare("system", Qt::CaseInsensitive)
+                        , dbusService.at(1), dbusService.at(2), dbusService.at(3)))
+                    {
+                        qDebug() << "Failed to connect to" << dbusService;
+                    }
                 }
                 wnd = wndMain;
             }
