@@ -957,7 +957,7 @@ void MainWindow::updatePipeline()
     updateShortcut(actionAbout, settings.value("hotkey-capture-about",  DEFAULT_HOTKEY_ABOUT).toInt());
 
     recordNotify = settings.value("notify-clip-limit", DEFAULT_NOTIFY_CLIP_LIMIT).toBool()?
-        settings.value("notify-clip-countdown", DEFAULT_NOTIFY_CLIP_COUNTDOWN).toInt(): 0;
+        settings.value("notify-clip-countdown", DEFAULT_NOTIFY_CLIP_COUNTDOWN).toInt(): -1;
 
     auto detectMotion = settings.value("enable-video").toBool() &&
                         settings.value("detect-motion", DEFAULT_MOTION_DETECTION).toBool();
@@ -1523,7 +1523,7 @@ void MainWindow::removeVideoTail(const QString& prefix)
 
 void MainWindow::onRecordStartClick()
 {
-    startRecord(recordLimit);
+    startRecord(0);
 }
 
 bool MainWindow::startRecord(int duration, const QString &clipFileTemplate)
