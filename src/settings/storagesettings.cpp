@@ -87,6 +87,9 @@ StorageSettings::StorageSettings(QWidget *parent)
 
     grpLegend->setLayout(layoutLegend);
     layoutMain->addWidget(grpLegend);
+
+    layoutMain->addStretch(1); // For really huge displays we need this
+
     setLayout(layoutMain);
 }
 
