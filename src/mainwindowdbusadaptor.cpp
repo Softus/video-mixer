@@ -19,6 +19,7 @@
 
 #include <QTimer>
 #include <QDBusConnection>
+#include <QDBusInterface>
 #include <QDebug>
 #include <QSettings>
 
@@ -32,11 +33,15 @@ bool MainWindowDBusAdaptor::connectToService(bool systemBus, const QString &serv
     auto ok = true;
     auto bus = systemBus? QDBusConnection::systemBus(): QDBusConnection::sessionBus();
 
+    // Activate the service
+    //
+    new QDBusInterface(service, path, interface, bus, this);
+
     ok = ok && (bus.connect(service, path, interface, "takeSnapshot", this, SLOT(takeSnapshot()))
-             || bus.connect(service, path, interface, "takeSnapshot", this, SLOT(takeSnapshot(String))));
+             || bus.connect(service, path, interface, "takeSnapshot", "string", this, SLOT(takeSnapshot(String))));
     ok = ok && (bus.connect(service, path, interface, "startRecord",  this, SLOT(startRecord()))
-             || bus.connect(service, path, interface, "startRecord",  this, SLOT(startRecord(String)))
-             || bus.connect(service, path, interface, "startRecord",  this, SLOT(startRecord(int,String))));
+             || bus.connect(service, path, interface, "startRecord", "int32",  this, SLOT(startRecord(int)))
+             || bus.connect(service, path, interface, "startRecord", "int32,string",  this, SLOT(startRecord(int,String))));
     ok = ok && (bus.connect(service, path, interface, "stopRecord",   this, SLOT(stopRecord())));
 
     return ok;
