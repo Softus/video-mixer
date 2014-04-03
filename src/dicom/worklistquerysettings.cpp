@@ -32,6 +32,7 @@ WorklistQuerySettings::WorklistQuerySettings(QWidget *parent) :
     QWidget(parent)
 {
     QSettings settings;
+    settings.beginGroup("dicom");
     auto scheduledDate = settings.value("worklist-by-date", DEFAULT_WORKLIST_DATE_RANGE).toInt();
 
     QFrame *frameDate = new QFrame();
@@ -106,6 +107,8 @@ WorklistQuerySettings::WorklistQuerySettings(QWidget *parent) :
 void WorklistQuerySettings::save()
 {
     QSettings settings;
+    settings.beginGroup("dicom");
+
     auto scheduledDate = !checkScheduledDate->isChecked()? 0: radioToday->isChecked()? 1: radioTodayDelta->isChecked()?2: 3;
     settings.setValue("worklist-by-date", scheduledDate);
     settings.setValue("worklist-delta", spinDelta->value());

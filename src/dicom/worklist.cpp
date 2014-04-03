@@ -55,6 +55,8 @@ Worklist::Worklist(QWidget *parent) :
     activeConnection(nullptr)
 {
     QSettings settings;
+    settings.beginGroup("dicom");
+
     setWindowTitle(tr("Worklist - %1").arg(settings.value("mwl-server").toString()));
 
     auto translateCyrillic = settings.value("translate-cyrillic", DEFAULT_TRANSLATE_CYRILLIC).toBool();
@@ -64,6 +66,7 @@ Worklist::Worklist(QWidget *parent) :
         // Defaults are id, name, bithday, sex, procedure description, date, time
         cols = DEFAULT_WORKLIST_COLUMNS;
     }
+    settings.endGroup();
 
     table = new QTableWidget(0, cols.size());
     connect(table, SIGNAL(itemDoubleClicked(QTableWidgetItem*)), this, SLOT(onItemDoubleClicked(QTableWidgetItem*)));

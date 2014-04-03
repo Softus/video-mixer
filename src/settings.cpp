@@ -96,7 +96,7 @@ Settings::Settings(const QString& pageTitle, QWidget *parent, Qt::WindowFlags fl
     setLayout(mainLayout);
 
     setWindowTitle(tr("Settings"));
-    QString selectedPage = pageTitle.isEmpty()? settings.value("settings-page").toString(): pageTitle;
+    QString selectedPage = pageTitle.isEmpty()? settings.value("ui/settings-page").toString(): pageTitle;
 
     if (!selectedPage.isEmpty())
     {
@@ -201,5 +201,5 @@ void Settings::accept()
 {
     save();
     QDialog::accept();
-    QSettings().setValue("settings-page", listWidget->currentItem()->text());
+    QSettings().setValue("ui/settings-page", listWidget->currentItem()->text());
 }

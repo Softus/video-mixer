@@ -92,6 +92,7 @@ DicomDeviceSettings::DicomDeviceSettings(QWidget *parent) :
     QWidget(parent)
 {
     QSettings settings;
+    settings.beginGroup("dicom");
     auto mainLayout = new QFormLayout;
 
     auto localHost = QHostInfo::localHostName();
@@ -132,9 +133,9 @@ DicomDeviceSettings::DicomDeviceSettings(QWidget *parent) :
     spinPort->setValue(settings.value("local-port").toInt());
 
     mainLayout->addRow(nullptr, checkExportClips = new QCheckBox(tr("Export video &clips to DICOM")));
-    checkExportClips->setChecked(settings.value("dicom-export-clips", DEFAULT_EXPORT_CLIPS_TO_DICOM).toBool());
+    checkExportClips->setChecked(settings.value("export-clips", DEFAULT_EXPORT_CLIPS_TO_DICOM).toBool());
     mainLayout->addRow(nullptr, checkExportVideo = new QCheckBox(tr("Export &video log to DICOM")));
-    checkExportVideo->setChecked(settings.value("dicom-export-video", DEFAULT_EXPORT_VIDEO_TO_DICOM).toBool());
+    checkExportVideo->setChecked(settings.value("export-video", DEFAULT_EXPORT_VIDEO_TO_DICOM).toBool());
     mainLayout->addRow(nullptr, checkTransCyr = new QCheckBox(tr("DICOM server accepts 7-bit &ASCII only")));
     checkTransCyr->setChecked(settings.value("translate-cyrillic", DEFAULT_TRANSLATE_CYRILLIC).toBool());
 
@@ -144,11 +145,12 @@ DicomDeviceSettings::DicomDeviceSettings(QWidget *parent) :
 void DicomDeviceSettings::save()
 {
     QSettings settings;
+    settings.beginGroup("dicom");
 
     settings.setValue("aet", textAet->text());
     settings.setValue("modality", cbModality->itemData(cbModality->currentIndex()).toString());
     settings.setValue("local-port", spinPort->value());
-    settings.setValue("dicom-export-clips", checkExportClips->isChecked());
-    settings.setValue("dicom-export-video", checkExportVideo->isChecked());
+    settings.setValue("export-clips", checkExportClips->isChecked());
+    settings.setValue("export-video", checkExportVideo->isChecked());
     settings.setValue("translate-cyrillic", checkTransCyr->isChecked());
 }

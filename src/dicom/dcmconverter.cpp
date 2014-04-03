@@ -46,6 +46,7 @@
 
 static QString getImageSopClass(const QSettings& settings)
 {
+    Q_ASSERT(settings.group() == "dicom");
     auto sopClass = settings.value("image-sopclass").toString();
     if (!sopClass.isEmpty())
     {
@@ -64,6 +65,7 @@ static QString getImageSopClass(const QSettings& settings)
 
 static QString getVideoSopClass(const QSettings& settings)
 {
+    Q_ASSERT(settings.group() == "dicom");
     auto sopClass = settings.value("video-sopclass").toString();
     if (!sopClass.isEmpty())
     {
@@ -115,6 +117,7 @@ public:
     {
         OFCondition cond;
         QSettings settings;
+        settings.beginGroup("dicom");
 
         if (!mi.Open_Buffer_Init(length))
         {

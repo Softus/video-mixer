@@ -292,7 +292,7 @@ void MainWindow::closeEvent(QCloseEvent *evt)
     // Don't trick the user, if she press the Alt+F4/Ctrl+Q.
     // Only for mouse clicks on close button.
     //
-    if (fromMouse && QSettings().value("hide-on-close").toBool())
+    if (fromMouse && QSettings().value("ui/hide-on-close").toBool())
     {
         evt->ignore();
         hide();
@@ -975,7 +975,7 @@ void MainWindow::updatePipeline()
     settings.endGroup();
 
 #ifdef WITH_DICOM
-    actionWorklist->setEnabled(!settings.value("mwl-server").toString().isEmpty());
+    actionWorklist->setEnabled(!settings.value("dicom/mwl-server").toString().isEmpty());
 #endif
 
     updateOverlayText();
@@ -1860,6 +1860,7 @@ void MainWindow::onStartStudy()
     }
 #endif
 
+    settings.beginGroup("dicom");
     if (settings.value("start-with-mpps", true).toBool() && !settings.value("mpps-server").toString().isEmpty())
     {
         DcmClient client(UID_ModalityPerformedProcedureStepSOPClass);
@@ -1870,6 +1871,7 @@ void MainWindow::onStartStudy()
         }
         pendingPatient->putAndInsertString(DCM_SOPInstanceUID, pendingSOPInstanceUID.toUtf8());
     }
+    settings.endGroup();
 #else
     auto localPatientInfoFile = outputPath.absoluteFilePath(".patient");
     dlgPatient->savePatientFile(localPatientInfoFile);
@@ -1909,7 +1911,7 @@ void MainWindow::onStopStudy()
         char seriesUID[100] = {0};
         dcmGenerateUniqueIdentifier(seriesUID, SITE_SERIES_UID_ROOT);
 
-        if (!pendingSOPInstanceUID.isEmpty() && settings.value("complete-with-mpps", true).toBool())
+        if (!pendingSOPInstanceUID.isEmpty() && settings.value("dicom/complete-with-mpps", true).toBool())
         {
             DcmClient client(UID_ModalityPerformedProcedureStepSOPClass);
             if (!client.nSetRQ(seriesUID, pendingPatient, pendingSOPInstanceUID))

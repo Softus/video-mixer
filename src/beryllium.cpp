@@ -397,7 +397,7 @@ int main(int argc, char *argv[])
     // Translations
     //
     QTranslator  translator;
-    QString      locale = settings.value("locale").toString();
+    QString      locale = settings.value("ui/locale").toString();
     if (locale.isEmpty())
     {
         locale = QLocale::system().name();

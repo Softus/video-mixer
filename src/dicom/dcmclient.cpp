@@ -53,6 +53,8 @@ static void CopyPatientData(/*const*/ DcmDataset* src, DcmDataset* dst)
 static void BuildCFindDataSet(DcmDataset& ds)
 {
     QSettings settings;
+    settings.beginGroup("dicom");
+
     QString modality = settings.value("worklist-modality").toString().toUpper();
     if (modality.isEmpty())
     {
@@ -125,7 +127,7 @@ static void BuildCFindDataSet(DcmDataset& ds)
 static void BuildCStoreDataSet(/*const*/ DcmDataset& patientDs, DcmDataset& cStoreDs, const QString& seriesUID)
 {
     auto now = QDateTime::currentDateTime();
-    auto modality = QSettings().value("modality", DEFAULT_MODALITY).toString().toUpper().toUtf8();
+    auto modality = QSettings().value("dicom/modality", DEFAULT_MODALITY).toString().toUpper().toUtf8();
 
     if (patientDs.findAndInsertCopyOfElement(DCM_SpecificCharacterSet, &cStoreDs).bad())
     {
@@ -152,6 +154,8 @@ static void BuildNCreateDataSet(/*const*/ DcmDataset& patientDs, DcmDataset& nCr
 {
     QDateTime now = QDateTime::currentDateTime();
     QSettings settings;
+    settings.beginGroup("dicom");
+
     auto modality = settings.value("modality", DEFAULT_MODALITY).toString().toUpper().toUtf8();
     QString aet = settings.value("aet", qApp->applicationName().toUpper()).toString();
 
@@ -253,7 +257,7 @@ DcmClient::~DcmClient()
 
 int DcmClient::timeout() const
 {
-    return QSettings().value("timeout", DEFAULT_TIMEOUT).toInt();
+    return QSettings().value("dicom/timeout", DEFAULT_TIMEOUT).toInt();
 }
 
 void DcmClient::loadCallback(void *callbackData,
@@ -295,6 +299,8 @@ T_ASC_Parameters* DcmClient::initAssocParams(const QString& server, const char* 
 T_ASC_Parameters* DcmClient::initAssocParams(const QString& peerAet, const QString& peerAddress, int timeout, const char* transferSyntax)
 {
     QSettings settings;
+    settings.beginGroup("dicom");
+
     DIC_NODENAME localHost;
     T_ASC_Parameters* params = nullptr;
 
@@ -427,7 +433,7 @@ QString DcmClient::cEcho(const QString &peerAet, const QString &peerAddress, int
 
 bool DcmClient::findSCU()
 {
-    if (!createAssociation(QSettings().value("mwl-server").toString()))
+    if (!createAssociation(QSettings().value("dicom/mwl-server").toString()))
     {
         return false;
     }
@@ -463,7 +469,7 @@ bool DcmClient::findSCU()
 
 QString DcmClient::nCreateRQ(DcmDataset* dsPatient)
 {
-    if (!createAssociation(QSettings().value("mpps-server").toString()))
+    if (!createAssociation(QSettings().value("dicom/mpps-server").toString()))
     {
         return nullptr;
     }
@@ -520,7 +526,7 @@ QString DcmClient::nCreateRQ(DcmDataset* dsPatient)
 
 bool DcmClient::nSetRQ(const char* seriesUID, DcmDataset* patientDs, const QString& sopInstance)
 {
-    if (!createAssociation(QSettings().value("mpps-server").toString()))
+    if (!createAssociation(QSettings().value("dicom/mpps-server").toString()))
     {
         return nullptr;
     }
@@ -702,10 +708,12 @@ bool DcmClient::sendToServer(QWidget *parent, DcmDataset *dsPatient, const QFile
     QProgressDialog pdlg(parent);
     progressDlg = &pdlg;
     QSettings settings;
+    settings.beginGroup("dicom");
+
     bool result = true;
     auto translate  = settings.value("translate-cyrillic", DEFAULT_TRANSLATE_CYRILLIC).toBool();
-    auto allowClips = settings.value("dicom-export-clips", DEFAULT_EXPORT_CLIPS_TO_DICOM).toBool();
-    auto allowVideo = settings.value("dicom-export-video", DEFAULT_EXPORT_VIDEO_TO_DICOM).toBool();
+    auto allowClips = settings.value("export-clips", DEFAULT_EXPORT_CLIPS_TO_DICOM).toBool();
+    auto allowVideo = settings.value("export-video", DEFAULT_EXPORT_VIDEO_TO_DICOM).toBool();
 
     pdlg.setRange(0, listFiles.count());
     pdlg.setMinimumDuration(0);
@@ -727,7 +735,7 @@ bool DcmClient::sendToServer(QWidget *parent, DcmDataset *dsPatient, const QFile
         translateDcmObjectToLatin(dsPatient);
     }
 
-    foreach (auto server, QSettings().value("storage-servers").toStringList())
+    foreach (auto server, settings.value("storage-servers").toStringList())
     {
         for (auto i = 0; !pdlg.wasCanceled() && i < listFiles.count(); ++i)
         {

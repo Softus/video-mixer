@@ -285,7 +285,7 @@ void ArchiveWindow::updateRoot()
     QSettings settings;
     root.setPath(settings.value("storage/output-path", DEFAULT_OUTPUT_PATH).toString());
     curr = root;
-    switchViewMode(settings.value("archive-mode").toInt());
+    switchViewMode(settings.value("ui/archive-mode").toInt());
 }
 
 void ArchiveWindow::setPath(const QString& path)
@@ -535,7 +535,7 @@ void ArchiveWindow::onListRowChanged(int idx)
     actionDelete->setEnabled(selectedSomething);
 
 #ifdef WITH_DICOM
-    actionStore->setEnabled(selectedSomething && !QSettings().value("storage-servers").toStringList().isEmpty());
+    actionStore->setEnabled(selectedSomething && !QSettings().value("dicom/storage-servers").toStringList().isEmpty());
 #endif
 
     stopMedia();
@@ -593,7 +593,7 @@ void ArchiveWindow::switchViewMode(int mode)
     actionMode->setData(action->data());
     actionMode->menu()->setDefaultAction(action);
 
-    QSettings().setValue("archive-mode", mode);
+    QSettings().setValue("ui/archive-mode", mode);
 
     if (mode == GALLERY_MODE)
     {

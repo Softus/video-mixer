@@ -29,7 +29,7 @@ MandatoryFieldGroup::MandatoryFieldGroup(QObject *parent)
     : QObject(parent), okButton(nullptr)
 {
     mandatoryFieldColor = QColor(QSettings()
-        .value("mandatory-field-color", DEFAULT_MANDATORY_FIELD_COLOR).toString()).rgba();
+        .value("ui/mandatory-field-color", DEFAULT_MANDATORY_FIELD_COLOR).toString()).rgba();
 }
 
 void MandatoryFieldGroup::add(QWidget *widget)

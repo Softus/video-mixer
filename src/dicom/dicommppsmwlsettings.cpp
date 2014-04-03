@@ -29,6 +29,8 @@ DicomMppsMwlSettings::DicomMppsMwlSettings(QWidget *parent) :
     connect(checkUseMwl, SIGNAL(toggled(bool)), this, SLOT(onUseToggle(bool)));
 
     QSettings settings;
+    settings.beginGroup("dicom");
+
     QString mwlServer = settings.value("mwl-server").toString();
     if (mwlServer.isEmpty())
     {
@@ -107,6 +109,7 @@ void DicomMppsMwlSettings::onUseToggle(bool checked)
 void DicomMppsMwlSettings::save()
 {
     QSettings settings;
+    settings.beginGroup("dicom");
     settings.setValue("mwl-server", checkUseMwl->isChecked()? cbMwlServer->currentText(): nullptr);
     settings.setValue("mpps-server", checkUseMpps->isChecked()? cbMppsServer->currentText(): nullptr);
     settings.setValue("start-with-mpps", checkStartWithMpps->isChecked());

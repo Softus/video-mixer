@@ -26,11 +26,12 @@ MandatoryFieldsSettings::MandatoryFieldsSettings(QWidget *parent) :
     QWidget(parent)
 {
     QSettings settings;
+    settings.beginGroup("ui");
     auto fieldLabels = QStringList() << tr("Patient ID")
         << tr("Name") << tr("Sex") << tr("Birthday") << tr("Physician") << tr("Study type");
     auto fieldNames = QStringList() << "PatientID"
         << "Name" << "Sex" << "Birthday" << "Physician" << "StudyType";
-    auto listMandatory = settings.value("new-study-mandatory-fields", DEFAULT_MANDATORY_FIELDS).toStringList();
+    auto listMandatory = settings.value("patient-data-mandatory-fields", DEFAULT_MANDATORY_FIELDS).toStringList();
 
     if (settings.value("patient-data-show-accession-number").toBool())
     {
@@ -57,6 +58,7 @@ MandatoryFieldsSettings::MandatoryFieldsSettings(QWidget *parent) :
 void MandatoryFieldsSettings::save()
 {
     QSettings settings;
+    settings.beginGroup("ui");
     QStringList fields;
 
     for (auto i = 0; i < listFields->count(); ++i)
@@ -69,5 +71,5 @@ void MandatoryFieldsSettings::save()
         fields.append(item->data(Qt::UserRole).toString());
     }
 
-    settings.setValue("new-study-mandatory-fields", fields);
+    settings.setValue("patient-data-mandatory-fields", fields);
 }

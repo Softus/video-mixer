@@ -64,7 +64,7 @@ WorklistColumnSettings::WorklistColumnSettings(QWidget *parent) :
     }
 
     QSettings settings;
-    QStringList listChecked = settings.value("worklist-columns").toStringList();
+    QStringList listChecked = settings.value("dicom/worklist-columns").toStringList();
     if (listChecked.size() == 0)
     {
         // Defaults are id, name, bithday, sex, procedure description, date, time
@@ -108,5 +108,5 @@ QStringList WorklistColumnSettings::checkedColumns()
 void WorklistColumnSettings::save()
 {
     QSettings settings;
-    settings.setValue("worklist-columns", checkedColumns());
+    settings.setValue("dicom/worklist-columns", checkedColumns());
 }

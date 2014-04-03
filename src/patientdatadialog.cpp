@@ -48,8 +48,8 @@ PatientDataDialog::PatientDataDialog(bool noWorklist, const QString& settingsKey
     , settingsKey(settingsKey)
 {
     QSettings settings;
-    auto listMandatory = settings.value("new-study-mandatory-fields", DEFAULT_MANDATORY_FIELDS).toStringList();
-    auto showAccessionNumber = settings.value("patient-data-show-accession-number").toBool();
+    auto listMandatory = settings.value("ui/patient-data-mandatory-fields", DEFAULT_MANDATORY_FIELDS).toStringList();
+    auto showAccessionNumber = settings.value("ui/patient-data-show-accession-number").toBool();
 
     setWindowTitle(tr("Patient data"));
     setMinimumSize(600, 300);
@@ -109,7 +109,7 @@ PatientDataDialog::PatientDataDialog(bool noWorklist, const QString& settingsKey
         btnWorklist->setToolTip(tr("Show work list"));
         connect(btnWorklist, SIGNAL(clicked()), this, SLOT(onShowWorklist()));
         layoutBtns->addWidget(btnWorklist);
-        btnWorklist->setEnabled(!settings.value("mwl-server").toString().isEmpty());
+        btnWorklist->setEnabled(!settings.value("dicom/mwl-server").toString().isEmpty());
     }
 #else
     // Suppres warning
@@ -130,8 +130,8 @@ PatientDataDialog::PatientDataDialog(bool noWorklist, const QString& settingsKey
     layoutMain->addRow(layoutBtns);
 
     setLayout(layoutMain);
-    restoreGeometry(settings.value("new-patient-geometry").toByteArray());
-    setWindowState((Qt::WindowState)settings.value("new-patient-state").toInt());
+    restoreGeometry(settings.value("ui/patient-data-geometry").toByteArray());
+    setWindowState((Qt::WindowState)settings.value("ui/patient-data-state").toInt());
 
     if (!listMandatory.isEmpty())
     {
@@ -167,8 +167,8 @@ void PatientDataDialog::showEvent(QShowEvent *)
 void PatientDataDialog::hideEvent(QHideEvent *)
 {
     QSettings settings;
-    settings.setValue("new-patient-geometry", saveGeometry());
-    settings.setValue("new-patient-state", (int)windowState() & ~Qt::WindowMinimized);
+    settings.setValue("ui/patient-data-geometry", saveGeometry());
+    settings.setValue("ui/patient-data-state", (int)windowState() & ~Qt::WindowMinimized);
 
     if (settings.value("show-onboard").toBool())
     {
