@@ -208,9 +208,11 @@ ArchiveWindow::ArchiveWindow(QWidget *parent)
     setLayout(layoutMain);
 
 #ifndef WITH_TOUCH
+    settings.beginGroup("ui");
     restoreGeometry(settings.value("archive-geometry").toByteArray());
     setWindowState((Qt::WindowState)settings.value("archive-state").toInt());
     setAttribute(Qt::WA_DeleteOnClose, false);
+    settings.endGroup();
 #endif
 
     settings.beginGroup("hotkeys");
@@ -260,8 +262,10 @@ void ArchiveWindow::showEvent(QShowEvent *evt)
 void ArchiveWindow::hideEvent(QHideEvent *evt)
 {
     QSettings settings;
+    settings.beginGroup("ui");
     settings.setValue("archive-geometry", saveGeometry());
     settings.setValue("archive-state", (int)windowState() & ~Qt::WindowMinimized);
+    settings.endGroup();
     QWidget::hideEvent(evt);
 }
 #endif
@@ -846,7 +850,7 @@ void ArchiveWindow::onSeekClick()
 
 void ArchiveWindow::onPlayPauseClick()
 {
-    pipeline->setState(pipeline->currentState() == QGst::StatePlaying? QGst::StatePaused: QGst::StatePlaying);
+    pipeline && pipeline->setState(pipeline->currentState() == QGst::StatePlaying? QGst::StatePaused: QGst::StatePlaying);
 }
 
 void ArchiveWindow::stopMedia()

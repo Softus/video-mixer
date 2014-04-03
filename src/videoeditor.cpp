@@ -158,8 +158,10 @@ VideoEditor::VideoEditor(const QString& filePath, QWidget *parent)
     setLayout(layoutMain);
 
     QSettings settings;
+    settings.beginGroup("ui");
     restoreGeometry(settings.value("video-editor-geometry").toByteArray());
     setWindowState((Qt::WindowState)settings.value("video-editor-state").toInt());
+    settings.endGroup();
     setWindowTitle(tr("Video editor"));
 
     DamnQtMadeMeDoTheSunsetByHands(barEditor);
@@ -186,8 +188,10 @@ VideoEditor::~VideoEditor()
 void VideoEditor::closeEvent(QCloseEvent *evt)
 {
     QSettings settings;
+    settings.beginGroup("ui");
     settings.setValue("video-editor-geometry", saveGeometry());
     settings.setValue("video-editor-state", (int)windowState() & ~Qt::WindowMinimized);
+    settings.endGroup();
     QWidget::closeEvent(evt);
 }
 
@@ -468,6 +472,7 @@ void VideoEditor::onSaveAsClick()
 bool VideoEditor::exportVideo(QFile* outFile)
 {
     QSettings settings;
+    settings.beginGroup("gst");
     auto encoder         = settings.value("video-encoder", DEFAULT_VIDEO_ENCODER).toString();
     auto colorConverter =  settings.value("color-converter", "ffmpegcolorspace").toString();
     auto fixColor        = settings.value(encoder + "-colorspace").toBool()? colorConverter + " ! ": "";

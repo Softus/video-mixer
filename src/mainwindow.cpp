@@ -223,6 +223,7 @@ MainWindow::MainWindow(QWidget *parent) :
     layoutMain->addWidget(listImagesAndClips);
 #endif
 
+    settings.beginGroup("ui");
     if (settings.value("enable-menu").toBool())
     {
         layoutMain->setMenuBar(createMenuBar());
@@ -231,10 +232,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
     restoreGeometry(settings.value("mainwindow-geometry").toByteArray());
     setWindowState((Qt::WindowState)settings.value("mainwindow-state").toInt());
+    settings.endGroup();
 
     updateStartButton();
 
-    auto safeMode    = settings.value("enable-settings", DEFAULT_ENABLE_SETTINGS).toBool() && (
+    auto safeMode    = settings.value("ui/enable-settings", DEFAULT_ENABLE_SETTINGS).toBool() && (
 #if (QT_VERSION >= QT_VERSION_CHECK(4, 8, 0))
                        qApp->queryKeyboardModifiers() == SAFE_MODE_KEYS ||
 #else
@@ -329,8 +331,10 @@ void MainWindow::closeEvent(QCloseEvent *evt)
 void MainWindow::hideEvent(QHideEvent *evt)
 {
     QSettings settings;
+    settings.beginGroup("ui");
     settings.setValue("mainwindow-geometry", saveGeometry());
     settings.setValue("mainwindow-state", (int)windowState() & ~Qt::WindowMinimized);
+    settings.endGroup();
     QWidget::hideEvent(evt);
 }
 
@@ -367,11 +371,11 @@ QMenuBar* MainWindow::createMenuBar()
     mnu->addSeparator();
     auto actionRtp = mnu->addAction(tr("&Enable RTP streaming"), this, SLOT(toggleSetting()));
     actionRtp->setCheckable(true);
-    actionRtp->setData("enable-rtp");
+    actionRtp->setData("gst/enable-rtp");
 
     auto actionFullVideo = mnu->addAction(tr("&Record entire study"), this, SLOT(toggleSetting()));
     actionFullVideo->setCheckable(true);
-    actionFullVideo->setData("enable-video");
+    actionFullVideo->setData("gst/enable-video");
 
     actionSettings->setMenuRole(QAction::PreferencesRole);
     mnu->addAction(actionSettings);
@@ -554,6 +558,9 @@ QString MainWindow::buildPipeline()
     //
     QString pipe;
 
+    auto outputPathDef  = settings.value("storage/output-path",    DEFAULT_OUTPUT_PATH).toString();
+
+    settings.beginGroup("gst");
     auto deviceType     = settings.value("device-type", PLATFORM_SPECIFIC_SOURCE).toString();
     auto deviceDef      = settings.value("device").toString();
     auto inputChannel   = settings.value("video-channel").toString();
@@ -563,7 +570,6 @@ QString MainWindow::buildPipeline()
     auto srcParams      = settings.value("src-parameters").toString();
     auto colorConverter = QString(" ! ").append(settings.value("color-converter", "ffmpegcolorspace").toString());
     auto videoCodec     = settings.value("video-encoder",  DEFAULT_VIDEO_ENCODER).toString();
-    auto outputPathDef  = settings.value("storage/output-path",    DEFAULT_OUTPUT_PATH).toString();
 
     pipe.append(deviceType);
 
@@ -634,6 +640,7 @@ QString MainWindow::buildPipeline()
     //
     auto displaySinkDef  = settings.value("display-sink", DEFAULT_DISPLAY_SINK).toString();
     auto displayParams   = settings.value(displaySinkDef + "-parameters").toString();
+
     auto detectMotion    = settings.value("enable-video").toBool() &&
                            settings.value("detect-motion", DEFAULT_MOTION_DETECTION).toBool();
     pipe.append(" ! tee name=splitter");
@@ -869,6 +876,7 @@ void MainWindow::updatePipeline()
 {
     QWaitCursor wait(this);
     QSettings settings;
+    settings.beginGroup("gst");
 
     auto newPipelineDef = buildPipeline();
     if (newPipelineDef != pipelineDef)
@@ -924,6 +932,15 @@ void MainWindow::updatePipeline()
         qDebug() << "video bitrate" << videoEncoder->property("bitrate").toInt();
     }
 
+    recordNotify = settings.value("notify-clip-limit", DEFAULT_NOTIFY_CLIP_LIMIT).toBool()?
+        settings.value("notify-clip-countdown", DEFAULT_NOTIFY_CLIP_COUNTDOWN).toInt(): -1;
+
+    auto detectMotion = settings.value("enable-video").toBool() &&
+                        settings.value("detect-motion", DEFAULT_MOTION_DETECTION).toBool();
+    motionStart  = detectMotion && settings.value("motion-start", DEFAULT_MOTION_START).toBool();
+    motionStop   = detectMotion && settings.value("motion-stop", DEFAULT_MOTION_STOP).toBool();
+    settings.endGroup();
+
     if (archiveWindow != nullptr)
     {
         archiveWindow->updateRoot();
@@ -941,7 +958,7 @@ void MainWindow::updatePipeline()
 
     updateShortcut(actionArchive,  settings.value("capture-archive",   DEFAULT_HOTKEY_ARCHIVE).toInt());
     updateShortcut(actionSettings, settings.value("capture-settings",  DEFAULT_HOTKEY_SETTINGS).toInt());
-    settings.endGroup();
+    updateShortcut(actionAbout,    settings.value("capture-about",     DEFAULT_HOTKEY_ABOUT).toInt());
 
 #ifdef WITH_DICOM
     // Recreate worklist just in case the columns/servers were changed
@@ -954,17 +971,12 @@ void MainWindow::updatePipeline()
     mainStack->addWidget(worklist);
 #endif
     updateShortcut(actionWorklist, settings.value("capture-worklist",   DEFAULT_HOTKEY_WORKLIST).toInt());
+#endif
+    settings.endGroup();
+
+#ifdef WITH_DICOM
     actionWorklist->setEnabled(!settings.value("mwl-server").toString().isEmpty());
 #endif
-    updateShortcut(actionAbout, settings.value("capture-about",  DEFAULT_HOTKEY_ABOUT).toInt());
-
-    recordNotify = settings.value("notify-clip-limit", DEFAULT_NOTIFY_CLIP_LIMIT).toBool()?
-        settings.value("notify-clip-countdown", DEFAULT_NOTIFY_CLIP_COUNTDOWN).toInt(): -1;
-
-    auto detectMotion = settings.value("enable-video").toBool() &&
-                        settings.value("detect-motion", DEFAULT_MOTION_DETECTION).toBool();
-    motionStart  = detectMotion && settings.value("motion-start", DEFAULT_MOTION_START).toBool();
-    motionStop   = detectMotion && settings.value("motion-stop", DEFAULT_MOTION_STOP).toBool();
 
     updateOverlayText();
 }
@@ -1311,9 +1323,9 @@ bool MainWindow::startVideoRecord()
     }
 
     QSettings settings;
-    if (settings.value("enable-video").toBool())
+    if (settings.value("gst/enable-video").toBool())
     {
-        auto split = settings.value("split-video-files", DEFAULT_SPLIT_VIDEO_FILES).toBool();
+        auto split = settings.value("gst/split-video-files", DEFAULT_SPLIT_VIDEO_FILES).toBool();
         auto videoFileName = appendVideoTail(videoOutputPath, "video", settings.value("storage/video-template", DEFAULT_VIDEO_TEMPLATE).toString(), studyNo, split);
         qDebug() << videoFileName;
         if (videoFileName.isEmpty())
@@ -1385,7 +1397,7 @@ bool MainWindow::takeSnapshot(const QString& imageTemplate)
     }
 
     QSettings settings;
-    auto imageExt = getExt(settings.value("image-encoder", DEFAULT_IMAGE_ENCODER).toString());
+    auto imageExt = getExt(settings.value("gst/image-encoder", DEFAULT_IMAGE_ENCODER).toString());
     auto actualImageTemplate = !imageTemplate.isEmpty()? imageTemplate:
             settings.value("storage/image-template", DEFAULT_IMAGE_TEMPLATE).toString();
     auto imageFileName = replace(actualImageTemplate, ++imageNo).append(imageExt);
@@ -1406,6 +1418,7 @@ bool MainWindow::takeSnapshot(const QString& imageTemplate)
 QString MainWindow::appendVideoTail(const QDir& dir, const QString& prefix, const QString& fileTemplate, int idx, bool split)
 {
     QSettings settings;
+    settings.beginGroup("gst");
     auto muxDef  = settings.value("video-muxer",    DEFAULT_VIDEO_MUXER).toString();
     auto maxSize = split? settings.value("video-max-file-size", DEFAULT_VIDEO_MAX_FILE_SIZE).toLongLong() * 1024 * 1024: 0;
 
@@ -1538,14 +1551,17 @@ bool MainWindow::startRecord(int duration, const QString &clipFileTemplate)
     }
 
     QSettings settings;
+    auto actualTemplate = !clipFileTemplate.isEmpty()? clipFileTemplate:
+        settings.value("storage/clip-template", DEFAULT_CLIP_TEMPLATE).toString();
+
+    settings.beginGroup("gst");
     recordLimit = duration > 0? duration:
-        settings.value("clip-limit", DEFAULT_CLIP_LIMIT).toBool()? settings.value("clip-countdown", DEFAULT_CLIP_COUNTDOWN).toInt(): 0;
+        settings.value("clip-limit", DEFAULT_CLIP_LIMIT).toBool()?
+            settings.value("clip-countdown", DEFAULT_CLIP_COUNTDOWN).toInt(): 0;
 
     if (!recording)
     {
         QString imageExt = getExt(settings.value("image-encoder", DEFAULT_IMAGE_ENCODER).toString());
-        auto actualTemplate = !clipFileTemplate.isEmpty()? clipFileTemplate:
-            settings.value("storage/clip-template", DEFAULT_CLIP_TEMPLATE).toString();
         auto clipFileName = appendVideoTail(outputPath, "clip", actualTemplate, ++clipNo, false);
         qDebug() << clipFileName;
         if (!clipFileName.isEmpty())
@@ -1584,6 +1600,7 @@ bool MainWindow::startRecord(int duration, const QString &clipFileTemplate)
         //
         countdown = recordLimit;
     }
+
     return true;
 }
 

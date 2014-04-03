@@ -51,6 +51,7 @@ VideoSourceSettings::VideoSourceSettings(QWidget *parent)
   , spinFps(nullptr)
 {
     QSettings settings;
+    settings.beginGroup("gst");
     auto layout = new QFormLayout();
 
     layout->addRow(tr("Video &device"), listDevices = new QComboBox());
@@ -131,6 +132,8 @@ void VideoSourceSettings::showEvent(QShowEvent *e)
 QString VideoSourceSettings::updateGstList(const char* setting, const char* def, unsigned long long type, QComboBox* cb)
 {
     QSettings settings;
+    settings.beginGroup("gst");
+
     cb->clear();
     auto selectedCodec = settings.value(setting, def).toString();
     auto extra = settings.value(QString(setting)+"-extra").toBool() || qApp->keyboardModifiers().testFlag(Qt::ShiftModifier);
@@ -152,6 +155,8 @@ QString VideoSourceSettings::updateGstList(const char* setting, const char* def,
 void VideoSourceSettings::updateDeviceList(const char* elmName, const char* propName)
 {
     QSettings settings;
+    settings.beginGroup("gst");
+
     auto selectedDevice = settings.value("device-type") == elmName? settings.value("device").toString(): nullptr;
     auto src = QGst::ElementFactory::make(elmName);
     if (!src) {
@@ -248,7 +253,7 @@ void VideoSourceSettings::videoDeviceChanged(int index)
     }
 
     auto caps = channels.at(2);
-    auto selectedChannel = QSettings().value("video-channel").toString();
+    auto selectedChannel = QSettings().value("gst/video-channel").toString();
 
     listChannels->addItem(tr("(default)"), caps);
 
@@ -303,7 +308,7 @@ void VideoSourceSettings::inputChannelChanged(int index)
         return;
     }
 
-    auto selectedFormat = QSettings().value("format").toString();
+    auto selectedFormat = QSettings().value("gst/format").toString();
     for (uint i = 0; i < caps->size(); ++i)
     {
         auto s = caps->internalStructure(i);
@@ -353,7 +358,7 @@ void VideoSourceSettings::formatChanged(int index)
     }
 
     QList<QSize> sizes;
-    auto selectedSize = QSettings().value("size").toSize();
+    auto selectedSize = QSettings().value("gst/size").toSize();
     for (uint i = 0; i < caps->size(); ++i)
     {
         auto s = caps->internalStructure(i);
@@ -436,6 +441,8 @@ static QVariant getListData(const QComboBox* cb)
 void VideoSourceSettings::save()
 {
     QSettings settings;
+    settings.beginGroup("gst");
+
     auto device = getListData(listDevices).toStringList();
     if (device.isEmpty())
     {
