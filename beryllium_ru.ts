@@ -93,8 +93,8 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
     <name>ArchiveWindow</name>
     <message>
         <location filename="src/archivewindow.cpp" line="88"/>
-        <location filename="src/archivewindow.cpp" line="781"/>
-        <location filename="src/archivewindow.cpp" line="838"/>
+        <location filename="src/archivewindow.cpp" line="795"/>
+        <location filename="src/archivewindow.cpp" line="852"/>
         <source>Archive</source>
         <oldsource>archive</oldsource>
         <translation>Архив</translation>
@@ -186,7 +186,7 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
     </message>
     <message>
         <location filename="src/archivewindow.cpp" line="181"/>
-        <location filename="src/archivewindow.cpp" line="1035"/>
+        <location filename="src/archivewindow.cpp" line="1049"/>
         <source>Play</source>
         <translation>Воспроизвести</translation>
     </message>
@@ -202,14 +202,14 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
         <translation>Файл был загружен в хранилище</translation>
     </message>
     <message>
-        <location filename="src/archivewindow.cpp" line="665"/>
+        <location filename="src/archivewindow.cpp" line="679"/>
         <source>Are you sure to delete
 
 &apos;%1&apos;?</source>
         <translation>Вы действительно хотите удалить &apos;%1&apos;?</translation>
     </message>
     <message>
-        <location filename="src/archivewindow.cpp" line="666"/>
+        <location filename="src/archivewindow.cpp" line="680"/>
         <source>Are you sure to delete selected items?</source>
         <translation>Вы действительно хотите удалить выбранные объекты?</translation>
     </message>
@@ -224,7 +224,7 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
         <translation type="obsolete">Вы действительно хотите отправить результат в хранилище?</translation>
     </message>
     <message>
-        <location filename="src/archivewindow.cpp" line="739"/>
+        <location filename="src/archivewindow.cpp" line="753"/>
         <source>All files were successfully stored.</source>
         <translation>Все файлы были успешно сохранены.</translation>
     </message>
@@ -237,17 +237,17 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
         <translation type="obsolete">Вы действительно хотите отправить выбранные объекты в хранилище?</translation>
     </message>
     <message>
-        <location filename="src/archivewindow.cpp" line="776"/>
+        <location filename="src/archivewindow.cpp" line="790"/>
         <source>Failed to launch </source>
         <translation>Ошибка при выполнении </translation>
     </message>
     <message>
-        <location filename="src/archivewindow.cpp" line="883"/>
+        <location filename="src/archivewindow.cpp" line="897"/>
         <source>Archive - %1</source>
         <translation>Архив - %1</translation>
     </message>
     <message>
-        <location filename="src/archivewindow.cpp" line="1035"/>
+        <location filename="src/archivewindow.cpp" line="1049"/>
         <source>Pause</source>
         <translation>Пауза</translation>
     </message>
@@ -883,22 +883,22 @@ Continue?</source>
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="src/mainwindow.cpp" line="397"/>
+        <location filename="src/mainwindow.cpp" line="436"/>
         <source>&amp;Archive</source>
         <translation>&amp;Архив</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="394"/>
+        <location filename="src/mainwindow.cpp" line="433"/>
         <source>&amp;Worlkist</source>
         <translation>&amp;Рабочий лист</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="400"/>
+        <location filename="src/mainwindow.cpp" line="439"/>
         <source>&amp;Preferences</source>
         <translation>&amp;Настройки</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="352"/>
+        <location filename="src/mainwindow.cpp" line="391"/>
         <source>Main</source>
         <oldsource>main</oldsource>
         <translation>Главная</translation>
@@ -908,51 +908,51 @@ Continue?</source>
         <translation type="obsolete">Сделать &amp;снимок</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="398"/>
+        <location filename="src/mainwindow.cpp" line="437"/>
         <source>Show studies archive</source>
         <translation>Открыть архив исследований</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="401"/>
+        <location filename="src/mainwindow.cpp" line="440"/>
         <source>Edit settings</source>
         <translation>Открыть окно настроек</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="404"/>
+        <location filename="src/mainwindow.cpp" line="443"/>
         <source>About %1</source>
         <oldsource>About berillyum</oldsource>
         <translation>О программе %1</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="943"/>
-        <location filename="src/mainwindow.cpp" line="948"/>
-        <location filename="src/mainwindow.cpp" line="953"/>
-        <location filename="src/mainwindow.cpp" line="958"/>
+        <location filename="src/mainwindow.cpp" line="982"/>
+        <location filename="src/mainwindow.cpp" line="987"/>
+        <location filename="src/mainwindow.cpp" line="992"/>
+        <location filename="src/mainwindow.cpp" line="997"/>
         <source> - </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="985"/>
+        <location filename="src/mainwindow.cpp" line="1024"/>
         <source>Failed to create &apos;%1&apos;</source>
         <translation>Не удалось создать &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1260"/>
+        <location filename="src/mainwindow.cpp" line="1306"/>
         <source>Failed to start recording.
 Please, adjust the video source settings.</source>
         <translation>Невозможно начать запись.
 Проверьте настройки видео.</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1273"/>
-        <location filename="src/mainwindow.cpp" line="1480"/>
+        <location filename="src/mainwindow.cpp" line="1319"/>
+        <location filename="src/mainwindow.cpp" line="1573"/>
         <source>Failed to start recording.
 Check the error log for details.</source>
         <translation>Невозможно начать запись.
 Проверьте журнал ожибок.</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1655"/>
+        <location filename="src/mainwindow.cpp" line="1749"/>
         <source>Failed to start a study.
 Another study is in progress.</source>
         <translation>Невозможно начать исследование.
@@ -975,17 +975,17 @@ Another study is in progress.</source>
         <translation type="obsolete">Отправить</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1292"/>
+        <location filename="src/mainwindow.cpp" line="1344"/>
         <source>End the study?</source>
         <translation>Завершить исследование?</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1536"/>
+        <location filename="src/mainwindow.cpp" line="1630"/>
         <source>End study</source>
         <translation>Завершить исследование</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1536"/>
+        <location filename="src/mainwindow.cpp" line="1630"/>
         <source>Start study</source>
         <translation>Начать исследование</translation>
     </message>
@@ -1014,47 +1014,47 @@ Another study is in progress.</source>
         <translation type="obsolete">З&amp;апись</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="318"/>
+        <location filename="src/mainwindow.cpp" line="357"/>
         <source>&amp;Menu</source>
         <translation>&amp;Меню</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="403"/>
+        <location filename="src/mainwindow.cpp" line="442"/>
         <source>A&amp;bout %1</source>
         <translation>&amp;О %1</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="329"/>
+        <location filename="src/mainwindow.cpp" line="368"/>
         <source>&amp;Enable RTP streaming</source>
         <translation>Включить RTP &amp;поток</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="333"/>
+        <location filename="src/mainwindow.cpp" line="372"/>
         <source>&amp;Record entire study</source>
         <translation>Записывать исследование &amp;целиком</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="340"/>
+        <location filename="src/mainwindow.cpp" line="379"/>
         <source>E&amp;xit</source>
         <translation>В&amp;ыход</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="365"/>
+        <location filename="src/mainwindow.cpp" line="404"/>
         <source>Take snapshot</source>
         <translation>Сделать снимок</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="374"/>
+        <location filename="src/mainwindow.cpp" line="413"/>
         <source>Start clip</source>
         <translation>Записать фрагмент</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="383"/>
+        <location filename="src/mainwindow.cpp" line="422"/>
         <source>Clip done</source>
         <translation>Завершить фрагмент</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1189"/>
+        <location filename="src/mainwindow.cpp" line="1228"/>
         <source>Failed to load image %1</source>
         <translation>Не удалось загрузить снимок %1</translation>
     </message>
@@ -1767,12 +1767,12 @@ Another study is in progress.</source>
         <translation>&amp;Использовать детектор движения</translation>
     </message>
     <message>
-        <location filename="src/settings/videorecordsettings.cpp" line="79"/>
+        <location filename="src/settings/videorecordsettings.cpp" line="78"/>
         <source>St&amp;art after</source>
         <translation>&amp;Начать после</translation>
     </message>
     <message>
-        <location filename="src/settings/videorecordsettings.cpp" line="86"/>
+        <location filename="src/settings/videorecordsettings.cpp" line="85"/>
         <source>St&amp;op after</source>
         <translation>&amp;Остановить после</translation>
     </message>
@@ -1781,7 +1781,7 @@ Another study is in progress.</source>
         <translation type="obsolete">&amp;Начать после</translation>
     </message>
     <message>
-        <location filename="src/settings/videorecordsettings.cpp" line="83"/>
+        <location filename="src/settings/videorecordsettings.cpp" line="82"/>
         <source> frames with motion</source>
         <translation> кадров с движением</translation>
     </message>
@@ -1790,23 +1790,23 @@ Another study is in progress.</source>
         <translation type="obsolete">&amp;Остановить после</translation>
     </message>
     <message>
-        <location filename="src/settings/videorecordsettings.cpp" line="90"/>
+        <location filename="src/settings/videorecordsettings.cpp" line="89"/>
         <source> seconds without motion</source>
         <translation> секунд без движения</translation>
     </message>
     <message>
-        <location filename="src/settings/videorecordsettings.cpp" line="95"/>
-        <location filename="src/settings/videorecordsettings.cpp" line="99"/>
+        <location filename="src/settings/videorecordsettings.cpp" line="94"/>
+        <location filename="src/settings/videorecordsettings.cpp" line="98"/>
         <source>%</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="src/settings/videorecordsettings.cpp" line="97"/>
+        <location filename="src/settings/videorecordsettings.cpp" line="96"/>
         <source>&amp;Threshold</source>
         <translation>По&amp;рог</translation>
     </message>
     <message>
-        <location filename="src/settings/videorecordsettings.cpp" line="101"/>
+        <location filename="src/settings/videorecordsettings.cpp" line="100"/>
         <source>&amp;Highlight areas with motion</source>
         <oldsource>&amp;Display cells with motion</oldsource>
         <translation>Выделять &amp;ячейки с движением</translation>
@@ -1820,7 +1820,7 @@ Another study is in progress.</source>
         <translation type="obsolete">О&amp;станавливать запись если движение прекратилось</translation>
     </message>
     <message>
-        <location filename="src/settings/videorecordsettings.cpp" line="93"/>
+        <location filename="src/settings/videorecordsettings.cpp" line="92"/>
         <source>S&amp;ensitivity</source>
         <translation>&amp;Чувствительность</translation>
     </message>
@@ -1845,7 +1845,7 @@ Another study is in progress.</source>
         <translation type="obsolete">Показывать &amp;ячейки с движением</translation>
     </message>
     <message>
-        <location filename="src/settings/videorecordsettings.cpp" line="120"/>
+        <location filename="src/settings/videorecordsettings.cpp" line="119"/>
         <source>Motion detection requires the opencv plugin which is not found.
 Are you want to continue?</source>
         <translation>Обнаружение движения пробует плагин opencv, не обнаруженный в системе.
