@@ -42,6 +42,7 @@ DebugSettings::DebugSettings(QWidget *parent) :
     QWidget(parent)
 {
     QSettings settings;
+    settings.beginGroup("debug");
     auto layoutMain = new QVBoxLayout;
 
     layoutMain->addWidget(grpGst = new QGroupBox(tr("Enable &GStreamer debugging")));
@@ -162,6 +163,7 @@ extern void setupDcmtkDebug(const QSettings& settings);
 void DebugSettings::save()
 {
     QSettings settings;
+    settings.beginGroup("debug");
 
     settings.setValue("gst-debug-on", grpGst->isChecked());
     settings.setValue("gst-debug-level", cbGstLogLevel->itemData(cbGstLogLevel->currentIndex()).toInt());

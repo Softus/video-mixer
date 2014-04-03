@@ -162,6 +162,8 @@ setModeCallback(const gchar *name, const gchar *value, gpointer, GError **)
 
 void setupGstDebug(const QSettings& settings)
 {
+    Q_ASSERT(settings.group() == "debug");
+
     if (!settings.value("gst-debug-on", DEFAULT_GST_DEBUG_ON).toBool())
     {
         return;
@@ -232,6 +234,8 @@ static GOptionEntry dcmtkOptions[] = {
 
 void setupDcmtkDebug(const QSettings& settings)
 {
+    Q_ASSERT(settings.group() == "debug");
+
     if (!settings.value("dcmtk-debug-on", DEFAULT_DCMTK_DEBUG_ON).toBool())
     {
         return;
@@ -363,10 +367,12 @@ int main(int argc, char *argv[])
     // At this time it is safe to use QSettings
     //
     QSettings settings;
+    settings.beginGroup("debug");
     setupGstDebug(settings);
 #ifdef WITH_DICOM
     setupDcmtkDebug(settings);
 #endif
+    settings.endGroup();
     gstApplyFixes();
 
     // QGStreamer stuff
