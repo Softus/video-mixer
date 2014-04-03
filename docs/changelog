@@ -1,3 +1,9 @@
+beryllium (0.9.4) debian;
+
+  * Rearrange all settings into groups
+
+ -- Pavel Bludov <pbludov@gmail.com>  Thu, 3 Apr 2014 17:20:00 +0900
+
 beryllium (0.9.3) debian;
 
   * Multiple -c configs
