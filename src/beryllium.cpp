@@ -89,7 +89,33 @@ void sighandler(int signum)
 static gboolean
 cfgPathCallback(const gchar *, const gchar *value, gpointer, GError **)
 {
-    QSettings::setPath(QSettings::NativeFormat, QSettings::UserScope, QString::fromLocal8Bit(value));
+    QSettings settings;
+
+    auto path = QString::fromLocal8Bit(value);
+    if (QFileInfo(path).isDir())
+    {
+        QSettings::setPath(QSettings::NativeFormat, QSettings::SystemScope, path);
+        QSettings defaultSettings(QSettings::NativeFormat, QSettings::SystemScope, ORGANIZATION_SHORT_NAME, PRODUCT_SHORT_NAME);
+        // Copy from defaultSettings to active settings
+        //
+        Q_FOREACH (auto key, defaultSettings.allKeys())
+        {
+            qDebug() << key << defaultSettings.value(key);
+            settings.setValue(key, defaultSettings.value(key));
+        }
+    }
+    else
+    {
+        QSettings defaultSettings(path, QSettings::NativeFormat);
+        // Copy from defaultSettings to active settings
+        //
+        Q_FOREACH (auto key, defaultSettings.allKeys())
+        {
+            qDebug() << key << defaultSettings.value(key);
+            settings.setValue(key, defaultSettings.value(key));
+        }
+    }
+
     return true;
 }
 
