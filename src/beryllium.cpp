@@ -100,7 +100,6 @@ cfgPathCallback(const gchar *, const gchar *value, gpointer, GError **)
         //
         Q_FOREACH (auto key, defaultSettings.allKeys())
         {
-            qDebug() << key << defaultSettings.value(key);
             settings.setValue(key, defaultSettings.value(key));
         }
     }
@@ -111,7 +110,6 @@ cfgPathCallback(const gchar *, const gchar *value, gpointer, GError **)
         //
         Q_FOREACH (auto key, defaultSettings.allKeys())
         {
-            qDebug() << key << defaultSettings.value(key);
             settings.setValue(key, defaultSettings.value(key));
         }
     }

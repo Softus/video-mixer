@@ -1,3 +1,9 @@
+beryllium (0.9.3) debian;
+
+  * Multiple -c configs
+
+ -- Pavel Bludov <pbludov@gmail.com>  Thu, 3 Apr 2014 12:32:00 +0900
+
 beryllium (0.9.2) debian;
 
   * Activate external d-bus service if not started
