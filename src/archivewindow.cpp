@@ -213,28 +213,30 @@ ArchiveWindow::ArchiveWindow(QWidget *parent)
     setAttribute(Qt::WA_DeleteOnClose, false);
 #endif
 
-    updateShortcut(actionDelete,      settings.value("hotkey-archive-delete",        DEFAULT_HOTKEY_DELETE).toInt());
+    settings.beginGroup("hotkeys");
+    updateShortcut(actionDelete,      settings.value("-delete",        DEFAULT_HOTKEY_DELETE).toInt());
 #ifdef WITH_DICOM
-    updateShortcut(actionStore,       settings.value("hotkey-archive-upload",        DEFAULT_HOTKEY_UPLOAD).toInt());
+    updateShortcut(actionStore,       settings.value("-upload",        DEFAULT_HOTKEY_UPLOAD).toInt());
 #endif
-    updateShortcut(actionEdit,        settings.value("hotkey-archive-edit",          DEFAULT_HOTKEY_EDIT).toInt());
-    updateShortcut(actionUp,          settings.value("hotkey-archive-parent-folder", DEFAULT_HOTKEY_PARENT_FOLDER).toInt());
+    updateShortcut(actionEdit,        settings.value("-edit",          DEFAULT_HOTKEY_EDIT).toInt());
+    updateShortcut(actionUp,          settings.value("-parent-folder", DEFAULT_HOTKEY_PARENT_FOLDER).toInt());
 
-    updateShortcut(actionMode,        settings.value("hotkey-archive-next-mode",     DEFAULT_HOTKEY_NEXT_MODE).toInt());
-    updateShortcut(actionListMode,    settings.value("hotkey-archive-list-mode",     DEFAULT_HOTKEY_LIST_MODE).toInt());
-    updateShortcut(actionIconMode,    settings.value("hotkey-archive-icon-mode",     DEFAULT_HOTKEY_ICON_MODE).toInt());
-    updateShortcut(actionGalleryMode, settings.value("hotkey-archive-gallery-mode",  DEFAULT_HOTKEY_GALLERY_MODE).toInt());
+    updateShortcut(actionMode,        settings.value("-next-mode",     DEFAULT_HOTKEY_NEXT_MODE).toInt());
+    updateShortcut(actionListMode,    settings.value("-list-mode",     DEFAULT_HOTKEY_LIST_MODE).toInt());
+    updateShortcut(actionIconMode,    settings.value("-icon-mode",     DEFAULT_HOTKEY_ICON_MODE).toInt());
+    updateShortcut(actionGalleryMode, settings.value("-gallery-mode",  DEFAULT_HOTKEY_GALLERY_MODE).toInt());
 
-    updateShortcut(actionBrowse,      settings.value("hotkey-archive-browse",        DEFAULT_HOTKEY_BROWSE).toInt());
+    updateShortcut(actionBrowse,      settings.value("-browse",        DEFAULT_HOTKEY_BROWSE).toInt());
 
-    updateShortcut(actionSeekBack,    settings.value("hotkey-archive-seek-back",     DEFAULT_HOTKEY_SEEK_BACK).toInt());
-    updateShortcut(actionSeekFwd,     settings.value("hotkey-archive-seek-fwd",      DEFAULT_HOTKEY_SEEK_FWD).toInt());
-    updateShortcut(actionPlay,        settings.value("hotkey-archive-play",          DEFAULT_HOTKEY_PLAY).toInt());
-    updateShortcut(actionEnter,       settings.value("hotkey-archive-select",        DEFAULT_HOTKEY_SELECT).toInt());
+    updateShortcut(actionSeekBack,    settings.value("-seek-back",     DEFAULT_HOTKEY_SEEK_BACK).toInt());
+    updateShortcut(actionSeekFwd,     settings.value("-seek-fwd",      DEFAULT_HOTKEY_SEEK_FWD).toInt());
+    updateShortcut(actionPlay,        settings.value("-play",          DEFAULT_HOTKEY_PLAY).toInt());
+    updateShortcut(actionEnter,       settings.value("-select",        DEFAULT_HOTKEY_SELECT).toInt());
 
     // Not a real keys
-    // updateShortcut(btnPrev,        settings.value("hotkey-archive-prev",        DEFAULT_HOTKEY_PREV).toInt());
-    // updateShortcut(btnNext,        settings.value("hotkey-archive-next",        DEFAULT_HOTKEY_NEXT).toInt());
+    // updateShortcut(btnPrev,        settings.value("-prev",        DEFAULT_HOTKEY_PREV).toInt());
+    // updateShortcut(btnNext,        settings.value("-next",        DEFAULT_HOTKEY_NEXT).toInt());
+    settings.endGroup();
 }
 
 ArchiveWindow::~ArchiveWindow()
