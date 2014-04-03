@@ -279,7 +279,7 @@ void ArchiveWindow::timerEvent(QTimerEvent* evt)
 void ArchiveWindow::updateRoot()
 {
     QSettings settings;
-    root.setPath(settings.value("output-path", DEFAULT_OUTPUT_PATH).toString());
+    root.setPath(settings.value("storage/output-path", DEFAULT_OUTPUT_PATH).toString());
     curr = root;
     switchViewMode(settings.value("archive-mode").toInt());
 }

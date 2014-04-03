@@ -34,6 +34,7 @@ StorageSettings::StorageSettings(QWidget *parent)
     : QWidget(parent)
 {
     QSettings settings;
+    settings.beginGroup("storage");
     auto layoutMain = new QVBoxLayout;
     auto layoutImages = new QFormLayout;
 
@@ -120,6 +121,7 @@ void StorageSettings::onClickVideoBrowse()
 void StorageSettings::save()
 {
     QSettings settings;
+    settings.beginGroup("storage");
     settings.setValue("output-path", textOutputPath->text());
     settings.setValue("video-output-path", textVideoOutputPath->text());
     settings.setValue("folder-template", textFolderTemplate->text());

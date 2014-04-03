@@ -239,7 +239,6 @@ void HotKeySettings::save()
            {
                key |= GLOBAL_SHORTCUT_MASK;
            }
-           qDebug() <<  item->text(3) << key;
            settings.setValue(item->text(3), key);
        }
    }

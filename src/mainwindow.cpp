@@ -254,7 +254,7 @@ MainWindow::MainWindow(QWidget *parent) :
         updatePipeline();
     }
 
-    outputPath.setPath(settings.value("output-path", DEFAULT_OUTPUT_PATH).toString());
+    outputPath.setPath(settings.value("storage/output-path", DEFAULT_OUTPUT_PATH).toString());
 }
 
 MainWindow::~MainWindow()
@@ -563,7 +563,7 @@ QString MainWindow::buildPipeline()
     auto srcParams      = settings.value("src-parameters").toString();
     auto colorConverter = QString(" ! ").append(settings.value("color-converter", "ffmpegcolorspace").toString());
     auto videoCodec     = settings.value("video-encoder",  DEFAULT_VIDEO_ENCODER).toString();
-    auto outputPathDef  = settings.value("output-path",    DEFAULT_OUTPUT_PATH).toString();
+    auto outputPathDef  = settings.value("storage/output-path",    DEFAULT_OUTPUT_PATH).toString();
 
     pipe.append(deviceType);
 
@@ -1034,6 +1034,7 @@ QDir MainWindow::checkPath(const QString tpl, bool needUnique)
 void MainWindow::updateOutputPath(bool needUnique)
 {
     QSettings settings;
+    settings.beginGroup("storage");
 
     auto root = settings.value("output-path", DEFAULT_OUTPUT_PATH).toString();
     auto tpl = settings.value("folder-template", DEFAULT_FOLDER_TEMPLATE).toString();
@@ -1313,7 +1314,8 @@ bool MainWindow::startVideoRecord()
     if (settings.value("enable-video").toBool())
     {
         auto split = settings.value("split-video-files", DEFAULT_SPLIT_VIDEO_FILES).toBool();
-        auto videoFileName = appendVideoTail(videoOutputPath, "video", settings.value("video-template", DEFAULT_VIDEO_TEMPLATE).toString(), studyNo, split);
+        auto videoFileName = appendVideoTail(videoOutputPath, "video", settings.value("storage/video-template", DEFAULT_VIDEO_TEMPLATE).toString(), studyNo, split);
+        qDebug() << videoFileName;
         if (videoFileName.isEmpty())
         {
             removeVideoTail("video");
@@ -1385,7 +1387,7 @@ bool MainWindow::takeSnapshot(const QString& imageTemplate)
     QSettings settings;
     auto imageExt = getExt(settings.value("image-encoder", DEFAULT_IMAGE_ENCODER).toString());
     auto actualImageTemplate = !imageTemplate.isEmpty()? imageTemplate:
-            settings.value("image-template", DEFAULT_IMAGE_TEMPLATE).toString();
+            settings.value("storage/image-template", DEFAULT_IMAGE_TEMPLATE).toString();
     auto imageFileName = replace(actualImageTemplate, ++imageNo).append(imageExt);
 
     sound->play(DATA_FOLDER + "/sound/shutter.ac3");
@@ -1543,8 +1545,9 @@ bool MainWindow::startRecord(int duration, const QString &clipFileTemplate)
     {
         QString imageExt = getExt(settings.value("image-encoder", DEFAULT_IMAGE_ENCODER).toString());
         auto actualTemplate = !clipFileTemplate.isEmpty()? clipFileTemplate:
-            settings.value("clip-template", DEFAULT_CLIP_TEMPLATE).toString();
+            settings.value("storage/clip-template", DEFAULT_CLIP_TEMPLATE).toString();
         auto clipFileName = appendVideoTail(outputPath, "clip", actualTemplate, ++clipNo, false);
+        qDebug() << clipFileName;
         if (!clipFileName.isEmpty())
         {
             if (settings.value("save-clip-thumbnails", DEFAULT_SAVE_CLIP_THUMBNAILS).toBool())
