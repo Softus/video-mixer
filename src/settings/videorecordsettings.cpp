@@ -46,7 +46,7 @@ VideoRecordSettings::VideoRecordSettings(QWidget *parent)
     spinCountdown->setRange(1, 3600);
     spinCountdown->setValue(settings.value("clip-countdown", DEFAULT_CLIP_COUNTDOWN).toInt());
     layoutClips->addRow(checkNotify = new QCheckBox(tr("&Play alert at")), spinNotify = new QSpinBox);
-    checkNotify->setChecked(settings.value("gst/notify-clip-limit", DEFAULT_NOTIFY_CLIP_LIMIT).toBool());
+    checkNotify->setChecked(settings.value("notify-clip-limit", DEFAULT_NOTIFY_CLIP_LIMIT).toBool());
     spinNotify->setSuffix(tr(" seconds till stop"));
     spinNotify->setRange(0, 3600);
     spinNotify->setValue(settings.value("notify-clip-countdown", DEFAULT_NOTIFY_CLIP_COUNTDOWN).toInt());
