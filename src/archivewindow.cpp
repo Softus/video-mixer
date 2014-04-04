@@ -540,25 +540,13 @@ void ArchiveWindow::onListRowChanged(int idx)
 
     stopMedia();
 
-    bool isVideo = false;
     if (selectedSomething)
     {
         QFileInfo fi(curr.absoluteFilePath(listFiles->item(idx)->text()));
-        auto caps = fi.isFile()? TypeDetect(fi.absoluteFilePath()): QString();
-        if (!caps.isEmpty())
+        if (fi.isFile() && actionMode->data().toInt() == GALLERY_MODE && idx >= 0)
         {
-            isVideo = caps.startsWith("video/");
-            if (fi.isFile() && actionMode->data().toInt() == GALLERY_MODE && idx >= 0)
-            {
-                playMediaFile(fi);
-            }
+            playMediaFile(fi);
         }
-    }
-
-    actionEdit->setEnabled(isVideo);
-    foreach (auto action, barMediaControls->actions())
-    {
-        action->setVisible(isVideo);
     }
 }
 
@@ -569,7 +557,7 @@ void ArchiveWindow::onListItemDoubleClicked(QListWidgetItem* item)
     {
         setPath(fi.absoluteFilePath());
     }
-    else
+    else if (actionMode->data().toInt() != GALLERY_MODE)
     {
         playMediaFile(fi);
     }
@@ -884,7 +872,14 @@ void ArchiveWindow::playMediaFile(const QFileInfo& fi)
         // Will get here again once switchig is done
     }
 
+    auto isVideo = false;
     stopMedia();
+
+    auto caps = TypeDetect(fi.absoluteFilePath());
+    if (caps.isEmpty())
+    {
+        return;
+    }
 
     try
     {
@@ -901,12 +896,19 @@ void ArchiveWindow::playMediaFile(const QFileInfo& fi)
         auto details = GstDebugGraphDetails(GST_DEBUG_GRAPH_SHOW_MEDIA_TYPE | GST_DEBUG_GRAPH_SHOW_NON_DEFAULT_PARAMS | GST_DEBUG_GRAPH_SHOW_STATES);
         GST_DEBUG_BIN_TO_DOT_FILE_WITH_TS(pipeline.staticCast<QGst::Bin>(), details, qApp->applicationName().append(".archive").toUtf8());
         setWindowTitle(tr("Archive - %1").arg(fi.fileName()));
+        isVideo = caps.startsWith("video/");
     }
     catch (const QGlib::Error& ex)
     {
         const QString msg = ex.message();
         qCritical() << msg;
         QMessageBox::critical(this, windowTitle(), msg, QMessageBox::Ok);
+    }
+
+    actionEdit->setEnabled(isVideo);
+    foreach (auto action, barMediaControls->actions())
+    {
+        action->setVisible(isVideo);
     }
 }
 
