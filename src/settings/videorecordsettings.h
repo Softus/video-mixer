@@ -18,6 +18,7 @@
 #define VIDEORECORDSETTINGS_H
 
 #include <QWidget>
+#include <QSettings>
 
 QT_BEGIN_NAMESPACE
 class QCheckBox;
@@ -50,8 +51,7 @@ public:
 signals:
     
 public slots:
-    void save();
-private slots:
+    void save(QSettings& settings);
 };
 
 #endif // VIDEORECORDSETTINGS_H

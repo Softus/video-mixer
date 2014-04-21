@@ -77,13 +77,12 @@ void PhysiciansSettings::onRemoveClicked()
     btnRemove->setEnabled(listStudies->count());
 }
 
-void PhysiciansSettings::save()
+void PhysiciansSettings::save(QSettings& settings)
 {
-    QSettings settings;
-    QStringList studies;
+    QStringList physicians;
     for (int i = 0; i < listStudies->count(); ++i)
     {
-        studies.append(listStudies->item(i)->text());
+        physicians.append(listStudies->item(i)->text());
     }
-    settings.setValue("physicians", studies);
+    settings.setValue("physicians", physicians);
 }

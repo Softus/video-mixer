@@ -109,9 +109,8 @@ VideoRecordSettings::VideoRecordSettings(QWidget *parent)
     setLayout(layoutMain);
 }
 
-void VideoRecordSettings::save()
+void VideoRecordSettings::save(QSettings& settings)
 {
-    QSettings settings;
     settings.beginGroup("gst");
 
     auto useDetection = grpMotionDetection->isChecked();
@@ -145,4 +144,6 @@ void VideoRecordSettings::save()
     settings.setValue("motion-min-frames",      spinMinTime->value());
     settings.setValue("motion-gap",             spinGap->value());
     settings.setValue("motion-debug",           checkMotionDebug->isChecked());
+
+    settings.endGroup();
 }

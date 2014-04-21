@@ -18,6 +18,7 @@
 #define DICOMSERVERSETTINGS_H
 
 #include <QWidget>
+#include <QSettings>
 
 QT_BEGIN_NAMESPACE
 class QTableWidgetItem;
@@ -40,9 +41,11 @@ public:
 signals:
 
 public slots:
+    void save(QSettings& settings);
+
+private slots:
     void onCellChanged(QTableWidgetItem* current, QTableWidgetItem* previous);
     void onCellDoubleClicked(QTableWidgetItem* item);
-    void save();
     void onAddClicked();
     void onEditClicked();
     void onRemoveClicked();

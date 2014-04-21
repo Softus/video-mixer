@@ -438,9 +438,8 @@ static QVariant getListData(const QComboBox* cb)
     return cb->itemData(idx);
 }
 
-void VideoSourceSettings::save()
+void VideoSourceSettings::save(QSettings& settings)
 {
-    QSettings settings;
     settings.beginGroup("gst");
 
     auto device = getListData(listDevices).toStringList();
@@ -470,4 +469,5 @@ void VideoSourceSettings::save()
         settings.setValue("limit-video-fps", checkFps->isChecked());
         settings.setValue("video-max-fps", spinFps->value() > 0? spinFps->value(): QVariant());
     }
+    settings.endGroup();
 }

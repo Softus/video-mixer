@@ -142,15 +142,14 @@ DicomDeviceSettings::DicomDeviceSettings(QWidget *parent) :
     setLayout(mainLayout);
 }
 
-void DicomDeviceSettings::save()
+void DicomDeviceSettings::save(QSettings& settings)
 {
-    QSettings settings;
     settings.beginGroup("dicom");
-
     settings.setValue("aet", textAet->text());
     settings.setValue("modality", cbModality->itemData(cbModality->currentIndex()).toString());
     settings.setValue("local-port", spinPort->value());
     settings.setValue("export-clips", checkExportClips->isChecked());
     settings.setValue("export-video", checkExportVideo->isChecked());
     settings.setValue("translate-cyrillic", checkTransCyr->isChecked());
+    settings.endGroup();
 }

@@ -18,6 +18,7 @@
 #define DICOMSTORAGESETTINGS_H
 
 #include <QWidget>
+#include <QSettings>
 
 QT_BEGIN_NAMESPACE
 class QCheckBox;
@@ -37,10 +38,8 @@ public:
 protected:
     virtual void showEvent(QShowEvent *);
 
-signals:
-    
 public slots:
-    void save();
+    void save(QSettings& settings);
 };
 
 #endif // DICOMSTORAGESETTINGS_H

@@ -18,6 +18,7 @@
 #define CONFIRMATIONSETTINGS_H
 
 #include <QWidget>
+#include <QSettings>
 
 QT_BEGIN_NAMESPACE
 class QCheckBox;
@@ -33,11 +34,9 @@ class ConfirmationSettings : public QWidget
 
 public:
     Q_INVOKABLE explicit ConfirmationSettings(QWidget *parent = 0);
-    
-signals:
-    
+
 public slots:
-    void save();
+    void save(QSettings& settings);
 };
 
 #endif // CONFIRMATIONSETTINGS_H

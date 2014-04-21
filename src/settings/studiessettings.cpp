@@ -75,9 +75,8 @@ void StudiesSettings::onRemoveClicked()
     btnRemove->setEnabled(listStudies->count());
 }
 
-void StudiesSettings::save()
+void StudiesSettings::save(QSettings& settings)
 {
-    QSettings settings;
     QStringList studies;
     for (int i = 0; i < listStudies->count(); ++i)
     {

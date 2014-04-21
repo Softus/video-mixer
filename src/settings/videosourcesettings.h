@@ -18,6 +18,7 @@
 #define VIDEOSETTINGS_H
 
 #include <QWidget>
+#include <QSettings>
 #include <QtGlobal>
 
 QT_BEGIN_NAMESPACE
@@ -78,7 +79,7 @@ private slots:
     void formatChanged(int index);
 
 public slots:
-    void save();
+    void save(QSettings& settings);
 };
 
 #endif // VIDEOSETTINGS_H

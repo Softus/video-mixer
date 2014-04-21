@@ -162,10 +162,8 @@ void DicomServerSettings::onRemoveClicked()
     updateServerList();
 }
 
-void DicomServerSettings::save()
+void DicomServerSettings::save(QSettings& settings)
 {
-    QSettings settings;
-
     settings.remove("servers");
     settings.beginGroup("servers");
     for (int i = 0; i < listServers->rowCount(); ++i)

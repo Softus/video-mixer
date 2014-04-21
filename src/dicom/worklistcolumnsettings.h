@@ -18,6 +18,7 @@
 #define WORKLISTCOLUMNSETTINGS_H
 
 #include <QWidget>
+#include <QSettings>
 
 QT_BEGIN_NAMESPACE
 class QTableWidget;
@@ -31,11 +32,9 @@ class WorklistColumnSettings : public QWidget
 
 public:
     Q_INVOKABLE explicit WorklistColumnSettings(QWidget *parent = 0);
-    
-signals:
-    
+
 public slots:
-    void save();
+    void save(QSettings& settings);
 };
 
 #endif // WORKLISTCOLUMNSETTINGS_H

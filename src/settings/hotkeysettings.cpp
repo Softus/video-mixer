@@ -223,11 +223,9 @@ void HotKeySettings::treeItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *
     }
 }
 
-void HotKeySettings::save()
+void HotKeySettings::save(QSettings& settings)
 {
-    QSettings settings;
     settings.beginGroup("hotkeys");
-
    for (auto grpIdx = 0; grpIdx < tree->topLevelItemCount(); ++grpIdx)
    {
        auto top = tree->topLevelItem(grpIdx);
@@ -242,4 +240,5 @@ void HotKeySettings::save()
            settings.setValue(item->text(3), key);
        }
    }
+   settings.endGroup();
 }

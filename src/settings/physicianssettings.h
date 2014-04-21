@@ -18,6 +18,7 @@
 #define PHYSICIANSSETTINGS_H
 
 #include <QWidget>
+#include <QSettings>
 
 QT_BEGIN_NAMESPACE
 class QListWidget;
@@ -36,11 +37,12 @@ public:
 
 signals:
 
-public slots:
+private slots:
     void onAddClicked();
     void onEditClicked();
     void onRemoveClicked();
-    void save();
+public slots:
+    void save(QSettings& settings);
 };
 
 #endif // PHYSICIANSSETTINGS_H

@@ -55,10 +55,8 @@ MandatoryFieldsSettings::MandatoryFieldsSettings(QWidget *parent) :
     setLayout(layoutMain);
 }
 
-void MandatoryFieldsSettings::save()
+void MandatoryFieldsSettings::save(QSettings& settings)
 {
-    QSettings settings;
-    settings.beginGroup("ui");
     QStringList fields;
 
     for (auto i = 0; i < listFields->count(); ++i)
@@ -71,5 +69,5 @@ void MandatoryFieldsSettings::save()
         fields.append(item->data(Qt::UserRole).toString());
     }
 
-    settings.setValue("patient-data-mandatory-fields", fields);
+    settings.setValue("ui/patient-data-mandatory-fields", fields);
 }

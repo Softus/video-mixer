@@ -160,9 +160,8 @@ extern void setupGstDebug(const QSettings& settings);
 extern void setupDcmtkDebug(const QSettings& settings);
 #endif
 
-void DebugSettings::save()
+void DebugSettings::save(QSettings& settings)
 {
-    QSettings settings;
     settings.beginGroup("debug");
 
     settings.setValue("gst-debug-on", grpGst->isChecked());
@@ -180,4 +179,5 @@ void DebugSettings::save()
     settings.setValue("dcmtk-log-config", textDicomConfig->text());
     setupDcmtkDebug(settings);
 #endif
+    settings.endGroup();
 }

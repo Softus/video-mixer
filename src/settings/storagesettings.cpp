@@ -118,9 +118,8 @@ void StorageSettings::onClickVideoBrowse()
     }
 }
 
-void StorageSettings::save()
+void StorageSettings::save(QSettings& settings)
 {
-    QSettings settings;
     settings.beginGroup("storage");
     settings.setValue("output-path", textOutputPath->text());
     settings.setValue("video-output-path", textVideoOutputPath->text());
@@ -129,4 +128,5 @@ void StorageSettings::save()
     settings.setValue("image-template", textImageTemplate->text());
     settings.setValue("clip-template", textClipTemplate->text());
     settings.setValue("video-template", textVideoTemplate->text());
+    settings.endGroup();
 }

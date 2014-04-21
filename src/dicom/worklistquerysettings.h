@@ -18,6 +18,7 @@
 #define WORKLISTQUERYSETTINGS_H
 
 #include <QWidget>
+#include <QSettings>
 
 QT_BEGIN_NAMESPACE
 class QCheckBox;
@@ -48,7 +49,7 @@ public:
 signals:
     
 public slots:
-    void save();
+    void save(QSettings& settings);
 };
 
 #endif // WORKLISTQUERYSETTINGS_H

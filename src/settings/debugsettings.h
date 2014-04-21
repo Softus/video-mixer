@@ -2,6 +2,7 @@
 #define DEBUGSETTINGS_H
 
 #include <QWidget>
+#include <QSettings>
 
 QT_BEGIN_NAMESPACE
 class QCheckBox;
@@ -31,7 +32,7 @@ public:
     Q_INVOKABLE explicit DebugSettings(QWidget *parent = 0);
 
 public slots:
-    void save();
+    void save(QSettings& settings);
 private slots:
     void onClickBrowse();
 };

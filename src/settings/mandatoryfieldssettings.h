@@ -18,6 +18,7 @@
 #define MANDATORYFIELDSSETTINGS_H
 
 #include <QWidget>
+#include <QSettings>
 
 QT_BEGIN_NAMESPACE
 class QListWidget;
@@ -34,7 +35,7 @@ public:
 signals:
 
 public slots:
-    void save();
+    void save(QSettings& settings);
 };
 
 #endif // MANDATORYFIELDSSETTINGS_H

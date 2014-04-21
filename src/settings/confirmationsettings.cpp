@@ -52,10 +52,8 @@ ConfirmationSettings::ConfirmationSettings(QWidget *parent) :
     setLayout(layoutMain);
 }
 
-void ConfirmationSettings::save()
+void ConfirmationSettings::save(QSettings& settings)
 {
-    QSettings settings;
-
     settings.beginGroup("confirmations");
     settings.setValue("archive-delete",  checkDelete->isChecked()? -1: QMessageBox::Ok);
     settings.setValue("archive-store",  !checkStore->isChecked());

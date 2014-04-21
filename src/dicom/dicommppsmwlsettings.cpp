@@ -106,12 +106,12 @@ void DicomMppsMwlSettings::onUseToggle(bool checked)
     }
 }
 
-void DicomMppsMwlSettings::save()
+void DicomMppsMwlSettings::save(QSettings& settings)
 {
-    QSettings settings;
     settings.beginGroup("dicom");
     settings.setValue("mwl-server", checkUseMwl->isChecked()? cbMwlServer->currentText(): nullptr);
     settings.setValue("mpps-server", checkUseMpps->isChecked()? cbMppsServer->currentText(): nullptr);
     settings.setValue("start-with-mpps", checkStartWithMpps->isChecked());
     settings.setValue("complete-with-mpps", checkCompleteWithMpps->isChecked());
+    settings.endGroup();
 }

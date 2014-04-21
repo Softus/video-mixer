@@ -42,10 +42,14 @@
 #include <QListWidget>
 #include <QBoxLayout>
 #include <QDebug>
+#include <QDesktopServices>
+#include <QFileDialog>
 #include <QLabel>
+#include <QMenu>
 #include <QStackedWidget>
 #include <QSettings>
 #include <QPushButton>
+#include <QUrl>
 #include "qwaitcursor.h"
 
 Q_DECLARE_METATYPE(QMetaObject)
@@ -70,8 +74,18 @@ Settings::Settings(const QString& pageTitle, QWidget *parent, Qt::WindowFlags fl
     auto layoutContent = new QHBoxLayout;
     layoutContent->addWidget(listWidget);
     layoutContent->addWidget(pagesWidget, 1);
-
     auto layoutBtns = new QHBoxLayout;
+
+    auto btnMore = new QPushButton(tr("Settings"));
+    auto menu = new QMenu(btnMore);
+    menu->addAction(tr("Save settings to a file"), this, SLOT(saveToFile()));
+    menu->addAction(tr("Load settings from a file"), this, SLOT(loadFromFile()));
+    menu->addAction(tr("Edit with external application"), this, SLOT(launchEditor()));
+    menu->addSeparator();
+    menu->addAction(tr("Reset settings"), this, SLOT(resetSettings()));
+    btnMore->setMenu(menu);
+    layoutBtns->addWidget(btnMore);
+
     if (!settings.isWritable())
     {
         layoutBtns->addWidget(new QLabel(tr("NOTE: all changes will be lost when the application closes.")));
@@ -81,6 +95,7 @@ Settings::Settings(const QString& pageTitle, QWidget *parent, Qt::WindowFlags fl
     auto btnApply = new QPushButton(tr("Appl&y"));
     connect(btnApply, SIGNAL(clicked()), this, SLOT(onClickApply()));
     layoutBtns->addWidget(btnApply);
+
     btnCancel = new QPushButton(tr("Cancel"));
     connect(btnCancel, SIGNAL(clicked()), this, SLOT(reject()));
     layoutBtns->addWidget(btnCancel);
@@ -156,6 +171,16 @@ void Settings::createPages()
         this, SLOT(changePage(QListWidgetItem*,QListWidgetItem*)));
 }
 
+void Settings::recreatePages()
+{
+    // Drop all loaded pages and create again
+    //
+    auto idx = listWidget->currentRow();
+    listWidget->clear();
+    createPages();
+    listWidget->setCurrentRow(idx);
+}
+
 void Settings::changePage(QListWidgetItem *current, QListWidgetItem *previous)
 {
     if (!current)
@@ -167,7 +192,7 @@ void Settings::changePage(QListWidgetItem *current, QListWidgetItem *previous)
     {
         const QMetaObject& mobj = data.value<QMetaObject>();
         QWidget* page = static_cast<QWidget*>(mobj.newInstance());
-        connect(this, SIGNAL(save()), page, SLOT(save()));
+        connect(this, SIGNAL(save(QSettings&)), page, SLOT(save(QSettings&)));
         auto count = pagesWidget->count();
         current->setData(Qt::UserRole, count);
         pagesWidget->addWidget(page);
@@ -181,11 +206,12 @@ void Settings::changePage(QListWidgetItem *current, QListWidgetItem *previous)
 
 void Settings::onClickApply()
 {
+    QSettings settings;
     QWaitCursor wait(this);
 
     // Save add pages data.
     //
-    save();
+    save(settings);
 
     // After all pages has been saved, we can trigger another signal
     // to tell the application that all settings are ready to be read.
@@ -199,7 +225,62 @@ void Settings::onClickApply()
 
 void Settings::accept()
 {
-    save();
+    QSettings settings;
+    save(settings);
     QDialog::accept();
-    QSettings().setValue("ui/settings-page", listWidget->currentItem()->text());
+    settings.setValue("ui/settings-page", listWidget->currentItem()->text());
+}
+
+void Settings::saveToFile()
+{
+    QWaitCursor wait(this);
+    QFileDialog dlg(this);
+    dlg.setFileMode(QFileDialog::AnyFile);
+    dlg.setDirectory(QDir::homePath());
+    if (dlg.exec())
+    {
+        QSettings settings;
+        save(settings);
+
+        QSettings fileSettings(dlg.selectedFiles().first(), QSettings::NativeFormat);
+        Q_FOREACH (auto key, settings.allKeys())
+        {
+            fileSettings.setValue(key, settings.value(key));
+        }
+    }
+}
+
+void Settings::loadFromFile()
+{
+    QWaitCursor wait(this);
+    QFileDialog dlg(this);
+    dlg.setFileMode(QFileDialog::ExistingFile);
+    dlg.setDirectory(QDir::homePath());
+    if (dlg.exec())
+    {
+        QSettings settings;
+        QSettings fileSettings(dlg.selectedFiles().first(), QSettings::NativeFormat);
+        Q_FOREACH (auto key, fileSettings.allKeys())
+        {
+            settings.setValue(key, fileSettings.value(key));
+        }
+
+        recreatePages();
+    }
+}
+
+void Settings::launchEditor()
+{
+    QSettings settings;
+    save(settings);
+    settings.sync();
+    QDesktopServices::openUrl(QUrl::fromLocalFile(settings.fileName()));
+}
+
+void Settings::resetSettings()
+{
+    // Drop settings
+    //
+    QSettings().clear();
+    recreatePages();
 }

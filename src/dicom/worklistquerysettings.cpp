@@ -104,16 +104,21 @@ WorklistQuerySettings::WorklistQuerySettings(QWidget *parent) :
     setLayout(layoutMain);
 }
 
-void WorklistQuerySettings::save()
+void WorklistQuerySettings::save(QSettings& settings)
 {
-    QSettings settings;
-    settings.beginGroup("dicom");
+    // This should be an enum definetelly
+    //
+    auto scheduledDate = !checkScheduledDate->isChecked()? 0:
+         radioToday->isChecked()? 1:
+         radioTodayDelta->isChecked()? 2:
+         3;
 
-    auto scheduledDate = !checkScheduledDate->isChecked()? 0: radioToday->isChecked()? 1: radioTodayDelta->isChecked()?2: 3;
+    settings.beginGroup("dicom");
     settings.setValue("worklist-by-date", scheduledDate);
     settings.setValue("worklist-delta", spinDelta->value());
     settings.setValue("worklist-from", dateFrom->date());
     settings.setValue("worklist-to", dateTo->date());
     settings.setValue("worklist-modality", checkModality->isChecked()? cbModality->currentText(): nullptr);
     settings.setValue("worklist-aet", checkAeTitle->isChecked()? cbAeTitle->currentText(): nullptr);
+    settings.endGroup();
 }

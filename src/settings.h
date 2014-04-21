@@ -18,6 +18,7 @@
 #define SETTINGS_H
 
 #include <QDialog>
+#include <QSettings>
 
 QT_BEGIN_NAMESPACE
 class QListWidget;
@@ -33,17 +34,24 @@ class Settings : public QDialog
 public:
     Settings(const QString &page, QWidget *parent = 0, Qt::WindowFlags flags = 0);
 signals:
-    void save();
+    void save(QSettings& settings);
     void apply();
 
 public slots:
-    void changePage(QListWidgetItem *current, QListWidgetItem *previous);
+    void resetSettings();
+
+private slots:
+    void saveToFile();
+    void loadFromFile();
+    void launchEditor();
     void onClickApply();
+    void changePage(QListWidgetItem *current, QListWidgetItem *previous);
 
     virtual void accept();
 
 private:
     void createPages();
+    void recreatePages();
     void createPage(const QString& title, const QMetaObject& page);
 
     QListWidget *listWidget;

@@ -18,6 +18,7 @@
 #define STORAGESETTINGS_H
 
 #include <QWidget>
+#include <QSettings>
 
 QT_BEGIN_NAMESPACE
 class QCheckBox;
@@ -43,7 +44,7 @@ public:
 signals:
     
 public slots:
-    void save();
+    void save(QSettings& settings);
 
 private slots:
     void onClickBrowse();

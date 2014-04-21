@@ -18,6 +18,7 @@
 #define HOTKEYSETTINGS_H
 
 #include <QWidget>
+#include <QSettings>
 
 QT_BEGIN_NAMESPACE
 class HotKeyEdit;
@@ -45,7 +46,7 @@ public:
 signals:
     
 public slots:
-    void save();
+    void save(QSettings& settings);
 private slots:
     void treeItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
     void resetClicked();

@@ -105,8 +105,7 @@ QStringList WorklistColumnSettings::checkedColumns()
     return listChecked;
 }
 
-void WorklistColumnSettings::save()
+void WorklistColumnSettings::save(QSettings& settings)
 {
-    QSettings settings;
     settings.setValue("dicom/worklist-columns", checkedColumns());
 }

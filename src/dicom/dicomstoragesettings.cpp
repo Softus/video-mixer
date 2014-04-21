@@ -72,10 +72,10 @@ void DicomStorageSettings::showEvent(QShowEvent *e)
     }
 }
 
-void DicomStorageSettings::save()
+void DicomStorageSettings::save(QSettings& settings)
 {
-    QSettings settings;
     settings.beginGroup("dicom");
     settings.setValue("storage-servers", checkedServers());
     settings.setValue("store-video-as-binary", checkStoreVideoAsBinary->isChecked());
+    settings.endGroup();
 }
