@@ -1,6 +1,0 @@
-<Include>
-  <Component Id="Comp_opencv32" Guid="B100D0FF-AF56-0501-0314-079500628307" Win64="no">
-    <File Id="File_opencv_core248_x86" Name="opencv_core248.dll" />
-    <File Id="File_opencv_imgproc248_x86" Name="opencv_imgproc248.dll" />
-  </Component>
-</Include>

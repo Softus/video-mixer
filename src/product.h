@@ -22,8 +22,8 @@
 
 #define PRODUCT_SITE_URL        "http://dc.baikal.ru/projects/" PRODUCT_SHORT_NAME "/"
 
-#define PRODUCT_VERSION         0x000904
-#define PRODUCT_VERSION_STR     "0.9.4"
+#define PRODUCT_VERSION         0x000905
+#define PRODUCT_VERSION_STR     "0.9.5"
 
 #define ORGANIZATION_FULL_NAME  "Irkutsk Diagnostic Center"
 #define ORGANIZATION_SHORT_NAME "dc.baikal.ru" // lowercase, no spaces
