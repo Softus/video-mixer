@@ -46,7 +46,7 @@ public:
     ~SmartShortcut();
 
 private slots:
-    void trigger();
+    bool trigger();
 
 protected:
     bool eventFilter(QObject *o, QEvent *e);

@@ -1410,7 +1410,7 @@ bool MainWindow::takeSnapshot(const QString& imageTemplate)
     //
     imageValve->setProperty("drop-probability", 0.0);
     //
-    // Once an image will be ready, the valve will be turned off again.
+    // Once the image will be ready, the valve will be turned off again.
     btnSnapshot->setEnabled(false);
     return true;
 }

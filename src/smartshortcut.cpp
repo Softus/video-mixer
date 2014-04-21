@@ -162,9 +162,8 @@ bool SmartShortcut::eventFilter(QObject *o, QEvent *e)
         QMouseEvent *evt = static_cast<QMouseEvent*>(e);
         int btn = MOUSE_SHORTCUT_MASK | evt->modifiers() | evt->buttons();
 
-        if (m_key == btn)
+        if (m_key == btn && trigger())
         {
-            trigger();
             e->accept();
             return true;
         }
@@ -173,12 +172,12 @@ bool SmartShortcut::eventFilter(QObject *o, QEvent *e)
     return QObject::eventFilter(o, e);
 }
 
-void SmartShortcut::trigger()
+bool SmartShortcut::trigger()
 {
     if (isGlobal(m_key) && qApp->activeModalWidget())
     {
         qApp->beep();
-        return;
+        return false;
     }
 
     if (parent()->inherits("QAction"))
@@ -188,6 +187,7 @@ void SmartShortcut::trigger()
         if (isGlobal(m_key) || !widget || widget->window() == qApp->activeWindow())
         {
             action->trigger();
+            return true;
         }
     }
     else if (parent()->inherits("QAbstractButton"))
@@ -196,6 +196,8 @@ void SmartShortcut::trigger()
         if (isGlobal(m_key) || btn->window() == qApp->activeWindow())
         {
             btn->click();
+            return true;
         }
     }
+    return false;
 }
