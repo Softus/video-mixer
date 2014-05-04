@@ -26,9 +26,16 @@ public:
     explicit ThumbnailList(QWidget *parent = 0);
 
 protected:
-    void wheelEvent(QWheelEvent *e);
-    void keyPressEvent(QKeyEvent *e);
-    void keyReleaseEvent(QKeyEvent *e);
+    virtual void dragEnterEvent(QDragEnterEvent *e);
+    virtual void dragMoveEvent(QDragMoveEvent *e);
+    virtual void dropEvent(QDropEvent *e);
+    virtual void wheelEvent(QWheelEvent *e);
+    virtual void keyPressEvent(QKeyEvent *e);
+    virtual void keyReleaseEvent(QKeyEvent *e);
+    virtual void startDrag(Qt::DropActions supportedActions);
+
+Q_SIGNALS:
+    void itemDraggedOut(QListWidgetItem *item);
 };
 
 #endif // HORLISTWIDGET_H
