@@ -24,6 +24,7 @@
 #define DEFAULT_HOTKEY_ARCHIVE        (int)(Qt::Key_F2)
 #define DEFAULT_HOTKEY_UPLOAD         (int)(Qt::Key_F6)
 #define DEFAULT_HOTKEY_DELETE         (int)(Qt::Key_Delete)
+#define DEFAULT_HOTKEY_RESTORE        (int)(Qt::ControlModifier | Qt::Key_Z)
 #define DEFAULT_HOTKEY_EDIT           (int)(Qt::Key_F4)
 #define DEFAULT_HOTKEY_PARENT_FOLDER  (int)(Qt::Key_Backspace)
 #define DEFAULT_HOTKEY_RECORD_START   (int)(Qt::AltModifier | Qt::Key_R)

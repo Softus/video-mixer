@@ -15,6 +15,8 @@
  */
 
 #include "thumbnaillist.h"
+#include <QDrag>
+#include <QMimeData>
 #include <QWheelEvent>
 #include <QKeyEvent>
 
@@ -23,6 +25,59 @@ ThumbnailList::ThumbnailList(QWidget *parent) :
 {
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setWrapping(false);
+    setDragEnabled(true);
+    setDragDropMode(DragDrop);
+    setDefaultDropAction(Qt::MoveAction);
+}
+
+void ThumbnailList::startDrag(Qt::DropActions /*supportedActions*/)
+{
+     QListWidgetItem *item = currentItem();
+
+     QDrag *drag = new QDrag(this);
+     auto data = new QMimeData();
+     data->setData("remove", QByteArray());
+     drag->setMimeData(data);
+
+     auto pm = item->icon().pixmap(item->sizeHint());
+     drag->setPixmap(pm.copy());
+     drag->setHotSpot(pm.rect().center());
+
+     clearSelection();
+     if (drag->exec(Qt::MoveAction) == Qt::IgnoreAction)
+     {
+         emit itemDraggedOut(item);
+     }
+}
+
+void ThumbnailList::dragEnterEvent(QDragEnterEvent *evt)
+{
+    if (evt->mimeData()->hasFormat("remove"))
+    {
+        evt->accept();
+        return;
+    }
+    QListWidget::dragEnterEvent(evt);
+}
+
+void ThumbnailList::dragMoveEvent(QDragMoveEvent *evt)
+{
+    if (evt->mimeData()->hasFormat("remove"))
+    {
+        evt->accept();
+        return;
+    }
+    QListWidget::dragMoveEvent(evt);
+}
+
+void ThumbnailList::dropEvent(QDropEvent *evt)
+{
+    if (evt->mimeData()->hasFormat("remove"))
+    {
+        evt->accept();
+        return;
+    }
+    QListWidget::dropEvent(evt);
 }
 
 void ThumbnailList::wheelEvent(QWheelEvent *e)

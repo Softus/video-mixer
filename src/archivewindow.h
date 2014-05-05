@@ -20,6 +20,7 @@
 #include <QDialog>
 #include <QDir>
 #include <QListView>
+#include <QSettings>
 
 #include <QGst/Message>
 #include <QGst/Pipeline>
@@ -45,8 +46,14 @@ class ArchiveWindow : public QWidget
     QAction*               actionEdit;
     QAction*               actionPlay;
     QAction*               actionMode;
+    QAction*               actionListMode;
+    QAction*               actionIconMode;
+    QAction*               actionGalleryMode;
+    QAction*               actionRestore;
     QAction*               actionSeekBack;
     QAction*               actionSeekFwd;
+    QAction*               actionBrowse;
+    QAction*               actionEnter;
     QAction*               actionUp;
     QListWidget*           listFiles;
     QStackedWidget*        pagesWidget;
@@ -55,8 +62,11 @@ class ArchiveWindow : public QWidget
     QDir                   root;
     QDir                   curr;
     QFileSystemWatcher*    dirWatcher;
+    QStringList            deleteLater;
     int                    updateTimerId;
 
+    void reallyDeleteFiles();
+    void queueFileDeletion(QListWidgetItem* item);
     void stopMedia();
     void playMediaFile(const QFileInfo &fi);
     void onBusMessage(const QGst::MessagePtr& message);
@@ -78,6 +88,7 @@ signals:
     
 public slots:
     void updateRoot();
+    void updateHotkeys(QSettings &settings);
     void updatePath();
     void updateList();
     void setPath(const QString& path);
@@ -105,8 +116,10 @@ private slots:
     void selectPath(QAction* action);
     void onSwitchModeClick(QAction* action);
     void onListItemDoubleClicked(QListWidgetItem* item);
+    void onListItemDraggedOut(QListWidgetItem* item);
     void onDirectoryChanged(const QString&);
     void onUpFolderClick();
+    void onRestoreClick();
 };
 
 #endif // ARCHIVEWINDOW_H

@@ -43,8 +43,6 @@ ConfirmationSettings::ConfirmationSettings(QWidget *parent) :
     auto grArchive = new QGroupBox(tr("Archive window"));
     grArchive->setLayout(layoutArchive);
     layoutMain->addWidget(grArchive);
-    layoutArchive->addWidget(checkDelete = new QCheckBox(tr("&Delete items")));
-    checkDelete->setChecked(settings.value("archive-delete").toInt() <= 0);
     layoutArchive->addWidget(checkStore = new QCheckBox(tr("S&end to storage")));
     checkStore->setChecked(!settings.value("archive-store").toBool());
 
@@ -55,7 +53,6 @@ ConfirmationSettings::ConfirmationSettings(QWidget *parent) :
 void ConfirmationSettings::save(QSettings& settings)
 {
     settings.beginGroup("confirmations");
-    settings.setValue("archive-delete",  checkDelete->isChecked()? -1: QMessageBox::Ok);
     settings.setValue("archive-store",  !checkStore->isChecked());
     settings.setValue("end-study",       checkEndStudy->isChecked()? -1: QMessageBox::Yes);
     settings.setValue("start-study",    !checkStartStudy->isChecked());

@@ -50,6 +50,7 @@
 #include <QPushButton>
 #include <QSettings>
 #include <QStackedWidget>
+#include <QStringList>
 #include <QSlider>
 #include <QTimer>
 #include <QToolBar>
@@ -94,6 +95,8 @@ ArchiveWindow::ArchiveWindow(QWidget *parent)
 
     actionDelete = barArchive->addAction(QIcon(":buttons/delete"), tr("Delete"), this, SLOT(onDeleteClick()));
     actionDelete->setEnabled(false);
+    actionRestore = barArchive->addAction(QIcon(":/buttons/undo"), tr("Restore"), this, SLOT(onRestoreClick()));
+    actionRestore->setEnabled(false);
 
 #ifdef WITH_DICOM
     actionStore = barArchive->addAction(QIcon(":buttons/dicom"), tr("Upload"), this, SLOT(onStoreClick()));
@@ -112,17 +115,17 @@ ArchiveWindow::ArchiveWindow(QWidget *parent)
 
     auto menuMode = new QMenu;
     connect(menuMode, SIGNAL(triggered(QAction*)), this, SLOT(onSwitchModeClick(QAction*)));
-    auto actionListMode = menuMode->addAction(QIcon(":buttons/list"), tr("List"));
+    actionListMode = menuMode->addAction(QIcon(":buttons/list"), tr("List"));
     actionListMode->setData(QListView::ListMode);
-    auto actionIconMode = menuMode->addAction(QIcon(":buttons/icons"), tr("Icons"));
+    actionIconMode = menuMode->addAction(QIcon(":buttons/icons"), tr("Icons"));
     actionIconMode->setData(QListView::IconMode);
-    auto actionGalleryMode = menuMode->addAction(QIcon(":buttons/gallery"), tr("Gallery"));
+    actionGalleryMode = menuMode->addAction(QIcon(":buttons/gallery"), tr("Gallery"));
     actionGalleryMode->setData(GALLERY_MODE);
 
     actionMode->setMenu(menuMode);
     barArchive->addAction(actionMode);
 
-    auto actionBrowse = barArchive->addAction(QIcon(":buttons/folder"), tr("File browser"), this, SLOT(onShowFolderClick()));
+    actionBrowse = barArchive->addAction(QIcon(":buttons/folder"), tr("File browser"), this, SLOT(onShowFolderClick()));
 
 #ifndef WITH_TOUCH
     layoutMain->addWidget(barArchive);
@@ -194,10 +197,11 @@ ArchiveWindow::ArchiveWindow(QWidget *parent)
     listFiles->setSelectionMode(QListWidget::ExtendedSelection);
 //    listFiles->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 //    listFiles->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    listFiles->setMovement(QListView::Static);
+    listFiles->setMovement(QListView::Snap);
     connect(listFiles, SIGNAL(currentRowChanged(int)), this, SLOT(onListRowChanged(int)));
     connect(listFiles, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(onListItemDoubleClicked(QListWidgetItem*)));
-    auto actionEnter = new QAction(listFiles);
+    connect(listFiles, SIGNAL(itemDraggedOut(QListWidgetItem*)), this, SLOT(onListItemDraggedOut(QListWidgetItem*)));
+    actionEnter = new QAction(listFiles);
     connect(actionEnter, SIGNAL(triggered()), this, SLOT(onListKey()));
     listFiles->addAction(actionEnter);
     layoutMain->addWidget(listFiles);
@@ -214,36 +218,42 @@ ArchiveWindow::ArchiveWindow(QWidget *parent)
     setAttribute(Qt::WA_DeleteOnClose, false);
     settings.endGroup();
 #endif
+    updateHotkeys(settings);
+}
 
+void ArchiveWindow::updateHotkeys(QSettings& settings)
+{
     settings.beginGroup("hotkeys");
-    updateShortcut(actionDelete,      settings.value("-delete",        DEFAULT_HOTKEY_DELETE).toInt());
+    updateShortcut(actionDelete,      settings.value("archive-delete",        DEFAULT_HOTKEY_DELETE).toInt());
+    updateShortcut(actionRestore,     settings.value("archive-restore",       DEFAULT_HOTKEY_RESTORE).toInt());
 #ifdef WITH_DICOM
-    updateShortcut(actionStore,       settings.value("-upload",        DEFAULT_HOTKEY_UPLOAD).toInt());
+    updateShortcut(actionStore,       settings.value("archive-upload",        DEFAULT_HOTKEY_UPLOAD).toInt());
 #endif
-    updateShortcut(actionEdit,        settings.value("-edit",          DEFAULT_HOTKEY_EDIT).toInt());
-    updateShortcut(actionUp,          settings.value("-parent-folder", DEFAULT_HOTKEY_PARENT_FOLDER).toInt());
+    updateShortcut(actionEdit,        settings.value("archive-edit",          DEFAULT_HOTKEY_EDIT).toInt());
+    updateShortcut(actionUp,          settings.value("archive-parent-folder", DEFAULT_HOTKEY_PARENT_FOLDER).toInt());
 
-    updateShortcut(actionMode,        settings.value("-next-mode",     DEFAULT_HOTKEY_NEXT_MODE).toInt());
-    updateShortcut(actionListMode,    settings.value("-list-mode",     DEFAULT_HOTKEY_LIST_MODE).toInt());
-    updateShortcut(actionIconMode,    settings.value("-icon-mode",     DEFAULT_HOTKEY_ICON_MODE).toInt());
-    updateShortcut(actionGalleryMode, settings.value("-gallery-mode",  DEFAULT_HOTKEY_GALLERY_MODE).toInt());
+    updateShortcut(actionMode,        settings.value("archive-next-mode",     DEFAULT_HOTKEY_NEXT_MODE).toInt());
+    updateShortcut(actionListMode,    settings.value("archive-list-mode",     DEFAULT_HOTKEY_LIST_MODE).toInt());
+    updateShortcut(actionIconMode,    settings.value("archive-icon-mode",     DEFAULT_HOTKEY_ICON_MODE).toInt());
+    updateShortcut(actionGalleryMode, settings.value("archive-gallery-mode",  DEFAULT_HOTKEY_GALLERY_MODE).toInt());
 
-    updateShortcut(actionBrowse,      settings.value("-browse",        DEFAULT_HOTKEY_BROWSE).toInt());
+    updateShortcut(actionBrowse,      settings.value("archive-browse",        DEFAULT_HOTKEY_BROWSE).toInt());
 
-    updateShortcut(actionSeekBack,    settings.value("-seek-back",     DEFAULT_HOTKEY_SEEK_BACK).toInt());
-    updateShortcut(actionSeekFwd,     settings.value("-seek-fwd",      DEFAULT_HOTKEY_SEEK_FWD).toInt());
-    updateShortcut(actionPlay,        settings.value("-play",          DEFAULT_HOTKEY_PLAY).toInt());
-    updateShortcut(actionEnter,       settings.value("-select",        DEFAULT_HOTKEY_SELECT).toInt());
+    updateShortcut(actionSeekBack,    settings.value("archive-seek-back",     DEFAULT_HOTKEY_SEEK_BACK).toInt());
+    updateShortcut(actionSeekFwd,     settings.value("archive-seek-fwd",      DEFAULT_HOTKEY_SEEK_FWD).toInt());
+    updateShortcut(actionPlay,        settings.value("archive-play",          DEFAULT_HOTKEY_PLAY).toInt());
+    updateShortcut(actionEnter,       settings.value("archive-select",        DEFAULT_HOTKEY_SELECT).toInt());
 
     // Not a real keys
-    // updateShortcut(btnPrev,        settings.value("-prev",        DEFAULT_HOTKEY_PREV).toInt());
-    // updateShortcut(btnNext,        settings.value("-next",        DEFAULT_HOTKEY_NEXT).toInt());
+    // updateShortcut(btnPrev,        settings.value("archive-prev",        DEFAULT_HOTKEY_PREV).toInt());
+    // updateShortcut(btnNext,        settings.value("archive-next",        DEFAULT_HOTKEY_NEXT).toInt());
     settings.endGroup();
 }
 
 ArchiveWindow::~ArchiveWindow()
 {
     stopMedia();
+    reallyDeleteFiles();
 }
 
 void ArchiveWindow::showEvent(QShowEvent *evt)
@@ -284,6 +294,10 @@ void ArchiveWindow::updateRoot()
 {
     QSettings settings;
     root.setPath(settings.value("storage/output-path", DEFAULT_OUTPUT_PATH).toString());
+    if (!root.exists())
+    {
+        root.mkpath(".");
+    }
     curr = root;
     switchViewMode(settings.value("ui/archive-mode").toInt());
 }
@@ -298,7 +312,15 @@ void ArchiveWindow::setPath(const QString& path)
         dirWatcher->removePaths(dirWatcher->directories());
         dirWatcher->addPath(path);
         onDirectoryChanged(QString());
+        reallyDeleteFiles();
     }
+}
+
+void ArchiveWindow::onRestoreClick()
+{
+    deleteLater.clear();
+    actionRestore->setEnabled(false);
+    updateList();
 }
 
 void ArchiveWindow::onUpFolderClick()
@@ -426,20 +448,19 @@ void ArchiveWindow::updateList()
         QIcon icon;
         QPixmap pm;
 
-        if (fi.isDir())
+        if (deleteLater.contains(fi.absoluteFilePath()))
         {
-            if (fi.fileName() == "..")
-            {
-                icon.addFile(":/buttons/up");
-            }
-            else
-            {
-                icon.addFile(":/buttons/folder");
-            }
+            // Got a file queued for deletion, skip it
+            //
+            continue;
+        }
+        else if (fi.isDir())
+        {
+            icon.addFile(":/buttons/folder");
         }
         else if (QFile::exists(curr.absoluteFilePath(fi.completeBaseName())))
         {
-            // Got thumbnail image, skip it
+            // Got a thumbnail image, skip it
             //
             continue;
         }
@@ -651,6 +672,58 @@ void static removeFileOrFolder(const QString& path)
     dir.rmdir(path);
 }
 
+void ArchiveWindow::reallyDeleteFiles()
+{
+    if (deleteLater.isEmpty())
+    {
+        return;
+    }
+
+    Q_FOREACH(auto file, deleteLater)
+    {
+        qDebug() << "Really deleting" << file;
+        removeFileOrFolder(file);
+    }
+
+    deleteLater.clear();
+    actionRestore->setEnabled(false);
+}
+
+void ArchiveWindow::queueFileDeletion(QListWidgetItem* item)
+{
+    qDebug() << "Queue deleting" << item->text();
+
+    if (item->text() == "..")
+    {
+        // User definitelly does not want this folder to be removed
+        //
+        return;
+    }
+
+    if (item->isSelected())
+    {
+        stopMedia();
+    }
+
+    // Delete both the clip and the thumbnail
+    //
+    deleteLater << curr.absoluteFilePath(item->text());
+    auto strPreviewFile = item->data(Qt::UserRole).toString();
+    if (!strPreviewFile.isEmpty())
+    {
+        deleteLater << strPreviewFile;
+    }
+
+    delete item;
+}
+
+void ArchiveWindow::onListItemDraggedOut(QListWidgetItem* item)
+{
+    reallyDeleteFiles();
+    queueFileDeletion(item);
+    actionRestore->setEnabled(true);
+}
+
 void ArchiveWindow::onDeleteClick()
 {
     auto items = listFiles->selectedItems();
@@ -670,49 +743,13 @@ void ArchiveWindow::onDeleteClick()
     listFiles->clearSelection();
     listFiles->setCurrentRow(-1);
 
-    auto text = items.count() == 1? tr("Are you sure to delete\n\n'%1'?").arg(items.first()->text()):
-                                    tr("Are you sure to delete selected items?");
-    QxtConfirmationMessage msg(QMessageBox::Question, windowTitle()
-        , text, QString(), QMessageBox::Ok | QMessageBox::Cancel, this);
-    msg.setSettingsPath("confirmations");
-    msg.setOverrideSettingsKey("archive-delete");
-    msg.setRememberOnReject(false);
-    msg.setDefaultButton(QMessageBox::Cancel);
-#if (QT_VERSION >= QT_VERSION_CHECK(4, 8, 0))
-    if (qApp->queryKeyboardModifiers().testFlag(Qt::ShiftModifier))
-#else
-    if (qApp->keyboardModifiers().testFlag(Qt::ShiftModifier))
-#endif
+    reallyDeleteFiles();
+
+    foreach (auto item, items)
     {
-        msg.reset();
+        queueFileDeletion(item);
     }
-
-    if (QMessageBox::Ok == msg.exec())
-    {
-        stopMedia();
-        QWaitCursor wait(this);
-
-        foreach (auto item, items)
-        {
-            if (item->text() == "..")
-            {
-                // User definitelly does not want this folder to be removed
-                //
-                continue;
-            }
-
-            removeFileOrFolder(curr.absoluteFilePath(item->text()));
-
-            // Delete both the clip and the thumbnail
-            //
-            auto strPreviewFile = item->data(Qt::UserRole).toString();
-            if (!strPreviewFile.isEmpty())
-            {
-                QFile(strPreviewFile).remove();
-            }
-            delete item;
-        }
-    }
+    actionRestore->setEnabled(true);
 }
 
 #ifdef WITH_DICOM

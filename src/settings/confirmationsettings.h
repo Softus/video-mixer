@@ -29,7 +29,6 @@ class ConfirmationSettings : public QWidget
     Q_OBJECT
     QCheckBox* checkStartStudy;
     QCheckBox* checkEndStudy;
-    QCheckBox* checkDelete;
     QCheckBox* checkStore;
 
 public:

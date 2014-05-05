@@ -77,6 +77,7 @@ HotKeySettings::HotKeySettings(QWidget *parent) :
     itemArchive->setFlags(Qt::ItemIsEnabled);
     tree->addTopLevelItem(itemArchive);
     itemArchive->addChild(newItem(settings, tr("Delete"),    "archive-delete",        DEFAULT_HOTKEY_DELETE));
+    itemArchive->addChild(newItem(settings, tr("Restore"),   "archive-restore",       DEFAULT_HOTKEY_RESTORE));
 #ifdef WITH_DICOM
     itemArchive->addChild(newItem(settings, tr("Upload"),    "archive-upload",        DEFAULT_HOTKEY_UPLOAD));
 #endif
