@@ -1,3 +1,9 @@
+beryllium (1.0.1) debian;
+
+  * Drag'n'drop for deleting files
+
+ -- Pavel Bludov <pbludov@gmail.com>  Mon, 5 May 2014 13:23:00 +0900
+
 beryllium (0.9.5) debian;
 
   * Load/save/edit/reset settings

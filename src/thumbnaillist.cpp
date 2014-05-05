@@ -15,6 +15,8 @@
  */
 
 #include "thumbnaillist.h"
+#include <QDrag>
+#include <QMimeData>
 #include <QWheelEvent>
 #include <QKeyEvent>
 
