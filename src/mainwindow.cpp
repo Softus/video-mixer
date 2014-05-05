@@ -944,6 +944,7 @@ void MainWindow::updatePipeline()
     if (archiveWindow != nullptr)
     {
         archiveWindow->updateRoot();
+        archiveWindow->updateHotkeys(settings);
     }
 
     auto showSettings = settings.value("enable-settings", DEFAULT_ENABLE_SETTINGS).toBool();
