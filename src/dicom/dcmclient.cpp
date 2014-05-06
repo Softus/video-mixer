@@ -127,7 +127,6 @@ static void BuildCFindDataSet(DcmDataset& ds)
 static void BuildCStoreDataSet(/*const*/ DcmDataset& patientDs, DcmDataset& cStoreDs, const QString& seriesUID)
 {
     auto now = QDateTime::currentDateTime();
-    auto modality = QSettings().value("dicom/modality", DEFAULT_MODALITY).toString().toUpper().toUtf8();
 
     if (patientDs.findAndInsertCopyOfElement(DCM_SpecificCharacterSet, &cStoreDs).bad())
     {
@@ -147,7 +146,6 @@ static void BuildCStoreDataSet(/*const*/ DcmDataset& patientDs, DcmDataset& cSto
 
     cStoreDs.putAndInsertString(DCM_Manufacturer, ORGANIZATION_FULL_NAME);
     cStoreDs.putAndInsertString(DCM_ManufacturerModelName, PRODUCT_FULL_NAME);
-    cStoreDs.putAndInsertString(DCM_Modality, modality);
 }
 
 static void BuildNCreateDataSet(/*const*/ DcmDataset& patientDs, DcmDataset& nCreateDs)
@@ -623,17 +621,28 @@ bool DcmClient::cStoreRQ(DcmDataset* dset, const char* sopInstance)
 }
 
 bool DcmClient::sendToServer(const QString& server, DcmDataset* dsPatient, const QString& seriesUID,
-                             int seriesNumber, const QString& file, int instanceNumber)
+                             int seriesNumber, const QString& file, const QString& mimeType, int instanceNumber)
 {
-    E_TransferSyntax writeXfer;
+    E_TransferSyntax writeXfer = EXS_LittleEndianExplicit;
 
     char instanceUID[100] = {0};
     dcmGenerateUniqueIdentifier(instanceUID,  SITE_INSTANCE_UID_ROOT);
 
-    qDebug() << file;
+    qDebug() << mimeType << file;
 
     DcmDataset ds;
-    cond = readAndInsertPixelData(file, &ds, writeXfer);
+    if (mimeType.startsWith("application/"))
+    {
+        ds.putAndInsertString(DCM_Modality,       "OT");
+        cond = readAndInsertGenericData(file, &ds, mimeType);
+    }
+    else
+    {
+        auto modality = QSettings().value("dicom/modality", DEFAULT_MODALITY).toString().toUpper().toUtf8();
+        ds.putAndInsertString(DCM_Modality, modality);
+        cond = readAndInsertPixelData(file, &ds, writeXfer);
+    }
+
     if (cond.bad())
     {
         qDebug() << QString::fromUtf8(cond.text());
@@ -723,6 +732,7 @@ bool DcmClient::sendToServer(QWidget *parent, DcmDataset *dsPatient, const QFile
     int imageSeriesNo = 1;
     int clipsSeriesNo = 2;
     int videoSeriesNo = 3;
+    int pdfSeriesNo = 4;
     int seriesNo = 0;
 
     char seriesUID[100] = {0};
@@ -749,7 +759,8 @@ bool DcmClient::sendToServer(QWidget *parent, DcmDataset *dsPatient, const QFile
                 continue;
             }
 
-            if (TypeDetect(filePath).startsWith("video/"))
+            auto mimeType = TypeDetect(filePath);
+            if (mimeType.startsWith("video/"))
             {
                 auto thumbnailFileTemplate = QStringList("." + file.fileName() + ".*");
                 auto isClip = !dir.entryList(thumbnailFileTemplate, QDir::Hidden | QDir::Files).isEmpty();
@@ -773,6 +784,10 @@ bool DcmClient::sendToServer(QWidget *parent, DcmDataset *dsPatient, const QFile
                     seriesNo = videoSeriesNo;
                 }
             }
+            else if (mimeType == "application/pdf")
+            {
+                seriesNo = pdfSeriesNo;
+            }
             else
             {
                 seriesNo = imageSeriesNo;
@@ -783,7 +798,7 @@ bool DcmClient::sendToServer(QWidget *parent, DcmDataset *dsPatient, const QFile
             qApp->processEvents();
 
             seriesUID[idx] = '0' + seriesNo;
-            if (!sendToServer(server, dsPatient, seriesUID, seriesNo, filePath, i))
+            if (!sendToServer(server, dsPatient, seriesUID, seriesNo, filePath, mimeType, i))
             {
                 result = false;
                 SetFileExtAttribute(filePath, "dicom-status", lastError());

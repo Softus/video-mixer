@@ -20,6 +20,7 @@
 
 #include <QDebug>
 #include <QFile>
+#include <QFileInfo>
 #include <QSettings>
 
 #include <dcmtk/dcmdata/dcdeftag.h>
@@ -43,6 +44,16 @@
 #include <MediaInfo/MediaInfo.h>
 #undef UNICODE
 #endif
+
+static QString getGenericSopClass(const QString& mimeType)
+{
+    if (mimeType == "application/pdf")
+    {
+        return UID_EncapsulatedPDFStorage;
+    }
+
+    return UID_RawDataStorage;
+}
 
 static QString getImageSopClass(const QSettings& settings)
 {
@@ -413,4 +424,62 @@ readAndInsertPixelData
         }
     }
     return cond;
+}
+
+OFCondition
+readAndInsertGenericData
+    ( const QString& fileName
+    , DcmDataset* dataset
+    , const QString& mimeType
+    )
+{
+    OFCondition result = EC_Normal;
+
+    if (result.good()) result = dataset->putAndInsertString(DCM_SOPClassUID,    getGenericSopClass(mimeType).toUtf8());
+    if (result.good()) result = dataset->putAndInsertString(DCM_ConversionType, "WSD");
+    if (result.good()) result = dataset->putAndInsertString(DCM_DocumentTitle,  QFileInfo(fileName).completeBaseName().toUtf8());
+    if (result.good()) result = dataset->putAndInsertString(DCM_MIMETypeOfEncapsulatedDocument, mimeType.toUtf8());
+
+    QFile file(fileName);
+    if (!file.open(QFile::ReadOnly))
+    {
+        return makeOFCondition(0, 1, OF_error, "Failed to open file");
+    }
+
+    DcmPolymorphOBOW *elem = new DcmPolymorphOBOW(DCM_EncapsulatedDocument);
+    if (elem)
+    {
+        Uint32 numBytes = file.size();
+        if (numBytes & 1) ++numBytes;
+        Uint8 *bytes = NULL;
+        result = elem->createUint8Array(numBytes, bytes);
+        if (result.good())
+        {
+            // blank pad byte
+            bytes[numBytes - 1] = 0;
+
+            // read the content
+            if (file.read((char*)bytes, file.size()) != file.size())
+            {
+                qDebug() << "read error in file " << fileName;
+                result = EC_IllegalCall;
+            }
+        }
+    }
+    else
+    {
+        result = EC_MemoryExhausted;
+    }
+
+    // if successful, insert element into dataset
+    if (result.good())
+    {
+        result = dataset->insert(elem);
+    }
+    else
+    {
+        delete elem;
+    }
+
+    return result;
 }

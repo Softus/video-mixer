@@ -151,6 +151,7 @@ public:
 
 protected:
     virtual void closeEvent(QCloseEvent *evt);
+    virtual void showEvent(QShowEvent *);
     virtual void hideEvent(QHideEvent *);
     virtual void timerEvent(QTimerEvent*);
 signals:

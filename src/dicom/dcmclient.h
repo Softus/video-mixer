@@ -68,7 +68,7 @@ public:
     bool sendToServer(QWidget* parent, DcmDataset* patientDs, const QFileInfoList& files);
 
     bool sendToServer(const QString& server, DcmDataset* patientDs, const QString& seriesUID,
-        int seriesNumber, const QString& file, int instanceNumber);
+        int seriesNumber, const QString& file, const QString& mimeType, int instanceNumber);
 
     QString lastError() const
     {
