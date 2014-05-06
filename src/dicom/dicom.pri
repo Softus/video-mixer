@@ -1,6 +1,6 @@
 dicom {
     QT        += network
-    LIBS      += -ldcmnet -ldcmdata -loflog -lofstd -lz -lmagic
+    LIBS      += -ldcmnet -ldcmdata -loflog -lofstd -lz
     unix:LIBS += -lwrap -lssl
     DEFINES   += WITH_DICOM
 
