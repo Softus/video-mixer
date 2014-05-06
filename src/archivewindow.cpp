@@ -491,7 +491,7 @@ void ArchiveWindow::updateList()
             }
             else
             {
-                icon = fip.icon(fi); // Should never happen.
+                icon.addPixmap(fip.icon(fi).pixmap(QSize(128,128))); // PDF and so on
             }
         }
 
@@ -681,7 +681,6 @@ void ArchiveWindow::reallyDeleteFiles()
 
     Q_FOREACH(auto file, deleteLater)
     {
-        qDebug() << "Really deleting" << file;
         removeFileOrFolder(file);
     }
 
@@ -691,8 +690,6 @@ void ArchiveWindow::reallyDeleteFiles()
 
 void ArchiveWindow::queueFileDeletion(QListWidgetItem* item)
 {
-    qDebug() << "Queue deleting" << item->text();
-
     if (item->text() == "..")
     {
         // User definitelly does not want this folder to be removed
@@ -913,7 +910,7 @@ void ArchiveWindow::playMediaFile(const QFileInfo& fi)
     stopMedia();
 
     auto caps = TypeDetect(fi.absoluteFilePath());
-    if (caps.isEmpty())
+    if (caps.isEmpty() || caps.startsWith("application/"))
     {
         return;
     }

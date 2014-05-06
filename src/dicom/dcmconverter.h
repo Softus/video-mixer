@@ -33,4 +33,11 @@ readAndInsertPixelData
     , E_TransferSyntax& outputTS
     );
 
+OFCondition
+readAndInsertGenericData
+    ( const QString& fileName
+    , DcmDataset* dset
+    , const QString& mimeType
+    );
+
 #endif // DCMCONVERTER_H

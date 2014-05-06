@@ -236,25 +236,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     updateStartButton();
 
-    auto safeMode    = settings.value("ui/enable-settings", DEFAULT_ENABLE_SETTINGS).toBool() && (
-#if (QT_VERSION >= QT_VERSION_CHECK(4, 8, 0))
-                       qApp->queryKeyboardModifiers() == SAFE_MODE_KEYS ||
-#else
-                       qApp->keyboardModifiers() == SAFE_MODE_KEYS ||
-#endif
-                       settings.value("safe-mode", true).toBool());
-
     sound = new Sound(this);
-
-    if (safeMode)
-    {
-        settings.setValue("safe-mode", false);
-        QTimer::singleShot(0, this, SLOT(onShowSettingsClick()));
-    }
-    else
-    {
-        updatePipeline();
-    }
 
     outputPath.setPath(settings.value("storage/output-path", DEFAULT_OUTPUT_PATH).toString());
 }
@@ -326,6 +308,32 @@ void MainWindow::closeEvent(QCloseEvent *evt)
 #endif
 
     QWidget::closeEvent(evt);
+}
+
+void MainWindow::showEvent(QShowEvent *evt)
+{
+    if (!pipeline)
+    {
+        QSettings settings;
+        auto safeMode    = settings.value("ui/enable-settings", DEFAULT_ENABLE_SETTINGS).toBool() && (
+#if (QT_VERSION >= QT_VERSION_CHECK(4, 8, 0))
+                       qApp->queryKeyboardModifiers() == SAFE_MODE_KEYS ||
+#else
+                       qApp->keyboardModifiers() == SAFE_MODE_KEYS ||
+#endif
+                       settings.value("safe-mode", true).toBool());
+
+        if (safeMode)
+        {
+            settings.setValue("safe-mode", false);
+            QTimer::singleShot(0, this, SLOT(onShowSettingsClick()));
+        }
+        else
+        {
+            updatePipeline();
+        }
+    }
+    QWidget::showEvent(evt);
 }
 
 void MainWindow::hideEvent(QHideEvent *evt)
