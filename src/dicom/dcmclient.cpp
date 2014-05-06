@@ -127,7 +127,6 @@ static void BuildCFindDataSet(DcmDataset& ds)
 static void BuildCStoreDataSet(/*const*/ DcmDataset& patientDs, DcmDataset& cStoreDs, const QString& seriesUID)
 {
     auto now = QDateTime::currentDateTime();
-    auto modality = QSettings().value("dicom/modality", DEFAULT_MODALITY).toString().toUpper().toUtf8();
 
     if (patientDs.findAndInsertCopyOfElement(DCM_SpecificCharacterSet, &cStoreDs).bad())
     {
@@ -147,7 +146,6 @@ static void BuildCStoreDataSet(/*const*/ DcmDataset& patientDs, DcmDataset& cSto
 
     cStoreDs.putAndInsertString(DCM_Manufacturer, ORGANIZATION_FULL_NAME);
     cStoreDs.putAndInsertString(DCM_ManufacturerModelName, PRODUCT_FULL_NAME);
-    cStoreDs.putAndInsertString(DCM_Modality, modality);
 }
 
 static void BuildNCreateDataSet(/*const*/ DcmDataset& patientDs, DcmDataset& nCreateDs)
@@ -633,9 +631,18 @@ bool DcmClient::sendToServer(const QString& server, DcmDataset* dsPatient, const
     qDebug() << mimeType << file;
 
     DcmDataset ds;
-    cond = mimeType.startsWith("application/")?
-                readAndInsertGenericData(file, &ds, mimeType):
-                readAndInsertPixelData(file, &ds, writeXfer);
+    if (mimeType.startsWith("application/"))
+    {
+        ds.putAndInsertString(DCM_Modality,       "OT");
+        cond = readAndInsertGenericData(file, &ds, mimeType);
+    }
+    else
+    {
+        auto modality = QSettings().value("dicom/modality", DEFAULT_MODALITY).toString().toUpper().toUtf8();
+        ds.putAndInsertString(DCM_Modality, modality);
+        cond = readAndInsertPixelData(file, &ds, writeXfer);
+    }
+
     if (cond.bad())
     {
         qDebug() << QString::fromUtf8(cond.text());

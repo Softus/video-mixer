@@ -436,7 +436,6 @@ readAndInsertGenericData
     OFCondition result = EC_Normal;
 
     if (result.good()) result = dataset->putAndInsertString(DCM_SOPClassUID,    getGenericSopClass(mimeType).toUtf8());
-    if (result.good()) result = dataset->putAndInsertString(DCM_Modality,       "OT");
     if (result.good()) result = dataset->putAndInsertString(DCM_ConversionType, "WSD");
     if (result.good()) result = dataset->putAndInsertString(DCM_DocumentTitle,  QFileInfo(fileName).completeBaseName().toUtf8());
     if (result.good()) result = dataset->putAndInsertString(DCM_MIMETypeOfEncapsulatedDocument, mimeType.toUtf8());
