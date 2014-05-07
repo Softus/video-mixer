@@ -41,6 +41,7 @@
 
 #include <QListWidget>
 #include <QBoxLayout>
+#include <QDBusInterface>
 #include <QDebug>
 #include <QDesktopServices>
 #include <QFileDialog>
@@ -111,7 +112,11 @@ Settings::Settings(const QString& pageTitle, QWidget *parent, Qt::WindowFlags fl
     setLayout(mainLayout);
 
     setWindowTitle(tr("Settings"));
-    QString selectedPage = pageTitle.isEmpty()? settings.value("ui/settings-page").toString(): pageTitle;
+    settings.beginGroup("ui");
+    restoreGeometry(settings.value("settings-geometry").toByteArray());
+    setWindowState((Qt::WindowState)settings.value("settings-state").toInt());
+    QString selectedPage = pageTitle.isEmpty()? settings.value("settings-page").toString(): pageTitle;
+    settings.endGroup();
 
     if (!selectedPage.isEmpty())
     {
@@ -228,8 +233,34 @@ void Settings::accept()
     QSettings settings;
     save(settings);
     QDialog::accept();
-    settings.setValue("ui/settings-page", listWidget->currentItem()->text());
 }
+
+void Settings::showEvent(QShowEvent *)
+{
+    QSettings settings;
+    if (settings.value("show-onboard").toBool())
+    {
+        QDBusInterface("org.onboard.Onboard", "/org/onboard/Onboard/Keyboard",
+                       "org.onboard.Onboard.Keyboard").call( "Show");
+    }
+}
+
+void Settings::hideEvent(QHideEvent *)
+{
+    QSettings settings;
+    settings.beginGroup("ui");
+    settings.setValue("settings-geometry", saveGeometry());
+    settings.setValue("settings-state", (int)windowState() & ~Qt::WindowMinimized);
+    settings.setValue("settings-page", listWidget->currentItem()->text());
+    settings.endGroup();
+
+    if (settings.value("show-onboard").toBool())
+    {
+        QDBusInterface("org.onboard.Onboard", "/org/onboard/Onboard/Keyboard",
+                       "org.onboard.Onboard.Keyboard").call( "Hide");
+    }
+}
+
 
 void Settings::saveToFile()
 {

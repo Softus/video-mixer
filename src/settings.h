@@ -47,7 +47,10 @@ private slots:
     void onClickApply();
     void changePage(QListWidgetItem *current, QListWidgetItem *previous);
 
+protected:
     virtual void accept();
+    virtual void showEvent(QShowEvent *);
+    virtual void hideEvent(QHideEvent *);
 
 private:
     void createPages();
