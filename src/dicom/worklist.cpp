@@ -93,6 +93,7 @@ Worklist::Worklist(QWidget *parent) :
             translateColumns.append(i);
         }
     }
+    table->resizeColumnsToContents();
     table->setSelectionBehavior(QAbstractItemView::SelectRows);
     table->setSelectionMode(QAbstractItemView::SingleSelection);
     table->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -211,8 +212,8 @@ void Worklist::closeEvent(QCloseEvent *e)
 void Worklist::hideEvent(QHideEvent *e)
 {
     QSettings settings;
-#ifndef WITH_TOUCH
     settings.beginGroup("ui");
+#ifndef WITH_TOUCH
     settings.setValue("worklist-geometry", saveGeometry());
     settings.setValue("worklist-state", (int)windowState() & ~Qt::WindowMinimized);
 #endif
