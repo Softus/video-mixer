@@ -955,7 +955,7 @@ void MainWindow::updatePipeline()
         archiveWindow->updateHotkeys(settings);
     }
 
-    auto showSettings = settings.value("enable-settings", DEFAULT_ENABLE_SETTINGS).toBool();
+    auto showSettings = settings.value("ui/enable-settings", DEFAULT_ENABLE_SETTINGS).toBool();
     actionSettings->setEnabled(showSettings);
     actionSettings->setVisible(showSettings);
 
