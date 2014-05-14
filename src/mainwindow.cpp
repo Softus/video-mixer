@@ -96,63 +96,6 @@ static inline QBoxLayout::Direction bestDirection(const QSize &s)
     return s.width() >= s.height()? QBoxLayout::LeftToRight: QBoxLayout::TopToBottom;
 }
 
-#ifdef QT_DEBUG
-
-static void Dump(QGst::ElementPtr elm)
-{
-    if (!elm)
-    {
-        qDebug() << " (null) ";
-        return;
-    }
-
-    foreach (auto prop, elm->listProperties())
-    {
-        const QString n = prop->name();
-        const QGlib::Value v = elm->property(n.toUtf8());
-        switch (v.type().fundamental())
-        {
-        case QGlib::Type::Boolean:
-            qDebug() << n << " = " << v.get<bool>();
-            break;
-        case QGlib::Type::Float:
-        case QGlib::Type::Double:
-            qDebug() << n << " = " << v.get<double>();
-            break;
-        case QGlib::Type::Enum:
-        case QGlib::Type::Flags:
-        case QGlib::Type::Int:
-        case QGlib::Type::Uint:
-            qDebug() << n << " = " << v.get<int>();
-            break;
-        case QGlib::Type::Long:
-        case QGlib::Type::Ulong:
-            qDebug() << n << " = " << v.get<long>();
-            break;
-        case QGlib::Type::Int64:
-        case QGlib::Type::Uint64:
-            qDebug() << n << " = " << v.get<qint64>();
-            break;
-        default:
-            qDebug() << n << " = " << v.get<QString>();
-            break;
-        }
-    }
-
-    QGst::ChildProxyPtr childProxy =  elm.dynamicCast<QGst::ChildProxy>();
-    if (childProxy)
-    {
-        auto cnt = childProxy->childrenCount();
-        for (uint i = 0; i < cnt; ++i)
-        {
-            qDebug() << "==== CHILD ==== " << i;
-            Dump(childProxy->childByIndex(i).dynamicCast<QGst::Element>());
-        }
-    }
-}
-
-#endif
-
 MainWindow::MainWindow(QWidget *parent) :
     QWidget(parent),
     dlgPatient(nullptr),
@@ -442,16 +385,19 @@ QToolBar* MainWindow::createToolBar()
     bar->addWidget(spacer);
 
 #ifdef WITH_DICOM
-    actionWorklist = bar->addAction(QIcon(":/buttons/show_worklist"), tr("&Worlkist"), this, SLOT(onShowWorkListClick()));
+    actionWorklist = bar->addAction(QIcon(":/buttons/show_worklist"), tr("&Worlkist"),
+                                    this, SLOT(onShowWorkListClick()));
 #endif
 
     actionArchive = bar->addAction(QIcon(":/buttons/database"), tr("&Archive"), this, SLOT(onShowArchiveClick()));
     actionArchive->setToolTip(tr("Show studies archive"));
 
-    actionSettings = bar->addAction(QIcon(":/buttons/settings"), tr("&Preferences").append(0x2026), this, SLOT(onShowSettingsClick()));
+    actionSettings = bar->addAction(QIcon(":/buttons/settings"), tr("&Preferences").append(0x2026),
+                                    this, SLOT(onShowSettingsClick()));
     actionSettings->setToolTip(tr("Edit settings"));
 
-    actionAbout = bar->addAction(QIcon(":/buttons/about"), tr("A&bout %1").arg(PRODUCT_FULL_NAME).append(0x2026), this, SLOT(onShowAboutClick()));
+    actionAbout = bar->addAction(QIcon(":/buttons/about"), tr("A&bout %1").arg(PRODUCT_FULL_NAME).append(0x2026),
+                                 this, SLOT(onShowAboutClick()));
     actionAbout->setToolTip(tr("About %1").arg(PRODUCT_FULL_NAME));
 
     return bar;
@@ -1335,8 +1281,9 @@ bool MainWindow::startVideoRecord()
     if (settings.value("gst/enable-video").toBool())
     {
         auto split = settings.value("gst/split-video-files", DEFAULT_SPLIT_VIDEO_FILES).toBool();
-        auto videoFileName = appendVideoTail(videoOutputPath, "video", settings.value("storage/video-template", DEFAULT_VIDEO_TEMPLATE).toString(), studyNo, split);
-        qDebug() << videoFileName;
+        auto videoFileName = appendVideoTail(videoOutputPath, "video",
+             settings.value("storage/video-template", DEFAULT_VIDEO_TEMPLATE).toString(), studyNo, split);
+
         if (videoFileName.isEmpty())
         {
             removeVideoTail("video");
@@ -1578,7 +1525,8 @@ bool MainWindow::startRecord(int duration, const QString &clipFileTemplate)
             if (settings.value("save-clip-thumbnails", DEFAULT_SAVE_CLIP_THUMBNAILS).toBool())
             {
                 QFileInfo fi(clipFileName);
-                clipPreviewFileName = fi.absolutePath().append(QDir::separator()).append('.').append(fi.fileName()).append(imageExt);
+                clipPreviewFileName = fi.absolutePath()
+                    .append(QDir::separator()).append('.').append(fi.fileName()).append(imageExt);
             }
             else
             {

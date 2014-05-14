@@ -18,6 +18,7 @@
 #include "hotkeyedit.h"
 #include "smartshortcut.h"
 
+#include <QDateTime>
 #include <QDebug>
 #include <QKeyEvent>
 #include <QMouseEvent>
@@ -26,7 +27,9 @@
 HotKeyEdit::HotKeyEdit(QWidget *parent)
     : QxtLineEdit(parent)
     , m_key(0)
+    , m_ts(0)
     , m_ignoreNextMouseEvent(false)
+    , m_stickyKey(0)
 {
     updateText();
 }
@@ -47,8 +50,13 @@ int HotKeyEdit::key() const
     return m_key;
 }
 
-void HotKeyEdit::keyPressEvent(QKeyEvent *event)
+void HotKeyEdit::handleKeyReleaseEvent(QKeyEvent *event)
 {
+    if (event->isAutoRepeat())
+    {
+        return;
+    }
+
     int key = event->key();
 
     // Handle some special keys
@@ -80,6 +88,13 @@ void HotKeyEdit::keyPressEvent(QKeyEvent *event)
         break;
     }
 
+    m_stickyKey = key;
+
+    if (SmartShortcut::timestamp() - m_ts > LONG_PRESS_TIMEOUT)
+    {
+        key |= LONG_PRESS_MASK;
+    }
+
     // Checking for key combinations
     //
     key |= event->modifiers();
@@ -88,14 +103,19 @@ void HotKeyEdit::keyPressEvent(QKeyEvent *event)
     emit keyChanged(m_key);
 }
 
-void HotKeyEdit::handleMousePressEvent(QMouseEvent *evt)
+void HotKeyEdit::handleMouseReleaseEvent(QMouseEvent *evt)
 {
     // 'Unknown' mouse buttons still generates the event,
     // but no buttons specified with it. Just ignore them.
     //
-    if (!m_ignoreNextMouseEvent && evt->buttons() && isEnabled())
+    if (!m_ignoreNextMouseEvent && evt->button() && isEnabled())
     {
-        setKey(0x80000000 | evt->modifiers() | evt->buttons());
+        int key = 0x80000000 | evt->modifiers() | evt->button();
+        if (SmartShortcut::timestamp() - m_ts > LONG_PRESS_TIMEOUT)
+        {
+            key |= LONG_PRESS_MASK;
+        }
+        setKey(key);
         emit keyChanged(m_key);
     }
     m_ignoreNextMouseEvent = false;
@@ -119,6 +139,8 @@ void HotKeyEdit::focusInEvent(QFocusEvent *evt)
         break;
     }
 
+    m_stickyKey = 0;
+    SmartShortcut::setEnabled(false);
     QLineEdit::focusInEvent(evt);
 }
 
@@ -127,6 +149,7 @@ void HotKeyEdit::focusOutEvent(QFocusEvent *evt)
     // Remove the hint message
     //
     updateText();
+    SmartShortcut::setEnabled(true);
     QLineEdit::focusOutEvent(evt);
 }
 
@@ -134,15 +157,34 @@ bool HotKeyEdit::event(QEvent *e)
 {
     switch (e->type())
     {
+    case QEvent::KeyPress:
+        {
+            auto evt = static_cast<QKeyEvent*>(e);
+            if (!evt->isAutoRepeat() && evt->key() != m_stickyKey)
+            {
+                m_ts = SmartShortcut::timestamp();
+                m_stickyKey = 0;
+            }
+        }
+        e->accept();
+        return true;
+
     case QEvent::MouseButtonPress:
-        // Mouse press event must be handled explicitly
-        //
-        handleMousePressEvent(static_cast<QMouseEvent*>(e));
-        // passthrough
+        m_ts = SmartShortcut::timestamp();
+        e->accept();
+        return true;
+
+    case QEvent::MouseButtonRelease:
+        handleMouseReleaseEvent(static_cast<QMouseEvent*>(e));
+        e->accept();
+        return true;
 
     case QEvent::KeyRelease:
+        handleKeyReleaseEvent(static_cast<QKeyEvent*>(e));
+        e->accept();
+        return true;
+
     case QEvent::ContextMenu:
-    case QEvent::MouseButtonRelease:
 
         // Local shortcuts like Alt+I will not work while
         // the focus is inside our widget.

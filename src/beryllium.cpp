@@ -25,6 +25,7 @@
 #include "mainwindowdbusadaptor.h"
 #include "videoeditor.h"
 #include "settings.h"
+#include "smartshortcut.h"
 
 #include <opencv/cv.h>
 #include <signal.h>
@@ -479,10 +480,10 @@ int main(int argc, char *argv[])
     if (wnd)
     {
 #ifdef WITH_TOUCH
-        ClickFilter filter;
-        wnd->installEventFilter(&filter);
+        new ClickFilter(wnd);
         wnd->grabGesture(Qt::TapAndHoldGesture);
 #endif
+        new SmartShortcut(wnd);
         fullScreen? wnd->showFullScreen(): wnd->show();
         errCode = app.exec();
         delete wnd;
