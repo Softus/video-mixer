@@ -1667,8 +1667,9 @@ void MainWindow::updateStartButton()
     btnRecordStart->setEnabled(running);
     btnRecordStop->setEnabled(running && recording);
     btnSnapshot->setEnabled(running);
-    actionSettings->setEnabled(!running);
+    actionSettings->setDisabled(running);
 #ifdef WITH_DICOM
+    actionWorklist->setDisabled(running);
     if (worklist)
     {
         worklist->setDisabled(running);
@@ -1911,7 +1912,6 @@ void MainWindow::onStopStudy()
 
     removeVideoTail("video");
     running = recording = false;
-    updateWindowTitle();
     updateOverlayText();
 
 #ifdef WITH_DICOM

@@ -877,8 +877,9 @@ void ArchiveWindow::onPlayPauseClick()
 
 void ArchiveWindow::stopMedia()
 {
+#ifndef WITH_TOUCH
     setWindowTitle(tr("Archive"));
-
+#endif
     foreach (auto action, barMediaControls->actions())
     {
         action->setVisible(false);
@@ -929,7 +930,9 @@ void ArchiveWindow::playMediaFile(const QFileInfo& fi)
         pipeline->getState(nullptr, nullptr, GST_SECOND * 10); // 10 sec
         auto details = GstDebugGraphDetails(GST_DEBUG_GRAPH_SHOW_MEDIA_TYPE | GST_DEBUG_GRAPH_SHOW_NON_DEFAULT_PARAMS | GST_DEBUG_GRAPH_SHOW_STATES);
         GST_DEBUG_BIN_TO_DOT_FILE_WITH_TS(pipeline.staticCast<QGst::Bin>(), details, qApp->applicationName().append(".archive").toUtf8());
+#ifndef WITH_TOUCH
         setWindowTitle(tr("Archive - %1").arg(fi.fileName()));
+#endif
         isVideo = caps.startsWith("video/");
     }
     catch (const QGlib::Error& ex)

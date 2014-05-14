@@ -57,7 +57,9 @@ Worklist::Worklist(QWidget *parent) :
     QSettings settings;
     settings.beginGroup("dicom");
 
+#ifndef WITH_TOUCH
     setWindowTitle(tr("Worklist - %1").arg(settings.value("mwl-server").toString()));
+#endif
 
     auto translateCyrillic = settings.value("translate-cyrillic", DEFAULT_TRANSLATE_CYRILLIC).toBool();
     auto cols = settings.value("worklist-columns").toStringList();
