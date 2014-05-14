@@ -42,13 +42,15 @@ signals:
 protected:
     virtual void focusInEvent(QFocusEvent *evt);
     virtual void focusOutEvent(QFocusEvent *evt);
-    virtual void keyPressEvent(QKeyEvent *evt);
     virtual bool event(QEvent *evt);
 private:
-    int m_key;
-    bool m_ignoreNextMouseEvent;
-    void handleMousePressEvent(QMouseEvent *evt);
-    void updateText();
+    int    m_key;
+    qint64 m_ts;
+    bool   m_ignoreNextMouseEvent;
+    int    m_stickyKey;
+    void   handleMouseReleaseEvent(QMouseEvent *evt);
+    void   handleKeyReleaseEvent(QKeyEvent *evt);
+    void   updateText();
 };
 
 #endif // HOTKEYEDIT_H

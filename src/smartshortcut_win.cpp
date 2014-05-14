@@ -14,26 +14,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CLICKFILTER_H
-#define CLICKFILTER_H
+#include "smartshortcut.h"
 
-#include <QObject>
-#include <QMouseEvent>
+#include <QDebug>
+#include <qt_windows.h>
 
-QT_BEGIN_NAMESPACE
-class QEvent;
-QT_END_NAMESPACE
 
-class ClickFilter : public QObject
+bool ungrabKey(int key)
 {
-    Q_OBJECT
-public:
-    ClickFilter(QObject *parent);
-    ~ClickFilter();
-protected:
-    bool eventFilter(QObject *o, QEvent *e);
-private:
-    QMouseEvent me;
-};
+    Q_UNUSED(key);
+    return false;
+}
 
-#endif // CLICKFILTER_H
+bool grabKey(int key)
+{
+    Q_UNUSED(key);
+    return false;
+}

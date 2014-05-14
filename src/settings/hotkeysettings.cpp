@@ -41,6 +41,12 @@ newItem(const QSettings& settings , const QString& title, const QString& setting
        );
     item->setData(0, Qt::UserRole, defaultValue);
     item->setData(1, Qt::UserRole, key);
+    if (key != defaultValue)
+    {
+        auto font = item->font(1);
+        font.setBold(true);
+        item->setFont(1, font);
+    }
     return item;
 }
 
@@ -140,9 +146,13 @@ void HotKeySettings::keyChanged(int key)
         item->setText(2, checkGlobal->isChecked() ? "*": "");
         item->setData(1, Qt::UserRole, key);
         checkKeys(item->parent());
+
+        auto font = item->font(1);
+        font.setBold(key != item->data(0, Qt::UserRole).toInt());
+        item->setFont(1, font);
     }
 
-    if (!key || SmartShortcut::isMouse(key))
+    if (!key)
     {
         checkGlobal->setEnabled(false);
         checkGlobal->setChecked(false);
@@ -212,7 +222,7 @@ void HotKeySettings::treeItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *
     editor->setKey(key);
     editor->setEnabled(true);
     btnReset->setEnabled(true);
-    if (!key || SmartShortcut::isMouse(key))
+    if (!key)
     {
         checkGlobal->setEnabled(false);
         checkGlobal->setChecked(false);
@@ -226,7 +236,7 @@ void HotKeySettings::treeItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *
 
 void HotKeySettings::save(QSettings& settings)
 {
-    settings.beginGroup("hotkeys");
+   settings.beginGroup("hotkeys");
    for (auto grpIdx = 0; grpIdx < tree->topLevelItemCount(); ++grpIdx)
    {
        auto top = tree->topLevelItem(grpIdx);
