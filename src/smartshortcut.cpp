@@ -19,26 +19,223 @@
 #include <QAbstractButton>
 #include <QAction>
 #include <QApplication>
+#include <QDateTime>
 #include <QDebug>
 #include <QMouseEvent>
-#include <QxtGlobalShortcut>
 
-void SmartShortcut::remove(QObject *parent)
+bool grabKey(int key);
+bool ungrabKey(int key);
+
+struct SmartTarget
 {
-    // Remove any existent mouse shortcut
-    //
-    Q_FOREACH(auto child, parent->children())
+    bool global;
+    bool longPress;
+    QObject *target;
+    SmartTarget(bool g, bool l, QObject* t)
+        : global(g)
+        , longPress(l)
+        , target(t)
     {
-        if (child->inherits("SmartShortcut"))
+    }
+    SmartTarget(QObject* t)
+        : global(false)
+        , longPress(false)
+        , target(t)
+    {
+    }
+
+    bool operator == (const SmartTarget& st)
+    {
+        return target == st.target;
+    }
+};
+
+static bool isActiveTarget(const SmartTarget& t)
+{
+    if (t.target->inherits("QAction"))
+    {
+        auto action = static_cast<QAction*>(t.target);
+        if (action->isEnabled())
         {
-            delete child;
+            auto widget = action->parentWidget();
+            if (t.global || !widget || widget->window() == qApp->activeWindow())
+            {
+                return true;
+            }
         }
+    }
+    else if (t.target->inherits("QAbstractButton"))
+    {
+        auto btn = static_cast<QAbstractButton*>(t.target);
+        if (btn->isEnabled() && (t.global || btn->window() == qApp->activeWindow()))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+static bool triggerTarget(bool longPress, const SmartTarget& t)
+{
+    if (t.longPress != longPress)
+    {
+        return false;
+    }
+
+    if (t.target->inherits("QAction"))
+    {
+        auto action = static_cast<QAction*>(t.target);
+        if (action->isEnabled())
+        {
+            auto widget = action->parentWidget();
+            if (t.global || !widget || widget->window() == qApp->activeWindow())
+            {
+                action->trigger();
+                return true;
+            }
+        }
+    }
+    else if (t.target->inherits("QAbstractButton"))
+    {
+        auto btn = static_cast<QAbstractButton*>(t.target);
+        if (btn->isEnabled() && (t.global || btn->window() == qApp->activeWindow()))
+        {
+            btn->click();
+            return true;
+        }
+    }
+    return false;
+}
+
+struct SmartHandler
+{
+    qint64 ts;
+    QList<SmartTarget> targets;
+    SmartHandler()
+        : ts(0)
+    {
+    }
+
+    bool isActive()
+    {
+        Q_FOREACH (auto t, targets)
+        {
+            if (isActiveTarget(t))
+                return true;
+        }
+
+        return false;
+    }
+
+    bool trigger()
+    {
+        if (qApp->activeModalWidget())
+        {
+            qApp->beep();
+            return false;
+        }
+
+        bool longPress = QDateTime::currentMSecsSinceEpoch() - ts > LONG_PRESS_TIMEOUT;
+
+        Q_FOREACH (auto t, targets)
+        {
+            if (triggerTarget(longPress, t))
+                return true;
+        }
+
+        return false;
+    }
+};
+
+static QHash<int, SmartHandler> handlers;
+
+void SmartShortcut::remove(QObject *target)
+{
+    for (auto h = handlers.begin(); h != handlers.end(); ++h)
+    {
+        bool global = false;
+        auto t = h.value().targets.indexOf(SmartTarget(target));
+        if (t >= 0)
+        {
+           global = h.value().targets[t].global;
+           h.value().targets.removeAt(t);
+        }
+
+        if (global)
+        {
+            Q_FOREACH (auto t, h.value().targets)
+            {
+                if (t.global)
+                {
+                    // Found another global key handler,
+                    // so keep key grabbed
+                    //
+                    global = false;
+                    break;
+                }
+            }
+
+            if (global)
+            {
+                ungrabKey(h.key());
+            }
+        }
+
+        if (h.value().targets.isEmpty())
+        {
+            handlers.remove(h.key());
+            break;
+        }
+    }
+}
+
+void SmartShortcut::removeAll()
+{
+    for (auto h = handlers.begin(); h != handlers.end(); ++h)
+    {
+        Q_FOREACH (auto t, h.value().targets)
+        {
+            if (t.global)
+            {
+                ungrabKey(h.key());
+                break;
+            }
+        }
+    }
+    handlers.clear();
+}
+
+void SmartShortcut::setShortcut(QObject *target, int key)
+{
+    SmartTarget st(isGlobal(key), isLongPress(key), target);
+
+    auto h = handlers.find(key & ~(GLOBAL_SHORTCUT_MASK | LONG_PRESS_MASK));
+    if (h == handlers.end())
+    {
+        SmartHandler sh;
+        sh.targets.append(st);
+        handlers.insert(key & ~(GLOBAL_SHORTCUT_MASK | LONG_PRESS_MASK), sh);
+    }
+    else
+    {
+        h.value().targets.append(st);
+    }
+
+    if (isGlobal(key))
+    {
+        grabKey(key & ~(GLOBAL_SHORTCUT_MASK | LONG_PRESS_MASK));
     }
 }
 
 bool SmartShortcut::isGlobal(int key)
 {
     return !!(key & GLOBAL_SHORTCUT_MASK);
+}
+
+bool SmartShortcut::isLongPress(int key)
+{
+    return !!(key & LONG_PRESS_MASK);
 }
 
 bool SmartShortcut::isMouse(int key)
@@ -55,6 +252,14 @@ QString SmartShortcut::toString(int key, QKeySequence::SequenceFormat format)
         return tr("(not set)");
     }
 
+    QStringList returnText;
+
+    if (key & LONG_PRESS_MASK)
+    {
+        returnText += "Long";
+        key &= ~LONG_PRESS_MASK;
+    }
+
     // It's a keyboard key, pass to defauls
     //
     if (key > 0)
@@ -64,140 +269,156 @@ QString SmartShortcut::toString(int key, QKeySequence::SequenceFormat format)
         //
         key &= ~Qt::KeypadModifier;
 #endif
-        return QKeySequence(key).toString();
-    }
-
-    QStringList returnText;
-
-    auto modifiers = key & Qt::MODIFIER_MASK & ~MOUSE_SHORTCUT_MASK;
-    if (modifiers)
-    {
-        auto modifiersStr = QKeySequence(modifiers).toString(format);
-
-        // Turn something like 'CTRL+ALT+' into 'CTRL+ALT'
-        //
-        modifiersStr.chop(1);
-
-        returnText += modifiersStr;
-    }
-
-    auto buttons = key & Qt::MouseButtonMask;
-
-    if (buttons & Qt::LeftButton)    returnText += "LeftButton";
-    if (buttons & Qt::RightButton)   returnText += "RightButton";
-    if (buttons & Qt::XButton1)      returnText += "BackButton";
-    if (buttons & Qt::XButton2)      returnText += "ForwardButton";
- #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-    if (buttons & Qt::MiddleButton)  returnText += "MiddleButton";
-    if (buttons & Qt::ExtraButton3)  returnText += "TaskButton";
-    if (buttons & Qt::ExtraButton4)  returnText += "ExtraButton4";
-    if (buttons & Qt::ExtraButton5)  returnText += "ExtraButton5";
-    if (buttons & Qt::ExtraButton6)  returnText += "ExtraButton6";
-    if (buttons & Qt::ExtraButton7)  returnText += "ExtraButton7";
-    if (buttons & Qt::ExtraButton8)  returnText += "ExtraButton8";
-    if (buttons & Qt::ExtraButton9)  returnText += "ExtraButton9";
-    if (buttons & Qt::ExtraButton10) returnText += "ExtraButton10";
-    if (buttons & Qt::ExtraButton11) returnText += "ExtraButton11";
-    if (buttons & Qt::ExtraButton12) returnText += "ExtraButton12";
-    if (buttons & Qt::ExtraButton13) returnText += "ExtraButton13";
-    if (buttons & Qt::ExtraButton14) returnText += "ExtraButton14";
-    if (buttons & Qt::ExtraButton15) returnText += "ExtraButton15";
-    if (buttons & Qt::ExtraButton16) returnText += "ExtraButton16";
-    if (buttons & Qt::ExtraButton17) returnText += "ExtraButton17";
-    if (buttons & Qt::ExtraButton18) returnText += "ExtraButton18";
-    if (buttons & Qt::ExtraButton19) returnText += "ExtraButton19";
-    if (buttons & Qt::ExtraButton20) returnText += "ExtraButton20";
-    if (buttons & Qt::ExtraButton21) returnText += "ExtraButton21";
-    if (buttons & Qt::ExtraButton22) returnText += "ExtraButton22";
-    if (buttons & Qt::ExtraButton23) returnText += "ExtraButton23";
-    if (buttons & Qt::ExtraButton24) returnText += "ExtraButton24";
-#else
-    if (buttons & Qt::MidButton)     returnText += "MiddleButton";
-#endif
-    return returnText.join("+");
-}
-
-QString SmartShortcut::toString(QKeySequence::SequenceFormat format) const
-{
-    return toString(m_key, format);
-}
-
-SmartShortcut::SmartShortcut(int key, QAbstractButton *parent) :
-    QObject(parent), m_key(key)
-{
-    init();
-}
-
-SmartShortcut::SmartShortcut(int key, QAction *parent) :
-    QObject(parent), m_key(key)
-{
-    init();
-}
-
-void SmartShortcut::init()
-{
-    if (isMouse(m_key))
-    {
-        qApp->installEventFilter(this);
+        returnText += QKeySequence(key).toString();
     }
     else
     {
-        auto shortcut = new QxtGlobalShortcut(QKeySequence(m_key & ~GLOBAL_SHORTCUT_MASK), this);
-        connect(shortcut, SIGNAL(activated()), this, SLOT(trigger()));
+        auto modifiers = key & Qt::MODIFIER_MASK & ~MOUSE_SHORTCUT_MASK;
+        if (modifiers)
+        {
+            auto modifiersStr = QKeySequence(modifiers).toString(format);
+
+            // Turn something like 'CTRL+ALT+' into 'CTRL+ALT'
+            //
+            modifiersStr.chop(1);
+
+            returnText += modifiersStr;
+        }
+
+        auto buttons = key & Qt::MouseButtonMask;
+
+        if (buttons & Qt::LeftButton)    returnText += "LeftButton";
+        if (buttons & Qt::RightButton)   returnText += "RightButton";
+        if (buttons & Qt::XButton1)      returnText += "BackButton";
+        if (buttons & Qt::XButton2)      returnText += "ForwardButton";
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+        if (buttons & Qt::MiddleButton)  returnText += "MiddleButton";
+        if (buttons & Qt::ExtraButton3)  returnText += "TaskButton";
+        if (buttons & Qt::ExtraButton4)  returnText += "ExtraButton4";
+        if (buttons & Qt::ExtraButton5)  returnText += "ExtraButton5";
+        if (buttons & Qt::ExtraButton6)  returnText += "ExtraButton6";
+        if (buttons & Qt::ExtraButton7)  returnText += "ExtraButton7";
+        if (buttons & Qt::ExtraButton8)  returnText += "ExtraButton8";
+        if (buttons & Qt::ExtraButton9)  returnText += "ExtraButton9";
+        if (buttons & Qt::ExtraButton10) returnText += "ExtraButton10";
+        if (buttons & Qt::ExtraButton11) returnText += "ExtraButton11";
+        if (buttons & Qt::ExtraButton12) returnText += "ExtraButton12";
+        if (buttons & Qt::ExtraButton13) returnText += "ExtraButton13";
+        if (buttons & Qt::ExtraButton14) returnText += "ExtraButton14";
+        if (buttons & Qt::ExtraButton15) returnText += "ExtraButton15";
+        if (buttons & Qt::ExtraButton16) returnText += "ExtraButton16";
+        if (buttons & Qt::ExtraButton17) returnText += "ExtraButton17";
+        if (buttons & Qt::ExtraButton18) returnText += "ExtraButton18";
+        if (buttons & Qt::ExtraButton19) returnText += "ExtraButton19";
+#else
+        if (buttons & Qt::MidButton)     returnText += "MiddleButton";
+#endif
     }
+    return returnText.join("+");
+}
+
+SmartShortcut::SmartShortcut(QObject *parent)
+    : QObject(parent)
+{
+    qApp->installEventFilter(this);
 }
 
 SmartShortcut::~SmartShortcut()
 {
-    if (isMouse(m_key))
+    qApp->removeEventFilter(this);
+}
+
+static bool enabled = true;
+void SmartShortcut::setEnabled(bool enable)
+{
+    enabled = enable;
+}
+
+static bool handlePress(int key, QInputEvent* evt)
+{
+    auto handler = handlers.find(key);
+    if (handler != handlers.end())
     {
-        qApp->removeEventFilter(this);
+        if (handler.value().isActive())
+        {
+            handler.value().ts = QDateTime::currentMSecsSinceEpoch();
+            evt->accept();
+            return true;
+        }
     }
+
+    return false;
 }
 
 bool SmartShortcut::eventFilter(QObject *o, QEvent *e)
 {
-    if (e->type() == QEvent::MouseButtonPress)
+    if (enabled)
     {
-        QMouseEvent *evt = static_cast<QMouseEvent*>(e);
-        int btn = MOUSE_SHORTCUT_MASK | evt->modifiers() | evt->buttons();
-
-        if (m_key == btn && trigger())
+        switch (e->type())
         {
-            e->accept();
-            return true;
+        case QEvent::KeyPress:
+            {
+                QKeyEvent *evt = static_cast<QKeyEvent*>(e);
+                if (!evt->isAutoRepeat())
+                {
+                    int key = evt->modifiers() | evt->key();
+                    if (handlePress(key, evt))
+                    {
+                        return true;
+                    }
+                }
+            }
+            break;
+        case QEvent::MouseButtonPress:
+            {
+                QMouseEvent *evt = static_cast<QMouseEvent*>(e);
+                int btn = MOUSE_SHORTCUT_MASK | evt->modifiers() | evt->button();
+                if (handlePress(btn, evt))
+                {
+                    return true;
+                }
+            }
+            break;
+        case QEvent::KeyRelease:
+            {
+                QKeyEvent *evt = static_cast<QKeyEvent*>(e);
+                if (!evt->isAutoRepeat())
+                {
+                    int key = evt->modifiers() | evt->key();
+                    auto handler = handlers.find(key);
+                    if (handler != handlers.end())
+                    {
+                        if (handler.value().trigger())
+                        {
+                            handler.value().ts = 0;
+                        }
+                        e->accept();
+                        return true;
+                    }
+                }
+            }
+            break;
+        case QEvent::MouseButtonRelease:
+            {
+                QMouseEvent *evt = static_cast<QMouseEvent*>(e);
+                int btn = MOUSE_SHORTCUT_MASK | evt->modifiers() | evt->button();
+                auto handler = handlers.find(btn);
+                if (handler != handlers.end())
+                {
+                    if (handler.value().trigger())
+                    {
+                        handler.value().ts = 0;
+                    }
+                    e->accept();
+                    return true;
+                }
+            }
+            break;
+        default:
+            break;
         }
     }
 
     return QObject::eventFilter(o, e);
 }
 
-bool SmartShortcut::trigger()
-{
-    if (isGlobal(m_key) && qApp->activeModalWidget())
-    {
-        qApp->beep();
-        return false;
-    }
-
-    if (parent()->inherits("QAction"))
-    {
-        auto action = static_cast<QAction*>(parent());
-        auto widget = action->parentWidget();
-        if (isGlobal(m_key) || !widget || widget->window() == qApp->activeWindow())
-        {
-            action->trigger();
-            return true;
-        }
-    }
-    else if (parent()->inherits("QAbstractButton"))
-    {
-        auto btn = static_cast<QAbstractButton*>(parent());
-        if (isGlobal(m_key) || btn->window() == qApp->activeWindow())
-        {
-            btn->click();
-            return true;
-        }
-    }
-    return false;
-}

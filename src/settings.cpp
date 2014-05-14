@@ -217,6 +217,7 @@ void Settings::onClickApply()
     // Save add pages data.
     //
     save(settings);
+    Q_ASSERT(settings.group().isEmpty());
 
     // After all pages has been saved, we can trigger another signal
     // to tell the application that all settings are ready to be read.
@@ -232,6 +233,7 @@ void Settings::accept()
 {
     QSettings settings;
     save(settings);
+    Q_ASSERT(settings.group().isEmpty());
     QDialog::accept();
 }
 
@@ -304,6 +306,7 @@ void Settings::launchEditor()
 {
     QSettings settings;
     save(settings);
+    Q_ASSERT(settings.group().isEmpty());
     settings.sync();
     QDesktopServices::openUrl(QUrl::fromLocalFile(settings.fileName()));
 }

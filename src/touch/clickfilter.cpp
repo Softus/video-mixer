@@ -22,9 +22,16 @@
 #include <QWidget>
 #include <QMenu>
 
-ClickFilter::ClickFilter()
-    : me(QEvent::MouseButtonDblClick, QPoint(), QPoint(), Qt::LeftButton, Qt::LeftButton, Qt::NoModifier)
+ClickFilter::ClickFilter(QObject *parent)
+    : QObject(parent)
+    , me(QEvent::MouseButtonDblClick, QPoint(), QPoint(), Qt::LeftButton, Qt::LeftButton, Qt::NoModifier)
 {
+    parent->installEventFilter(this);
+}
+
+ClickFilter::~ClickFilter()
+{
+    parent()->removeEventFilter(this);
 }
 
 bool ClickFilter::eventFilter(QObject *o, QEvent *e)

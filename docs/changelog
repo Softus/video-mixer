@@ -1,3 +1,9 @@
+beryllium (1.1.0) debian;
+
+  * Global mouse shortcuts, long press shortcuts
+
+ -- Pavel Bludov <pbludov@gmail.com>  Wed, 14 May 2014 12:19:00 +0900
+
 beryllium (1.0.1) debian;
 
   * Drag'n'drop for deleting files

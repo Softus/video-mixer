@@ -440,6 +440,15 @@ static QVariant getListData(const QComboBox* cb)
 
 void VideoSourceSettings::save(QSettings& settings)
 {
+    if (listVideoCodecs->count() == 0)
+    {
+        // The page was created, but never shown, so
+        // all listboxes are empty.
+        // Nothing has been changed, so exit right now
+        //
+        return;
+    }
+
     settings.beginGroup("gst");
 
     auto device = getListData(listDevices).toStringList();
