@@ -58,10 +58,6 @@ void HotKeyEdit::handleKeyReleaseEvent(QKeyEvent *event)
     }
 
     int key = event->key();
-    if (m_stickyKey == key)
-    {
-        return;
-    }
 
     // Handle some special keys
     //
@@ -92,15 +88,16 @@ void HotKeyEdit::handleKeyReleaseEvent(QKeyEvent *event)
         break;
     }
 
+    m_stickyKey = key;
+
+    if (SmartShortcut::timestamp() - m_ts > LONG_PRESS_TIMEOUT)
+    {
+        key |= LONG_PRESS_MASK;
+    }
+
     // Checking for key combinations
     //
     key |= event->modifiers();
-
-    if (QDateTime::currentMSecsSinceEpoch() - m_ts > LONG_PRESS_TIMEOUT)
-    {
-        m_stickyKey = key;
-        key |= LONG_PRESS_MASK;
-    }
 
     setKey(key);
     emit keyChanged(m_key);
@@ -114,7 +111,7 @@ void HotKeyEdit::handleMouseReleaseEvent(QMouseEvent *evt)
     if (!m_ignoreNextMouseEvent && evt->button() && isEnabled())
     {
         int key = 0x80000000 | evt->modifiers() | evt->button();
-        if (QDateTime::currentMSecsSinceEpoch() - m_ts > LONG_PRESS_TIMEOUT)
+        if (SmartShortcut::timestamp() - m_ts > LONG_PRESS_TIMEOUT)
         {
             key |= LONG_PRESS_MASK;
         }
@@ -165,7 +162,7 @@ bool HotKeyEdit::event(QEvent *e)
             auto evt = static_cast<QKeyEvent*>(e);
             if (!evt->isAutoRepeat() && evt->key() != m_stickyKey)
             {
-                m_ts = QDateTime::currentMSecsSinceEpoch();
+                m_ts = SmartShortcut::timestamp();
                 m_stickyKey = 0;
             }
         }
@@ -173,7 +170,7 @@ bool HotKeyEdit::event(QEvent *e)
         return true;
 
     case QEvent::MouseButtonPress:
-        m_ts = QDateTime::currentMSecsSinceEpoch();
+        m_ts = SmartShortcut::timestamp();
         e->accept();
         return true;
 

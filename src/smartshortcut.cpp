@@ -136,7 +136,7 @@ struct SmartHandler
             return false;
         }
 
-        bool longPress = QDateTime::currentMSecsSinceEpoch() - ts > LONG_PRESS_TIMEOUT;
+        bool longPress = SmartShortcut::timestamp() - ts > LONG_PRESS_TIMEOUT;
 
         Q_FOREACH (auto t, targets)
         {
@@ -341,7 +341,7 @@ static bool handlePress(int key, QInputEvent* evt)
     {
         if (handler.value().isActive())
         {
-            handler.value().ts = QDateTime::currentMSecsSinceEpoch();
+            handler.value().ts = SmartShortcut::timestamp();
             evt->accept();
             return true;
         }
@@ -422,3 +422,11 @@ bool SmartShortcut::eventFilter(QObject *o, QEvent *e)
     return QObject::eventFilter(o, e);
 }
 
+qint64 SmartShortcut::timestamp()
+{
+#if (QT_VERSION >= QT_VERSION_CHECK(4, 7, 0))
+    return QDateTime::currentMSecsSinceEpoch();
+#else
+    return QTime(0,0,0).msecsTo(QTime::currentTime());
+#endif
+}
