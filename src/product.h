@@ -17,18 +17,18 @@
 #ifndef PRODUCT_H
 #define PRODUCT_H
 
+#define ORGANIZATION_FULL_NAME  "Irkutsk Diagnostic Center"
+#define ORGANIZATION_DOMAIN     "dc.baikal.ru"
+
 #define PRODUCT_FULL_NAME       "Beryllium"
 #define PRODUCT_SHORT_NAME      "beryllium" // lowercase, no spaces
 
-#define PRODUCT_SITE_URL        "http://dc.baikal.ru/projects/" PRODUCT_SHORT_NAME "/"
+#define PRODUCT_VERSION         0x010101
+#define PRODUCT_VERSION_STR     "1.1.1"
 
-#define PRODUCT_VERSION         0x010100
-#define PRODUCT_VERSION_STR     "1.1.0"
-
-#define ORGANIZATION_FULL_NAME  "Irkutsk Diagnostic Center"
-#define ORGANIZATION_SHORT_NAME "dc.baikal.ru" // lowercase, no spaces
+#define PRODUCT_SITE_URL        "http://" ORGANIZATION_DOMAIN "/projects/" PRODUCT_SHORT_NAME "/"
+#define PRODUCT_NAMESPACE       "ru.baikal.dc." PRODUCT_SHORT_NAME
 
 #define SITE_UID_ROOT           "1.2.643.2.66"
-#define PRODUCT_NAMESPACE       "ru.baikal.dc." PRODUCT_SHORT_NAME
 
 #endif // PRODUCT_H

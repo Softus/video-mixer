@@ -14,7 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "settings.h"
+#include "settingsdialog.h"
 
 #include "settings/confirmationsettings.h"
 #include "settings/debugsettings.h"
@@ -56,7 +56,7 @@
 Q_DECLARE_METATYPE(QMetaObject)
 static int QMetaObjectMetaType = qRegisterMetaType<QMetaObject>();
 
-Settings::Settings(const QString& pageTitle, QWidget *parent, Qt::WindowFlags flags)
+SettingsDialog::SettingsDialog(const QString& pageTitle, QWidget *parent, Qt::WindowFlags flags)
     : QDialog(parent, flags)
 {
     QSettings settings;
@@ -140,13 +140,13 @@ Settings::Settings(const QString& pageTitle, QWidget *parent, Qt::WindowFlags fl
     }
 }
 
-void Settings::createPage(const QString& title, const QMetaObject& page)
+void SettingsDialog::createPage(const QString& title, const QMetaObject& page)
 {
     auto item = new QListWidgetItem(title, listWidget);
     item->setData(Qt::UserRole, QVariant::fromValue(page));
 }
 
-void Settings::createPages()
+void SettingsDialog::createPages()
 {
 #ifdef WITH_DICOM
     createPage(tr("DICOM device"), DicomDeviceSettings::staticMetaObject);
@@ -176,7 +176,7 @@ void Settings::createPages()
         this, SLOT(changePage(QListWidgetItem*,QListWidgetItem*)));
 }
 
-void Settings::recreatePages()
+void SettingsDialog::recreatePages()
 {
     // Drop all loaded pages and create again
     //
@@ -186,7 +186,7 @@ void Settings::recreatePages()
     listWidget->setCurrentRow(idx);
 }
 
-void Settings::changePage(QListWidgetItem *current, QListWidgetItem *previous)
+void SettingsDialog::changePage(QListWidgetItem *current, QListWidgetItem *previous)
 {
     if (!current)
         current = previous;
@@ -209,7 +209,7 @@ void Settings::changePage(QListWidgetItem *current, QListWidgetItem *previous)
     }
 }
 
-void Settings::onClickApply()
+void SettingsDialog::onClickApply()
 {
     QSettings settings;
     QWaitCursor wait(this);
@@ -229,7 +229,7 @@ void Settings::onClickApply()
     btnCancel->setText(tr("Close"));
 }
 
-void Settings::accept()
+void SettingsDialog::accept()
 {
     QSettings settings;
     save(settings);
@@ -237,7 +237,7 @@ void Settings::accept()
     QDialog::accept();
 }
 
-void Settings::showEvent(QShowEvent *)
+void SettingsDialog::showEvent(QShowEvent *)
 {
     QSettings settings;
     if (settings.value("show-onboard").toBool())
@@ -247,7 +247,7 @@ void Settings::showEvent(QShowEvent *)
     }
 }
 
-void Settings::hideEvent(QHideEvent *)
+void SettingsDialog::hideEvent(QHideEvent *)
 {
     QSettings settings;
     settings.beginGroup("ui");
@@ -264,7 +264,7 @@ void Settings::hideEvent(QHideEvent *)
 }
 
 
-void Settings::saveToFile()
+void SettingsDialog::saveToFile()
 {
     QWaitCursor wait(this);
     QFileDialog dlg(this);
@@ -283,7 +283,7 @@ void Settings::saveToFile()
     }
 }
 
-void Settings::loadFromFile()
+void SettingsDialog::loadFromFile()
 {
     QWaitCursor wait(this);
     QFileDialog dlg(this);
@@ -302,7 +302,7 @@ void Settings::loadFromFile()
     }
 }
 
-void Settings::launchEditor()
+void SettingsDialog::launchEditor()
 {
     QSettings settings;
     save(settings);
@@ -311,7 +311,7 @@ void Settings::launchEditor()
     QDesktopServices::openUrl(QUrl::fromLocalFile(settings.fileName()));
 }
 
-void Settings::resetSettings()
+void SettingsDialog::resetSettings()
 {
     // Drop settings
     //

@@ -1,3 +1,9 @@
+beryllium (1.1.1) debian;
+
+  * Config values from files specified with -c option now are read only
+
+ -- Pavel Bludov <pbludov@gmail.com>  Thu, 15 May 2014 11:39:00 +0900
+
 beryllium (1.1.0) debian;
 
   * Global mouse shortcuts, long press shortcuts

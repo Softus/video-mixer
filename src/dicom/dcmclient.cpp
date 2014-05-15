@@ -20,6 +20,7 @@
 #include "dcmclient.h"
 #include "dcmconverter.h"
 #include "transcyrillic.h"
+#include "qxtglobal.h" // for _countof
 
 #include <dcmtk/dcmdata/dcdeftag.h>
 #include <dcmtk/dcmdata/dcdicent.h>
@@ -262,6 +263,24 @@ void DcmClient::loadCallback(void *callbackData,
     T_DIMSE_C_FindRQ* /*request*/, int /*responseCount*/,
     T_DIMSE_C_FindRSP* /*rsp*/, DcmDataset* dset)
 {
+    auto translateCyrillic = QSettings().value("dicom/translate-cyrillic", DEFAULT_TRANSLATE_CYRILLIC).toBool();
+    if (translateCyrillic)
+    {
+        DcmTagKey keys[] = { DCM_PatientName, DCM_ScheduledPerformingPhysicianName };
+        for (size_t i = 0; i < _countof(keys); ++i)
+        {
+            DcmElement* elm = nullptr;
+            char* val = nullptr;
+            if (dset->findAndGetElement(keys[i], elm, true).good() && elm->getString(val).good())
+            {
+                auto str = QString::fromUtf8(val);
+                auto tranlated = translateToCyrillic(str);
+                //qDebug() << str << " => " << tranlated;
+                elm->putString(tranlated.toUtf8().constData());
+            }
+        }
+    }
+
     static_cast<DcmClient*>(callbackData)->addRow(dset);
 }
 

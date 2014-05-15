@@ -24,7 +24,7 @@
 #include "mainwindow.h"
 #include "mainwindowdbusadaptor.h"
 #include "videoeditor.h"
-#include "settings.h"
+#include "settingsdialog.h"
 #include "smartshortcut.h"
 
 #include <opencv/cv.h>
@@ -90,18 +90,18 @@ void sighandler(int signum)
 static gboolean
 cfgPathCallback(const gchar *, const gchar *value, gpointer, GError **)
 {
-    QSettings settings;
+    QSettings systemSettings(QSettings::SystemScope, ORGANIZATION_DOMAIN, PRODUCT_SHORT_NAME);
 
     auto path = QString::fromLocal8Bit(value);
     if (QFileInfo(path).isDir())
     {
         QSettings::setPath(QSettings::NativeFormat, QSettings::SystemScope, path);
-        QSettings defaultSettings(QSettings::NativeFormat, QSettings::SystemScope, ORGANIZATION_SHORT_NAME, PRODUCT_SHORT_NAME);
+        QSettings fileSettings(QSettings::NativeFormat, QSettings::SystemScope, ORGANIZATION_DOMAIN, PRODUCT_SHORT_NAME);
         // Copy from defaultSettings to active settings
         //
-        Q_FOREACH (auto key, defaultSettings.allKeys())
+        Q_FOREACH (auto key, fileSettings.allKeys())
         {
-            settings.setValue(key, defaultSettings.value(key));
+            systemSettings.setValue(key, fileSettings.value(key));
         }
     }
     else
@@ -111,7 +111,7 @@ cfgPathCallback(const gchar *, const gchar *value, gpointer, GError **)
         //
         Q_FOREACH (auto key, defaultSettings.allKeys())
         {
-            settings.setValue(key, defaultSettings.value(key));
+            systemSettings.setValue(key, defaultSettings.value(key));
         }
     }
 
@@ -325,7 +325,7 @@ int main(int argc, char *argv[])
 
     int errCode = 0;
 
-    QApplication::setOrganizationName(ORGANIZATION_SHORT_NAME);
+    QApplication::setOrganizationName(ORGANIZATION_DOMAIN);
     QApplication::setApplicationName(PRODUCT_SHORT_NAME);
     QApplication::setApplicationVersion(PRODUCT_VERSION_STR);
 
@@ -432,7 +432,7 @@ int main(int argc, char *argv[])
         wnd = new VideoEditor(windowArg);
         break;
     case 's':
-        wnd = new Settings(windowArg);
+        wnd = new SettingsDialog(windowArg);
         break;
     default:
         {

@@ -73,7 +73,6 @@ SOURCES += \
     src/mandatoryfieldgroup.cpp \
     src/patientdatadialog.cpp \
     src/settings/confirmationsettings.cpp \
-    src/settings.cpp \
     src/settings/debugsettings.cpp \
     src/settings/hotkeysettings.cpp \
     src/settings/mandatoryfieldssettings.cpp \
@@ -87,7 +86,8 @@ SOURCES += \
     src/thumbnaillist.cpp \
     src/typedetect.cpp \
     src/videoeditor.cpp \
-    src/videoencodingprogressdialog.cpp
+    src/videoencodingprogressdialog.cpp \
+    src/settingsdialog.cpp
 
 unix: SOURCES += src/smartshortcut_x11.cpp
 win32:SOURCES += src/smartshortcut_win.cpp
@@ -113,7 +113,6 @@ HEADERS += \
     src/qwaitcursor.h \
     src/settings/confirmationsettings.h \
     src/settings/debugsettings.h \
-    src/settings.h \
     src/settings/hotkeysettings.h \
     src/settings/mandatoryfieldssettings.h \
     src/settings/physicianssettings.h \
@@ -126,7 +125,8 @@ HEADERS += \
     src/thumbnaillist.h \
     src/typedetect.h \
     src/videoeditor.h \
-    src/videoencodingprogressdialog.h
+    src/videoencodingprogressdialog.h \
+    src/settingsdialog.h
 
 FORMS   +=
 
