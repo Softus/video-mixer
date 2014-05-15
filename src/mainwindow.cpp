@@ -1558,6 +1558,7 @@ bool MainWindow::startRecord(int duration, const QString &clipFileTemplate)
         countdown = recordLimit;
     }
 
+    sound->play(DATA_FOLDER + "/sound/record.ac3");
     return true;
 }
 
