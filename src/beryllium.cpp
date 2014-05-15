@@ -87,17 +87,19 @@ void sighandler(int signum)
     signal(signum, SIG_DFL);
 }
 
+// Holder for defaut settings values. Must be kept in the memory.
+//
+static QSettings systemSettings(QSettings::SystemScope, ORGANIZATION_DOMAIN, PRODUCT_SHORT_NAME);
+
 static gboolean
 cfgPathCallback(const gchar *, const gchar *value, gpointer, GError **)
 {
-    QSettings systemSettings(QSettings::SystemScope, ORGANIZATION_DOMAIN, PRODUCT_SHORT_NAME);
-
     auto path = QString::fromLocal8Bit(value);
     if (QFileInfo(path).isDir())
     {
-        QSettings::setPath(QSettings::NativeFormat, QSettings::SystemScope, path);
-        QSettings fileSettings(QSettings::NativeFormat, QSettings::SystemScope, ORGANIZATION_DOMAIN, PRODUCT_SHORT_NAME);
-        // Copy from defaultSettings to active settings
+        QSettings::setPath(QSettings::IniFormat, QSettings::SystemScope, path);
+        QSettings fileSettings(QSettings::IniFormat, QSettings::SystemScope, ORGANIZATION_DOMAIN, PRODUCT_SHORT_NAME);
+        // Copy settings from file to memory
         //
         Q_FOREACH (auto key, fileSettings.allKeys())
         {
@@ -106,15 +108,14 @@ cfgPathCallback(const gchar *, const gchar *value, gpointer, GError **)
     }
     else
     {
-        QSettings defaultSettings(path, QSettings::NativeFormat);
-        // Copy from defaultSettings to active settings
+        QSettings fileSettings(path, QSettings::IniFormat);
+        // Copy settings from file to memory
         //
-        Q_FOREACH (auto key, defaultSettings.allKeys())
+        Q_FOREACH (auto key, fileSettings.allKeys())
         {
-            systemSettings.setValue(key, defaultSettings.value(key));
+            systemSettings.setValue(key, fileSettings.value(key));
         }
     }
-
     return true;
 }
 
