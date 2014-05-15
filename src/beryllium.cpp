@@ -42,7 +42,6 @@
 #include <X11/Xlib.h>
 #endif
 
-#include <glib/gi18n.h>
 #include <gst/gst.h>
 #include <QGst/Init>
 
@@ -347,11 +346,10 @@ int main(int argc, char *argv[])
     g_option_context_add_main_entries(ctx, options, PRODUCT_SHORT_NAME);
 
 #ifdef WITH_DICOM
-    auto dcmtkGroup = g_option_group_new ("dcmtk", _("DCMTK Options"),
-        _("Show DCMTK Options"), NULL, NULL);
+    auto dcmtkGroup = g_option_group_new ("dcmtk", QT_TRANSLATE_NOOP_UTF8("cmdline", "DCMTK Options"),
+        QT_TRANSLATE_NOOP_UTF8("cmdline", "Show DCMTK Options"), NULL, NULL);
     g_option_context_add_group(ctx, dcmtkGroup);
     g_option_group_add_entries (dcmtkGroup, dcmtkOptions);
-    //g_option_group_set_translation_domain (dcmtkGroup, GETTEXT_PACKAGE);
 #endif
 
     g_option_context_add_group(ctx, gst_init_get_option_group());
