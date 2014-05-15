@@ -22,7 +22,7 @@
 #include "smartshortcut.h"
 #include "patientdatadialog.h"
 #include "qwaitcursor.h"
-#include "settings.h"
+#include "settingsdialog.h"
 #include "sound.h"
 #include "thumbnaillist.h"
 #include "settings/videosourcesettings.h"
@@ -1675,7 +1675,7 @@ void MainWindow::onShowArchiveClick()
 
 void MainWindow::onShowSettingsClick()
 {
-    Settings dlg(QString(), this);
+    SettingsDialog dlg(QString(), this);
     connect(&dlg, SIGNAL(apply()), this, SLOT(updatePipeline()));
     if (dlg.exec())
     {

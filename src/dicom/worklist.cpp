@@ -61,7 +61,6 @@ Worklist::Worklist(QWidget *parent) :
     setWindowTitle(tr("Worklist - %1").arg(settings.value("mwl-server").toString()));
 #endif
 
-    auto translateCyrillic = settings.value("translate-cyrillic", DEFAULT_TRANSLATE_CYRILLIC).toBool();
     auto cols = settings.value("worklist-columns").toStringList();
     if (cols.size() == 0)
     {
@@ -89,10 +88,6 @@ Worklist::Worklist(QWidget *parent) :
         else if (tag == DCM_ScheduledProcedureStepStartTime)
         {
             timeColumn = i;
-        }
-        else if (translateCyrillic && (tag == DCM_PatientName || tag == DCM_ScheduledPerformingPhysicianName))
-        {
-            translateColumns.append(i);
         }
     }
     table->resizeColumnsToContents();
@@ -162,12 +157,6 @@ void Worklist::onAddRow(DcmDataset* dset)
         DcmTagKey tagKey(tag >> 16, tag & 0xFFFF);
         OFCondition cond = dset->findAndGetString(tagKey, str, true);
         auto text = QString::fromUtf8(str? str: cond.text());
-
-        if (str && translateColumns.contains(col))
-        {
-            text = translateToCyrillic(text);
-        }
-
         auto item = new QTableWidgetItem(text);
         table->setItem(row, col, item);
         if (col == dateColumn)
