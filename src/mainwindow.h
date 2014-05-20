@@ -131,7 +131,6 @@ class MainWindow : public QWidget
 
     void onBusMessage(const QGst::MessagePtr& msg);
     void onElementMessage(const QGst::ElementMessagePtr& msg);
-    void onStateChangedMessage(const QGst::StateChangedMessagePtr& msg);
 
     void onImageReady(const QGst::BufferPtr&);
     void onClipFrame(const QGst::BufferPtr&);

@@ -720,7 +720,7 @@ QGst::PipelinePtr MainWindow::createPipeline()
 
         // The pipeline will start once it reaches paused state without an error
         //
-        pl->setState(QGst::StatePaused);
+        pl->setState(QGst::StatePlaying);
     }
 
     return pl;
@@ -1116,12 +1116,18 @@ void MainWindow::errorGlib(const QGlib::ObjectPtr& obj, const QGlib::Error& ex)
 
 void MainWindow::onBusMessage(const QGst::MessagePtr& msg)
 {
-    //qDebug() << message->typeName() << " " << message->source()->property("name").toString();
+    //qDebug() << msg->typeName() << " " << msg->source()->property("name").toString();
 
     switch (msg->type())
     {
     case QGst::MessageStateChanged:
-        onStateChangedMessage(msg.staticCast<QGst::StateChangedMessage>());
+        // The display area of the main window is filled with some garbage.
+        // We need to redraw the contents.
+        //
+        if (msg->source() == pipeline)
+        {
+            update();
+        }
         break;
     case QGst::MessageElement:
         onElementMessage(msg.staticCast<QGst::ElementMessage>());
@@ -1150,26 +1156,6 @@ void MainWindow::onBusMessage(const QGst::MessagePtr& msg)
     default: // Make the compiler happy
         break;
 #endif
-    }
-}
-
-void MainWindow::onStateChangedMessage(const QGst::StateChangedMessagePtr& msg)
-{
-//  qDebug() << message->oldState() << " => " << message->newState();
-
-    // The pipeline will not start by itself since 2 of 3 renders are in NULL state
-    // We need to kick off the display renderer to start the capture
-    //
-    if (msg->oldState() == QGst::StateReady && msg->newState() == QGst::StatePaused)
-    {
-        msg->source().staticCast<QGst::Element>()->setState(QGst::StatePlaying);
-    }
-    else if (msg->newState() == QGst::StateNull && msg->source() == pipeline)
-    {
-        // The display area of the main window is filled with some garbage.
-        // We need to redraw the contents.
-        //
-        update();
     }
 }
 

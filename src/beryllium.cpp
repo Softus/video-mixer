@@ -161,6 +161,8 @@ setModeCallback(const gchar *name, const gchar *value, gpointer, GError **)
     return true;
 }
 
+extern void _gst_debug_init(void);
+
 void setupGstDebug(const QSettings& settings)
 {
     Q_ASSERT(settings.group() == "debug");
@@ -182,6 +184,7 @@ void setupGstDebug(const QSettings& settings)
     {
         QFileInfo(debugLogFile).absoluteDir().mkpath(".");
         qputenv("GST_DEBUG_FILE", debugLogFile.toLocal8Bit());
+        _gst_debug_init();
     }
     auto gstDebug = settings.value("gst-debug", DEFAULT_GST_DEBUG).toString();
     if (!gstDebug.isEmpty())
@@ -373,11 +376,11 @@ int main(int argc, char *argv[])
     setupDcmtkDebug(settings);
 #endif
     settings.endGroup();
-    gstApplyFixes();
 
     // QGStreamer stuff
     //
     QGst::init();
+    gstApplyFixes();
 
     // QT init
     //
