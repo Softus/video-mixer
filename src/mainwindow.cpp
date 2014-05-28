@@ -427,10 +427,10 @@ QToolBar* MainWindow::createToolBar()
   [image writer]             [video encoder]
                                    |
                                    V
-                       +----[video splitter]----+
-                       |           |            |
-                       V           V            V
-            [movie writer]   [clip valve]  [rtp sender]
+                       +----[video splitter]----+--------------+
+                       |           |            |              |
+                       V           V            V              V
+            [movie writer]   [clip valve]  [rtp sender]  [http sender]
                                    |
                                    V
                             [clip writer]
@@ -469,10 +469,10 @@ Sample:
 static QString appendVideo(QString& pipe, const QSettings& settings)
 {
 /*
-                       +----[video splitter]----+
-                       |           |            |
-                       V           V            V
-            [movie writer]   [clip valve]  [rtp sender]
+                       +----[video splitter]----+-------------+
+                       |           |            |             |
+                       V           V            V             V
+            [movie writer]   [clip valve]  [rtp sender]  [http sender]
                                    |
                                    V
                             [clip writer]
@@ -483,6 +483,10 @@ static QString appendVideo(QString& pipe, const QSettings& settings)
     auto rtpSinkDef      = settings.value("rtp-sink",       DEFAULT_RTP_SINK).toString();
     auto rtpSinkParams   = settings.value(rtpSinkDef + "-parameters").toString();
     auto enableRtp       = !rtpSinkDef.isEmpty() && settings.value("enable-rtp").toBool();
+    auto httpSinkDef     = settings.value("http-sink",      DEFAULT_HTTP_SINK).toString();
+    auto enableHttp      = !httpSinkDef.isEmpty() && settings.value("enable-http").toBool();
+    auto httpPushUrl     = settings.value("http-push-url").toString();
+    auto httpSinkParams  = settings.value(httpSinkDef + "-parameters").toString();
     auto enableVideo     = settings.value("enable-video").toBool();
 
     pipe.append(" ! tee name=videosplitter");
@@ -497,6 +501,11 @@ static QString appendVideo(QString& pipe, const QSettings& settings)
             pipe.append("\nvideosplitter. ! queue ! ").append(rtpPayDef).append(" ").append(rtpPayParams)
                 .append(" ! ").append(rtpSinkDef).append(" clients=127.0.0.1:5000 sync=0 async=0 name=rtpsink ")
                 .append(rtpSinkParams);
+        }
+        if (enableHttp)
+        {
+            pipe.append("\nvideosplitter. ! queue ! mpegtsmux ! ")
+                .append(httpSinkDef).append(" async=0  location=\"").append(httpPushUrl).append("\" ").append(httpSinkParams);
         }
     }
 

@@ -50,6 +50,7 @@
 #define DEFAULT_OUTPUT_UNIQUE         false
 #define DEFAULT_RTP_PAYLOADER         "rtpmpvpay"
 #define DEFAULT_RTP_SINK              "udpsink"
+#define DEFAULT_HTTP_SINK             "souphttpclientsink"
 #define DEFAULT_VIDEOBITRATE          4000
 #define DEFAULT_NOTIFY_CLIP_LIMIT     true
 #define DEFAULT_CLIP_LIMIT            true
