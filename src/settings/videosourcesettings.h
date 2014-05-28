@@ -60,6 +60,8 @@ class VideoSourceSettings : public QWidget
     QSpinBox  *spinBitrate;
     QLineEdit *textRtpClients;
     QCheckBox *checkEnableRtp;
+    QLineEdit *textHttpPushUrl;
+    QCheckBox *checkEnableHttp;
     QCheckBox *checkDeinterlace;
 
     void updateDeviceList(const char *elmName, const char *propName);

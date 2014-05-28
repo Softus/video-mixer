@@ -427,10 +427,10 @@ QToolBar* MainWindow::createToolBar()
   [image writer]             [video encoder]
                                    |
                                    V
-                       +----[video splitter]----+
-                       |           |            |
-                       V           V            V
-            [movie writer]   [clip valve]  [rtp sender]
+                       +----[video splitter]----+--------------+
+                       |           |            |              |
+                       V           V            V              V
+            [movie writer]   [clip valve]  [rtp sender]  [http sender]
                                    |
                                    V
                             [clip writer]
@@ -469,10 +469,10 @@ Sample:
 static QString appendVideo(QString& pipe, const QSettings& settings)
 {
 /*
-                       +----[video splitter]----+
-                       |           |            |
-                       V           V            V
-            [movie writer]   [clip valve]  [rtp sender]
+                       +----[video splitter]----+-------------+
+                       |           |            |             |
+                       V           V            V             V
+            [movie writer]   [clip valve]  [rtp sender]  [http sender]
                                    |
                                    V
                             [clip writer]
@@ -483,6 +483,10 @@ static QString appendVideo(QString& pipe, const QSettings& settings)
     auto rtpSinkDef      = settings.value("rtp-sink",       DEFAULT_RTP_SINK).toString();
     auto rtpSinkParams   = settings.value(rtpSinkDef + "-parameters").toString();
     auto enableRtp       = !rtpSinkDef.isEmpty() && settings.value("enable-rtp").toBool();
+    auto httpSinkDef     = settings.value("http-sink",      DEFAULT_HTTP_SINK).toString();
+    auto enableHttp      = !httpSinkDef.isEmpty() && settings.value("enable-http").toBool();
+    auto httpPushUrl     = settings.value("http-push-url").toString();
+    auto httpSinkParams  = settings.value(httpSinkDef + "-parameters").toString();
     auto enableVideo     = settings.value("enable-video").toBool();
 
     pipe.append(" ! tee name=videosplitter");
@@ -497,6 +501,11 @@ static QString appendVideo(QString& pipe, const QSettings& settings)
             pipe.append("\nvideosplitter. ! queue ! ").append(rtpPayDef).append(" ").append(rtpPayParams)
                 .append(" ! ").append(rtpSinkDef).append(" clients=127.0.0.1:5000 sync=0 async=0 name=rtpsink ")
                 .append(rtpSinkParams);
+        }
+        if (enableHttp)
+        {
+            pipe.append("\nvideosplitter. ! queue ! mpegtsmux ! ")
+                .append(httpSinkDef).append(" async=0  location=\"").append(httpPushUrl).append("\" ").append(httpSinkParams);
         }
     }
 
@@ -647,6 +656,7 @@ QString MainWindow::buildPipeline()
                                   settings.value("video-max-fps",  DEFAULT_VIDEO_MAX_FPS).toInt(): 0;
         auto videoFixColor      = settings.value(videoCodec + "-colorspace").toBool();
         auto videoEncoderParams = settings.value(videoCodec + "-parameters").toString();
+        auto idleStream         = settings.value("idle-stream").toBool();
 
         pipe.append("\nsplitter.");
         if (videoMaxRate > 0)
@@ -654,9 +664,13 @@ QString MainWindow::buildPipeline()
             pipe.append(" ! videorate skip-to-first=1 max-rate=").append(QString::number(videoMaxRate));
         }
 
-        pipe.append(" ! valve name=encvalve drop=1 ! queue max-size-bytes=0");
+        if (!idleStream)
+        {
+            pipe.append(" ! valve name=encvalve drop=1");
+        }
 
-        pipe.append(videoFixColor? colorConverter: "")
+        pipe.append(" ! queue max-size-bytes=0")
+            .append(videoFixColor? colorConverter: "")
             .append(" ! ").append(videoCodec).append(" name=videoencoder ").append(videoEncoderParams);
 
         appendVideo(pipe, settings);
@@ -703,7 +717,6 @@ QGst::PipelinePtr MainWindow::createPipeline()
 
         displayOverlay    = pl->getElementByName("displayoverlay");
         videoEncoder      = pl->getElementByName("videoencoder");
-        videoEncoderValve = pl->getElementByName("encvalve");
 
         imageValve = pl->getElementByName("imagevalve");
         imageValve && QGlib::connect(imageValve, "handoff", this, &MainWindow::onImageReady);
@@ -1037,7 +1050,6 @@ void MainWindow::releasePipeline()
     displaySink.clear();
     imageValve.clear();
     imageSink.clear();
-    videoEncoderValve.clear();
     videoEncoder.clear();
     displayOverlay.clear();
     displayWidget->stopPipelineWatch();
@@ -1826,7 +1838,7 @@ void MainWindow::onStartStudy()
 #endif
 
     running = startVideoRecord();
-    setElementProperty(videoEncoderValve, "drop", !running);
+    setElementProperty("encvalve", "drop", !running);
     updateOverlayText();
     updateStartButton();
     updateWindowTitle();
@@ -1884,7 +1896,7 @@ void MainWindow::onStopStudy()
         studyName.clear();
     }
 
-    setElementProperty(videoEncoderValve, "drop", true);
+    setElementProperty("encvalve", "drop", true);
 
     updateStartButton();
     displayWidget->update();

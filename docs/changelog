@@ -1,3 +1,10 @@
+beryllium (1.1.2) debian;
+
+  * Http push video stream to a streaming server.
+  * Option to not turn off streaming on idle.
+
+ -- Pavel Bludov <pbludov@gmail.com>  Thu, 28 May 2014 14:39:00 +0900
+
 beryllium (1.1.1) debian;
 
   * Config values from files specified with -c option now are read only
