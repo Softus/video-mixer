@@ -87,11 +87,23 @@ VideoSourceSettings::VideoSourceSettings(QWidget *parent)
     layout->addRow(tr("Video &muxer"), listVideoMuxers = new QComboBox());
     layout->addRow(tr("Im&age codec"), listImageCodecs = new QComboBox());
     layout->addRow(tr("RTP &payloader"), listRtpPayloaders = new QComboBox());
+
+    // UDP streaming
+    //
     textRtpClients = new QLineEdit(settings.value("rtp-clients").toString());
-    layout->addRow(tr("&RTP clients"), textRtpClients);
-    checkEnableRtp = new QCheckBox(tr("&Enable RTP"));
+    layout->addRow(checkEnableRtp = new QCheckBox(tr("&RTP clients")), textRtpClients);
+    connect(checkEnableRtp, SIGNAL(toggled(bool)), textRtpClients, SLOT(setEnabled(bool)));
     checkEnableRtp->setChecked(settings.value("enable-rtp").toBool());
-    layout->addRow(nullptr, checkEnableRtp);
+    textRtpClients->setEnabled(checkEnableRtp->isChecked());
+
+    // Http streaming
+    //
+    textHttpPushUrl = new QLineEdit(settings.value("http-push-url").toString());
+    layout->addRow(checkEnableHttp = new QCheckBox(tr("&Http push URL")), textHttpPushUrl);
+    connect(checkEnableHttp, SIGNAL(toggled(bool)), textHttpPushUrl, SLOT(setEnabled(bool)));
+    checkEnableHttp->setChecked(settings.value("enable-http").toBool());
+    textHttpPushUrl->setEnabled(checkEnableHttp->isChecked());
+
     setLayout(layout);
 }
 
@@ -471,6 +483,8 @@ void VideoSourceSettings::save(QSettings& settings)
     settings.setValue("image-encoder", getListData(listImageCodecs));
     settings.setValue("enable-rtp",    checkEnableRtp->isChecked());
     settings.setValue("rtp-clients",   textRtpClients->text());
+    settings.setValue("enable-http",   checkEnableHttp->isChecked());
+    settings.setValue("http-push-url", textHttpPushUrl->text());
     settings.setValue("bitrate",       spinBitrate->value());
     settings.setValue("video-deinterlace", checkDeinterlace->isChecked());
     if (spinFps)
