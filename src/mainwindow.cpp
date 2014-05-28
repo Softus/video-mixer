@@ -656,6 +656,7 @@ QString MainWindow::buildPipeline()
                                   settings.value("video-max-fps",  DEFAULT_VIDEO_MAX_FPS).toInt(): 0;
         auto videoFixColor      = settings.value(videoCodec + "-colorspace").toBool();
         auto videoEncoderParams = settings.value(videoCodec + "-parameters").toString();
+        auto idleStream         = settings.value("idle-stream").toBool();
 
         pipe.append("\nsplitter.");
         if (videoMaxRate > 0)
@@ -663,9 +664,13 @@ QString MainWindow::buildPipeline()
             pipe.append(" ! videorate skip-to-first=1 max-rate=").append(QString::number(videoMaxRate));
         }
 
-        pipe.append(" ! valve name=encvalve drop=1 ! queue max-size-bytes=0");
+        if (!idleStream)
+        {
+            pipe.append(" ! valve name=encvalve drop=1");
+        }
 
-        pipe.append(videoFixColor? colorConverter: "")
+        pipe.append(" ! queue max-size-bytes=0")
+            .append(videoFixColor? colorConverter: "")
             .append(" ! ").append(videoCodec).append(" name=videoencoder ").append(videoEncoderParams);
 
         appendVideo(pipe, settings);
@@ -712,7 +717,6 @@ QGst::PipelinePtr MainWindow::createPipeline()
 
         displayOverlay    = pl->getElementByName("displayoverlay");
         videoEncoder      = pl->getElementByName("videoencoder");
-        videoEncoderValve = pl->getElementByName("encvalve");
 
         imageValve = pl->getElementByName("imagevalve");
         imageValve && QGlib::connect(imageValve, "handoff", this, &MainWindow::onImageReady);
@@ -1046,7 +1050,6 @@ void MainWindow::releasePipeline()
     displaySink.clear();
     imageValve.clear();
     imageSink.clear();
-    videoEncoderValve.clear();
     videoEncoder.clear();
     displayOverlay.clear();
     displayWidget->stopPipelineWatch();
@@ -1835,7 +1838,7 @@ void MainWindow::onStartStudy()
 #endif
 
     running = startVideoRecord();
-    setElementProperty(videoEncoderValve, "drop", !running);
+    setElementProperty("encvalve", "drop", !running);
     updateOverlayText();
     updateStartButton();
     updateWindowTitle();
@@ -1893,7 +1896,7 @@ void MainWindow::onStopStudy()
         studyName.clear();
     }
 
-    setElementProperty(videoEncoderValve, "drop", true);
+    setElementProperty("encvalve", "drop", true);
 
     updateStartButton();
     displayWidget->update();
