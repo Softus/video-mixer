@@ -48,7 +48,7 @@
 #define DEFAULT_HOTKEY_SELECT         (int)(Qt::Key_Return)
 #define DEFAULT_OUTPUT_PATH           "/video"
 #define DEFAULT_OUTPUT_UNIQUE         false
-#define DEFAULT_RTP_PAYLOADER         "rtpmpvpay"
+#define DEFAULT_RTP_PAYLOADER         "rtpmp2tpay"
 #define DEFAULT_RTP_SINK              "udpsink"
 #define DEFAULT_HTTP_SINK             "souphttpclientsink"
 #define DEFAULT_VIDEOBITRATE          4000
