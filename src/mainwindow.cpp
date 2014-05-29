@@ -487,21 +487,32 @@ static QString appendVideo(QString& pipe, const QSettings& settings)
     auto enableHttp      = !httpSinkDef.isEmpty() && settings.value("enable-http").toBool();
     auto httpPushUrl     = settings.value("http-push-url").toString();
     auto httpSinkParams  = settings.value(httpSinkDef + "-parameters").toString();
-    auto enableVideo     = settings.value("enable-video").toBool();
+    auto enableVideoLog     = settings.value("enable-video").toBool();
 
     pipe.append(" ! tee name=videosplitter");
-    if (enableRtp || enableVideo)
+    if (enableRtp || enableHttp || enableVideoLog)
     {
-        if (enableVideo)
+        if (enableVideoLog)
         {
             pipe.append("\nvideosplitter. ! identity name=videoinspect drop-probability=1.0 ! queue ! valve name=videovalve");
         }
+
         if (enableRtp)
         {
-            pipe.append("\nvideosplitter. ! queue ! ").append(rtpPayDef).append(" ").append(rtpPayParams)
+            pipe.append("\nvideosplitter. ! queue ! ");
+
+            // MPEG2TS is a payloader for container, so add the required muxer
+            //
+            if (rtpPayDef == "rtpmp2tpay")
+            {
+                pipe.append("mpegtsmux ! ");
+            }
+
+            pipe.append(rtpPayDef).append(" ").append(rtpPayParams)
                 .append(" ! ").append(rtpSinkDef).append(" clients=127.0.0.1:5000 sync=0 async=0 name=rtpsink ")
                 .append(rtpSinkParams);
         }
+
         if (enableHttp)
         {
             pipe.append("\nvideosplitter. ! queue ! mpegtsmux ! ")
@@ -597,7 +608,7 @@ QString MainWindow::buildPipeline()
         pipe.append(" ! dvdemux ! dvdec");
     }
 
-    pipe.append(colorConverter).append(srcDeinterlace? " ! deinterlace": "");
+    pipe.append(colorConverter).append(srcDeinterlace? " ! deinterlace mode=1 method=4": "");
 
     // v4l2src ... ! tee name=splitter [! colorspace ! motioncells] ! colorspace ! autovideosink");
     //
