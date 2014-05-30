@@ -517,7 +517,7 @@ static QString appendVideo(QString& pipe, const QSettings& settings, bool httpSt
 
         if (enableHttp)
         {
-            pipe.append("\nvideosplitter. ! valve name=httpvalve ! queue ! mpegtsmux name=httpmux ! ")
+            pipe.append("\nvideosplitter. ! queue ! mpegtsmux name=httpmux ! ")
                 .append(httpSinkDef).append(" async=0 name=httpsink location=\"").append(httpPushUrl).append("\" ").append(httpSinkParams);
         }
     }
