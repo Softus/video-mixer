@@ -114,6 +114,7 @@ MainWindow::MainWindow(QWidget *parent) :
     motionStart(false),
     motionStop(false),
     motionDetected(false),
+    httpStreamingServerIsNotResponding(false),
     running(false),
     recording(false)
 {
@@ -466,7 +467,7 @@ Sample:
                                       [image writer]
 */
 
-static QString appendVideo(QString& pipe, const QSettings& settings)
+static QString appendVideo(QString& pipe, const QSettings& settings, bool httpStreamingServerIsNotResponding)
 {
 /*
                        +----[video splitter]----+-------------+
@@ -484,17 +485,18 @@ static QString appendVideo(QString& pipe, const QSettings& settings)
     auto rtpSinkParams   = settings.value(rtpSinkDef + "-parameters").toString();
     auto enableRtp       = !rtpSinkDef.isEmpty() && settings.value("enable-rtp").toBool();
     auto httpSinkDef     = settings.value("http-sink",      DEFAULT_HTTP_SINK).toString();
-    auto enableHttp      = !httpSinkDef.isEmpty() && settings.value("enable-http").toBool();
+    auto enableHttp      = !httpStreamingServerIsNotResponding &&
+                           !httpSinkDef.isEmpty() && settings.value("enable-http").toBool();
     auto httpPushUrl     = settings.value("http-push-url").toString();
     auto httpSinkParams  = settings.value(httpSinkDef + "-parameters").toString();
-    auto enableVideoLog     = settings.value("enable-video").toBool();
+    auto enableVideoLog  = settings.value("enable-video").toBool();
 
     pipe.append(" ! tee name=videosplitter");
     if (enableRtp || enableHttp || enableVideoLog)
     {
         if (enableVideoLog)
         {
-            pipe.append("\nvideosplitter. ! identity name=videoinspect drop-probability=1.0 ! queue ! valve name=videovalve");
+            pipe.append("\nvideosplitter. ! identity name=videoinspect drop-probability=1.0 ! queue ! valve name=videovalve ");
         }
 
         if (enableRtp)
@@ -505,7 +507,7 @@ static QString appendVideo(QString& pipe, const QSettings& settings)
             //
             if (rtpPayDef == "rtpmp2tpay")
             {
-                pipe.append("mpegtsmux ! ");
+                pipe.append("mpegtsmux name=rtpmux ! ");
             }
 
             pipe.append(rtpPayDef).append(" ").append(rtpPayParams)
@@ -515,8 +517,8 @@ static QString appendVideo(QString& pipe, const QSettings& settings)
 
         if (enableHttp)
         {
-            pipe.append("\nvideosplitter. ! queue ! mpegtsmux ! ")
-                .append(httpSinkDef).append(" async=0  location=\"").append(httpPushUrl).append("\" ").append(httpSinkParams);
+            pipe.append("\nvideosplitter. ! valve name=httpvalve ! queue ! mpegtsmux name=httpmux ! ")
+                .append(httpSinkDef).append(" async=0 name=httpsink location=\"").append(httpPushUrl).append("\" ").append(httpSinkParams);
         }
     }
 
@@ -592,7 +594,7 @@ QString MainWindow::buildPipeline()
 
     if (videoCodec.isEmpty())
     {
-        appendVideo(pipe, settings);
+        appendVideo(pipe, settings, httpStreamingServerIsNotResponding);
         pipe.append("\nvideosplitter.");
     }
 
@@ -684,7 +686,7 @@ QString MainWindow::buildPipeline()
             .append(videoFixColor? colorConverter: "")
             .append(" ! ").append(videoCodec).append(" name=videoencoder ").append(videoEncoderParams);
 
-        appendVideo(pipe, settings);
+        appendVideo(pipe, settings, httpStreamingServerIsNotResponding);
     }
 
     return pipe;
@@ -1158,6 +1160,12 @@ void MainWindow::onBusMessage(const QGst::MessagePtr& msg)
     case QGst::MessageError:
         errorGlib(msg->source(), msg.staticCast<QGst::ErrorMessage>()->error());
         onStopStudy();
+        if (msg->source() && msg->source()->property("name").toString() == "httpsink")
+        {
+            qDebug() << "Http streaming url" << msg->source()->property("location").toString() << "is not accessible.";
+            httpStreamingServerIsNotResponding = true;
+            updatePipeline();
+        }
         break;
 #ifdef QT_DEBUG
     case QGst::MessageInfo:
