@@ -98,7 +98,6 @@ class MainWindow : public QWidget
     bool          motionStart;
     bool          motionStop;
     bool          motionDetected;
-    bool          httpStreamingServerIsNotResponding;
     Sound*        sound;
 
     QMenuBar* createMenuBar();

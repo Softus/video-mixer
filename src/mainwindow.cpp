@@ -114,7 +114,6 @@ MainWindow::MainWindow(QWidget *parent) :
     motionStart(false),
     motionStop(false),
     motionDetected(false),
-    httpStreamingServerIsNotResponding(false),
     running(false),
     recording(false)
 {
@@ -467,7 +466,7 @@ Sample:
                                       [image writer]
 */
 
-static QString appendVideo(QString& pipe, const QSettings& settings, bool httpStreamingServerIsNotResponding)
+static QString appendVideo(QString& pipe, const QSettings& settings)
 {
 /*
                        +----[video splitter]----+-------------+
@@ -485,8 +484,7 @@ static QString appendVideo(QString& pipe, const QSettings& settings, bool httpSt
     auto rtpSinkParams   = settings.value(rtpSinkDef + "-parameters").toString();
     auto enableRtp       = !rtpSinkDef.isEmpty() && settings.value("enable-rtp").toBool();
     auto httpSinkDef     = settings.value("http-sink",      DEFAULT_HTTP_SINK).toString();
-    auto enableHttp      = !httpStreamingServerIsNotResponding &&
-                           !httpSinkDef.isEmpty() && settings.value("enable-http").toBool();
+    auto enableHttp      = !httpSinkDef.isEmpty() && settings.value("enable-http").toBool();
     auto httpPushUrl     = settings.value("http-push-url").toString();
     auto httpSinkParams  = settings.value(httpSinkDef + "-parameters").toString();
     auto enableVideoLog  = settings.value("enable-video").toBool();
@@ -594,7 +592,7 @@ QString MainWindow::buildPipeline()
 
     if (videoCodec.isEmpty())
     {
-        appendVideo(pipe, settings, httpStreamingServerIsNotResponding);
+        appendVideo(pipe, settings);
         pipe.append("\nvideosplitter.");
     }
 
@@ -686,7 +684,7 @@ QString MainWindow::buildPipeline()
             .append(videoFixColor? colorConverter: "")
             .append(" ! ").append(videoCodec).append(" name=videoencoder ").append(videoEncoderParams);
 
-        appendVideo(pipe, settings, httpStreamingServerIsNotResponding);
+        appendVideo(pipe, settings);
     }
 
     return pipe;
@@ -1160,12 +1158,6 @@ void MainWindow::onBusMessage(const QGst::MessagePtr& msg)
     case QGst::MessageError:
         errorGlib(msg->source(), msg.staticCast<QGst::ErrorMessage>()->error());
         onStopStudy();
-        if (msg->source() && msg->source()->property("name").toString() == "httpsink")
-        {
-            qDebug() << "Http streaming url" << msg->source()->property("location").toString() << "is not accessible.";
-            httpStreamingServerIsNotResponding = true;
-            updatePipeline();
-        }
         break;
 #ifdef QT_DEBUG
     case QGst::MessageInfo:
