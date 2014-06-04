@@ -17,6 +17,8 @@
 #include <../src/product.h>
 #include <gst/gst.h>
 
+#include "soup/gstsouphttpclientsink.h"
+
 #define MPEG_SYS_CAPS gst_static_caps_get(&mpeg_sys_caps)
 
 static const gchar *mpeg_sys_exts[] = { "mpe", "mpeg", "mpg", NULL };
@@ -34,5 +36,8 @@ bool gstApplyFixes()
         mpeg_sys_type_find, (gchar **)mpeg_sys_exts, MPEG_SYS_CAPS, NULL, NULL)
 
     && gst_plugin_register_static(GST_VERSION_MAJOR, GST_VERSION_MINOR, "motioncells", "",
-        gst_motion_cells_plugin_init, PRODUCT_VERSION_STR, "LGPL", "gst", PRODUCT_SHORT_NAME, PRODUCT_SITE_URL);
+        gst_motion_cells_plugin_init, PRODUCT_VERSION_STR, "LGPL", "gst", PRODUCT_SHORT_NAME, PRODUCT_SITE_URL)
+
+    && gst_element_register (nullptr, "souphttpclientsink", GST_RANK_NONE,
+        GST_TYPE_SOUP_HTTP_CLIENT_SINK);
 }
