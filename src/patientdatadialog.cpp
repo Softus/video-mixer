@@ -312,10 +312,8 @@ void PatientDataDialog::setPhysician(const QString& name)
     }
 }
 
-void PatientDataDialog::readPatientFile(const QString& filePath)
+void PatientDataDialog::readPatientData(QSettings& settings)
 {
-    QSettings settings(filePath, QSettings::IniFormat);
-
     settings.beginGroup(PRODUCT_SHORT_NAME);
     setAccessionNumber(settings.value("accession-number").toString());
     setPatientId(settings.value("patient-id").toString());
@@ -327,21 +325,18 @@ void PatientDataDialog::readPatientFile(const QString& filePath)
     settings.endGroup();
 }
 
-void PatientDataDialog::savePatientFile(const QString& filePath)
+void PatientDataDialog::savePatientData(QSettings& settings)
 {
-    QSettings settings(filePath, QSettings::IniFormat);
-
     settings.beginGroup(PRODUCT_SHORT_NAME);
     settings.setValue("accession-number", accessionNumber());
     settings.setValue("patient-id", patientId());
     settings.setValue("name", patientName());
-    settings.setValue("sex", patientSexCode());
+    settings.setValue("sex", QString(patientSexCode()));
     settings.setValue("birthday", patientBirthDateStr());
     settings.setValue("physician", physician());
     settings.setValue("study-description", studyDescription());
     settings.endGroup();
 }
-
 
 void PatientDataDialog::onShowWorklist()
 {

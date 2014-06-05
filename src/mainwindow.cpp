@@ -35,8 +35,14 @@
 // From DCMTK SDK
 //
 #include <dcmtk/dcmdata/dcdatset.h>
+#include <dcmtk/dcmdata/dcdict.h>
+#include <dcmtk/dcmdata/dcdicent.h>
+#include <dcmtk/dcmdata/dcelem.h>
 #include <dcmtk/dcmdata/dcuid.h>
 #include <dcmtk/dcmdata/dcdeftag.h>
+
+static DcmTagKey DCM_ImageNo(0x5000, 0x8001);
+static DcmTagKey DCM_ClipNo(0x5000,  0x8002);
 #endif
 
 #ifdef WITH_TOUCH
@@ -182,6 +188,15 @@ MainWindow::MainWindow(QWidget *parent) :
     sound = new Sound(this);
 
     outputPath.setPath(settings.value("storage/output-path", DEFAULT_OUTPUT_PATH).toString());
+
+#ifdef WITH_DICOM
+    DcmDataDictionary& d = dcmDataDict.wrlock();
+    d.addEntry(new DcmDictEntry(DCM_ImageNo.getGroup(), DCM_ImageNo.getElement(), EVR_SL, "ImageNo",
+                                0, 0, nullptr, false, nullptr));
+    d.addEntry(new DcmDictEntry(DCM_ClipNo.getGroup(), DCM_ClipNo.getElement(), EVR_SL, "ClipNo",
+                                0, 0, nullptr, false, nullptr));
+    dcmDataDict.unlock();
+#endif
 }
 
 MainWindow::~MainWindow()
@@ -1748,8 +1763,6 @@ void MainWindow::onStartStudy()
 
     QSettings settings;
     listImagesAndClips->clear();
-    imageNo = clipNo = 0;
-
     dlgPatient = new PatientDataDialog(false, "start-study", this);
 
 #ifdef WITH_DICOM
@@ -1815,7 +1828,16 @@ void MainWindow::onStartStudy()
 #error "Unsupported byte order"
 #endif
 
+    imageNo = clipNo = 0;
     auto localPatientInfoFile = outputPath.absoluteFilePath(".patient.dcm");
+    if (QFileInfo(localPatientInfoFile).exists())
+    {
+        DcmDataset ds;
+        ds.loadFile((const char*)localPatientInfoFile.toLocal8Bit());
+        ds.findAndGetSint32(DCM_ImageNo, imageNo);
+        ds.findAndGetSint32(DCM_ClipNo, clipNo);
+    }
+
     auto cond = pendingPatient->saveFile((const char*)localPatientInfoFile.toLocal8Bit(), writeXfer);
     if (cond.bad())
     {
@@ -1840,13 +1862,17 @@ void MainWindow::onStartStudy()
         pendingPatient->putAndInsertString(DCM_SOPInstanceUID, pendingSOPInstanceUID.toUtf8());
     }
     settings.endGroup();
-#else
+#else // WITH_DICOM
     auto localPatientInfoFile = outputPath.absoluteFilePath(".patient");
-    dlgPatient->savePatientFile(localPatientInfoFile);
+    QSettings patientData(localPatientInfoFile, QSettings::IniFormat);
+    dlgPatient->savePatientData(patientData);
+    imageNo = patientData.value("last-image-no", 0).toUInt();
+    clipNo  = patientData.value("last-clip-no", 0).toUInt();
+
 #ifdef Q_OS_WIN
     SetFileAttributesW(localPatientInfoFile.toStdWString().c_str(), FILE_ATTRIBUTE_HIDDEN);
 #endif
-#endif
+#endif // WITH_DICOM
 
     running = startVideoRecord();
     setElementProperty("encvalve", "drop", !running);
@@ -1886,12 +1912,30 @@ void MainWindow::onStopStudy()
                 QMessageBox::critical(this, windowTitle(), client.lastError());
             }
         }
+
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+    const E_TransferSyntax writeXfer = EXS_LittleEndianImplicit;
+#elif __BYTE_ORDER == __BIG_ENDIAN
+    const E_TransferSyntax writeXfer = EXS_BigEndianImplicit;
+#else
+#error "Unsupported byte order"
+#endif
+
+        auto localPatientInfoFile = outputPath.absoluteFilePath(".patient.dcm");
+        pendingPatient->putAndInsertSint32(DCM_ImageNo, imageNo);
+        pendingPatient->putAndInsertSint32(DCM_ClipNo, clipNo);
+        pendingPatient->saveFile((const char*)localPatientInfoFile.toLocal8Bit(), writeXfer);
+
+        delete pendingPatient;
+        pendingPatient = nullptr;
     }
 
-    delete pendingPatient;
-    pendingPatient = nullptr;
     pendingSOPInstanceUID.clear();
-#endif
+#else // WITH_DICOM
+    QSettings patientData(outputPath.absoluteFilePath(".patient"), QSettings::IniFormat);
+    patientData.setValue("last-image-no", imageNo);
+    patientData.setValue("last-clip-no", clipNo);
+#endif // WITH_DICOM
 
     accessionNumber.clear();
     patientId.clear();
@@ -1915,7 +1959,6 @@ void MainWindow::onStopStudy()
     // Clear the capture list
     //
     listImagesAndClips->clear();
-    imageNo = clipNo = 0;
 }
 
 #ifdef WITH_DICOM

@@ -65,7 +65,7 @@
 #define DEFAULT_MOTION_GAP            5
 #define DEFAULT_IMAGE_TEMPLATE        "image-%study%-%nn%"
 #define DEFAULT_CLIP_TEMPLATE         "clip-%study%-%nn%"
-#define DEFAULT_VIDEO_TEMPLATE        "video-%study%"
+#define DEFAULT_VIDEO_TEMPLATE        "video-%study%-%nn%"
 #define DEFAULT_VIDEO_OUTPUT_UNIQUE   false
 #define DEFAULT_IMAGE_ENCODER         "jpegenc"
 #define DEFAULT_SAVE_CLIP_THUMBNAILS  true
