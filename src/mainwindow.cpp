@@ -191,9 +191,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
 #ifdef WITH_DICOM
     DcmDataDictionary& d = dcmDataDict.wrlock();
-    d.addEntry(new DcmDictEntry(DCM_ImageNo.getGroup(), DCM_ImageNo.getElement(), EVR_SL, "ImageNo",
+    d.addEntry(new DcmDictEntry(DCM_ImageNo.getGroup(), DCM_ImageNo.getElement(), EVR_US, "ImageNo",
                                 0, 0, nullptr, false, nullptr));
-    d.addEntry(new DcmDictEntry(DCM_ClipNo.getGroup(), DCM_ClipNo.getElement(), EVR_SL, "ClipNo",
+    d.addEntry(new DcmDictEntry(DCM_ClipNo.getGroup(), DCM_ClipNo.getElement(), EVR_US, "ClipNo",
                                 0, 0, nullptr, false, nullptr));
     dcmDataDict.unlock();
 #endif
@@ -1834,8 +1834,8 @@ void MainWindow::onStartStudy()
     {
         DcmDataset ds;
         ds.loadFile((const char*)localPatientInfoFile.toLocal8Bit());
-        ds.findAndGetSint32(DCM_ImageNo, imageNo);
-        ds.findAndGetSint32(DCM_ClipNo, clipNo);
+        ds.findAndGetUint16(DCM_ImageNo, imageNo);
+        ds.findAndGetUint16(DCM_ClipNo, clipNo);
     }
 
     auto cond = pendingPatient->saveFile((const char*)localPatientInfoFile.toLocal8Bit(), writeXfer);
@@ -1922,8 +1922,8 @@ void MainWindow::onStopStudy()
 #endif
 
         auto localPatientInfoFile = outputPath.absoluteFilePath(".patient.dcm");
-        pendingPatient->putAndInsertSint32(DCM_ImageNo, imageNo);
-        pendingPatient->putAndInsertSint32(DCM_ClipNo, clipNo);
+        pendingPatient->putAndInsertUint16(DCM_ImageNo, imageNo);
+        pendingPatient->putAndInsertUint16(DCM_ClipNo, clipNo);
         pendingPatient->saveFile((const char*)localPatientInfoFile.toLocal8Bit(), writeXfer);
 
         delete pendingPatient;
