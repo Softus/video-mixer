@@ -667,7 +667,7 @@ QString MainWindow::buildPipeline()
                                   settings.value("video-max-fps",  DEFAULT_VIDEO_MAX_FPS).toInt(): 0;
         auto videoFixColor      = settings.value(videoCodec + "-colorspace").toBool();
         auto videoEncoderParams = settings.value(videoCodec + "-parameters").toString();
-        auto idleStream         = settings.value("idle-stream").toBool();
+        auto noIdleStream       = settings.value("no-idle-stream").toBool();
 
         pipe.append("\nsplitter.");
         if (videoMaxRate > 0)
@@ -675,7 +675,7 @@ QString MainWindow::buildPipeline()
             pipe.append(" ! videorate skip-to-first=1 max-rate=").append(QString::number(videoMaxRate));
         }
 
-        if (!idleStream)
+        if (noIdleStream)
         {
             pipe.append(" ! valve name=encvalve drop=1");
         }
