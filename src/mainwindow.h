@@ -88,8 +88,8 @@ class MainWindow : public QWidget
     QString       physician;
     QString       studyName;
 
-    int           imageNo;
-    int           clipNo;
+    ushort        imageNo;
+    ushort        clipNo;
     int           studyNo;
     int           recordTimerId;
     int           recordLimit;
