@@ -56,6 +56,7 @@ class MainWindow : public QWidget
     // UI
     //
     PatientDataDialog *dlgPatient;
+    QLabel*      extraTitle;
     QToolButton* btnStart;
     QToolButton* btnRecordStart;
     QToolButton* btnRecordStop;
@@ -151,6 +152,7 @@ protected:
     virtual void closeEvent(QCloseEvent *evt);
     virtual void showEvent(QShowEvent *);
     virtual void hideEvent(QHideEvent *);
+    virtual void resizeEvent(QResizeEvent *);
     virtual void timerEvent(QTimerEvent*);
 signals:
     void enableWidget(QWidget*, bool);

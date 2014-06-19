@@ -126,7 +126,6 @@ MainWindow::MainWindow(QWidget *parent) :
     QSettings settings;
     studyNo = settings.value("study-no").toInt();
 
-    updateWindowTitle();
     // This magic required for updating widgets from worker threads on Microsoft (R) Windows (TM)
     //
     connect(this, SIGNAL(enableWidget(QWidget*, bool)), this, SLOT(onEnableWidget(QWidget*, bool)), Qt::QueuedConnection);
@@ -134,6 +133,11 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, SIGNAL(updateOverlayText()), this, SLOT(onUpdateOverlayText()), Qt::QueuedConnection);
 
     auto layoutMain = new QVBoxLayout();
+    extraTitle = new QLabel;
+    auto font = extraTitle->font();
+    font.setPointSize(font.pointSize() * 1.5);
+    extraTitle->setFont(font);
+    layoutMain->addWidget(extraTitle);
 #ifndef WITH_TOUCH
     layoutMain->addWidget(createToolBar());
 #endif
@@ -173,6 +177,7 @@ MainWindow::MainWindow(QWidget *parent) :
 #endif
 
     settings.beginGroup("ui");
+    extraTitle->setVisible(settings.value("extra-title").toBool());
     if (settings.value("enable-menu").toBool())
     {
         layoutMain->setMenuBar(createMenuBar());
@@ -184,6 +189,7 @@ MainWindow::MainWindow(QWidget *parent) :
     settings.endGroup();
 
     updateStartButton();
+    updateWindowTitle();
 
     sound = new Sound(this);
 
@@ -291,6 +297,7 @@ void MainWindow::showEvent(QShowEvent *evt)
             updatePipeline();
         }
     }
+
     QWidget::showEvent(evt);
 }
 
@@ -299,9 +306,21 @@ void MainWindow::hideEvent(QHideEvent *evt)
     QSettings settings;
     settings.beginGroup("ui");
     settings.setValue("mainwindow-geometry", saveGeometry());
-    settings.setValue("mainwindow-state", (int)windowState() & ~Qt::WindowMinimized);
+    // Do not save window state, if it is in fullscreen mode or minimized
+    //
+    auto state = (int)windowState() & ~(Qt::WindowMinimized | Qt::WindowFullScreen);
+    settings.setValue("mainwindow-state", state);
     settings.endGroup();
     QWidget::hideEvent(evt);
+}
+
+void MainWindow::resizeEvent(QResizeEvent *evt)
+{
+    if (windowState().testFlag(Qt::WindowFullScreen))
+    {
+        extraTitle->setVisible(true);
+    }
+    QWidget::resizeEvent(evt);
 }
 
 void MainWindow::timerEvent(QTimerEvent* evt)
@@ -1007,6 +1026,7 @@ void MainWindow::updateWindowTitle()
     }
 
     setWindowTitle(windowTitle);
+    extraTitle->setText(windowTitle);
 }
 
 QDir MainWindow::checkPath(const QString tpl, bool needUnique)

@@ -1,3 +1,9 @@
+beryllium (1.1.4) debian;
+
+  * Extra title for main window (ui/extra-tile=true in config file).
+
+ -- Pavel Bludov <pbludov@gmail.com>  Thu, 19 Jun 2014 14:32:00 +0900
+
 beryllium (1.1.3) debian;
 
   * Fix for Http push.
