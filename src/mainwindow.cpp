@@ -22,7 +22,7 @@
 #include "smartshortcut.h"
 #include "patientdatadialog.h"
 #include "qwaitcursor.h"
-#include "settings.h"
+#include "settingsdialog.h"
 #include "sound.h"
 #include "thumbnaillist.h"
 #include "settings/videosourcesettings.h"
@@ -35,8 +35,14 @@
 // From DCMTK SDK
 //
 #include <dcmtk/dcmdata/dcdatset.h>
+#include <dcmtk/dcmdata/dcdict.h>
+#include <dcmtk/dcmdata/dcdicent.h>
+#include <dcmtk/dcmdata/dcelem.h>
 #include <dcmtk/dcmdata/dcuid.h>
 #include <dcmtk/dcmdata/dcdeftag.h>
+
+static DcmTagKey DCM_ImageNo(0x5000, 0x8001);
+static DcmTagKey DCM_ClipNo(0x5000,  0x8002);
 #endif
 
 #ifdef WITH_TOUCH
@@ -96,63 +102,6 @@ static inline QBoxLayout::Direction bestDirection(const QSize &s)
     return s.width() >= s.height()? QBoxLayout::LeftToRight: QBoxLayout::TopToBottom;
 }
 
-#ifdef QT_DEBUG
-
-static void Dump(QGst::ElementPtr elm)
-{
-    if (!elm)
-    {
-        qDebug() << " (null) ";
-        return;
-    }
-
-    foreach (auto prop, elm->listProperties())
-    {
-        const QString n = prop->name();
-        const QGlib::Value v = elm->property(n.toUtf8());
-        switch (v.type().fundamental())
-        {
-        case QGlib::Type::Boolean:
-            qDebug() << n << " = " << v.get<bool>();
-            break;
-        case QGlib::Type::Float:
-        case QGlib::Type::Double:
-            qDebug() << n << " = " << v.get<double>();
-            break;
-        case QGlib::Type::Enum:
-        case QGlib::Type::Flags:
-        case QGlib::Type::Int:
-        case QGlib::Type::Uint:
-            qDebug() << n << " = " << v.get<int>();
-            break;
-        case QGlib::Type::Long:
-        case QGlib::Type::Ulong:
-            qDebug() << n << " = " << v.get<long>();
-            break;
-        case QGlib::Type::Int64:
-        case QGlib::Type::Uint64:
-            qDebug() << n << " = " << v.get<qint64>();
-            break;
-        default:
-            qDebug() << n << " = " << v.get<QString>();
-            break;
-        }
-    }
-
-    QGst::ChildProxyPtr childProxy =  elm.dynamicCast<QGst::ChildProxy>();
-    if (childProxy)
-    {
-        auto cnt = childProxy->childrenCount();
-        for (uint i = 0; i < cnt; ++i)
-        {
-            qDebug() << "==== CHILD ==== " << i;
-            Dump(childProxy->childByIndex(i).dynamicCast<QGst::Element>());
-        }
-    }
-}
-
-#endif
-
 MainWindow::MainWindow(QWidget *parent) :
     QWidget(parent),
     dlgPatient(nullptr),
@@ -177,7 +126,6 @@ MainWindow::MainWindow(QWidget *parent) :
     QSettings settings;
     studyNo = settings.value("study-no").toInt();
 
-    updateWindowTitle();
     // This magic required for updating widgets from worker threads on Microsoft (R) Windows (TM)
     //
     connect(this, SIGNAL(enableWidget(QWidget*, bool)), this, SLOT(onEnableWidget(QWidget*, bool)), Qt::QueuedConnection);
@@ -185,6 +133,11 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, SIGNAL(updateOverlayText()), this, SLOT(onUpdateOverlayText()), Qt::QueuedConnection);
 
     auto layoutMain = new QVBoxLayout();
+    extraTitle = new QLabel;
+    auto font = extraTitle->font();
+    font.setPointSize(font.pointSize() * 1.5);
+    extraTitle->setFont(font);
+    layoutMain->addWidget(extraTitle);
 #ifndef WITH_TOUCH
     layoutMain->addWidget(createToolBar());
 #endif
@@ -224,6 +177,7 @@ MainWindow::MainWindow(QWidget *parent) :
 #endif
 
     settings.beginGroup("ui");
+    extraTitle->setVisible(settings.value("extra-title").toBool());
     if (settings.value("enable-menu").toBool())
     {
         layoutMain->setMenuBar(createMenuBar());
@@ -235,10 +189,20 @@ MainWindow::MainWindow(QWidget *parent) :
     settings.endGroup();
 
     updateStartButton();
+    updateWindowTitle();
 
     sound = new Sound(this);
 
     outputPath.setPath(settings.value("storage/output-path", DEFAULT_OUTPUT_PATH).toString());
+
+#ifdef WITH_DICOM
+    DcmDataDictionary& d = dcmDataDict.wrlock();
+    d.addEntry(new DcmDictEntry(DCM_ImageNo.getGroup(), DCM_ImageNo.getElement(), EVR_US, "ImageNo",
+                                0, 0, nullptr, false, nullptr));
+    d.addEntry(new DcmDictEntry(DCM_ClipNo.getGroup(), DCM_ClipNo.getElement(), EVR_US, "ClipNo",
+                                0, 0, nullptr, false, nullptr));
+    dcmDataDict.unlock();
+#endif
 }
 
 MainWindow::~MainWindow()
@@ -333,6 +297,7 @@ void MainWindow::showEvent(QShowEvent *evt)
             updatePipeline();
         }
     }
+
     QWidget::showEvent(evt);
 }
 
@@ -341,9 +306,21 @@ void MainWindow::hideEvent(QHideEvent *evt)
     QSettings settings;
     settings.beginGroup("ui");
     settings.setValue("mainwindow-geometry", saveGeometry());
-    settings.setValue("mainwindow-state", (int)windowState() & ~Qt::WindowMinimized);
+    // Do not save window state, if it is in fullscreen mode or minimized
+    //
+    auto state = (int)windowState() & ~(Qt::WindowMinimized | Qt::WindowFullScreen);
+    settings.setValue("mainwindow-state", state);
     settings.endGroup();
     QWidget::hideEvent(evt);
+}
+
+void MainWindow::resizeEvent(QResizeEvent *evt)
+{
+    if (windowState().testFlag(Qt::WindowFullScreen))
+    {
+        extraTitle->setVisible(true);
+    }
+    QWidget::resizeEvent(evt);
 }
 
 void MainWindow::timerEvent(QTimerEvent* evt)
@@ -442,16 +419,19 @@ QToolBar* MainWindow::createToolBar()
     bar->addWidget(spacer);
 
 #ifdef WITH_DICOM
-    actionWorklist = bar->addAction(QIcon(":/buttons/show_worklist"), tr("&Worlkist"), this, SLOT(onShowWorkListClick()));
+    actionWorklist = bar->addAction(QIcon(":/buttons/show_worklist"), tr("&Worlkist"),
+                                    this, SLOT(onShowWorkListClick()));
 #endif
 
     actionArchive = bar->addAction(QIcon(":/buttons/database"), tr("&Archive"), this, SLOT(onShowArchiveClick()));
     actionArchive->setToolTip(tr("Show studies archive"));
 
-    actionSettings = bar->addAction(QIcon(":/buttons/settings"), tr("&Preferences").append(0x2026), this, SLOT(onShowSettingsClick()));
+    actionSettings = bar->addAction(QIcon(":/buttons/settings"), tr("&Preferences").append(0x2026),
+                                    this, SLOT(onShowSettingsClick()));
     actionSettings->setToolTip(tr("Edit settings"));
 
-    actionAbout = bar->addAction(QIcon(":/buttons/about"), tr("A&bout %1").arg(PRODUCT_FULL_NAME).append(0x2026), this, SLOT(onShowAboutClick()));
+    actionAbout = bar->addAction(QIcon(":/buttons/about"), tr("A&bout %1").arg(PRODUCT_FULL_NAME).append(0x2026),
+                                 this, SLOT(onShowAboutClick()));
     actionAbout->setToolTip(tr("About %1").arg(PRODUCT_FULL_NAME));
 
     return bar;
@@ -481,10 +461,10 @@ QToolBar* MainWindow::createToolBar()
   [image writer]             [video encoder]
                                    |
                                    V
-                       +----[video splitter]----+
-                       |           |            |
-                       V           V            V
-            [movie writer]   [clip valve]  [rtp sender]
+                       +----[video splitter]----+--------------+
+                       |           |            |              |
+                       V           V            V              V
+            [movie writer]   [clip valve]  [rtp sender]  [http sender]
                                    |
                                    V
                             [clip writer]
@@ -523,10 +503,10 @@ Sample:
 static QString appendVideo(QString& pipe, const QSettings& settings)
 {
 /*
-                       +----[video splitter]----+
-                       |           |            |
-                       V           V            V
-            [movie writer]   [clip valve]  [rtp sender]
+                       +----[video splitter]----+-------------+
+                       |           |            |             |
+                       V           V            V             V
+            [movie writer]   [clip valve]  [rtp sender]  [http sender]
                                    |
                                    V
                             [clip writer]
@@ -537,20 +517,40 @@ static QString appendVideo(QString& pipe, const QSettings& settings)
     auto rtpSinkDef      = settings.value("rtp-sink",       DEFAULT_RTP_SINK).toString();
     auto rtpSinkParams   = settings.value(rtpSinkDef + "-parameters").toString();
     auto enableRtp       = !rtpSinkDef.isEmpty() && settings.value("enable-rtp").toBool();
-    auto enableVideo     = settings.value("enable-video").toBool();
+    auto httpSinkDef     = settings.value("http-sink",      DEFAULT_HTTP_SINK).toString();
+    auto enableHttp      = !httpSinkDef.isEmpty() && settings.value("enable-http").toBool();
+    auto httpPushUrl     = settings.value("http-push-url").toString();
+    auto httpSinkParams  = settings.value(httpSinkDef + "-parameters").toString();
+    auto enableVideoLog  = settings.value("enable-video").toBool();
 
     pipe.append(" ! tee name=videosplitter");
-    if (enableRtp || enableVideo)
+    if (enableRtp || enableHttp || enableVideoLog)
     {
-        if (enableVideo)
+        if (enableVideoLog)
         {
-            pipe.append("\nvideosplitter. ! identity name=videoinspect drop-probability=1.0 ! queue ! valve name=videovalve");
+            pipe.append("\nvideosplitter. ! identity name=videoinspect drop-probability=1.0 ! queue ! valve name=videovalve ");
         }
+
         if (enableRtp)
         {
-            pipe.append("\nvideosplitter. ! queue ! ").append(rtpPayDef).append(" ").append(rtpPayParams)
+            pipe.append("\nvideosplitter. ! queue ! ");
+
+            // MPEG2TS is a payloader for container, so add the required muxer
+            //
+            if (rtpPayDef == "rtpmp2tpay")
+            {
+                pipe.append("mpegtsmux name=rtpmux ! ");
+            }
+
+            pipe.append(rtpPayDef).append(" ").append(rtpPayParams)
                 .append(" ! ").append(rtpSinkDef).append(" clients=127.0.0.1:5000 sync=0 async=0 name=rtpsink ")
                 .append(rtpSinkParams);
+        }
+
+        if (enableHttp)
+        {
+            pipe.append("\nvideosplitter. ! queue ! mpegtsmux name=httpmux ! ")
+                .append(httpSinkDef).append(" async=0 name=httpsink location=\"").append(httpPushUrl).append("\" ").append(httpSinkParams);
         }
     }
 
@@ -642,7 +642,7 @@ QString MainWindow::buildPipeline()
         pipe.append(" ! dvdemux ! dvdec");
     }
 
-    pipe.append(colorConverter).append(srcDeinterlace? " ! deinterlace": "");
+    pipe.append(colorConverter).append(srcDeinterlace? " ! deinterlace mode=1 method=4": "");
 
     // v4l2src ... ! tee name=splitter [! colorspace ! motioncells] ! colorspace ! autovideosink");
     //
@@ -701,6 +701,7 @@ QString MainWindow::buildPipeline()
                                   settings.value("video-max-fps",  DEFAULT_VIDEO_MAX_FPS).toInt(): 0;
         auto videoFixColor      = settings.value(videoCodec + "-colorspace").toBool();
         auto videoEncoderParams = settings.value(videoCodec + "-parameters").toString();
+        auto noIdleStream       = settings.value("no-idle-stream").toBool();
 
         pipe.append("\nsplitter.");
         if (videoMaxRate > 0)
@@ -708,9 +709,13 @@ QString MainWindow::buildPipeline()
             pipe.append(" ! videorate skip-to-first=1 max-rate=").append(QString::number(videoMaxRate));
         }
 
-        pipe.append(" ! valve name=encvalve drop=1 ! queue max-size-bytes=0");
+        if (noIdleStream)
+        {
+            pipe.append(" ! valve name=encvalve drop=1");
+        }
 
-        pipe.append(videoFixColor? colorConverter: "")
+        pipe.append(" ! queue max-size-bytes=0")
+            .append(videoFixColor? colorConverter: "")
             .append(" ! ").append(videoCodec).append(" name=videoencoder ").append(videoEncoderParams);
 
         appendVideo(pipe, settings);
@@ -757,7 +762,6 @@ QGst::PipelinePtr MainWindow::createPipeline()
 
         displayOverlay    = pl->getElementByName("displayoverlay");
         videoEncoder      = pl->getElementByName("videoencoder");
-        videoEncoderValve = pl->getElementByName("encvalve");
 
         imageValve = pl->getElementByName("imagevalve");
         imageValve && QGlib::connect(imageValve, "handoff", this, &MainWindow::onImageReady);
@@ -774,7 +778,7 @@ QGst::PipelinePtr MainWindow::createPipeline()
 
         // The pipeline will start once it reaches paused state without an error
         //
-        pl->setState(QGst::StatePaused);
+        pl->setState(QGst::StatePlaying);
     }
 
     return pl;
@@ -955,7 +959,7 @@ void MainWindow::updatePipeline()
         archiveWindow->updateHotkeys(settings);
     }
 
-    auto showSettings = settings.value("enable-settings", DEFAULT_ENABLE_SETTINGS).toBool();
+    auto showSettings = settings.value("ui/enable-settings", DEFAULT_ENABLE_SETTINGS).toBool();
     actionSettings->setEnabled(showSettings);
     actionSettings->setVisible(showSettings);
 
@@ -1022,6 +1026,7 @@ void MainWindow::updateWindowTitle()
     }
 
     setWindowTitle(windowTitle);
+    extraTitle->setText(windowTitle);
 }
 
 QDir MainWindow::checkPath(const QString tpl, bool needUnique)
@@ -1091,7 +1096,6 @@ void MainWindow::releasePipeline()
     displaySink.clear();
     imageValve.clear();
     imageSink.clear();
-    videoEncoderValve.clear();
     videoEncoder.clear();
     displayOverlay.clear();
     displayWidget->stopPipelineWatch();
@@ -1170,12 +1174,18 @@ void MainWindow::errorGlib(const QGlib::ObjectPtr& obj, const QGlib::Error& ex)
 
 void MainWindow::onBusMessage(const QGst::MessagePtr& msg)
 {
-    //qDebug() << message->typeName() << " " << message->source()->property("name").toString();
+    //qDebug() << msg->typeName() << " " << msg->source()->property("name").toString();
 
     switch (msg->type())
     {
     case QGst::MessageStateChanged:
-        onStateChangedMessage(msg.staticCast<QGst::StateChangedMessage>());
+        // The display area of the main window is filled with some garbage.
+        // We need to redraw the contents.
+        //
+        if (msg->source() == pipeline)
+        {
+            update();
+        }
         break;
     case QGst::MessageElement:
         onElementMessage(msg.staticCast<QGst::ElementMessage>());
@@ -1204,26 +1214,6 @@ void MainWindow::onBusMessage(const QGst::MessagePtr& msg)
     default: // Make the compiler happy
         break;
 #endif
-    }
-}
-
-void MainWindow::onStateChangedMessage(const QGst::StateChangedMessagePtr& msg)
-{
-//  qDebug() << message->oldState() << " => " << message->newState();
-
-    // The pipeline will not start by itself since 2 of 3 renders are in NULL state
-    // We need to kick off the display renderer to start the capture
-    //
-    if (msg->oldState() == QGst::StateReady && msg->newState() == QGst::StatePaused)
-    {
-        msg->source().staticCast<QGst::Element>()->setState(QGst::StatePlaying);
-    }
-    else if (msg->newState() == QGst::StateNull && msg->source() == pipeline)
-    {
-        // The display area of the main window is filled with some garbage.
-        // We need to redraw the contents.
-        //
-        update();
     }
 }
 
@@ -1335,8 +1325,9 @@ bool MainWindow::startVideoRecord()
     if (settings.value("gst/enable-video").toBool())
     {
         auto split = settings.value("gst/split-video-files", DEFAULT_SPLIT_VIDEO_FILES).toBool();
-        auto videoFileName = appendVideoTail(videoOutputPath, "video", settings.value("storage/video-template", DEFAULT_VIDEO_TEMPLATE).toString(), studyNo, split);
-        qDebug() << videoFileName;
+        auto videoFileName = appendVideoTail(videoOutputPath, "video",
+             settings.value("storage/video-template", DEFAULT_VIDEO_TEMPLATE).toString(), studyNo, split);
+
         if (videoFileName.isEmpty())
         {
             removeVideoTail("video");
@@ -1578,7 +1569,8 @@ bool MainWindow::startRecord(int duration, const QString &clipFileTemplate)
             if (settings.value("save-clip-thumbnails", DEFAULT_SAVE_CLIP_THUMBNAILS).toBool())
             {
                 QFileInfo fi(clipFileName);
-                clipPreviewFileName = fi.absolutePath().append(QDir::separator()).append('.').append(fi.fileName()).append(imageExt);
+                clipPreviewFileName = fi.absolutePath()
+                    .append(QDir::separator()).append('.').append(fi.fileName()).append(imageExt);
             }
             else
             {
@@ -1610,6 +1602,7 @@ bool MainWindow::startRecord(int duration, const QString &clipFileTemplate)
         countdown = recordLimit;
     }
 
+    sound->play(DATA_FOLDER + "/sound/record.ac3");
     return true;
 }
 
@@ -1667,8 +1660,9 @@ void MainWindow::updateStartButton()
     btnRecordStart->setEnabled(running);
     btnRecordStop->setEnabled(running && recording);
     btnSnapshot->setEnabled(running);
-    actionSettings->setEnabled(!running);
+    actionSettings->setDisabled(running);
 #ifdef WITH_DICOM
+    actionWorklist->setDisabled(running);
     if (worklist)
     {
         worklist->setDisabled(running);
@@ -1726,7 +1720,7 @@ void MainWindow::onShowArchiveClick()
 
 void MainWindow::onShowSettingsClick()
 {
-    Settings dlg(QString(), this);
+    SettingsDialog dlg(QString(), this);
     connect(&dlg, SIGNAL(apply()), this, SLOT(updatePipeline()));
     if (dlg.exec())
     {
@@ -1789,8 +1783,6 @@ void MainWindow::onStartStudy()
 
     QSettings settings;
     listImagesAndClips->clear();
-    imageNo = clipNo = 0;
-
     dlgPatient = new PatientDataDialog(false, "start-study", this);
 
 #ifdef WITH_DICOM
@@ -1856,7 +1848,16 @@ void MainWindow::onStartStudy()
 #error "Unsupported byte order"
 #endif
 
+    imageNo = clipNo = 0;
     auto localPatientInfoFile = outputPath.absoluteFilePath(".patient.dcm");
+    if (QFileInfo(localPatientInfoFile).exists())
+    {
+        DcmDataset ds;
+        ds.loadFile((const char*)localPatientInfoFile.toLocal8Bit());
+        ds.findAndGetUint16(DCM_ImageNo, imageNo);
+        ds.findAndGetUint16(DCM_ClipNo, clipNo);
+    }
+
     auto cond = pendingPatient->saveFile((const char*)localPatientInfoFile.toLocal8Bit(), writeXfer);
     if (cond.bad())
     {
@@ -1881,16 +1882,20 @@ void MainWindow::onStartStudy()
         pendingPatient->putAndInsertString(DCM_SOPInstanceUID, pendingSOPInstanceUID.toUtf8());
     }
     settings.endGroup();
-#else
+#else // WITH_DICOM
     auto localPatientInfoFile = outputPath.absoluteFilePath(".patient");
-    dlgPatient->savePatientFile(localPatientInfoFile);
+    QSettings patientData(localPatientInfoFile, QSettings::IniFormat);
+    dlgPatient->savePatientData(patientData);
+    imageNo = patientData.value("last-image-no", 0).toUInt();
+    clipNo  = patientData.value("last-clip-no", 0).toUInt();
+
 #ifdef Q_OS_WIN
     SetFileAttributesW(localPatientInfoFile.toStdWString().c_str(), FILE_ATTRIBUTE_HIDDEN);
 #endif
-#endif
+#endif // WITH_DICOM
 
     running = startVideoRecord();
-    setElementProperty(videoEncoderValve, "drop", !running);
+    setElementProperty("encvalve", "drop", !running);
     updateOverlayText();
     updateStartButton();
     updateWindowTitle();
@@ -1911,7 +1916,6 @@ void MainWindow::onStopStudy()
 
     removeVideoTail("video");
     running = recording = false;
-    updateWindowTitle();
     updateOverlayText();
 
 #ifdef WITH_DICOM
@@ -1928,12 +1932,30 @@ void MainWindow::onStopStudy()
                 QMessageBox::critical(this, windowTitle(), client.lastError());
             }
         }
+
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+    const E_TransferSyntax writeXfer = EXS_LittleEndianImplicit;
+#elif __BYTE_ORDER == __BIG_ENDIAN
+    const E_TransferSyntax writeXfer = EXS_BigEndianImplicit;
+#else
+#error "Unsupported byte order"
+#endif
+
+        auto localPatientInfoFile = outputPath.absoluteFilePath(".patient.dcm");
+        pendingPatient->putAndInsertUint16(DCM_ImageNo, imageNo);
+        pendingPatient->putAndInsertUint16(DCM_ClipNo, clipNo);
+        pendingPatient->saveFile((const char*)localPatientInfoFile.toLocal8Bit(), writeXfer);
+
+        delete pendingPatient;
+        pendingPatient = nullptr;
     }
 
-    delete pendingPatient;
-    pendingPatient = nullptr;
     pendingSOPInstanceUID.clear();
-#endif
+#else // WITH_DICOM
+    QSettings patientData(outputPath.absoluteFilePath(".patient"), QSettings::IniFormat);
+    patientData.setValue("last-image-no", imageNo);
+    patientData.setValue("last-clip-no", clipNo);
+#endif // WITH_DICOM
 
     accessionNumber.clear();
     patientId.clear();
@@ -1949,7 +1971,7 @@ void MainWindow::onStopStudy()
         studyName.clear();
     }
 
-    setElementProperty(videoEncoderValve, "drop", true);
+    setElementProperty("encvalve", "drop", true);
 
     updateStartButton();
     displayWidget->update();
@@ -1957,7 +1979,6 @@ void MainWindow::onStopStudy()
     // Clear the capture list
     //
     listImagesAndClips->clear();
-    imageNo = clipNo = 0;
 }
 
 #ifdef WITH_DICOM

@@ -40,7 +40,6 @@ class Worklist : public QWidget
     QDateTime     maxDate;
     int           timeColumn;
     int           dateColumn;
-    QList<int>    translateColumns;
     QAction*      actionLoad;
     QAction*      actionDetail;
     QAction*      actionStartStudy;

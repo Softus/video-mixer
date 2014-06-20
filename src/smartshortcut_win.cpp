@@ -14,21 +14,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PRODUCT_H
-#define PRODUCT_H
+#include "smartshortcut.h"
 
-#define ORGANIZATION_FULL_NAME  "Irkutsk Diagnostic Center"
-#define ORGANIZATION_DOMAIN     "dc.baikal.ru"
+#include <QDebug>
+#include <qt_windows.h>
 
-#define PRODUCT_FULL_NAME       "Beryllium"
-#define PRODUCT_SHORT_NAME      "beryllium" // lowercase, no spaces
 
-#define PRODUCT_VERSION         0x010104
-#define PRODUCT_VERSION_STR     "1.1.4"
+bool ungrabKey(int key)
+{
+    Q_UNUSED(key);
+    return false;
+}
 
-#define PRODUCT_SITE_URL        "http://" ORGANIZATION_DOMAIN "/projects/" PRODUCT_SHORT_NAME "/"
-#define PRODUCT_NAMESPACE       "ru.baikal.dc." PRODUCT_SHORT_NAME
-
-#define SITE_UID_ROOT           "1.2.643.2.66"
-
-#endif // PRODUCT_H
+bool grabKey(int key)
+{
+    Q_UNUSED(key);
+    return false;
+}

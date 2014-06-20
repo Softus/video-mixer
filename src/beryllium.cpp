@@ -24,7 +24,8 @@
 #include "mainwindow.h"
 #include "mainwindowdbusadaptor.h"
 #include "videoeditor.h"
-#include "settings.h"
+#include "settingsdialog.h"
+#include "smartshortcut.h"
 
 #include <opencv/cv.h>
 #include <signal.h>
@@ -41,7 +42,6 @@
 #include <X11/Xlib.h>
 #endif
 
-#include <glib/gi18n.h>
 #include <gst/gst.h>
 #include <QGst/Init>
 
@@ -86,34 +86,35 @@ void sighandler(int signum)
     signal(signum, SIG_DFL);
 }
 
+// Holder for defaut settings values. Must be kept in the memory.
+//
+static QSettings systemSettings(QSettings::SystemScope, ORGANIZATION_DOMAIN, PRODUCT_SHORT_NAME);
+
 static gboolean
 cfgPathCallback(const gchar *, const gchar *value, gpointer, GError **)
 {
-    QSettings settings;
-
     auto path = QString::fromLocal8Bit(value);
     if (QFileInfo(path).isDir())
     {
-        QSettings::setPath(QSettings::NativeFormat, QSettings::SystemScope, path);
-        QSettings defaultSettings(QSettings::NativeFormat, QSettings::SystemScope, ORGANIZATION_SHORT_NAME, PRODUCT_SHORT_NAME);
-        // Copy from defaultSettings to active settings
+        QSettings::setPath(QSettings::IniFormat, QSettings::SystemScope, path);
+        QSettings fileSettings(QSettings::IniFormat, QSettings::SystemScope, ORGANIZATION_DOMAIN, PRODUCT_SHORT_NAME);
+        // Copy settings from file to memory
         //
-        Q_FOREACH (auto key, defaultSettings.allKeys())
+        Q_FOREACH (auto key, fileSettings.allKeys())
         {
-            settings.setValue(key, defaultSettings.value(key));
+            systemSettings.setValue(key, fileSettings.value(key));
         }
     }
     else
     {
-        QSettings defaultSettings(path, QSettings::NativeFormat);
-        // Copy from defaultSettings to active settings
+        QSettings fileSettings(path, QSettings::IniFormat);
+        // Copy settings from file to memory
         //
-        Q_FOREACH (auto key, defaultSettings.allKeys())
+        Q_FOREACH (auto key, fileSettings.allKeys())
         {
-            settings.setValue(key, defaultSettings.value(key));
+            systemSettings.setValue(key, fileSettings.value(key));
         }
     }
-
     return true;
 }
 
@@ -160,6 +161,8 @@ setModeCallback(const gchar *name, const gchar *value, gpointer, GError **)
     return true;
 }
 
+extern void _gst_debug_init(void);
+
 void setupGstDebug(const QSettings& settings)
 {
     Q_ASSERT(settings.group() == "debug");
@@ -181,6 +184,7 @@ void setupGstDebug(const QSettings& settings)
     {
         QFileInfo(debugLogFile).absoluteDir().mkpath(".");
         qputenv("GST_DEBUG_FILE", debugLogFile.toLocal8Bit());
+        _gst_debug_init();
     }
     auto gstDebug = settings.value("gst-debug", DEFAULT_GST_DEBUG).toString();
     if (!gstDebug.isEmpty())
@@ -324,7 +328,7 @@ int main(int argc, char *argv[])
 
     int errCode = 0;
 
-    QApplication::setOrganizationName(ORGANIZATION_SHORT_NAME);
+    QApplication::setOrganizationName(ORGANIZATION_DOMAIN);
     QApplication::setApplicationName(PRODUCT_SHORT_NAME);
     QApplication::setApplicationVersion(PRODUCT_VERSION_STR);
 
@@ -345,11 +349,10 @@ int main(int argc, char *argv[])
     g_option_context_add_main_entries(ctx, options, PRODUCT_SHORT_NAME);
 
 #ifdef WITH_DICOM
-    auto dcmtkGroup = g_option_group_new ("dcmtk", _("DCMTK Options"),
-        _("Show DCMTK Options"), NULL, NULL);
+    auto dcmtkGroup = g_option_group_new ("dcmtk", QT_TRANSLATE_NOOP_UTF8("cmdline", "DCMTK Options"),
+        QT_TRANSLATE_NOOP_UTF8("cmdline", "Show DCMTK Options"), NULL, NULL);
     g_option_context_add_group(ctx, dcmtkGroup);
     g_option_group_add_entries (dcmtkGroup, dcmtkOptions);
-    //g_option_group_set_translation_domain (dcmtkGroup, GETTEXT_PACKAGE);
 #endif
 
     g_option_context_add_group(ctx, gst_init_get_option_group());
@@ -373,11 +376,11 @@ int main(int argc, char *argv[])
     setupDcmtkDebug(settings);
 #endif
     settings.endGroup();
-    gstApplyFixes();
 
     // QGStreamer stuff
     //
     QGst::init();
+    gstApplyFixes();
 
     // QT init
     //
@@ -431,7 +434,7 @@ int main(int argc, char *argv[])
         wnd = new VideoEditor(windowArg);
         break;
     case 's':
-        wnd = new Settings(windowArg);
+        wnd = new SettingsDialog(windowArg);
         break;
     default:
         {
@@ -479,10 +482,10 @@ int main(int argc, char *argv[])
     if (wnd)
     {
 #ifdef WITH_TOUCH
-        ClickFilter filter;
-        wnd->installEventFilter(&filter);
+        new ClickFilter(wnd);
         wnd->grabGesture(Qt::TapAndHoldGesture);
 #endif
+        new SmartShortcut(wnd);
         fullScreen? wnd->showFullScreen(): wnd->show();
         errCode = app.exec();
         delete wnd;

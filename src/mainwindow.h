@@ -56,6 +56,7 @@ class MainWindow : public QWidget
     // UI
     //
     PatientDataDialog *dlgPatient;
+    QLabel*      extraTitle;
     QToolButton* btnStart;
     QToolButton* btnRecordStart;
     QToolButton* btnRecordStop;
@@ -88,8 +89,8 @@ class MainWindow : public QWidget
     QString       physician;
     QString       studyName;
 
-    int           imageNo;
-    int           clipNo;
+    ushort        imageNo;
+    ushort        clipNo;
     int           studyNo;
     int           recordTimerId;
     int           recordLimit;
@@ -116,7 +117,6 @@ class MainWindow : public QWidget
     QGst::ElementPtr imageValve;
     QGst::ElementPtr imageSink;
     QGst::ElementPtr videoEncoder;
-    QGst::ElementPtr videoEncoderValve;
     QGst::ElementPtr displayOverlay;
 
     QString replace(QString str, int seqNo = 0);
@@ -131,7 +131,6 @@ class MainWindow : public QWidget
 
     void onBusMessage(const QGst::MessagePtr& msg);
     void onElementMessage(const QGst::ElementMessagePtr& msg);
-    void onStateChangedMessage(const QGst::StateChangedMessagePtr& msg);
 
     void onImageReady(const QGst::BufferPtr&);
     void onClipFrame(const QGst::BufferPtr&);
@@ -153,6 +152,7 @@ protected:
     virtual void closeEvent(QCloseEvent *evt);
     virtual void showEvent(QShowEvent *);
     virtual void hideEvent(QHideEvent *);
+    virtual void resizeEvent(QResizeEvent *);
     virtual void timerEvent(QTimerEvent*);
 signals:
     void enableWidget(QWidget*, bool);

@@ -19,6 +19,7 @@
 
 #include <QDialog>
 #include <QDate>
+#include <QSettings>
 
 #define SHOW_WORKLIST_RESULT 100
 
@@ -48,8 +49,8 @@ class PatientDataDialog : public QDialog
 public:
     explicit PatientDataDialog(bool noWorklist = false, const QString &settingsKey = QString(), QWidget *parent = 0);
 
-    void readPatientFile(const QString& filePath);
-    void savePatientFile(const QString& filePath);
+    void readPatientData(QSettings& settings);
+    void savePatientData(QSettings& settings);
 #ifdef WITH_DICOM
     void readPatientData(DcmDataset* patient);
     void savePatientData(DcmDataset* patient);

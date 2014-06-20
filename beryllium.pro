@@ -47,7 +47,7 @@ greaterThan(QT_MAJOR_VERSION, 4) {
 else {
     PKGCONFIG += QtGLib-2.0 QtGStreamer-0.10 QtGStreamerUi-0.10
 }
-PKGCONFIG += gstreamer-0.10 gstreamer-base-0.10 gstreamer-interfaces-0.10 gstreamer-pbutils-0.10 gio-2.0 opencv
+PKGCONFIG += gstreamer-0.10 gstreamer-base-0.10 gstreamer-interfaces-0.10 gstreamer-pbutils-0.10 gio-2.0 opencv libsoup-2.4
 
 TARGET   = beryllium
 TEMPLATE = app
@@ -56,24 +56,14 @@ INCLUDEPATH += libqxt
 DEFINES += QXT_STATIC
 
 SOURCES += \
+    gst/gst.cpp \
+    gst/motioncells/gstmotioncells.cpp \
+    gst/motioncells/MotionCells.cpp \
+    gst/motioncells/motioncells_wrapper.cpp \
+    gst/mpeg_sys_type_find.cpp \
     libqxt/qxtconfirmationmessage.cpp \
     libqxt/qxtlineedit.cpp \
     libqxt/qxtspanslider.cpp \
-    gst/motioncells/motioncells_wrapper.cpp \
-    gst/motioncells/MotionCells.cpp \
-    gst/motioncells/gstmotioncells.cpp \
-    gst/gst.cpp \
-    gst/mpeg_sys_type_find.cpp \
-    src/settings/debugsettings.cpp \
-    src/settings/hotkeysettings.cpp \
-    src/settings.cpp \
-    src/settings/confirmationsettings.cpp \
-    src/settings/mandatoryfieldssettings.cpp \
-    src/settings/physicianssettings.cpp \
-    src/settings/storagesettings.cpp \
-    src/settings/studiessettings.cpp \
-    src/settings/videorecordsettings.cpp \
-    src/settings/videosourcesettings.cpp \
     src/aboutdialog.cpp \
     src/archivewindow.cpp \
     src/beryllium.cpp \
@@ -82,56 +72,63 @@ SOURCES += \
     src/mainwindowdbusadaptor.cpp \
     src/mandatoryfieldgroup.cpp \
     src/patientdatadialog.cpp \
+    src/settings/confirmationsettings.cpp \
+    src/settings/debugsettings.cpp \
+    src/settings/hotkeysettings.cpp \
+    src/settings/mandatoryfieldssettings.cpp \
+    src/settings/physicianssettings.cpp \
+    src/settings/storagesettings.cpp \
+    src/settings/studiessettings.cpp \
+    src/settings/videorecordsettings.cpp \
+    src/settings/videosourcesettings.cpp \
+    src/smartshortcut.cpp \
     src/sound.cpp \
     src/thumbnaillist.cpp \
     src/typedetect.cpp \
     src/videoeditor.cpp \
     src/videoencodingprogressdialog.cpp \
-    libqxt/qxtglobalshortcut.cpp \
-    src/smartshortcut.cpp
+    src/settingsdialog.cpp \
+    gst/soup/gstsouphttpclientsink.c
 
-macx: SOURCES += libqxt/mac/qxtglobalshortcut_mac.cpp
-unix: SOURCES += libqxt/x11/qxtglobalshortcut_x11.cpp
-win32:SOURCES += libqxt/win/qxtglobalshortcut_win.cpp
+unix: SOURCES += src/smartshortcut_x11.cpp
+win32:SOURCES += src/smartshortcut_win.cpp
 
 HEADERS += \
+    gst/motioncells/gstmotioncells.h \
+    gst/motioncells/MotionCells.h \
+    gst/motioncells/motioncells_wrapper.h \
     libqxt/qxtconfirmationmessage.h \
     libqxt/qxtlineedit.h \
     libqxt/qxtspanslider.h \
     libqxt/qxtspanslider_p.h \
-    gst/motioncells/motioncells_wrapper.h \
-    gst/motioncells/MotionCells.h \
-    gst/motioncells/gstmotioncells.h \
-    src/settings/debugsettings.h \
-    src/settings/hotkeysettings.h \
-    src/settings.h \
-    src/settings/videosourcesettings.h \
-    src/settings/videorecordsettings.h \
-    src/settings/studiessettings.h \
-    src/settings/storagesettings.h \
-    src/settings/physicianssettings.h \
-    src/settings/mandatoryfieldssettings.h \
-    src/settings/confirmationsettings.h \
     src/aboutdialog.h \
     src/archivewindow.h \
     src/comboboxwithpopupsignal.h \
     src/defaults.h \
     src/hotkeyedit.h \
-    src/mainwindow.h \
     src/mainwindowdbusadaptor.h \
+    src/mainwindow.h \
     src/mandatoryfieldgroup.h \
     src/patientdatadialog.h \
     src/product.h \
     src/qwaitcursor.h \
+    src/settings/confirmationsettings.h \
+    src/settings/debugsettings.h \
+    src/settings/hotkeysettings.h \
+    src/settings/mandatoryfieldssettings.h \
+    src/settings/physicianssettings.h \
+    src/settings/storagesettings.h \
+    src/settings/studiessettings.h \
+    src/settings/videorecordsettings.h \
+    src/settings/videosourcesettings.h \
+    src/smartshortcut.h \
     src/sound.h \
     src/thumbnaillist.h \
     src/typedetect.h \
     src/videoeditor.h \
     src/videoencodingprogressdialog.h \
-    libqxt/qxtglobalshortcut_p.h \
-    libqxt/qxtglobalshortcut.h \
-    libqxt/QxtGlobalShortcut \
-    src/smartshortcut.h
+    src/settingsdialog.h \
+    gst/soup/gstsouphttpclientsink.h
 
 FORMS   +=
 

@@ -14,7 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "settings.h"
+#include "settingsdialog.h"
 
 #include "settings/confirmationsettings.h"
 #include "settings/debugsettings.h"
@@ -41,6 +41,7 @@
 
 #include <QListWidget>
 #include <QBoxLayout>
+#include <QDBusInterface>
 #include <QDebug>
 #include <QDesktopServices>
 #include <QFileDialog>
@@ -55,7 +56,7 @@
 Q_DECLARE_METATYPE(QMetaObject)
 static int QMetaObjectMetaType = qRegisterMetaType<QMetaObject>();
 
-Settings::Settings(const QString& pageTitle, QWidget *parent, Qt::WindowFlags flags)
+SettingsDialog::SettingsDialog(const QString& pageTitle, QWidget *parent, Qt::WindowFlags flags)
     : QDialog(parent, flags)
 {
     QSettings settings;
@@ -111,7 +112,11 @@ Settings::Settings(const QString& pageTitle, QWidget *parent, Qt::WindowFlags fl
     setLayout(mainLayout);
 
     setWindowTitle(tr("Settings"));
-    QString selectedPage = pageTitle.isEmpty()? settings.value("ui/settings-page").toString(): pageTitle;
+    settings.beginGroup("ui");
+    restoreGeometry(settings.value("settings-geometry").toByteArray());
+    setWindowState((Qt::WindowState)settings.value("settings-state").toInt());
+    QString selectedPage = pageTitle.isEmpty()? settings.value("settings-page").toString(): pageTitle;
+    settings.endGroup();
 
     if (!selectedPage.isEmpty())
     {
@@ -135,13 +140,13 @@ Settings::Settings(const QString& pageTitle, QWidget *parent, Qt::WindowFlags fl
     }
 }
 
-void Settings::createPage(const QString& title, const QMetaObject& page)
+void SettingsDialog::createPage(const QString& title, const QMetaObject& page)
 {
     auto item = new QListWidgetItem(title, listWidget);
     item->setData(Qt::UserRole, QVariant::fromValue(page));
 }
 
-void Settings::createPages()
+void SettingsDialog::createPages()
 {
 #ifdef WITH_DICOM
     createPage(tr("DICOM device"), DicomDeviceSettings::staticMetaObject);
@@ -171,7 +176,7 @@ void Settings::createPages()
         this, SLOT(changePage(QListWidgetItem*,QListWidgetItem*)));
 }
 
-void Settings::recreatePages()
+void SettingsDialog::recreatePages()
 {
     // Drop all loaded pages and create again
     //
@@ -181,7 +186,7 @@ void Settings::recreatePages()
     listWidget->setCurrentRow(idx);
 }
 
-void Settings::changePage(QListWidgetItem *current, QListWidgetItem *previous)
+void SettingsDialog::changePage(QListWidgetItem *current, QListWidgetItem *previous)
 {
     if (!current)
         current = previous;
@@ -204,7 +209,7 @@ void Settings::changePage(QListWidgetItem *current, QListWidgetItem *previous)
     }
 }
 
-void Settings::onClickApply()
+void SettingsDialog::onClickApply()
 {
     QSettings settings;
     QWaitCursor wait(this);
@@ -212,6 +217,7 @@ void Settings::onClickApply()
     // Save add pages data.
     //
     save(settings);
+    Q_ASSERT(settings.group().isEmpty());
 
     // After all pages has been saved, we can trigger another signal
     // to tell the application that all settings are ready to be read.
@@ -223,15 +229,42 @@ void Settings::onClickApply()
     btnCancel->setText(tr("Close"));
 }
 
-void Settings::accept()
+void SettingsDialog::accept()
 {
     QSettings settings;
     save(settings);
+    Q_ASSERT(settings.group().isEmpty());
     QDialog::accept();
-    settings.setValue("ui/settings-page", listWidget->currentItem()->text());
 }
 
-void Settings::saveToFile()
+void SettingsDialog::showEvent(QShowEvent *)
+{
+    QSettings settings;
+    if (settings.value("show-onboard").toBool())
+    {
+        QDBusInterface("org.onboard.Onboard", "/org/onboard/Onboard/Keyboard",
+                       "org.onboard.Onboard.Keyboard").call( "Show");
+    }
+}
+
+void SettingsDialog::hideEvent(QHideEvent *)
+{
+    QSettings settings;
+    settings.beginGroup("ui");
+    settings.setValue("settings-geometry", saveGeometry());
+    settings.setValue("settings-state", (int)windowState() & ~Qt::WindowMinimized);
+    settings.setValue("settings-page", listWidget->currentItem()->text());
+    settings.endGroup();
+
+    if (settings.value("show-onboard").toBool())
+    {
+        QDBusInterface("org.onboard.Onboard", "/org/onboard/Onboard/Keyboard",
+                       "org.onboard.Onboard.Keyboard").call( "Hide");
+    }
+}
+
+
+void SettingsDialog::saveToFile()
 {
     QWaitCursor wait(this);
     QFileDialog dlg(this);
@@ -250,7 +283,7 @@ void Settings::saveToFile()
     }
 }
 
-void Settings::loadFromFile()
+void SettingsDialog::loadFromFile()
 {
     QWaitCursor wait(this);
     QFileDialog dlg(this);
@@ -269,15 +302,16 @@ void Settings::loadFromFile()
     }
 }
 
-void Settings::launchEditor()
+void SettingsDialog::launchEditor()
 {
     QSettings settings;
     save(settings);
+    Q_ASSERT(settings.group().isEmpty());
     settings.sync();
     QDesktopServices::openUrl(QUrl::fromLocalFile(settings.fileName()));
 }
 
-void Settings::resetSettings()
+void SettingsDialog::resetSettings()
 {
     // Drop settings
     //

@@ -3,7 +3,7 @@ Section: contrib/misc
 Priority: optional
 Maintainer: Beryllium team <beryllium@dc.baikal.ru>
 Standards-Version: 3.2.1
-Build-Depends: libboost-dev, libopencv-dev,
+Build-Depends: libboost-dev, libopencv-dev, libsoup2.4-dev,
   libgstreamer0.10-dev, libgstreamer-plugins-base0.10-dev,
   libqt5opengl5-dev | libqt4-opengl-dev,
   libdcmtk2-dev, libmediainfo-dev, libssl-dev, libwrap0-dev

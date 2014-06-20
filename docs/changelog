@@ -1,3 +1,34 @@
+beryllium (1.1.4) debian;
+
+  * Extra title for main window (ui/extra-tile=true in config file).
+
+ -- Pavel Bludov <pbludov@gmail.com>  Thu, 19 Jun 2014 14:32:00 +0900
+
+beryllium (1.1.3) debian;
+
+  * Fix for Http push.
+
+ -- Pavel Bludov <pbludov@gmail.com>  Tue, 4 Jun 2014 19:35:00 +0900
+
+beryllium (1.1.2) debian;
+
+  * Http push video stream to a streaming server.
+  * Option to not turn off streaming on idle.
+
+ -- Pavel Bludov <pbludov@gmail.com>  Thu, 28 May 2014 14:39:00 +0900
+
+beryllium (1.1.1) debian;
+
+  * Config values from files specified with -c option now are read only
+
+ -- Pavel Bludov <pbludov@gmail.com>  Thu, 15 May 2014 11:39:00 +0900
+
+beryllium (1.1.0) debian;
+
+  * Global mouse shortcuts, long press shortcuts
+
+ -- Pavel Bludov <pbludov@gmail.com>  Wed, 14 May 2014 12:19:00 +0900
+
 beryllium (1.0.1) debian;
 
   * Drag'n'drop for deleting files

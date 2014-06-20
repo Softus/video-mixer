@@ -28,7 +28,8 @@ class ClickFilter : public QObject
 {
     Q_OBJECT
 public:
-    ClickFilter();
+    ClickFilter(QObject *parent);
+    ~ClickFilter();
 protected:
     bool eventFilter(QObject *o, QEvent *e);
 private:

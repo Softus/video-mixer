@@ -57,9 +57,10 @@ Worklist::Worklist(QWidget *parent) :
     QSettings settings;
     settings.beginGroup("dicom");
 
+#ifndef WITH_TOUCH
     setWindowTitle(tr("Worklist - %1").arg(settings.value("mwl-server").toString()));
+#endif
 
-    auto translateCyrillic = settings.value("translate-cyrillic", DEFAULT_TRANSLATE_CYRILLIC).toBool();
     auto cols = settings.value("worklist-columns").toStringList();
     if (cols.size() == 0)
     {
@@ -88,11 +89,8 @@ Worklist::Worklist(QWidget *parent) :
         {
             timeColumn = i;
         }
-        else if (translateCyrillic && (tag == DCM_PatientName || tag == DCM_ScheduledPerformingPhysicianName))
-        {
-            translateColumns.append(i);
-        }
     }
+    table->resizeColumnsToContents();
     table->setSelectionBehavior(QAbstractItemView::SelectRows);
     table->setSelectionMode(QAbstractItemView::SingleSelection);
     table->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -159,12 +157,6 @@ void Worklist::onAddRow(DcmDataset* dset)
         DcmTagKey tagKey(tag >> 16, tag & 0xFFFF);
         OFCondition cond = dset->findAndGetString(tagKey, str, true);
         auto text = QString::fromUtf8(str? str: cond.text());
-
-        if (str && translateColumns.contains(col))
-        {
-            text = translateToCyrillic(text);
-        }
-
         auto item = new QTableWidgetItem(text);
         table->setItem(row, col, item);
         if (col == dateColumn)
@@ -211,8 +203,8 @@ void Worklist::closeEvent(QCloseEvent *e)
 void Worklist::hideEvent(QHideEvent *e)
 {
     QSettings settings;
-#ifndef WITH_TOUCH
     settings.beginGroup("ui");
+#ifndef WITH_TOUCH
     settings.setValue("worklist-geometry", saveGeometry());
     settings.setValue("worklist-state", (int)windowState() & ~Qt::WindowMinimized);
 #endif

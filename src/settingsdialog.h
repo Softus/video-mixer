@@ -27,12 +27,12 @@ class QPushButton;
 class QStackedWidget;
 QT_END_NAMESPACE
 
-class Settings : public QDialog
+class SettingsDialog : public QDialog
 {
     Q_OBJECT
     QPushButton *btnCancel;
 public:
-    Settings(const QString &page, QWidget *parent = 0, Qt::WindowFlags flags = 0);
+    SettingsDialog(const QString &page, QWidget *parent = 0, Qt::WindowFlags flags = 0);
 signals:
     void save(QSettings& settings);
     void apply();
@@ -47,7 +47,10 @@ private slots:
     void onClickApply();
     void changePage(QListWidgetItem *current, QListWidgetItem *previous);
 
+protected:
     virtual void accept();
+    virtual void showEvent(QShowEvent *);
+    virtual void hideEvent(QHideEvent *);
 
 private:
     void createPages();
