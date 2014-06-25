@@ -89,7 +89,8 @@ SOURCES += \
     src/videoencodingprogressdialog.cpp \
     src/settingsdialog.cpp \
     gst/soup/gstsouphttpclientsink.c \
-    src/pipeline.cpp
+    src/pipeline.cpp \
+    src/videowidget.cpp
 
 unix: SOURCES += src/smartshortcut_x11.cpp
 win32:SOURCES += src/smartshortcut_win.cpp
@@ -130,7 +131,8 @@ HEADERS += \
     src/videoencodingprogressdialog.h \
     src/settingsdialog.h \
     gst/soup/gstsouphttpclientsink.h \
-    src/pipeline.h
+    src/pipeline.h \
+    src/videowidget.h
 
 FORMS   +=
 

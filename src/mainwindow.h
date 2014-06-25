@@ -56,6 +56,8 @@ class MainWindow : public QWidget
     QAction*     actionSettings;
     QAction*     actionArchive;
     ArchiveWindow* archiveWindow;
+    QBoxLayout*  altSources;
+    QBoxLayout*  videoWidgetsLayout;
 #ifdef WITH_DICOM
     QAction*      actionWorklist;
     DcmDataset*   pendingPatient;
@@ -95,12 +97,12 @@ class MainWindow : public QWidget
     //
     bool running;
 
-    // GStreamer pipeline
+    // GStreamer pipelines
     //
-    Pipeline*         activePipeline;
+    Pipeline*        activePipeline;
+    QList<Pipeline*> pipelines;
 
     QString replace(QString str, int seqNo = 0);
-    void setupPipeline();
     void updateWindowTitle();
     QDir checkPath(const QString tpl, bool needUnique);
     void updateOutputPath(bool needUnique);
@@ -150,6 +152,7 @@ private slots:
     void onSnapshotClick();
     void onStartClick();
     void onStopStudy();
+    void onSwapSource(int src, int dst);
     void onVideoFrameReady();
 
     friend class MainWindowDBusAdaptor;

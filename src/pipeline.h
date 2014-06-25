@@ -1,6 +1,8 @@
 #ifndef PIPELINE_H
 #define PIPELINE_H
 
+#include "videowidget.h"
+
 #include <QDir>
 #include <QObject>
 
@@ -12,11 +14,12 @@
 #include <QGst/Message>
 #include <QGst/Pad>
 #include <QGst/Pipeline>
-#include <QGst/Ui/VideoWidget>
 
 class Pipeline : public QObject
 {
     Q_OBJECT
+    int           index;
+    QString       name;
     QString       pipelineDef;
 
     void onBusMessage(const QGst::MessagePtr& msg);
@@ -31,10 +34,10 @@ class Pipeline : public QObject
     void setElementProperty(QGst::ElementPtr& elm, const char* prop = nullptr, const QGlib::Value& value = nullptr, QGst::State minimumState = QGst::StatePlaying);
 
 public:
-    explicit Pipeline(QObject *parent = 0);
+    Pipeline(int index, QObject *parent = 0);
     ~Pipeline();
 
-    void updatePipeline();
+    bool updatePipeline();
     QString appendVideoTail(const QDir &dir, const QString& prefix, QString clipFileName, bool split);
     void removeVideoTail(const QString& prefix);
     void enableEncoder(bool enable);
@@ -48,7 +51,7 @@ public:
     QGst::ElementPtr  imageSink;
     QGst::ElementPtr  videoEncoder;
     QGst::ElementPtr  displayOverlay;
-    QGst::Ui::VideoWidget* displayWidget;
+    VideoWidget*      displayWidget;
 
     bool          motionDetected;
     bool          motionStart;

@@ -15,14 +15,15 @@
 #include <gst/gstdebugutils.h>
 #include <gst/interfaces/tuner.h>
 
-Pipeline::Pipeline(QObject *parent) :
+Pipeline::Pipeline(int index, QObject *parent) :
     QObject(parent),
+    index(index),
     motionDetected(false),
     motionStart(false),
     motionStop(false),
     recording(false)
 {
-    displayWidget = new QGst::Ui::VideoWidget();
+    displayWidget = new VideoWidget(index);
     displayWidget->setMinimumSize(352, 288);
     displayWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 }
@@ -54,13 +55,13 @@ void Pipeline::releasePipeline()
 
   The pipeline is:
 
-                 [video src]
+                 [video src #]
                       |
                       V
-          [video decoder, for DV/JPEG]
+          [video decoder, for DV/JPEG #]
                       |
                       V
-                [deinterlace]
+                [deinterlace #]
                       |
                       V
          +----[main splitter]------+
@@ -185,6 +186,9 @@ QString Pipeline::buildPipeline()
     auto outputPathDef  = settings.value("storage/output-path",    DEFAULT_OUTPUT_PATH).toString();
 
     settings.beginGroup("gst");
+    settings.beginReadArray("src");
+    settings.setArrayIndex(index);
+
     auto deviceType     = settings.value("device-type", PLATFORM_SPECIFIC_SOURCE).toString();
     auto deviceDef      = settings.value("device").toString();
     auto inputChannel   = settings.value("video-channel").toString();
@@ -192,6 +196,14 @@ QString Pipeline::buildPipeline()
     auto sizeDef        = settings.value("size").toSize();
     auto srcDeinterlace = settings.value("video-deinterlace").toBool();
     auto srcParams      = settings.value("src-parameters").toString();
+    name                = settings.value("name").toString();
+    settings.endArray();
+
+    if (name.isEmpty())
+    {
+        name = QString("src%1").arg(index);
+    }
+
     auto colorConverter = QString(" ! ").append(settings.value("color-converter", "ffmpegcolorspace").toString());
     auto videoCodec     = settings.value("video-encoder",  DEFAULT_VIDEO_ENCODER).toString();
     auto bitrate        = settings.value("bitrate").toString();
@@ -344,12 +356,12 @@ QString Pipeline::buildPipeline()
     return pipe;
 }
 
-void Pipeline::updatePipeline()
+bool Pipeline::updatePipeline()
 {
     auto newPipelineDef = buildPipeline();
     if (newPipelineDef == pipelineDef)
     {
-        return;
+        return false;
     }
 
     QSettings settings;
@@ -369,7 +381,7 @@ void Pipeline::updatePipeline()
     catch (const QGlib::Error& ex)
     {
         errorGlib(pipeline, ex);
-        return;
+        return false;
     }
 
     pipelineDef = newPipelineDef;
@@ -450,8 +462,11 @@ void Pipeline::updatePipeline()
     motionStart  = detectMotion && settings.value("motion-start", DEFAULT_MOTION_START).toBool();
     motionStop   = detectMotion && settings.value("motion-stop", DEFAULT_MOTION_STOP).toBool();
 
-    settings.endGroup();
+    // Start the pipeline
+    pipeline->setState(QGst::StatePlaying);
 
+    settings.endGroup();
+    return true;
 }
 
 void Pipeline::errorGlib(const QGlib::ObjectPtr& obj, const QGlib::Error& ex)
@@ -581,7 +596,7 @@ QString Pipeline::appendVideoTail(const QDir& dir, const QString& prefix, QStrin
 
     // Manually increment video/clip file name
     //
-    clipFileName.append(split? "%02d": "").append(videoExt);
+    clipFileName.replace("%src%", name).append(split? "%02d": "").append(videoExt);
     auto absPath = dir.absoluteFilePath(clipFileName);
     sink->setProperty("location", absPath);
     if (split)
@@ -600,6 +615,11 @@ QString Pipeline::appendVideoTail(const QDir& dir, const QString& prefix, QStrin
 
 void Pipeline::removeVideoTail(const QString& prefix)
 {
+    if (!pipeline)
+    {
+        return;
+    }
+
     auto inspect = pipeline->getElementByName((prefix + "inspect").toUtf8());
     auto valve   = pipeline->getElementByName((prefix + "valve").toUtf8());
     auto mux     = pipeline->getElementByName((prefix + "mux").toUtf8());
@@ -635,13 +655,12 @@ void Pipeline::updateOverlayText(int countdown)
         return;
 
     QString text;
-    if (countdown > 0)
+    if (recording)
     {
-        text.setNum(countdown);
-    }
-    else if (recording)
-    {
-        text.append('*');
+        if (countdown > 0)
+            text.setNum(countdown);
+        else
+            text.append('*');
     }
 
     auto videovalve = pipeline->getElementByName("videovalve");
@@ -689,7 +708,10 @@ void Pipeline::onBusMessage(const QGst::MessagePtr& msg)
         //
         if (msg->source() == pipeline)
         {
-            static_cast<QWidget*>(parent())->update();
+            Q_FOREACH (auto w, qApp->topLevelWidgets())
+            {
+                w->update();
+            }
         }
         break;
     case QGst::MessageElement:
