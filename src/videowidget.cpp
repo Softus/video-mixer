@@ -1,5 +1,6 @@
 #include "videowidget.h"
 
+#include <QApplication>
 #include <QDebug>
 #include <QDrag>
 #include <QDragEnterEvent>
@@ -12,17 +13,39 @@
 
 extern QImage ExtractImage(const QGst::BufferPtr& buf, int width = 0);
 
-VideoWidget::VideoWidget(int index, QWidget *parent) :
+VideoWidget::VideoWidget(QWidget *parent) :
     QGst::Ui::VideoWidget(parent)
 {
     setAcceptDrops(true);
 }
 
-void VideoWidget::mousePressEvent(QMouseEvent *)
+void VideoWidget::mouseDoubleClickEvent(QMouseEvent *evt)
 {
+    swapWith(nullptr);
+    QGst::Ui::VideoWidget::mouseDoubleClickEvent(evt);
+}
+
+void VideoWidget::mousePressEvent(QMouseEvent *evt)
+{
+    if (evt->button() == Qt::LeftButton)
+    {
+        dragStartPosition = evt->pos();
+    }
+    QGst::Ui::VideoWidget::mousePressEvent(evt);
+}
+
+void VideoWidget::mouseMoveEvent(QMouseEvent *evt)
+{
+    if (!(evt->buttons() & Qt::LeftButton) ||
+        (evt->pos() - dragStartPosition).manhattanLength() < QApplication::startDragDistance())
+    {
+        QGst::Ui::VideoWidget::mouseMoveEvent(evt);
+        return;
+    }
+
      QDrag *drag = new QDrag(this);
      auto data = new QMimeData();
-     data->setData("set-active-source", QByteArray());
+     data->setData("swap-widget", QByteArray());
      drag->setMimeData(data);
 
      auto sink = videoSink();
@@ -43,37 +66,30 @@ void VideoWidget::mousePressEvent(QMouseEvent *)
 
      if (Qt::MoveAction == drag->exec(Qt::MoveAction) && drag->source() != drag->target())
      {
-         qDebug() << "swap" <<drag->source() << this << drag->target();
-         emit swap(1,0);//index, static_cast<VideoWidget*>(drag->target())->index);
+         emit swapWith(drag->target());
      }
 }
 
 void VideoWidget::dragEnterEvent(QDragEnterEvent *evt)
 {
-    if (evt->mimeData()->hasFormat("set-active-source"))
+    if (evt->mimeData()->hasFormat("swap-widget"))
     {
         evt->accept();
-        return;
     }
-    QGst::Ui::VideoWidget::dragEnterEvent(evt);
 }
 
 void VideoWidget::dragMoveEvent(QDragMoveEvent *evt)
 {
-    if (evt->mimeData()->hasFormat("set-active-source"))
+    if (evt->mimeData()->hasFormat("swap-widget"))
     {
         evt->accept();
-        return;
     }
-    QGst::Ui::VideoWidget::dragMoveEvent(evt);
 }
 
 void VideoWidget::dropEvent(QDropEvent *evt)
 {
-    if (evt->mimeData()->hasFormat("set-active-source"))
+    if (evt->mimeData()->hasFormat("swap-widget"))
     {
-        evt->accept();
-        return;
+        evt->acceptProposedAction();
     }
-    QGst::Ui::VideoWidget::dropEvent(evt);
 }

@@ -134,10 +134,10 @@ MainWindow::MainWindow(QWidget *parent) :
     layoutMain->addWidget(mainStack);
 
     auto studyLayout = new QVBoxLayout;
-    videoWidgetsLayout = new QHBoxLayout;
-    altSources = new QVBoxLayout;
-    videoWidgetsLayout->addLayout(altSources);
-    studyLayout->addLayout(videoWidgetsLayout);
+    layoutVideo = new QHBoxLayout;
+    layoutSources = new QVBoxLayout;
+    layoutVideo->addLayout(layoutSources);
+    studyLayout->addLayout(layoutVideo);
     studyLayout->addWidget(listImagesAndClips);
     studyLayout->addWidget(createToolBar());
     auto studyWidget = new QWidget;
@@ -157,6 +157,7 @@ MainWindow::MainWindow(QWidget *parent) :
 #endif
 
     settings.beginGroup("ui");
+    altSrcSize = settings.value("alt-src-size", DEFAULT_ALT_SRC_SIZE).toSize();
     extraTitle->setVisible(settings.value("extra-title").toBool());
     if (settings.value("enable-menu").toBool())
     {
@@ -169,9 +170,7 @@ MainWindow::MainWindow(QWidget *parent) :
     settings.endGroup();
 
     settings.beginGroup("gst");
-    auto nActive = settings.value("active-pipeline").toInt();
     auto nSources = settings.beginReadArray("src");
-    settings.endArray();
 
     if (nSources <= 0)
     {
@@ -188,25 +187,36 @@ MainWindow::MainWindow(QWidget *parent) :
         connect(p, SIGNAL(pipelineError(const QString&)), this, SLOT(onPipelineError(const QString&)), Qt::QueuedConnection);
         connect(p, SIGNAL(motion(bool)), this, SLOT(onMotion(bool)), Qt::QueuedConnection);
         connect(this, SIGNAL(updateOverlayText(int)), p, SLOT(updateOverlayText(int)), Qt::QueuedConnection);
-        connect(p->displayWidget, SIGNAL(swap(int,int)), this, SLOT(onSwapSource(int,int)), Qt::QueuedConnection);
+        connect(p->displayWidget, SIGNAL(swapWith(QWidget*)), this, SLOT(onSwapSources(QWidget*)));
         pipelines.push_back(p);
-        if (nActive == i)
+
+        settings.setArrayIndex(i);
+        auto order = settings.value("order", -1).toInt();
+        if (order < 0 && !activePipeline)
         {
+            p->displayWidget->setMinimumSize(352, 288);
+            p->displayWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+            layoutVideo->insertWidget(0, p->displayWidget);
             activePipeline = p;
-            videoWidgetsLayout->insertWidget(0, p->displayWidget);
         }
         else
         {
-            p->displayWidget->setMaximumSize(128, 96);
+            p->displayWidget->setMinimumSize(altSrcSize);
             p->displayWidget->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-            altSources->addWidget(p->displayWidget, 0, Qt::AlignTop);
+            layoutSources->insertWidget(order < 0? nSources: order, p->displayWidget, 0, Qt::AlignTop);
         }
     }
-    altSources->addStretch();
+    settings.endArray();
+
+    layoutSources->addStretch();
 
     if (!activePipeline)
     {
         activePipeline = pipelines.front();
+        activePipeline->displayWidget->setMinimumSize(352, 288);
+        activePipeline->displayWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        layoutSources->removeWidget(activePipeline->displayWidget);
+        layoutVideo->insertWidget(0, activePipeline->displayWidget);
     }
 
     settings.endGroup();
@@ -688,20 +698,17 @@ void MainWindow::onClipFrameReady()
         countdown = recordLimit;
         recordTimerId = startTimer(1000);
     }
-
     enableWidget(btnRecordStart, true);
     enableWidget(btnRecordStop, true);
     updateOverlayText(countdown);
 
     if (!clipPreviewFileName.isEmpty())
     {
-        // Take a picture for thumbnail
-        //
-        activePipeline->setImageLocation(clipPreviewFileName);
+        auto pipeline = static_cast<Pipeline*>(sender());
 
         // Turn the valve on for a while.
         //
-        activePipeline->imageValve->setProperty("drop-probability", 0.0);
+        pipeline->imageValve->setProperty("drop-probability", 0.0);
 
         // Once an image will be ready, the valve will be turned off again.
         //
@@ -930,7 +937,7 @@ bool MainWindow::startRecord(int duration, const QString &clipFileTemplate)
             //
             btnRecordStart->setEnabled(false);
             activePipeline->recording = true;
-
+            activePipeline->setImageLocation(clipPreviewFileName);
             activePipeline->enableClip(true);
         }
         else
@@ -953,9 +960,16 @@ bool MainWindow::startRecord(int duration, const QString &clipFileTemplate)
 
 void MainWindow::onRecordStopClick()
 {
-    activePipeline->removeVideoTail("clip");
+    Q_FOREACH(auto p, pipelines)
+    {
+        if (p->recording)
+        {
+            p->removeVideoTail("clip");
+            p->recording = false;
+        }
+    }
+
     clipPreviewFileName.clear();
-    activePipeline->recording = false;
     countdown = 0;
     if (recordTimerId)
     {
@@ -1228,17 +1242,14 @@ void MainWindow::onStopStudy()
     QSettings settings;
     QWaitCursor wait(this);
 
-    if (activePipeline->recording)
-    {
-        onRecordStopClick();
-    }
+    onRecordStopClick();
 
     Q_FOREACH (auto p, pipelines)
     {
         p->removeVideoTail("video");
     }
 
-    running = activePipeline->recording = false;
+    running = false;
     updateOverlayText(countdown);
 
 #ifdef WITH_DICOM
@@ -1307,24 +1318,75 @@ void MainWindow::onStopStudy()
     listImagesAndClips->clear();
 }
 
-void MainWindow::onSwapSource(int srcIdx, int dstIdx)
+void MainWindow::onSwapSources(QWidget* dst)
 {
-    auto src = pipelines[srcIdx]->displayWidget;
-    auto dst = pipelines[dstIdx]->displayWidget;
+    auto src = static_cast<QWidget*>(sender());
+
+    // Swap with main video widget
+    //
+    if (dst == nullptr)
+    {
+        dst = activePipeline->displayWidget;
+    }
+
+    if (src == dst)
+    {
+        // Nothing to do.
+        //
+        return;
+    }
+
+    if (src == activePipeline->displayWidget)
+    {
+        src = dst;
+        dst = activePipeline->displayWidget;
+    }
+
+    QSettings settings;
+    settings.beginGroup("gst");
     if (dst == activePipeline->displayWidget)
     {
-        videoWidgetsLayout->removeWidget(dst);
-        altSources->removeWidget(src);
+        // Swap alt src with main src
+        //
+        int idx = layoutSources->indexOf(src);
 
-        src->setMinimumSize(QSize(720, 536));
-        src->setMaximumSize(QSize(10000, 10000));
-        videoWidgetsLayout->insertWidget(0, src);
+        layoutVideo->removeWidget(dst);
+        layoutSources->removeWidget(src);
 
-        dst->setMaximumSize(128, 96);
+        src->setMinimumSize(352, 288);
+        src->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        layoutVideo->insertWidget(0, src);
+
+        dst->setMinimumSize(altSrcSize);
         dst->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-        altSources->insertWidget(0, dst);
-        activePipeline = pipelines[srcIdx];
+        layoutSources->insertWidget(idx, dst, 0, Qt::AlignTop);
     }
+    else
+    {
+        // Swap alt src with another alt src
+        //
+        int idxSrc = layoutSources->indexOf(src);
+        int idxDst = layoutSources->indexOf(dst);
+
+        layoutSources->removeWidget(src);
+        layoutSources->insertWidget(idxDst, src, 0, Qt::AlignTop);
+        layoutSources->removeWidget(dst);
+        layoutSources->insertWidget(idxSrc, dst, 0, Qt::AlignTop);
+    }
+
+    settings.beginWriteArray("src");
+    for (int i = 0; i < pipelines.size(); ++i)
+    {
+        settings.setArrayIndex(i);
+        auto idx = layoutSources->indexOf(pipelines[i]->displayWidget);
+        settings.setValue("order", idx);
+        if (idx < 0)
+        {
+            activePipeline = pipelines[i];
+        }
+    }
+    settings.endArray();
+    settings.endGroup();
 }
 
 #ifdef WITH_DICOM

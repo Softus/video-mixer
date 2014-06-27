@@ -56,8 +56,8 @@ class MainWindow : public QWidget
     QAction*     actionSettings;
     QAction*     actionArchive;
     ArchiveWindow* archiveWindow;
-    QBoxLayout*  altSources;
-    QBoxLayout*  videoWidgetsLayout;
+    QBoxLayout*  layoutSources;
+    QBoxLayout*  layoutVideo;
 #ifdef WITH_DICOM
     QAction*      actionWorklist;
     DcmDataset*   pendingPatient;
@@ -101,6 +101,7 @@ class MainWindow : public QWidget
     //
     Pipeline*        activePipeline;
     QList<Pipeline*> pipelines;
+    QSize            altSrcSize;
 
     QString replace(QString str, int seqNo = 0);
     void updateWindowTitle();
@@ -152,7 +153,7 @@ private slots:
     void onSnapshotClick();
     void onStartClick();
     void onStopStudy();
-    void onSwapSource(int src, int dst);
+    void onSwapSources(QWidget*);
     void onVideoFrameReady();
 
     friend class MainWindowDBusAdaptor;

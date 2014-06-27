@@ -23,9 +23,8 @@ Pipeline::Pipeline(int index, QObject *parent) :
     motionStop(false),
     recording(false)
 {
-    displayWidget = new VideoWidget(index);
-    displayWidget->setMinimumSize(352, 288);
-    displayWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    displayWidget = new VideoWidget();
+    displayWidget->setProperty("index", index);
 }
 
 Pipeline::~Pipeline()
@@ -114,7 +113,7 @@ Sample:
                                       [image writer]
 */
 
-static QString appendVideo(QString& pipe, const QSettings& settings)
+QString appendVideo(QString& pipe, QSettings& settings, int index)
 {
 /*
                        +----[video splitter]----+-------------+
@@ -130,6 +129,10 @@ static QString appendVideo(QString& pipe, const QSettings& settings)
     auto rtpPayParams    = settings.value(rtpPayDef + "-parameters").toString();
     auto rtpSinkDef      = settings.value("rtp-sink",       DEFAULT_RTP_SINK).toString();
     auto rtpSinkParams   = settings.value(rtpSinkDef + "-parameters").toString();
+    auto enableVideoLog  = settings.value("enable-video").toBool();
+
+    settings.beginReadArray("src");
+    settings.setArrayIndex(index);
     auto rtpClients      = settings.value("rtp-clients").toString();
     auto enableRtp       = !rtpSinkDef.isEmpty() && !rtpClients.isEmpty()
                             && settings.value("enable-rtp").toBool();
@@ -137,7 +140,7 @@ static QString appendVideo(QString& pipe, const QSettings& settings)
     auto enableHttp      = !httpSinkDef.isEmpty() && settings.value("enable-http").toBool();
     auto httpPushUrl     = settings.value("http-push-url").toString();
     auto httpSinkParams  = settings.value(httpSinkDef + "-parameters").toString();
-    auto enableVideoLog  = settings.value("enable-video").toBool();
+    settings.endArray();
 
     pipe.append(" ! tee name=videosplitter");
     if (enableRtp || enableHttp || enableVideoLog)
@@ -255,7 +258,7 @@ QString Pipeline::buildPipeline()
 
     if (videoCodec.isEmpty())
     {
-        appendVideo(pipe, settings);
+        appendVideo(pipe, settings, index);
         pipe.append("\nvideosplitter.");
     }
 
@@ -343,14 +346,14 @@ QString Pipeline::buildPipeline()
             pipe.append(" ! valve name=encvalve drop=1");
         }
 
-        // Store encoder bitrate as the queue name to detect pipline changes.
+        // Store encoder bitrate as the queue name to detect pipeline changes.
         // The real bitrate will be set later, after we figure out is it bits or kbits
         //
         pipe.append(" ! queue name=").append(bitrate).append(" max-size-bytes=0")
             .append(videoFixColor? colorConverter: "")
             .append(" ! ").append(videoCodec).append(" name=videoencoder ").append(videoEncoderParams);
 
-        appendVideo(pipe, settings);
+        appendVideo(pipe, settings, index);
     }
 
     return pipe;
@@ -366,6 +369,8 @@ bool Pipeline::updatePipeline()
 
     QSettings settings;
     settings.beginGroup("gst");
+    settings.beginReadArray("src");
+    settings.setArrayIndex(index);
 
     qDebug() << "The pipeline has been changed, restarting";
     if (pipeline)
@@ -385,6 +390,10 @@ bool Pipeline::updatePipeline()
     }
 
     pipelineDef = newPipelineDef;
+
+    // Connect to the underlying hardware
+    //
+    pipeline->setState(QGst::StateReady);
 
     auto videoInputChannel = settings.value("video-channel").toString();
     if (!videoInputChannel.isEmpty())
@@ -407,6 +416,7 @@ bool Pipeline::updatePipeline()
             g_object_unref(tuner);
         }
     }
+    settings.endArray();
 
     pipeline->bus()->addSignalWatch();
     displayWidget->watchPipeline(pipeline);
@@ -670,6 +680,8 @@ void Pipeline::updateOverlayText(int countdown)
         text.append(" log");
     }
 
+    text.append(' ').append(name);
+
     displayOverlay->setProperty("color", 0xFFFF0000);
     displayOverlay->setProperty("outline-color", 0xFFFF0000);
     displayOverlay->setProperty("text", text);
@@ -693,7 +705,17 @@ void Pipeline::enableVideo(bool enable)
 
 void Pipeline::setImageLocation(const QString& filename)
 {
-    setElementProperty(imageSink, "location", filename, QGst::StateReady);
+    if (!imageSink)
+    {
+        qDebug() << "Failed to set image location: no image sink";
+        return;
+    }
+
+    auto location = imageSink->property("location").toString();
+    if (location != filename)
+    {
+        setElementProperty(imageSink, "location", filename, QGst::StateReady);
+    }
 }
 
 void Pipeline::onBusMessage(const QGst::MessagePtr& msg)

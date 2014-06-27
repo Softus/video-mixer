@@ -6,18 +6,21 @@
 class VideoWidget : public QGst::Ui::VideoWidget
 {
     Q_OBJECT
+    QPoint dragStartPosition;
 
 public:
-    VideoWidget(int index, QWidget *parent = 0);
+    explicit VideoWidget(QWidget *parent = 0);
 
 protected:
-    virtual void mousePressEvent(QMouseEvent *event);
+    virtual void mousePressEvent(QMouseEvent *evt);
+    virtual void mouseMoveEvent(QMouseEvent *evt);
+    virtual void mouseDoubleClickEvent(QMouseEvent *);
     virtual void dragEnterEvent(QDragEnterEvent *evt);
     virtual void dragMoveEvent(QDragMoveEvent *e);
     virtual void dropEvent(QDropEvent *e);
 
 signals:
-    void swap(int src, int dst);
+    void swapWith(QWidget* w);
 
 public slots:
 };
