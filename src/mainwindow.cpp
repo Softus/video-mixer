@@ -127,7 +127,7 @@ MainWindow::MainWindow(QWidget *parent) :
     listImagesAndClips->setMinimumHeight(144); // 576/4
     listImagesAndClips->setMaximumHeight(176);
     listImagesAndClips->setIconSize(QSize(144,144));
-    listImagesAndClips->setMovement(QListView::Static);
+    listImagesAndClips->setMovement(QListView::Snap);
 
 #ifdef WITH_TOUCH
     mainStack = new SlidingStackedWidget();
@@ -188,6 +188,8 @@ MainWindow::MainWindow(QWidget *parent) :
         connect(p, SIGNAL(motion(bool)), this, SLOT(onMotion(bool)), Qt::QueuedConnection);
         connect(this, SIGNAL(updateOverlayText(int)), p, SLOT(updateOverlayText(int)), Qt::QueuedConnection);
         connect(p->displayWidget, SIGNAL(swapWith(QWidget*)), this, SLOT(onSwapSources(QWidget*)));
+        connect(p->displayWidget, SIGNAL(click()), this, SLOT(onSourceClick()));
+        connect(p->displayWidget, SIGNAL(copy()), this, SLOT(onSourceSnapshot()));
         pipelines.push_back(p);
 
         settings.setArrayIndex(i);
@@ -864,11 +866,40 @@ void MainWindow::onSnapshotClick()
     takeSnapshot();
 }
 
-bool MainWindow::takeSnapshot(const QString& imageTemplate)
+void MainWindow::onSourceSnapshot()
+{
+    Q_FOREACH (auto p, pipelines)
+    {
+        if (p->displayWidget == sender())
+        {
+            takeSnapshot(p);
+            break;
+        }
+    }
+}
+
+void MainWindow::onSourceClick()
+{
+    if (activePipeline->displayWidget == sender())
+    {
+        takeSnapshot(activePipeline);
+    }
+    else
+    {
+        onSwapSources(activePipeline->displayWidget);
+    }
+}
+
+bool MainWindow::takeSnapshot(Pipeline* pipeline, const QString& imageTemplate)
 {
     if (!running)
     {
         return false;
+    }
+
+    if (!pipeline)
+    {
+        pipeline = activePipeline;
     }
 
     QSettings settings;
@@ -879,11 +910,11 @@ bool MainWindow::takeSnapshot(const QString& imageTemplate)
 
     sound->play(DATA_FOLDER + "/sound/shutter.ac3");
 
-    activePipeline->setImageLocation(outputPath.absoluteFilePath(imageFileName));
+    pipeline->setImageLocation(outputPath.absoluteFilePath(imageFileName));
 
     // Turn the valve on for a while.
     //
-    activePipeline->imageValve->setProperty("drop-probability", 0.0);
+    pipeline->imageValve->setProperty("drop-probability", 0.0);
     //
     // Once the image will be ready, the valve will be turned off again.
     btnSnapshot->setEnabled(false);

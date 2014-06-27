@@ -126,7 +126,7 @@ bool MainWindowDBusAdaptor::takeSnapshot
     (const QString &imageFileTemplate
     )
 {
-    return wnd->takeSnapshot(imageFileTemplate);
+    return wnd->takeSnapshot(nullptr, imageFileTemplate);
 }
 
 bool MainWindowDBusAdaptor::startRecord

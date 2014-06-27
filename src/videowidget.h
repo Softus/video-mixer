@@ -21,6 +21,8 @@ protected:
 
 signals:
     void swapWith(QWidget* w);
+    void click();
+    void copy();
 
 public slots:
 };

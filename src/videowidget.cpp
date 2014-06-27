@@ -21,7 +21,7 @@ VideoWidget::VideoWidget(QWidget *parent) :
 
 void VideoWidget::mouseDoubleClickEvent(QMouseEvent *evt)
 {
-    swapWith(nullptr);
+    emit click();
     QGst::Ui::VideoWidget::mouseDoubleClickEvent(evt);
 }
 
@@ -45,7 +45,7 @@ void VideoWidget::mouseMoveEvent(QMouseEvent *evt)
 
      QDrag *drag = new QDrag(this);
      auto data = new QMimeData();
-     data->setData("swap-widget", QByteArray());
+     data->setData("videowidget", QByteArray());
      drag->setMimeData(data);
 
      auto sink = videoSink();
@@ -64,32 +64,47 @@ void VideoWidget::mouseMoveEvent(QMouseEvent *evt)
          }
      }
 
-     if (Qt::MoveAction == drag->exec(Qt::MoveAction) && drag->source() != drag->target())
+     switch (drag->exec(Qt::CopyAction | Qt::MoveAction))
      {
-         emit swapWith(drag->target());
+     case Qt::MoveAction:
+        if (drag->source() != drag->target())
+        {
+            emit swapWith(drag->target());
+        }
+        break;
+     case Qt::CopyAction:
+     {
+         emit copy();
+         break;
+     }
+     default:
+         break;
      }
 }
 
 void VideoWidget::dragEnterEvent(QDragEnterEvent *evt)
 {
-    if (evt->mimeData()->hasFormat("swap-widget"))
+    if (evt->mimeData()->hasFormat("videowidget"))
     {
+        evt->setDropAction(Qt::MoveAction);
         evt->accept();
     }
 }
 
 void VideoWidget::dragMoveEvent(QDragMoveEvent *evt)
 {
-    if (evt->mimeData()->hasFormat("swap-widget"))
+    if (evt->mimeData()->hasFormat("videowidget"))
     {
+        evt->setDropAction(Qt::MoveAction);
         evt->accept();
     }
 }
 
 void VideoWidget::dropEvent(QDropEvent *evt)
 {
-    if (evt->mimeData()->hasFormat("swap-widget"))
+    if (evt->mimeData()->hasFormat("videowidget"))
     {
-        evt->acceptProposedAction();
+        evt->setDropAction(Qt::MoveAction);
+        evt->accept();
     }
 }

@@ -111,7 +111,7 @@ class MainWindow : public QWidget
     bool startVideoRecord();
     void updateStartDialog();
     bool confirmStopStudy();
-    bool takeSnapshot(const QString& imageTemplate = QString());
+    bool takeSnapshot(Pipeline* pipeline = nullptr, const QString& imageTemplate = QString());
     bool startRecord(int duration = 0, const QString &clipFileTemplate = QString());
 
 public:
@@ -151,6 +151,8 @@ private slots:
     void onShowArchiveClick();
     void onShowSettingsClick();
     void onSnapshotClick();
+    void onSourceClick();
+    void onSourceSnapshot();
     void onStartClick();
     void onStopStudy();
     void onSwapSources(QWidget*);
