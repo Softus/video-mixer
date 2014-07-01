@@ -14,19 +14,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef VIDEOSETTINGS_H
-#define VIDEOSETTINGS_H
+#ifndef VIDEOSOURCES_H
+#define VIDEOSOURCES_H
 
 #include <QWidget>
 #include <QSettings>
-#include <QtGlobal>
 
 QT_BEGIN_NAMESPACE
-class QCheckBox;
-class QComboBox;
-class QLineEdit;
-class QSpinBox;
-class QTextEdit;
+class QTreeWidget;
+class QTreeWidgetItem;
+class QPushButton;
 QT_END_NAMESPACE
 
 #if defined (Q_OS_WIN)
@@ -42,46 +39,28 @@ QT_END_NAMESPACE
 #error The platform is not supported.
 #endif
 
-#define DEFAULT_VIDEOBITRATE 4000
-
-class VideoSourceSettings : public QWidget
+class VideoSources : public QWidget
 {
     Q_OBJECT
-    QComboBox *listDevices;
-    QComboBox *listChannels;
-    QComboBox *listFormats;
-    QComboBox *listSizes;
-    QComboBox *listVideoCodecs;
-    QComboBox *listVideoMuxers;
-    QComboBox *listRtpPayloaders;
-    QComboBox *listImageCodecs;
-    QCheckBox *checkFps;
-    QSpinBox  *spinFps;
-    QSpinBox  *spinBitrate;
-    QLineEdit *textRtpClients;
-    QCheckBox *checkEnableRtp;
-    QLineEdit *textHttpPushUrl;
-    QCheckBox *checkEnableHttp;
-    QCheckBox *checkDeinterlace;
+    QTreeWidget* listSources;
+    QPushButton* btnDetails;
 
     void updateDeviceList(const char *elmName, const char *propName);
-    QString updateGstList(const char* setting, const char* def, unsigned long long type, QComboBox* cb);
 
 public:
-    Q_INVOKABLE explicit VideoSourceSettings(QWidget *parent = 0);
+    Q_INVOKABLE explicit VideoSources(QWidget *parent = 0);
 
 protected:
     virtual void showEvent(QShowEvent *);
 
-signals:
-    
 private slots:
-    void videoDeviceChanged(int index);
-    void inputChannelChanged(int index);
-    void formatChanged(int index);
+    void onAddClicked();
+    void onEditClicked();
+    void onTreeItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
+    void onItemDoubleClicked(QTreeWidgetItem*, int);
 
 public slots:
     void save(QSettings& settings);
 };
 
-#endif // VIDEOSETTINGS_H
+#endif // VIDEOSOURCES_H

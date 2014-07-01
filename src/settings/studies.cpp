@@ -14,30 +14,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "physicianssettings.h"
-
+#include "studies.h"
 #include <QBoxLayout>
 #include <QListWidget>
 #include <QPushButton>
 #include <QSettings>
 
-PhysiciansSettings::PhysiciansSettings(QWidget *parent) :
+StudiesSettings::StudiesSettings(QWidget *parent) :
     QWidget(parent)
 {
     QSettings settings;
-    QLayout* mainLayout = new QHBoxLayout;
+    auto mainLayout = new QHBoxLayout;
     mainLayout->setContentsMargins(4,0,4,0);
     listStudies = new QListWidget;
-    listStudies->addItems(settings.value("physicians").toStringList());
+    listStudies->addItems(settings.value("studies").toStringList());
     for (int i = 0; i < listStudies->count(); ++i)
     {
-        QListWidgetItem* item = listStudies->item(i);
-        item->setFlags(Qt::ItemIsEditable | Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+        listStudies->item(i)->setFlags(Qt::ItemIsEditable | Qt::ItemIsSelectable | Qt::ItemIsEnabled);
     }
 
     mainLayout->addWidget(listStudies);
-    QBoxLayout* buttonsLayout = new QVBoxLayout;
-    QPushButton* btnAdd = new QPushButton(tr("&Add"));
+    auto buttonsLayout = new QVBoxLayout;
+    auto btnAdd = new QPushButton(tr("&Add"));
     connect(btnAdd, SIGNAL(clicked()), this, SLOT(onAddClicked()));
     buttonsLayout->addWidget(btnAdd);
     btnEdit = new QPushButton(tr("&Edit"));
@@ -54,9 +52,9 @@ PhysiciansSettings::PhysiciansSettings(QWidget *parent) :
     btnRemove->setEnabled(listStudies->count());
 }
 
-void PhysiciansSettings::onAddClicked()
+void StudiesSettings::onAddClicked()
 {
-    QListWidgetItem* item = new QListWidgetItem(tr("(new physician)"), listStudies);
+    auto item = new QListWidgetItem(tr("(new study)"), listStudies);
     item->setFlags(Qt::ItemIsEditable | Qt::ItemIsSelectable | Qt::ItemIsEnabled);
     listStudies->scrollToItem(item);
     listStudies->setCurrentItem(item, QItemSelectionModel::ClearAndSelect);
@@ -65,24 +63,24 @@ void PhysiciansSettings::onAddClicked()
     btnRemove->setEnabled(true);
 }
 
-void PhysiciansSettings::onEditClicked()
+void StudiesSettings::onEditClicked()
 {
     listStudies->editItem(listStudies->currentItem());
 }
 
-void PhysiciansSettings::onRemoveClicked()
+void StudiesSettings::onRemoveClicked()
 {
     delete listStudies->currentItem();
     btnEdit->setEnabled(listStudies->count());
     btnRemove->setEnabled(listStudies->count());
 }
 
-void PhysiciansSettings::save(QSettings& settings)
+void StudiesSettings::save(QSettings& settings)
 {
-    QStringList physicians;
+    QStringList studies;
     for (int i = 0; i < listStudies->count(); ++i)
     {
-        physicians.append(listStudies->item(i)->text());
+        studies.append(listStudies->item(i)->text());
     }
-    settings.setValue("physicians", physicians);
+    settings.setValue("studies", studies);
 }

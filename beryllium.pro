@@ -72,15 +72,6 @@ SOURCES += \
     src/mainwindowdbusadaptor.cpp \
     src/mandatoryfieldgroup.cpp \
     src/patientdatadialog.cpp \
-    src/settings/confirmationsettings.cpp \
-    src/settings/debugsettings.cpp \
-    src/settings/hotkeysettings.cpp \
-    src/settings/mandatoryfieldssettings.cpp \
-    src/settings/physicianssettings.cpp \
-    src/settings/storagesettings.cpp \
-    src/settings/studiessettings.cpp \
-    src/settings/videorecordsettings.cpp \
-    src/settings/videosourcesettings.cpp \
     src/smartshortcut.cpp \
     src/sound.cpp \
     src/thumbnaillist.cpp \
@@ -90,7 +81,17 @@ SOURCES += \
     src/settingsdialog.cpp \
     gst/soup/gstsouphttpclientsink.c \
     src/pipeline.cpp \
-    src/videowidget.cpp
+    src/videowidget.cpp \
+    src/settings/videosources.cpp \
+    src/settings/videosourcedetails.cpp \
+    src/settings/videorecord.cpp \
+    src/settings/studies.cpp \
+    src/settings/storage.cpp \
+    src/settings/physicians.cpp \
+    src/settings/mandatoryfields.cpp \
+    src/settings/hotkeys.cpp \
+    src/settings/debug.cpp \
+    src/settings/confirmations.cpp
 
 unix: SOURCES += src/smartshortcut_x11.cpp
 win32:SOURCES += src/smartshortcut_win.cpp
@@ -114,15 +115,6 @@ HEADERS += \
     src/patientdatadialog.h \
     src/product.h \
     src/qwaitcursor.h \
-    src/settings/confirmationsettings.h \
-    src/settings/debugsettings.h \
-    src/settings/hotkeysettings.h \
-    src/settings/mandatoryfieldssettings.h \
-    src/settings/physicianssettings.h \
-    src/settings/storagesettings.h \
-    src/settings/studiessettings.h \
-    src/settings/videorecordsettings.h \
-    src/settings/videosourcesettings.h \
     src/smartshortcut.h \
     src/sound.h \
     src/thumbnaillist.h \
@@ -132,7 +124,17 @@ HEADERS += \
     src/settingsdialog.h \
     gst/soup/gstsouphttpclientsink.h \
     src/pipeline.h \
-    src/videowidget.h
+    src/videowidget.h \
+    src/settings/videosources.h \
+    src/settings/videosourcedetails.h \
+    src/settings/confirmations.h \
+    src/settings/debug.h \
+    src/settings/hotkeys.h \
+    src/settings/mandatoryfields.h \
+    src/settings/physicians.h \
+    src/settings/storage.h \
+    src/settings/studies.h \
+    src/settings/videorecord.h
 
 FORMS   +=
 

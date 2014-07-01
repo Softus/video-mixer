@@ -14,7 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "videorecordsettings.h"
+#include "videorecord.h"
 #include "../defaults.h"
 
 #include <QCheckBox>

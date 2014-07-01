@@ -14,7 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "videosourcesettings.h"
+#include "videosourcedetails.h"
 #include "../defaults.h"
 #include <algorithm>
 #include <QApplication>
@@ -45,8 +45,8 @@
 #include <gst/gst.h>
 #include <gst/interfaces/tuner.h>
 
-VideoSourceSettings::VideoSourceSettings(QWidget *parent)
-  : QWidget(parent)
+VideoSourceDetails::VideoSourceDetails(const QString& device, const QString& elmName, const QString& propName, QWidget *parent)
+  : QDialog(parent)
   , checkFps(nullptr)
   , spinFps(nullptr)
 {
@@ -54,9 +54,8 @@ VideoSourceSettings::VideoSourceSettings(QWidget *parent)
     settings.beginGroup("gst");
     auto layout = new QFormLayout();
 
-    layout->addRow(tr("Video &device"), listDevices = new QComboBox());
-    connect(listDevices, SIGNAL(currentIndexChanged(int)), this, SLOT(videoDeviceChanged(int)));
     layout->addRow(tr("I&nput channel"), listChannels = new QComboBox());
+    listChannels->addItem(tr("(default)"));
     connect(listChannels, SIGNAL(currentIndexChanged(int)), this, SLOT(inputChannelChanged(int)));
     layout->addRow(tr("Pixel &format"), listFormats = new QComboBox());
     connect(listFormats, SIGNAL(currentIndexChanged(int)), this, SLOT(formatChanged(int)));
@@ -105,11 +104,7 @@ VideoSourceSettings::VideoSourceSettings(QWidget *parent)
     textHttpPushUrl->setEnabled(checkEnableHttp->isChecked());
 
     setLayout(layout);
-}
 
-void VideoSourceSettings::showEvent(QShowEvent *e)
-{
-    QWidget::showEvent(e);
     // Refill the boxes every time the page is shown
     //
     auto selectedCodec = updateGstList("video-encoder", DEFAULT_VIDEO_ENCODER, GST_ELEMENT_FACTORY_TYPE_ENCODER | GST_ELEMENT_FACTORY_TYPE_MEDIA_VIDEO, listVideoCodecs);
@@ -127,21 +122,10 @@ void VideoSourceSettings::showEvent(QShowEvent *e)
     updateGstList("image-encoder", DEFAULT_IMAGE_ENCODER, GST_ELEMENT_FACTORY_TYPE_ENCODER | GST_ELEMENT_FACTORY_TYPE_MEDIA_IMAGE, listImageCodecs);
     updateGstList("rtp-payloader", DEFAULT_RTP_PAYLOADER, GST_ELEMENT_FACTORY_TYPE_PAYLOADER, listRtpPayloaders);
 
-    listDevices->clear();
-    listDevices->addItem(tr("(default)"));
-
-    // Populate cameras list
-    //
-    updateDeviceList(PLATFORM_SPECIFIC_SOURCE, PLATFORM_SPECIFIC_PROPERTY);
-
-#ifndef Q_OS_WIN
-    // Populate firewire list
-    //
-    updateDeviceList("dv1394src", "guid");
-#endif
+    updateDevice(device, elmName, propName);
 }
 
-QString VideoSourceSettings::updateGstList(const char* setting, const char* def, unsigned long long type, QComboBox* cb)
+QString VideoSourceDetails::updateGstList(const char* setting, const char* def, unsigned long long type, QComboBox* cb)
 {
     QSettings settings;
     settings.beginGroup("gst");
@@ -164,121 +148,83 @@ QString VideoSourceSettings::updateGstList(const char* setting, const char* def,
     return selectedCodec;
 }
 
-void VideoSourceSettings::updateDeviceList(const char* elmName, const char* propName)
+void VideoSourceDetails::updateDevice(const QString& device, const QString& elmName, const QString& propName)
 {
+    int idx = 0;
     QSettings settings;
     settings.beginGroup("gst");
 
-    auto selectedDevice = settings.value("device-type") == elmName? settings.value("device").toString(): nullptr;
     auto src = QGst::ElementFactory::make(elmName);
     if (!src) {
         QMessageBox::critical(this, windowTitle(), tr("Failed to create element '%1'").arg(elmName));
         return;
     }
 
-    // Look for device-name for windows and "device" for linux/macosx
-    //
-    QGst::PropertyProbePtr propertyProbe = src.dynamicCast<QGst::PropertyProbe>();
-    if (propertyProbe && propertyProbe->propertySupportsProbe(propName))
+    auto srcPad = src->getStaticPad("src");
+    if (srcPad)
     {
-        //get a list of devices that the element supports
-        auto devices = propertyProbe->probeAndGetValues(propName);
-        foreach (const QGlib::Value& device, devices)
+        // To set the property, the device must be in Null state
+        //
+        src->setProperty(propName.toUtf8(), device);
+
+        // To query the caps, the device must be in Ready state
+        //
+        src->setState(QGst::StateReady);
+        src->getState(nullptr, nullptr, GST_SECOND * 10);
+
+        caps = srcPad->caps();
+        qDebug() << caps->toString();
+
+        auto tuner = GST_TUNER(src);
+        if (tuner)
         {
-            auto deviceName = device.toString();
-            auto srcPad = src->getStaticPad("src");
-            if (srcPad)
+            auto selectedChannel = settings.value("video-channel").toString();
+
+            // The list is owned by the GstTuner and must not be freed.
+            //
+            auto channelList = gst_tuner_list_channels(tuner);
+            while (channelList)
             {
-                // To set the property, the device must be in Null state
-                //
-                src->setProperty(propName, device);
+                auto ch = GST_TUNER_CHANNEL(channelList->data);
+                //gst_tuner_set_channel(tuner, ch);
 
-                // To query the caps, the device must be in Ready state
-                //
-                src->setState(QGst::StateReady);
-                src->getState(nullptr, nullptr, GST_SECOND * 10);
-
-                QStringList channelsAndCaps;
-
-                // First three entries will be device type, device id, caps
-                //
-                channelsAndCaps << elmName << deviceName << srcPad->caps()->toString();
-                //qDebug() << channelsAndCaps;
-
-                auto tuner = GST_TUNER(src);
-                if (tuner)
+                listChannels->addItem(ch->label);
+                if (selectedChannel == ch->label)
                 {
-                    // The list is owned by the GstTuner and must not be freed.
-                    //
-                    auto channelList = gst_tuner_list_channels(tuner);
-                    while (channelList)
-                    {
-                        auto ch = GST_TUNER_CHANNEL(channelList->data);
-                        //gst_tuner_set_channel(tuner, ch);
-
-                        channelsAndCaps.append(ch->label);
-                        channelList = g_list_next(channelList);
-                    }
+                    idx = listChannels->count() - 1;
                 }
-                else
-                {
-                    // Check for generic 'channel' property
-                    //
-                    QGlib::ParamSpecPtr channelSpec = src->findProperty("channel");
-                    if (channelSpec && channelSpec->flags().testFlag(QGlib::ParamSpec::ReadWrite) &&
-                        QGlib::Type::Int == channelSpec->valueType().fundamental())
-                    {
-                        for (int i = 1; i <= 64; ++i)
-                        {
-                            channelsAndCaps.append(QString::number(i));
-                        }
-                    }
-                }
-
-                auto friendlyName = src->property("device-name").toString();
-                friendlyName = friendlyName.isEmpty()? deviceName: deviceName + " (" + friendlyName + ")";
-
-                listDevices->addItem(friendlyName, channelsAndCaps);
-                if (selectedDevice == deviceName)
-                {
-                    listDevices->setCurrentIndex(listDevices->count() - 1);
-                }
-
-                // Now switch the device back to Null state (release resources)
-                //
-                src->setState(QGst::StateNull);
-                src->getState(nullptr, nullptr, GST_SECOND * 10);
+                channelList = g_list_next(channelList);
             }
         }
-    }
-}
-
-void VideoSourceSettings::videoDeviceChanged(int index)
-{
-    listChannels->clear();
-
-    auto channels = listDevices->itemData(index).toStringList();
-    if (index < 0 || channels.size() < 3)
-    {
-        listChannels->addItem(tr("(default)"));
-        return;
-    }
-
-    auto caps = channels.at(2);
-    auto selectedChannel = QSettings().value("gst/video-channel").toString();
-
-    listChannels->addItem(tr("(default)"), caps);
-
-    // From index 3 till end here is channels
-    //
-    for (int i = 3; i < channels.size(); ++i)
-    {
-        listChannels->addItem(channels.at(i), caps);
-        if (channels.at(i) == selectedChannel)
+        else
         {
-            listChannels->setCurrentIndex(listChannels->count() - 1);
+            auto selectedChannel = settings.value("video-channel").toInt();
+            if (elmName == "dv1394src")
+            {
+                for (int i = 1; i <= 64; ++i)
+                {
+                    listChannels->addItem(QString::number(i));
+                }
+                idx = selectedChannel - 1;
+            }
+            else if (elmName == "videotestsrc")
+            {
+                for (int i = 0; i <= 20; ++i)
+                {
+                    listChannels->addItem(QString::number(i));
+                }
+                idx = selectedChannel;
+            }
         }
+
+        // Now switch the device back to Null state (release resources)
+        //
+        src->setState(QGst::StateNull);
+        src->getState(nullptr, nullptr, GST_SECOND * 10);
     }
+
+    listChannels->setCurrentIndex(-1);
+    listChannels->setCurrentIndex(idx);
 }
 
 static QString valueToString(const QGlib::Value& value)
@@ -308,12 +254,10 @@ static QList<QGlib::Value> getFormats(const QGlib::Value& value)
     return formats;
 }
 
-void VideoSourceSettings::inputChannelChanged(int index)
+void VideoSourceDetails::inputChannelChanged(int index)
 {
     listFormats->clear();
     listFormats->addItem(tr("(default)"));
-
-    auto caps = QGst::Caps::fromString(listChannels->itemData(index).toString());
 
     if (index < 0 || !caps)
     {
@@ -357,12 +301,11 @@ static QGst::IntRange getRange(const QGlib::Value& value)
     return ok? QGst::IntRange(intValue, intValue): value.get<QGst::IntRange>();
 }
 
-void VideoSourceSettings::formatChanged(int index)
+void VideoSourceDetails::formatChanged(int index)
 {
     listSizes->clear();
     listSizes->addItem(tr("(default)"));
 
-    auto caps = QGst::Caps::fromString(listChannels->itemData(listChannels->currentIndex()).toString());
     auto selectedFormat = listFormats->itemData(index).toString();
     if (index < 0 || !caps || selectedFormat.isEmpty())
     {
@@ -389,10 +332,19 @@ void VideoSourceSettings::formatChanged(int index)
             continue;
         }
 
+        // Videotestsrc can produce frames till 2147483647x2147483647
+        // Add some reasonable limits
+        //
+        widthRange .start = qMax(widthRange .start, 32);
+        heightRange.start = qMax(heightRange.start, 24);
+        widthRange .end = qMin(widthRange .end, 32768);
+        heightRange.end = qMin(heightRange.end, 24576);
+
         // Iterate from min to max (160x120,320x240,640x480)
         //
         auto width = widthRange.start;
         auto height = heightRange.start;
+
         while (width <= widthRange.end && height <= heightRange.end)
         {
             sizes.append(QSize(width, height));
@@ -449,8 +401,8 @@ static QVariant getListData(const QComboBox* cb)
     auto idx = cb->currentIndex();
     return cb->itemData(idx);
 }
-
-void VideoSourceSettings::save(QSettings& settings)
+#if 0
+void VideoSourceDetails::save(QSettings& settings)
 {
     if (listVideoCodecs->count() == 0)
     {
@@ -494,3 +446,4 @@ void VideoSourceSettings::save(QSettings& settings)
     }
     settings.endGroup();
 }
+#endif

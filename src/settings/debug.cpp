@@ -14,7 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "debugsettings.h"
+#include "debug.h"
 #include "../defaults.h"
 #include "../qwaitcursor.h"
 

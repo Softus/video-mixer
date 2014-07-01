@@ -35,8 +35,10 @@ DicomServerSettings::DicomServerSettings(QWidget *parent) :
         tr("IP address"),
         tr("Port"),
         //tr("Timeout"),
+#ifdef ENABLE_DICOM_OLD_SOPCLASS
         //tr("Echo"),
         //tr("SOP class"),
+#endif
     };
 
     mainLayout->addWidget(listServers = new QTableWidget);

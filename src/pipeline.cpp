@@ -1,6 +1,22 @@
+/*
+ * Copyright (C) 2013-2014 Irkutsk Diagnostic Center.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; version 2.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "pipeline.h"
 #include "defaults.h"
-#include "settings/videosourcesettings.h"
+#include "settings/videosources.h"
 
 #include <QApplication>
 
@@ -52,7 +68,7 @@ void Pipeline::releasePipeline()
 
 /*
 
-  The pipeline is:
+The pipeline for software encoder:
 
                  [video src #]
                       |
@@ -74,10 +90,10 @@ void Pipeline::releasePipeline()
   [image writer]             [video encoder]
                                    |
                                    V
-                       +----[video splitter]----+--------------+
-                       |           |            |              |
-                       V           V            V              V
-            [movie writer]   [clip valve]  [rtp sender]  [http sender]
+                       +----[video splitter]----+---------------+
+                       |           |            |               |
+                       V           V            V               V
+            [movie writer]   [clip valve]  [rtp sender #] [http sender #]
                                    |
                                    V
                             [clip writer]
@@ -92,24 +108,26 @@ Sample:
                 videosplitter. ! identity  name=clipinspect drop-probability=1.0 ! queue ! valve name=clipvalve ! [ mpegpsmux name=clipmux ! filesink name=clipsink]
         splitter. ! identity name=imagevalve drop-probability=1.0 ! jpegenc ! multifilesink name=imagesink post-messages=1 async=0 sync=0 location=/video/image
 
-                [video src]
+The pipeline for hardware encoder:
+
+                [video src #]
                      |
                      V
-         +----[video splitter]----+----------+
-         |           |            |          |
-         V           V            V          V
-[movie writer] [clip valve] [rtp sender] [decoder]
-                     |                       |
-                     V                       V
-               [clip writer]            [splitter]------+
-                                             |          |
-                                             V          V
-                                      [image valve]  [detector]
-                                             |          |
-                                             V          V
-                                     [image encoder] [display]
-                                             |
-                                             V
+         +----[video splitter #]----+----------+------------+
+         |           |              |          |            |
+         V           V              V          V            V
+[movie writer] [clip valve] [rtp sender #] [decoder #] [http sender #]
+                     |                        |
+                     V                        V
+               [clip writer]             [splitter]-------+
+                                              |           |
+                                              V           V
+                                       [image valve]  [detector]
+                                              |           |
+                                              V           V
+                                      [image encoder] [display]
+                                              |
+                                              V
                                       [image writer]
 */
 
