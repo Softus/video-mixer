@@ -101,6 +101,7 @@ class MainWindow : public QWidget
     //
     Pipeline*        activePipeline;
     QList<Pipeline*> pipelines;
+    QSize            mainSrcSize;
     QSize            altSrcSize;
 
     QString replace(QString str, int seqNo = 0);

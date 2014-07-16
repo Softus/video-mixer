@@ -18,6 +18,7 @@
 #define BERYLLIUM_DEFAULTS_H
 
 #define DEFAULT_ALT_SRC_SIZE          QSize(160, 144)
+#define DEFAULT_MAIN_SRC_SIZE         QSize(352, 288)
 #define DEFAULT_ENABLE_SETTINGS       true
 #define DEFAULT_DISPLAY_SINK          "autovideosink"
 #define DEFAULT_FOLDER_TEMPLATE       "/%yyyy%-%MM%/%dd%/%name%-%id%/"

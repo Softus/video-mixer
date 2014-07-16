@@ -158,6 +158,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     settings.beginGroup("ui");
     altSrcSize = settings.value("alt-src-size", DEFAULT_ALT_SRC_SIZE).toSize();
+    mainSrcSize = settings.value("main-src-size", DEFAULT_MAIN_SRC_SIZE).toSize();
     extraTitle->setVisible(settings.value("extra-title").toBool());
     if (settings.value("enable-menu").toBool())
     {
@@ -196,7 +197,7 @@ MainWindow::MainWindow(QWidget *parent) :
         auto order = settings.value("order", -1).toInt();
         if (order < 0 && !activePipeline)
         {
-            p->displayWidget->setMinimumSize(352, 288);
+            p->displayWidget->setMinimumSize(mainSrcSize);
             p->displayWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
             layoutVideo->insertWidget(0, p->displayWidget);
             activePipeline = p;
@@ -215,7 +216,7 @@ MainWindow::MainWindow(QWidget *parent) :
     if (!activePipeline)
     {
         activePipeline = pipelines.front();
-        activePipeline->displayWidget->setMinimumSize(352, 288);
+        activePipeline->displayWidget->setMinimumSize(mainSrcSize);
         activePipeline->displayWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
         layoutSources->removeWidget(activePipeline->displayWidget);
         layoutVideo->insertWidget(0, activePipeline->displayWidget);
@@ -1384,7 +1385,7 @@ void MainWindow::onSwapSources(QWidget* dst)
         layoutVideo->removeWidget(dst);
         layoutSources->removeWidget(src);
 
-        src->setMinimumSize(352, 288);
+        src->setMinimumSize(mainSrcSize);
         src->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
         layoutVideo->insertWidget(0, src);
 
