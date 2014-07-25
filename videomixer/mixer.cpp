@@ -18,13 +18,13 @@
 
 #if GST_CHECK_VERSION(1,0,0)
 #define VIDEO_XRAW      "video/x-raw"
-#define FOURCC_I420     "(fourcc)I420"
+#define FOURCC_I420     "(string)I420"
 #define VIDEOCONVERTER  "videoconvert"
 #define VIDEODECODER    "avdec_mpeg2video"
 #define DEFAULT_ENCODER "avenc_mpeg2video bitrate=1000000"
 #else
 #define VIDEO_XRAW      "video/x-raw-yuv"
-#define FOURCC_I420     "(string)I420"
+#define FOURCC_I420     "(fourcc)I420"
 #define VIDEOCONVERTER  "ffmpegcolorspace"
 #define VIDEODECODER    "ffdec_mpeg2video"
 #define DEFAULT_ENCODER "ffenc_mpeg2video bitrate=1000000"
