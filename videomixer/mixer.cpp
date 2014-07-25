@@ -20,13 +20,13 @@
 #define VIDEO_XRAW      "video/x-raw"
 #define FOURCC_I420     "(string)I420"
 #define VIDEOCONVERTER  "videoconvert"
-#define VIDEODECODER    "avdec_mpeg2video"
+#define VIDEODECODER    "tsdemux ! avdec_mpeg2video"
 #define DEFAULT_ENCODER "avenc_mpeg2video bitrate=1000000"
 #else
 #define VIDEO_XRAW      "video/x-raw-yuv"
 #define FOURCC_I420     "(fourcc)I420"
 #define VIDEOCONVERTER  "ffmpegcolorspace"
-#define VIDEODECODER    "ffdec_mpeg2video"
+#define VIDEODECODER    "mpegtsdemux ! ffdec_mpeg2video"
 #define DEFAULT_ENCODER "ffenc_mpeg2video bitrate=1000000"
 #endif
 
@@ -102,7 +102,7 @@ void Mixer::buildPipeline()
             auto text = src.value().first;
             pipelineDef
                 .append("souphttpsrc timeout=1 do-timestamp=1 location=").append(src.key())
-                .append(" ! queue ! mpegtsdemux ! " VIDEODECODER " ! videoscale ! " VIDEO_XRAW ",width=")
+                .append(" ! queue ! " VIDEODECODER " ! videoscale ! " VIDEO_XRAW ",width=")
                     .append(QString::number(width)).append(",height=").append(QString::number(height))
                     .append(" ! " VIDEOCONVERTER " ! textoverlay valignment=bottom halignment=right xpad=2 ypad=2 font-desc=24 text=")
                     .append(text).append(" ! videobox")
