@@ -104,7 +104,7 @@ void Mixer::buildPipeline()
                 .append("souphttpsrc timeout=1 do-timestamp=1 location=").append(src.key())
                 .append(" ! queue ! mpegtsdemux ! " VIDEODECODER " ! videoscale ! " VIDEO_XRAW ",width=")
                     .append(QString::number(width)).append(",height=").append(QString::number(height))
-                    .append(" ! " VIDEOCONVERTER " ! cairotextoverlay valign=bottom halign=right xpad=2 ypad=2 text=")
+                    .append(" ! " VIDEOCONVERTER " ! textoverlay valignment=bottom halignment=right xpad=2 ypad=2 font-desc=24 text=")
                     .append(text).append(" ! videobox")
                     .append(" left=-").append(QString::number(margins.left() + (padding + width)  * left))
                     .append(" top=-") .append(QString::number(margins.top()  + (padding + height) * top))
@@ -138,7 +138,7 @@ void Mixer::buildPipeline()
     //
     if (inactiveStreams == srcMap.size())
     {
-        pipelineDef.append(" ! cairotextoverlay halign=center text=\"no signal\"");
+        pipelineDef.append(" ! textoverlay halignment=center font-desc=24 text=\"no signal\"");
         restart(60 * 1000); // Restart every 1 min
     }
 
