@@ -8,12 +8,23 @@
 #include <QGst/Bus>
 #include <QGst/Parse>
 
+#include <gst/gst.h>
+
 #define DEFAULT_WIDTH         160
 #define DEFAULT_HEIGHT        120
 #define DEFAULT_RESTART_DELAY 1000
 #define DEFAULT_PADDING       8
 #define DEFAULT_MARGINS       QRect(32, 32, 32, 32)
-#define DEFAULT_ENCODER       "ffenc_mpeg2video bitrate=1000000"
+
+#if GST_CHECK_VERSION(1,0,0)
+#define VIDEOCONVERTER  "videoconvert"
+#define VIDEODECODER    "avdec_mpeg2video"
+#define DEFAULT_ENCODER "avenc_mpeg2video bitrate=1000000"
+#else
+#define VIDEOCONVERTER  "ffmpegcolorspace"
+#define VIDEODECODER    "ffdec_mpeg2video"
+#define DEFAULT_ENCODER "ffenc_mpeg2video bitrate=1000000"
+#endif
 
 Mixer::Mixer(const QString& group, QObject *parent) :
     QObject(parent), updateTimerId(0)
@@ -70,7 +81,7 @@ void Mixer::buildPipeline()
     // Append output
     //
     pipelineDef
-        .append("videomixer name=mix ! ffmpegcolorspace")
+        .append("videomixer name=mix ! " VIDEOCONVERTER)
         .append(" ! ").append(encoder)
         .append(" ! mpegtsmux ! queue ! souphttpclientsink sync=0 location=").append(dstUri).append('\n');
 
@@ -87,9 +98,9 @@ void Mixer::buildPipeline()
             auto text = src.value().first;
             pipelineDef
                 .append("souphttpsrc timeout=1 do-timestamp=1 location=").append(src.key())
-                .append(" ! queue ! mpegtsdemux ! ffdec_mpeg2video ! videoscale ! video/x-raw-yuv,width=")
+                .append(" ! queue ! mpegtsdemux ! " VIDEODECODER " ! videoscale ! video/x-raw-yuv,width=")
                     .append(QString::number(width)).append(",height=").append(QString::number(height))
-                    .append(" ! ffmpegcolorspace ! cairotextoverlay valign=bottom halign=right xpad=2 ypad=2 text=")
+                    .append(" ! " VIDEOCONVERTER " ! cairotextoverlay valign=bottom halign=right xpad=2 ypad=2 text=")
                     .append(text).append(" ! videobox")
                     .append(" left=-").append(QString::number(margins.left() + (padding + width)  * left))
                     .append(" top=-") .append(QString::number(margins.top()  + (padding + height) * top))
