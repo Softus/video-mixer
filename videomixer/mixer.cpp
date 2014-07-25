@@ -17,10 +17,14 @@
 #define DEFAULT_MARGINS       QRect(32, 32, 32, 32)
 
 #if GST_CHECK_VERSION(1,0,0)
+#define VIDEO_XRAW      "video/x-raw"
+#define FOURCC_I420     "(fourcc)I420"
 #define VIDEOCONVERTER  "videoconvert"
 #define VIDEODECODER    "avdec_mpeg2video"
 #define DEFAULT_ENCODER "avenc_mpeg2video bitrate=1000000"
 #else
+#define VIDEO_XRAW      "video/x-raw-yuv"
+#define FOURCC_I420     "(string)I420"
 #define VIDEOCONVERTER  "ffmpegcolorspace"
 #define VIDEODECODER    "ffdec_mpeg2video"
 #define DEFAULT_ENCODER "ffenc_mpeg2video bitrate=1000000"
@@ -98,7 +102,7 @@ void Mixer::buildPipeline()
             auto text = src.value().first;
             pipelineDef
                 .append("souphttpsrc timeout=1 do-timestamp=1 location=").append(src.key())
-                .append(" ! queue ! mpegtsdemux ! " VIDEODECODER " ! videoscale ! video/x-raw-yuv,width=")
+                .append(" ! queue ! mpegtsdemux ! " VIDEODECODER " ! videoscale ! " VIDEO_XRAW ",width=")
                     .append(QString::number(width)).append(",height=").append(QString::number(height))
                     .append(" ! " VIDEOCONVERTER " ! cairotextoverlay valign=bottom halign=right xpad=2 ypad=2 text=")
                     .append(text).append(" ! videobox")
@@ -125,7 +129,7 @@ void Mixer::buildPipeline()
     }
 
     pipelineDef
-        .append("videotestsrc pattern=2 is-live=1 do-timestamp=1 ! video/x-raw-yuv,format=(fourcc)I420")
+        .append("videotestsrc pattern=2 is-live=1 do-timestamp=1 ! " VIDEO_XRAW ",format=" FOURCC_I420)
         .append(",width=") .append(QString::number(margins.left() + margins.width()  + width  * rowSize + padding * (rowSize - 1)))
         .append(",height=").append(QString::number(margins.top()  + margins.height() + height * rowSize + padding * (rowSize - 1)))
         ;
