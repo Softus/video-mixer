@@ -15,6 +15,7 @@
 #define DEFAULT_RESTART_DELAY 1000
 #define DEFAULT_PADDING       8
 #define DEFAULT_MARGINS       QRect(32, 32, 32, 32)
+#define DEFAULT_MESSAGE       "No active sources"
 
 #if GST_CHECK_VERSION(1,0,0)
 #define VIDEO_XRAW      "video/x-raw"
@@ -35,14 +36,23 @@ Mixer::Mixer(const QString& group, QObject *parent) :
 {
     QSettings settings;
 
-    auto size = settings.beginReadArray(group);
-    dstUri  = settings.value("dst").toString();
     width   = settings.value("width",   DEFAULT_WIDTH).toInt();
     height  = settings.value("height",  DEFAULT_HEIGHT).toInt();
     delay   = settings.value("delay",   DEFAULT_RESTART_DELAY).toInt();
     padding = settings.value("padding", DEFAULT_PADDING).toInt();
     margins = settings.value("margins", DEFAULT_MARGINS).toRect();
     encoder = settings.value("encoder", DEFAULT_ENCODER).toString();
+    message = settings.value("message", DEFAULT_MESSAGE).toString();
+
+    auto size = settings.beginReadArray(group);
+    dstUri  = settings.value("dst").toString();
+    width   = settings.value("width",   width).toInt();
+    height  = settings.value("height",  height).toInt();
+    delay   = settings.value("delay",   delay).toInt();
+    padding = settings.value("padding", padding).toInt();
+    margins = settings.value("margins", margins).toRect();
+    encoder = settings.value("encoder", encoder).toString();
+    message = settings.value("message", message).toString();
 
     for (int i = 0; i < size; ++i)
     {
@@ -129,7 +139,8 @@ void Mixer::buildPipeline()
     }
 
     pipelineDef
-        .append("videotestsrc pattern=2 is-live=1 do-timestamp=1 ! " VIDEO_XRAW ",format=" FOURCC_I420)
+        .append("videotestsrc pattern=").append(inactiveStreams == srcMap.size()? "18":"2")
+        .append(" is-live=1 do-timestamp=1 ! " VIDEO_XRAW ",format=" FOURCC_I420)
         .append(",width=") .append(QString::number(margins.left() + margins.width()  + width  * rowSize + padding * (rowSize - 1)))
         .append(",height=").append(QString::number(margins.top()  + margins.height() + height * rowSize + padding * (rowSize - 1)))
         ;
@@ -138,7 +149,7 @@ void Mixer::buildPipeline()
     //
     if (inactiveStreams == srcMap.size())
     {
-        pipelineDef.append(" ! textoverlay halignment=center font-desc=24 text=\"no signal\"");
+        pipelineDef.append(" ! textoverlay halignment=center font-desc=24 text=\"").append(message).append('"');
         restart(60 * 1000); // Restart every 1 min
     }
 

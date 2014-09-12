@@ -22,6 +22,7 @@ class Mixer : public QObject
     int                 padding;
     QRect               margins;
     QString             encoder;
+    QString             message;
 
     void onBusMessage(const QGst::MessagePtr& msg);
     void onHttpFrame(const QGst::BufferPtr&, const QGst::PadPtr& padding);
