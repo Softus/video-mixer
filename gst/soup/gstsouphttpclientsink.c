@@ -645,13 +645,15 @@ send_message_locked (GstSoupHttpClientSink * souphttpsink)
   }
 
   /* If the URI went away, drop all these buffers */
-  if (souphttpsink->location == NULL) {
+  if (souphttpsink->location == NULL || *souphttpsink->location == '\x0') {
     free_buffer_list (souphttpsink->queued_buffers);
     souphttpsink->queued_buffers = NULL;
     return;
   }
 
   souphttpsink->message = soup_message_new ("PUT", souphttpsink->location);
+  if (!souphttpsink->message)
+      return;
 
   n = 0;
   if (souphttpsink->offset == 0) {
