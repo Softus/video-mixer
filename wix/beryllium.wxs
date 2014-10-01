@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?define ProductBuild     = "1.1" ?>
-<?define ProductRevision  = "4" ?>
+<?define ProductRevision  = "5" ?>
 <?define ProductName      = "Beryllium" ?>
 
 <?define Manufacturer    = "dc.baikal.ru" ?>
@@ -23,10 +23,12 @@
   <?define InstallPrivileges = "elevated" ?>
   <?define InstallScope      = "perMachine" ?>
   <?define DstDir            = "ProgramFilesFolder" ?>
+  <?define SysEnv            = "yes" ?>
 <?else ?>
   <?define InstallPrivileges = "limited" ?>
   <?define InstallScope      = "perUser" ?>
   <?define DstDir            = "CommonAppDataFolder" ?>
+  <?define SysEnv            = "no" ?>
 <?endif ?>
 
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
@@ -83,7 +85,7 @@
 
           <Directory Id="ProductFolder32" Name="$(var.ProductName)" FileSource="$(var.SrcDir32)">
             <Component Id="Comp_Application32" Guid="B100D0FF-AF56-0101-0314-079500628307" Win64="no">
-              <Environment Id="PATH" Name="PATH" Value="[GSTREAMERSDKROOT_X86]\[GSTREAMERSDKVERSION_X86]\x86\bin" Permanent="no" Part="last" Action="set" System="no" />
+              <Environment Id="PATH" Name="PATH" Value="[GSTREAMERSDKROOT_X86]\[GSTREAMERSDKVERSION_X86]\x86\bin" Permanent="no" Part="first" Action="set" System="$(var.SysEnv)" />
               <File Id="File_Beryllium_x86" Name="beryllium.exe" KeyPath="yes">
                 <Shortcut Id="Shortcut_Beryllium_x86" Directory="ProgramMenuFolder" Name="Beryllium" Advertise="yes" Icon="beryllium.ico">
                   <Icon Id="beryllium.ico" SourceFile="../beryllium.ico" />
