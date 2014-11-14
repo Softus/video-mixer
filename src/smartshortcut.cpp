@@ -22,6 +22,9 @@
 #include <QDateTime>
 #include <QDebug>
 #include <QMouseEvent>
+#include <QSettings>
+
+#define DEFAULT_LONG_PRESS_TIMEOUT   2000
 
 bool grabKey(int key);
 bool ungrabKey(int key);
@@ -136,7 +139,7 @@ struct SmartHandler
             return false;
         }
 
-        bool longPress = SmartShortcut::timestamp() - ts > LONG_PRESS_TIMEOUT;
+        bool longPress = SmartShortcut::longPressTimeout(ts);
 
         Q_FOREACH (auto t, targets)
         {
@@ -149,6 +152,8 @@ struct SmartHandler
 };
 
 static QHash<int, SmartHandler> handlers;
+
+qint64 SmartShortcut::longPressTimeoutInMsec = 0;
 
 void SmartShortcut::remove(QObject *target)
 {
@@ -320,6 +325,11 @@ QString SmartShortcut::toString(int key, QKeySequence::SequenceFormat format)
 SmartShortcut::SmartShortcut(QObject *parent)
     : QObject(parent)
 {
+    if (!longPressTimeoutInMsec)
+    {
+        longPressTimeoutInMsec = QSettings().value("long-press-timeout", DEFAULT_LONG_PRESS_TIMEOUT).toLongLong();
+    }
+
     qApp->installEventFilter(this);
 }
 
@@ -429,4 +439,9 @@ qint64 SmartShortcut::timestamp()
 #else
     return QTime(0,0,0).msecsTo(QTime::currentTime());
 #endif
+}
+
+bool SmartShortcut::longPressTimeout(qint64 ts)
+{
+    return timestamp() - ts > longPressTimeoutInMsec;
 }
