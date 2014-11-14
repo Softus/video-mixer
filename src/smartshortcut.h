@@ -30,14 +30,15 @@ QT_END_NAMESPACE
 #define MOUSE_SHORTCUT_MASK  0x80000000
 #define GLOBAL_SHORTCUT_MASK 0x00800000
 #define LONG_PRESS_MASK      0x00400000
-#define LONG_PRESS_TIMEOUT   500
 
 class SmartShortcut : public QObject
 {
     Q_OBJECT
+    static qint64 longPressTimeoutInMsec;
 
 public:
     static qint64 timestamp();
+    static bool longPressTimeout(qint64 ts);
     static void remove(QObject *parent);
     static void removeAll();
     static void setShortcut(QObject *parent, int key);
