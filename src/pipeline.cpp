@@ -185,10 +185,10 @@ QString appendVideo(QString& pipe, QSettings& settings, int index)
                 .append(rtpSinkParams);
         }
 
-        if (enableHttp)
+        if (enableHttp && !httpPushUrl.isEmpty())
         {
-            pipe.append("\nvideosplitter. ! queue ! mpegtsmux name=httpmux ! ")
-                .append(httpSinkDef).append(" async=0 name=httpsink location=\"").append(httpPushUrl).append("\" ").append(httpSinkParams);
+            pipe.append("\nvideosplitter. ! queue ! mpegtsmux name=httpmux ! ").append(httpSinkDef)
+                .append(" async=0 name=httpsink location=\"").append(httpPushUrl).append("\" ").append(httpSinkParams);
         }
     }
 
