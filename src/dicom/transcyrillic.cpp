@@ -446,7 +446,7 @@ QString translateToLatin(const QString& str)
             ret.append("zh");
             break;
         case L'з':
-            ret.append('Z');
+            ret.append('z');
             break;
         case L'и': // В конце слова 'ий' == 'y'
             if (str.length() > i && str[i] == L'й')

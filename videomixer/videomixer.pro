@@ -6,7 +6,7 @@ QT       -= gui
 
 CONFIG += link_pkgconfig
 greaterThan(QT_MAJOR_VERSION, 4) {
-    PKGCONFIG += Qt5GLib-2.0 Qt5GStreamer-0.10 Qt5GStreamerUi-0.10
+    PKGCONFIG += Qt5GLib-2.0 Qt5GStreamer-1.0 Qt5GStreamerUi-1.0
 }
 else {
     PKGCONFIG += QtGLib-2.0 QtGStreamer-0.10 QtGStreamerUi-0.10

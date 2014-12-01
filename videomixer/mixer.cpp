@@ -8,26 +8,51 @@
 #include <QGst/Bus>
 #include <QGst/Parse>
 
+#include <gst/gst.h>
+
 #define DEFAULT_WIDTH         160
 #define DEFAULT_HEIGHT        120
 #define DEFAULT_RESTART_DELAY 1000
 #define DEFAULT_PADDING       8
 #define DEFAULT_MARGINS       QRect(32, 32, 32, 32)
-#define DEFAULT_ENCODER       "ffenc_mpeg2video bitrate=1000000"
+#define DEFAULT_MESSAGE       "No active sources"
+
+#if GST_CHECK_VERSION(1,0,0)
+#define VIDEO_XRAW      "video/x-raw"
+#define FOURCC_I420     "(string)I420"
+#define VIDEOCONVERTER  "videoconvert"
+#define VIDEODECODER    "tsdemux ! avdec_mpeg2video"
+#define DEFAULT_ENCODER "avenc_mpeg2video bitrate=1000000"
+#else
+#define VIDEO_XRAW      "video/x-raw-yuv"
+#define FOURCC_I420     "(fourcc)I420"
+#define VIDEOCONVERTER  "ffmpegcolorspace"
+#define VIDEODECODER    "mpegtsdemux ! ffdec_mpeg2video"
+#define DEFAULT_ENCODER "ffenc_mpeg2video bitrate=1000000"
+#endif
 
 Mixer::Mixer(const QString& group, QObject *parent) :
     QObject(parent), updateTimerId(0)
 {
     QSettings settings;
 
-    auto size = settings.beginReadArray(group);
-    dstUri  = settings.value("dst").toString();
     width   = settings.value("width",   DEFAULT_WIDTH).toInt();
     height  = settings.value("height",  DEFAULT_HEIGHT).toInt();
     delay   = settings.value("delay",   DEFAULT_RESTART_DELAY).toInt();
     padding = settings.value("padding", DEFAULT_PADDING).toInt();
     margins = settings.value("margins", DEFAULT_MARGINS).toRect();
     encoder = settings.value("encoder", DEFAULT_ENCODER).toString();
+    message = settings.value("message", DEFAULT_MESSAGE).toString();
+
+    auto size = settings.beginReadArray(group);
+    dstUri  = settings.value("dst").toString();
+    width   = settings.value("width",   width).toInt();
+    height  = settings.value("height",  height).toInt();
+    delay   = settings.value("delay",   delay).toInt();
+    padding = settings.value("padding", padding).toInt();
+    margins = settings.value("margins", margins).toRect();
+    encoder = settings.value("encoder", encoder).toString();
+    message = settings.value("message", message).toString();
 
     for (int i = 0; i < size; ++i)
     {
@@ -70,7 +95,7 @@ void Mixer::buildPipeline()
     // Append output
     //
     pipelineDef
-        .append("videomixer name=mix ! ffmpegcolorspace")
+        .append("videomixer name=mix ! " VIDEOCONVERTER)
         .append(" ! ").append(encoder)
         .append(" ! mpegtsmux ! queue ! souphttpclientsink sync=0 location=").append(dstUri).append('\n');
 
@@ -87,9 +112,9 @@ void Mixer::buildPipeline()
             auto text = src.value().first;
             pipelineDef
                 .append("souphttpsrc timeout=1 do-timestamp=1 location=").append(src.key())
-                .append(" ! queue ! mpegtsdemux ! ffdec_mpeg2video ! videoscale ! video/x-raw-yuv,width=")
+                .append(" ! queue ! " VIDEODECODER " ! videoscale ! " VIDEO_XRAW ",width=")
                     .append(QString::number(width)).append(",height=").append(QString::number(height))
-                    .append(" ! ffmpegcolorspace ! cairotextoverlay valign=bottom halign=right xpad=2 ypad=2 text=")
+                    .append(" ! " VIDEOCONVERTER " ! textoverlay valignment=bottom halignment=right xpad=2 ypad=2 font-desc=24 text=")
                     .append(text).append(" ! videobox")
                     .append(" left=-").append(QString::number(margins.left() + (padding + width)  * left))
                     .append(" top=-") .append(QString::number(margins.top()  + (padding + height) * top))
@@ -114,7 +139,8 @@ void Mixer::buildPipeline()
     }
 
     pipelineDef
-        .append("videotestsrc pattern=2 is-live=1 do-timestamp=1 ! video/x-raw-yuv,format=(fourcc)I420")
+        .append("videotestsrc pattern=").append(inactiveStreams == srcMap.size()? "18":"2")
+        .append(" is-live=1 do-timestamp=1 ! " VIDEO_XRAW ",format=" FOURCC_I420)
         .append(",width=") .append(QString::number(margins.left() + margins.width()  + width  * rowSize + padding * (rowSize - 1)))
         .append(",height=").append(QString::number(margins.top()  + margins.height() + height * rowSize + padding * (rowSize - 1)))
         ;
@@ -123,7 +149,7 @@ void Mixer::buildPipeline()
     //
     if (inactiveStreams == srcMap.size())
     {
-        pipelineDef.append(" ! cairotextoverlay halign=center text=\"no signal\"");
+        pipelineDef.append(" ! textoverlay halignment=center font-desc=24 text=\"").append(message).append('"');
         restart(60 * 1000); // Restart every 1 min
     }
 

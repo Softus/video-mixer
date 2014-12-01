@@ -90,7 +90,7 @@ void HotKeyEdit::handleKeyReleaseEvent(QKeyEvent *event)
 
     m_stickyKey = key;
 
-    if (SmartShortcut::timestamp() - m_ts > LONG_PRESS_TIMEOUT)
+    if (SmartShortcut::longPressTimeout(m_ts))
     {
         key |= LONG_PRESS_MASK;
     }
@@ -111,7 +111,7 @@ void HotKeyEdit::handleMouseReleaseEvent(QMouseEvent *evt)
     if (!m_ignoreNextMouseEvent && evt->button() && isEnabled())
     {
         int key = 0x80000000 | evt->modifiers() | evt->button();
-        if (SmartShortcut::timestamp() - m_ts > LONG_PRESS_TIMEOUT)
+        if (SmartShortcut::longPressTimeout(m_ts))
         {
             key |= LONG_PRESS_MASK;
         }

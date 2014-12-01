@@ -5,7 +5,7 @@ lrelease *.ts
 
 dicom=0
 debug=0
-touch=0
+touch=1
 
 for arg in "$@"; do
   case $arg in
@@ -16,9 +16,13 @@ for arg in "$@"; do
     debug=1
      ;;
   'touch')
-    touch=1
+     touch=1
+     ;;
+  'notouch')
+    touch=0
      ;;
   *) echo "Unknown argument $arg"
+     echo "Valid arguments are debug dicom notouch"
      ;;
   esac
 done
