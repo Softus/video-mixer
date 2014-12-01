@@ -16,6 +16,7 @@
 
 #include "mainwindowdbusadaptor.h"
 #include "mainwindow.h"
+#include "pipeline.h"
 
 #include <QTimer>
 #include <QDBusConnection>
@@ -54,7 +55,7 @@ bool MainWindowDBusAdaptor::busy()
 
 bool MainWindowDBusAdaptor::recording()
 {
-    return wnd->recording;
+    return wnd->activePipeline->recording;
 }
 
 bool MainWindowDBusAdaptor::startStudy
@@ -125,7 +126,7 @@ bool MainWindowDBusAdaptor::takeSnapshot
     (const QString &imageFileTemplate
     )
 {
-    return wnd->takeSnapshot(imageFileTemplate);
+    return wnd->takeSnapshot(nullptr, imageFileTemplate);
 }
 
 bool MainWindowDBusAdaptor::startRecord

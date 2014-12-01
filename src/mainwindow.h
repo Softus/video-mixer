@@ -18,16 +18,6 @@
 #define MAINWINDOW_H
 
 #include <QDir>
-#include <QGst/Message>
-#include <QGst/Pipeline>
-#include <QGst/Element>
-#include <QGst/Pad>
-#include <QGst/Buffer>
-#include <QGst/Ui/VideoWidget>
-
-#include <QGlib/Error>
-#include <QGlib/Value>
-
 #include <QWidget>
 
 QT_BEGIN_NAMESPACE
@@ -44,6 +34,7 @@ QT_END_NAMESPACE
 
 class ArchiveWindow;
 class DcmDataset;
+class Pipeline;
 class SlidingStackedWidget;
 class Sound;
 class Worklist;
@@ -65,6 +56,8 @@ class MainWindow : public QWidget
     QAction*     actionSettings;
     QAction*     actionArchive;
     ArchiveWindow* archiveWindow;
+    QBoxLayout*  layoutSources;
+    QBoxLayout*  layoutVideo;
 #ifdef WITH_DICOM
     QAction*      actionWorklist;
     DcmDataset*   pendingPatient;
@@ -74,12 +67,10 @@ class MainWindow : public QWidget
 #ifdef WITH_TOUCH
     SlidingStackedWidget* mainStack;
 #endif
-    QGst::Ui::VideoWidget* displayWidget;
     QListWidget*  listImagesAndClips;
     QDir          outputPath;
     QDir          videoOutputPath;
     QString       clipPreviewFileName;
-    QString       pipelineDef;
 
     QString       accessionNumber;
     QString       patientId;
@@ -96,9 +87,6 @@ class MainWindow : public QWidget
     int           recordLimit;
     int           recordNotify;
     int           countdown;
-    bool          motionStart;
-    bool          motionStop;
-    bool          motionDetected;
     Sound*        sound;
 
     QMenuBar* createMenuBar();
@@ -108,40 +96,22 @@ class MainWindow : public QWidget
     // State machine
     //
     bool running;
-    bool recording;
 
-    // GStreamer pipeline
+    // GStreamer pipelines
     //
-    QGst::PipelinePtr pipeline;
-    QGst::ElementPtr displaySink;
-    QGst::ElementPtr imageValve;
-    QGst::ElementPtr imageSink;
-    QGst::ElementPtr videoEncoder;
-    QGst::ElementPtr displayOverlay;
+    Pipeline*        activePipeline;
+    QList<Pipeline*> pipelines;
+    QSize            altSrcSize;
 
     QString replace(QString str, int seqNo = 0);
-    QString buildPipeline();
-    QGst::PipelinePtr createPipeline();
-    void releasePipeline();
     void updateWindowTitle();
     QDir checkPath(const QString tpl, bool needUnique);
     void updateOutputPath(bool needUnique);
-    QString appendVideoTail(const QDir &dir, const QString& prefix, const QString &fileTemplate, int idx, bool split);
-    void removeVideoTail(const QString& prefix);
 
-    void onBusMessage(const QGst::MessagePtr& msg);
-    void onElementMessage(const QGst::ElementMessagePtr& msg);
-
-    void onImageReady(const QGst::BufferPtr&);
-    void onClipFrame(const QGst::BufferPtr&);
-    void onVideoFrame(const QGst::BufferPtr&);
-    void errorGlib(const QGlib::ObjectPtr& obj, const QGlib::Error& ex);
-    void setElementProperty(const char* elm, const char* prop = nullptr, const QGlib::Value& value = nullptr, QGst::State minimumState = QGst::StatePlaying);
-    void setElementProperty(QGst::ElementPtr& elm, const char* prop = nullptr, const QGlib::Value& value = nullptr, QGst::State minimumState = QGst::StatePlaying);
     bool startVideoRecord();
     void updateStartDialog();
     bool confirmStopStudy();
-    bool takeSnapshot(const QString& imageTemplate = QString());
+    bool takeSnapshot(Pipeline* pipeline = nullptr, const QString& imageTemplate = QString());
     bool startRecord(int duration = 0, const QString &clipFileTemplate = QString());
 
 public:
@@ -149,15 +119,18 @@ public:
     ~MainWindow();
 
 protected:
-    virtual void closeEvent(QCloseEvent *evt);
-    virtual void showEvent(QShowEvent *);
-    virtual void hideEvent(QHideEvent *);
-    virtual void resizeEvent(QResizeEvent *);
+    virtual void closeEvent(QCloseEvent*);
+    virtual void showEvent(QShowEvent*);
+    virtual void hideEvent(QHideEvent*);
+    virtual void resizeEvent(QResizeEvent*);
     virtual void timerEvent(QTimerEvent*);
 signals:
     void enableWidget(QWidget*, bool);
-    void clipFrameReady();
-    void updateOverlayText();
+    void updateOverlayText(int);
+
+public slots:
+    void updatePipeline();
+    void toggleSetting();
 
 private slots:
 #ifdef WITH_DICOM
@@ -166,20 +139,24 @@ private slots:
 #else
     void onStartStudy();
 #endif
-    void onStopStudy();
+    void onClipFrameReady();
+    void onEnableWidget(QWidget*, bool);
+    void onImageSaved(const QString& filename, const QString& tooltip, const QPixmap& pm);
+    void onMotion(bool detected);
+    void onPipelineError(const QString& text);
+    void onPrepareSettingsMenu();
+    void onRecordStartClick();
+    void onRecordStopClick();
     void onShowAboutClick();
     void onShowArchiveClick();
     void onShowSettingsClick();
-    void onStartClick();
     void onSnapshotClick();
-    void onRecordStartClick();
-    void onRecordStopClick();
-    void prepareSettingsMenu();
-    void toggleSetting();
-    void updatePipeline();
-    void onEnableWidget(QWidget*, bool);
-    void onClipFrameReady();
-    void onUpdateOverlayText();
+    void onSourceClick();
+    void onSourceSnapshot();
+    void onStartClick();
+    void onStopStudy();
+    void onSwapSources(QWidget*);
+    void onVideoFrameReady();
 
     friend class MainWindowDBusAdaptor;
 };

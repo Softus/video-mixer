@@ -22,8 +22,12 @@
 class ThumbnailList : public QListWidget
 {
     Q_OBJECT
+    bool _enableDragRemove;
+
 public:
-    explicit ThumbnailList(QWidget *parent = 0);
+    explicit ThumbnailList(bool enableDragRemove = false, QWidget *parent = 0);
+    bool enableDragRemove();
+    void setEnableDragRemove(bool enable);
 
 protected:
     virtual void dragEnterEvent(QDragEnterEvent *e);

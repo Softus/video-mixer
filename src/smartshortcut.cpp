@@ -443,5 +443,6 @@ qint64 SmartShortcut::timestamp()
 
 bool SmartShortcut::longPressTimeout(qint64 ts)
 {
+    qDebug() << timestamp() <<  ts << timestamp() - ts;
     return timestamp() - ts > longPressTimeoutInMsec;
 }

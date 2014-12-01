@@ -20,34 +20,50 @@
 #include <QWheelEvent>
 #include <QKeyEvent>
 
-ThumbnailList::ThumbnailList(QWidget *parent) :
-    QListWidget(parent)
+ThumbnailList::ThumbnailList(bool enableDragRemove, QWidget *parent) :
+  QListWidget(parent),
+  _enableDragRemove(enableDragRemove)
 {
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setWrapping(false);
     setDragEnabled(true);
-    setDragDropMode(DragDrop);
+    setDragDropMode(QAbstractItemView::DragDrop);
     setDefaultDropAction(Qt::MoveAction);
+}
+
+bool ThumbnailList::enableDragRemove()
+{
+    return _enableDragRemove;
+}
+
+void ThumbnailList::setEnableDragRemove(bool enable)
+{
+    _enableDragRemove = enable;
 }
 
 void ThumbnailList::startDrag(Qt::DropActions /*supportedActions*/)
 {
-     QListWidgetItem *item = currentItem();
+    if (!_enableDragRemove)
+    {
+        return;
+    }
 
-     QDrag *drag = new QDrag(this);
-     auto data = new QMimeData();
-     data->setData("remove", QByteArray());
-     drag->setMimeData(data);
+    QListWidgetItem *item = currentItem();
 
-     auto pm = item->icon().pixmap(item->sizeHint());
-     drag->setPixmap(pm.copy());
-     drag->setHotSpot(pm.rect().center());
+    QDrag *drag = new QDrag(this);
+    auto data = new QMimeData();
+    data->setData("remove", QByteArray());
+    drag->setMimeData(data);
 
-     clearSelection();
-     if (drag->exec(Qt::MoveAction) == Qt::IgnoreAction)
-     {
-         emit itemDraggedOut(item);
-     }
+    auto pm = item->icon().pixmap(item->sizeHint());
+    drag->setPixmap(pm.copy());
+    drag->setHotSpot(pm.rect().center());
+
+    clearSelection();
+    if (drag->exec(Qt::MoveAction) == Qt::IgnoreAction)
+    {
+        emit itemDraggedOut(item);
+    }
 }
 
 void ThumbnailList::dragEnterEvent(QDragEnterEvent *evt)
@@ -55,9 +71,12 @@ void ThumbnailList::dragEnterEvent(QDragEnterEvent *evt)
     if (evt->mimeData()->hasFormat("remove"))
     {
         evt->accept();
-        return;
     }
-    QListWidget::dragEnterEvent(evt);
+    else if (evt->mimeData()->hasFormat("videowidget"))
+    {
+        evt->setDropAction(Qt::CopyAction);
+        evt->accept();
+    }
 }
 
 void ThumbnailList::dragMoveEvent(QDragMoveEvent *evt)
@@ -65,19 +84,21 @@ void ThumbnailList::dragMoveEvent(QDragMoveEvent *evt)
     if (evt->mimeData()->hasFormat("remove"))
     {
         evt->accept();
-        return;
     }
-    QListWidget::dragMoveEvent(evt);
+    else if (evt->mimeData()->hasFormat("videowidget"))
+    {
+        evt->setDropAction(Qt::CopyAction);
+        evt->accept();
+    }
 }
 
 void ThumbnailList::dropEvent(QDropEvent *evt)
 {
-    if (evt->mimeData()->hasFormat("remove"))
+    if (evt->mimeData()->hasFormat("videowidget"))
     {
+        evt->setDropAction(Qt::CopyAction);
         evt->accept();
-        return;
     }
-    QListWidget::dropEvent(evt);
 }
 
 void ThumbnailList::wheelEvent(QWheelEvent *e)

@@ -193,7 +193,7 @@ ArchiveWindow::ArchiveWindow(QWidget *parent)
     player->setLayout(playerLayout);
     layoutMain->addWidget(player);
 
-    listFiles = new ThumbnailList;
+    listFiles = new ThumbnailList(true);
     listFiles->setSelectionMode(QListWidget::ExtendedSelection);
 //    listFiles->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 //    listFiles->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
