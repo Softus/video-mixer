@@ -27,13 +27,19 @@
 #include <QGst/PropertyProbe>
 
 static QTreeWidgetItem*
-newItem(const QString& title, const QString& elmName, const QString& propName)
+newItem(const QString& name, const QString& device, const QVariantMap& parameters, bool enabled = true)
 {
-    auto item = new QTreeWidgetItem(QStringList() << title);
+    auto title = name.isEmpty()? device: device + " (" + name + ")";
+    auto item = new QTreeWidgetItem(QStringList()
+                                    << title
+                                    << parameters.value("modality").toString()
+                                    << parameters.value("alias").toString()
+                                    );
     item->setFlags(Qt::ItemNeverHasChildren | Qt::ItemIsEnabled | Qt::ItemIsUserCheckable | Qt::ItemIsSelectable);
-    item->setCheckState(0, Qt::Checked);
-    item->setData(0, Qt::UserRole, elmName);
-    item->setData(1, Qt::UserRole, propName);
+    item->setCheckState(0, enabled? Qt::Checked: Qt::Unchecked);
+    item->setData(0, Qt::UserRole, device);
+    item->setData(1, Qt::UserRole, name);
+    item->setData(2, Qt::UserRole, parameters);
     return item;
 }
 
@@ -61,7 +67,7 @@ VideoSources::VideoSources(QWidget *parent) :
     buttonsLayout->addWidget(btnDetails);
     if (qApp->keyboardModifiers().testFlag(Qt::ShiftModifier))
     {
-        auto btnAdd = new QPushButton(tr("&Add"));
+        auto btnAdd = new QPushButton(tr("&Add test source"));
         connect(btnAdd, SIGNAL(clicked()), this, SLOT(onAddClicked()));
         buttonsLayout->addWidget(btnAdd);
     }
@@ -69,14 +75,28 @@ VideoSources::VideoSources(QWidget *parent) :
     mainLayout->addItem(buttonsLayout);
     setLayout(mainLayout);
 
+    settings.beginGroup("gst");
+    auto cnt = settings.beginReadArray("src");
+    for (int i = 0; i < cnt; ++i)
+    {
+        settings.setArrayIndex(i);
+        auto device       = settings.value("device").toString();
+        auto friendlyName = settings.value("device-name").toString();
+        auto enabled      = settings.value("enabled").toBool();
+        auto parameters   = settings.value("parameters").toMap();
+        parameters["device-type"] = settings.value("device-type", PLATFORM_SPECIFIC_SOURCE);
+        auto item = newItem(friendlyName, device, parameters, enabled);
+        listSources->addTopLevelItem(item);
+    }
+    settings.endArray();
+    settings.endGroup();
+
     btnDetails->setEnabled(false);
 }
 
 void VideoSources::showEvent(QShowEvent *e)
 {
     QWidget::showEvent(e);
-
-    listSources->clear();
 
     // Populate cameras list
     //
@@ -91,9 +111,6 @@ void VideoSources::showEvent(QShowEvent *e)
 
 void VideoSources::updateDeviceList(const char* elmName, const char* propName)
 {
-    QSettings settings;
-    settings.beginGroup("gst");
-
     auto src = QGst::ElementFactory::make(elmName);
     if (!src) {
         QMessageBox::critical(this, windowTitle(), tr("Failed to create element '%1'").arg(elmName));
@@ -111,9 +128,26 @@ void VideoSources::updateDeviceList(const char* elmName, const char* propName)
         {
             auto deviceName = device.toString();
             auto friendlyName = src->property("device-name").toString();
-            friendlyName = friendlyName.isEmpty()? deviceName: deviceName + " (" + friendlyName + ")";
+            auto found = false;
 
-            listSources->addTopLevelItem(newItem(deviceName, elmName, propName));
+            foreach (auto item, listSources->findItems(deviceName, Qt::MatchStartsWith))
+            {
+                if (item->data(0, Qt::UserRole).toString() == deviceName &&
+                    item->data(1, Qt::UserRole).toString() == friendlyName)
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found)
+            {
+                auto alias = QString("src%1").arg(listSources->topLevelItemCount());
+                QVariantMap parameters;
+                parameters["alias"] = alias;
+                parameters["device-type"] = elmName;
+                listSources->addTopLevelItem(newItem(friendlyName, deviceName, parameters));
+            }
         }
     }
 }
@@ -131,18 +165,45 @@ void VideoSources::onItemDoubleClicked(QTreeWidgetItem*, int)
 void VideoSources::onEditClicked()
 {
     auto item = listSources->currentItem();
-    VideoSourceDetails dlg(item->text(0), item->data(0, Qt::UserRole).toString(), item->data(1, Qt::UserRole).toString(), this);
+    auto device     = item->data(0, Qt::UserRole).toString();
+    auto parameters = item->data(2, Qt::UserRole).toMap();
+    auto deviceType = parameters["device-type"].toString();
+
+    VideoSourceDetails dlg(parameters, this);
+    dlg.setWindowTitle(item->text(0));
+    dlg.updateDevice(device, deviceType);
+
     if (dlg.exec())
     {
-
+        dlg.updateParameters(parameters);
+        item->setData(2, Qt::UserRole, parameters);
+        item->setText(1, parameters["modality"].toString());
+        item->setText(2, parameters["alias"].toString());
     }
 }
 
 void VideoSources::onAddClicked()
 {
-    listSources->addTopLevelItem(newItem("videotest", "videotestsrc", "pattern"));
+    QVariantMap parameters;
+    parameters["alias"] = QString("src%1").arg(listSources->topLevelItemCount());
+    parameters["device-type"] = "videotestsrc";
+    listSources->addTopLevelItem(newItem("", "Video test source", parameters));
 }
 
 void VideoSources::save(QSettings& settings)
 {
+    settings.beginGroup("gst");
+    settings.beginWriteArray("src");
+
+    for (int i = 0; i < listSources->topLevelItemCount(); ++i)
+    {
+        settings.setArrayIndex(i);
+        auto item = listSources->topLevelItem(i);
+        settings.setValue("device", item->data(0, Qt::UserRole));
+        settings.setValue("device-name", item->data(1, Qt::UserRole));
+        settings.setValue("enabled", item->checkState(0) == Qt::Checked);
+        settings.setValue("parameters", item->data(2, Qt::UserRole));
+    }
+    settings.endArray();
+    settings.endGroup();
 }

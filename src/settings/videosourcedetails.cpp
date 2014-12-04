@@ -17,6 +17,7 @@
 #include "videosourcedetails.h"
 #include "../defaults.h"
 #include <algorithm>
+
 #include <QApplication>
 #include <QCheckBox>
 #include <QComboBox>
@@ -28,9 +29,8 @@
 #include <QSettings>
 #include <QSpinBox>
 #include <QTextEdit>
+#include <QxtLineEdit>
 
-// Video encoder
-//
 #include <QGlib/Error>
 #include <QGlib/ParamSpec>
 #include <QGlib/Value>
@@ -45,94 +45,127 @@
 #include <gst/gst.h>
 #include <gst/interfaces/tuner.h>
 
-VideoSourceDetails::VideoSourceDetails(const QString& device, const QString& elmName, const QString& propName, QWidget *parent)
+static QString getPropName(const QString& deviceType)
+{
+    if (deviceType == "videotestsrc")  return "pattern";
+    if (deviceType == "dshowvideosrc") return "device-name";
+    if (deviceType == "v4l2src")       return "device";
+    if (deviceType == "osxvideosrc")   return "device";
+
+    // Unknown device type
+    return QString();
+}
+
+// TODO: rewrite with qvariantmap
+VideoSourceDetails::VideoSourceDetails(const QVariantMap& parameters, QWidget *parent)
   : QDialog(parent)
   , checkFps(nullptr)
   , spinFps(nullptr)
 {
-    QSettings settings;
-    settings.beginGroup("gst");
-    auto layout = new QFormLayout();
+    selectedChannel = parameters.value("video-channel");
+    selectedFormat  = parameters.value("format").toString();
+    selectedSize    = parameters.value("size").toSize();
 
-    layout->addRow(tr("I&nput channel"), listChannels = new QComboBox());
+    auto layoutMain = new QFormLayout();
+
+    editAlias= new QLineEdit(parameters.value("alias").toString());
+    layoutMain->addRow(tr("&Alias"), editAlias);
+
+#ifdef WITH_DICOM
+    // Modality override
+    //
+    editModality  = new QxtLineEdit(parameters.value("modality").toString());
+    editModality->setSampleText(tr("(default)"));
+    layoutMain->addRow(tr("&Modality"), editModality);
+#endif
+
+    layoutMain->addRow(tr("I&nput channel"), listChannels = new QComboBox());
     listChannels->addItem(tr("(default)"));
     connect(listChannels, SIGNAL(currentIndexChanged(int)), this, SLOT(inputChannelChanged(int)));
-    layout->addRow(tr("Pixel &format"), listFormats = new QComboBox());
+    layoutMain->addRow(tr("Pixel &format"), listFormats = new QComboBox());
     connect(listFormats, SIGNAL(currentIndexChanged(int)), this, SLOT(formatChanged(int)));
-    layout->addRow(tr("Frame &size"), listSizes = new QComboBox());
-    layout->addRow(tr("Video &codec"), listVideoCodecs = new QComboBox());
+    layoutMain->addRow(tr("Frame &size"), listSizes = new QComboBox());
+    layoutMain->addRow(tr("Video &codec"), listVideoCodecs = new QComboBox());
 
     auto elm = QGst::ElementFactory::make("videorate");
     if (elm && elm->findProperty("max-rate"))
     {
-        layout->addRow(checkFps = new QCheckBox(tr("&Limit rate")), spinFps = new QSpinBox());
+        layoutMain->addRow(checkFps = new QCheckBox(tr("&Limit rate")), spinFps = new QSpinBox());
         connect(checkFps, SIGNAL(toggled(bool)), spinFps, SLOT(setEnabled(bool)));
-        checkFps->setChecked(settings.value("limit-video-fps", DEFAULT_LIMIT_VIDEO_FPS).toBool());
+        checkFps->setChecked(parameters.value("limit-video-fps", DEFAULT_LIMIT_VIDEO_FPS).toBool());
 
         spinFps->setRange(1, 200);
-        spinFps->setValue(settings.value("video-max-fps", DEFAULT_VIDEO_MAX_FPS).toInt());
+        spinFps->setValue(parameters.value("video-max-fps", DEFAULT_VIDEO_MAX_FPS).toInt());
         spinFps->setSuffix(tr(" frames per second"));
         spinFps->setEnabled(checkFps->isChecked());
     }
-    layout->addRow(tr("Video &bitrate"), spinBitrate = new QSpinBox());
+    layoutMain->addRow(tr("Video &bitrate"), spinBitrate = new QSpinBox());
     spinBitrate->setRange(0, 102400);
     spinBitrate->setSingleStep(100);
     spinBitrate->setSuffix(tr(" kbit per second"));
-    spinBitrate->setValue(settings.value("bitrate", DEFAULT_VIDEOBITRATE).toInt());
+    spinBitrate->setValue(parameters.value("bitrate", DEFAULT_VIDEOBITRATE).toInt());
 
-    layout->addRow(nullptr, checkDeinterlace = new QCheckBox(tr("De&interlace")));
-    checkDeinterlace->setChecked(settings.value("video-deinterlace").toBool());
+    layoutMain->addRow(nullptr, checkDeinterlace = new QCheckBox(tr("De&interlace")));
+    checkDeinterlace->setChecked(parameters.value("video-deinterlace").toBool());
 
-    layout->addRow(tr("Video &muxer"), listVideoMuxers = new QComboBox());
-    layout->addRow(tr("Im&age codec"), listImageCodecs = new QComboBox());
-    layout->addRow(tr("RTP &payloader"), listRtpPayloaders = new QComboBox());
+    layoutMain->addRow(tr("Video m&uxer"), listVideoMuxers = new QComboBox());
+    layoutMain->addRow(tr("Ima&ge codec"), listImageCodecs = new QComboBox());
+    layoutMain->addRow(tr("RTP &payloader"), listRtpPayloaders = new QComboBox());
 
     // UDP streaming
     //
-    textRtpClients = new QLineEdit(settings.value("rtp-clients").toString());
-    layout->addRow(checkEnableRtp = new QCheckBox(tr("&RTP clients")), textRtpClients);
-    connect(checkEnableRtp, SIGNAL(toggled(bool)), textRtpClients, SLOT(setEnabled(bool)));
-    checkEnableRtp->setChecked(settings.value("enable-rtp").toBool());
-    textRtpClients->setEnabled(checkEnableRtp->isChecked());
+    editRtpClients = new QLineEdit(parameters.value("rtp-clients").toString());
+    layoutMain->addRow(checkEnableRtp = new QCheckBox(tr("&RTP clients")), editRtpClients);
+    connect(checkEnableRtp, SIGNAL(toggled(bool)), editRtpClients, SLOT(setEnabled(bool)));
+    checkEnableRtp->setChecked(parameters.value("enable-rtp").toBool());
+    editRtpClients->setEnabled(checkEnableRtp->isChecked());
 
     // Http streaming
     //
-    textHttpPushUrl = new QLineEdit(settings.value("http-push-url").toString());
-    layout->addRow(checkEnableHttp = new QCheckBox(tr("&Http push URL")), textHttpPushUrl);
-    connect(checkEnableHttp, SIGNAL(toggled(bool)), textHttpPushUrl, SLOT(setEnabled(bool)));
-    checkEnableHttp->setChecked(settings.value("enable-http").toBool());
-    textHttpPushUrl->setEnabled(checkEnableHttp->isChecked());
+    editHttpPushUrl = new QLineEdit(parameters.value("http-push-url").toString());
+    layoutMain->addRow(checkEnableHttp = new QCheckBox(tr("&Http push URL")), editHttpPushUrl);
+    connect(checkEnableHttp, SIGNAL(toggled(bool)), editHttpPushUrl, SLOT(setEnabled(bool)));
+    checkEnableHttp->setChecked(parameters.value("enable-http").toBool());
+    editHttpPushUrl->setEnabled(checkEnableHttp->isChecked());
 
-    setLayout(layout);
+    // Buttons row
+    //
+    auto layoutBtns = new QHBoxLayout;
+    layoutBtns->addStretch(1);
+    auto btnCancel = new QPushButton(tr("Cancel"));
+    connect(btnCancel, SIGNAL(clicked()), this, SLOT(reject()));
+    layoutBtns->addWidget(btnCancel);
+    auto btnSave = new QPushButton(tr("Save"));
+    connect(btnSave, SIGNAL(clicked()), this, SLOT(accept()));
+    btnSave->setDefault(true);
+    layoutBtns->addWidget(btnSave);
+    layoutMain->addRow(layoutBtns);
+
+    setLayout(layoutMain);
 
     // Refill the boxes every time the page is shown
     //
-    auto selectedCodec = updateGstList("video-encoder", DEFAULT_VIDEO_ENCODER, GST_ELEMENT_FACTORY_TYPE_ENCODER | GST_ELEMENT_FACTORY_TYPE_MEDIA_VIDEO, listVideoCodecs);
+    auto selectedCodec = updateGstList(parameters, "video-encoder", DEFAULT_VIDEO_ENCODER, GST_ELEMENT_FACTORY_TYPE_ENCODER | GST_ELEMENT_FACTORY_TYPE_MEDIA_VIDEO, listVideoCodecs);
     listVideoCodecs->insertItem(0, tr("(none)"));
     if (selectedCodec.isEmpty())
     {
         listVideoCodecs->setCurrentIndex(0);
     }
-    auto selectedMuxer = updateGstList("video-muxer",   DEFAULT_VIDEO_MUXER,   GST_ELEMENT_FACTORY_TYPE_MUXER, listVideoMuxers);
+    auto selectedMuxer = updateGstList(parameters, "video-muxer",   DEFAULT_VIDEO_MUXER,   GST_ELEMENT_FACTORY_TYPE_MUXER, listVideoMuxers);
     listVideoMuxers->insertItem(0, tr("(none)"));
     if (selectedMuxer.isEmpty())
     {
         listVideoMuxers->setCurrentIndex(0);
     }
-    updateGstList("image-encoder", DEFAULT_IMAGE_ENCODER, GST_ELEMENT_FACTORY_TYPE_ENCODER | GST_ELEMENT_FACTORY_TYPE_MEDIA_IMAGE, listImageCodecs);
-    updateGstList("rtp-payloader", DEFAULT_RTP_PAYLOADER, GST_ELEMENT_FACTORY_TYPE_PAYLOADER, listRtpPayloaders);
-
-    updateDevice(device, elmName, propName);
+    updateGstList(parameters, "image-encoder", DEFAULT_IMAGE_ENCODER, GST_ELEMENT_FACTORY_TYPE_ENCODER | GST_ELEMENT_FACTORY_TYPE_MEDIA_IMAGE, listImageCodecs);
+    updateGstList(parameters, "rtp-payloader", DEFAULT_RTP_PAYLOADER, GST_ELEMENT_FACTORY_TYPE_PAYLOADER, listRtpPayloaders);
 }
 
-QString VideoSourceDetails::updateGstList(const char* setting, const char* def, unsigned long long type, QComboBox* cb)
+QString VideoSourceDetails::updateGstList(const QVariantMap& parameters, const char* settingName, const char* def, unsigned long long type, QComboBox* cb)
 {
-    QSettings settings;
-    settings.beginGroup("gst");
-
     cb->clear();
-    auto selectedCodec = settings.value(setting, def).toString();
-    auto extra = settings.value(QString(setting)+"-extra").toBool() || qApp->keyboardModifiers().testFlag(Qt::ShiftModifier);
+    auto selectedCodec = parameters.value(settingName, def).toString();
+    auto extra = parameters.value(QString(settingName)+"-extra").toBool() || qApp->keyboardModifiers().testFlag(Qt::ShiftModifier);
     auto elmList = gst_element_factory_list_get_elements(type, extra? GST_RANK_NONE: GST_RANK_SECONDARY);
     for (auto curr = elmList; curr; curr = curr->next)
     {
@@ -148,24 +181,27 @@ QString VideoSourceDetails::updateGstList(const char* setting, const char* def, 
     return selectedCodec;
 }
 
-void VideoSourceDetails::updateDevice(const QString& device, const QString& elmName, const QString& propName)
+void VideoSourceDetails::updateDevice(const QString& device, const QString& deviceType)
 {
     int idx = 0;
-    QSettings settings;
-    settings.beginGroup("gst");
 
-    auto src = QGst::ElementFactory::make(elmName);
-    if (!src) {
-        QMessageBox::critical(this, windowTitle(), tr("Failed to create element '%1'").arg(elmName));
+    auto src = QGst::ElementFactory::make(deviceType);
+    if (!src)
+    {
+        QMessageBox::critical(this, windowTitle(), tr("Failed to create element '%1'").arg(deviceType));
         return;
     }
 
+    auto propName = getPropName(deviceType);
     auto srcPad = src->getStaticPad("src");
     if (srcPad)
     {
-        // To set the property, the device must be in Null state
-        //
-        src->setProperty(propName.toUtf8(), device);
+        if (!propName.isEmpty())
+        {
+            // To set this property, the device must be in Null state
+            //
+            src->setProperty(propName.toUtf8(), device);
+        }
 
         // To query the caps, the device must be in Ready state
         //
@@ -178,8 +214,7 @@ void VideoSourceDetails::updateDevice(const QString& device, const QString& elmN
         auto tuner = GST_TUNER(src);
         if (tuner)
         {
-            auto selectedChannel = settings.value("video-channel").toString();
-
+            auto selectedChannelLabel = selectedChannel.toString();
             // The list is owned by the GstTuner and must not be freed.
             //
             auto channelList = gst_tuner_list_channels(tuner);
@@ -189,7 +224,7 @@ void VideoSourceDetails::updateDevice(const QString& device, const QString& elmN
                 //gst_tuner_set_channel(tuner, ch);
 
                 listChannels->addItem(ch->label);
-                if (selectedChannel == ch->label)
+                if (selectedChannelLabel == ch->label)
                 {
                     idx = listChannels->count() - 1;
                 }
@@ -198,22 +233,26 @@ void VideoSourceDetails::updateDevice(const QString& device, const QString& elmN
         }
         else
         {
-            auto selectedChannel = settings.value("video-channel").toInt();
-            if (elmName == "dv1394src")
+            if (deviceType == "dv1394src")
             {
                 for (int i = 1; i <= 64; ++i)
                 {
                     listChannels->addItem(QString::number(i));
                 }
-                idx = selectedChannel - 1;
+                idx = selectedChannel.toInt();
             }
-            else if (elmName == "videotestsrc")
+            else if (deviceType == "videotestsrc")
             {
-                for (int i = 0; i <= 20; ++i)
+#if GST_CHECK_VERSION(1,0,0)
+                auto numPatterns = 23;
+#else
+                auto numPatterns = 21;
+#endif
+                for (int i = 1; i <= numPatterns; ++i)
                 {
                     listChannels->addItem(QString::number(i));
                 }
-                idx = selectedChannel;
+                idx = selectedChannel.toInt();
             }
         }
 
@@ -264,7 +303,6 @@ void VideoSourceDetails::inputChannelChanged(int index)
         return;
     }
 
-    auto selectedFormat = QSettings().value("gst/format").toString();
     for (uint i = 0; i < caps->size(); ++i)
     {
         auto s = caps->internalStructure(i);
@@ -313,7 +351,6 @@ void VideoSourceDetails::formatChanged(int index)
     }
 
     QList<QSize> sizes;
-    auto selectedSize = QSettings().value("gst/size").toSize();
     for (uint i = 0; i < caps->size(); ++i)
     {
         auto s = caps->internalStructure(i);
@@ -388,12 +425,12 @@ void VideoSourceDetails::formatChanged(int index)
     }
 }
 
-// Return nullptr for 'default', otherwise the text itself
+// Return nullptr for '(default)', otherwise the text itself
 //
 static QString getListText(const QComboBox* cb)
 {
     auto idx = cb->currentIndex();
-    return cb->itemData(idx).isNull()? nullptr: cb->itemText(idx);
+    return idx <= 0? nullptr: cb->itemText(idx);
 }
 
 static QVariant getListData(const QComboBox* cb)
@@ -401,49 +438,28 @@ static QVariant getListData(const QComboBox* cb)
     auto idx = cb->currentIndex();
     return cb->itemData(idx);
 }
-#if 0
-void VideoSourceDetails::save(QSettings& settings)
+
+void VideoSourceDetails::updateParameters(QVariantMap& settings)
 {
-    if (listVideoCodecs->count() == 0)
-    {
-        // The page was created, but never shown, so
-        // all listboxes are empty.
-        // Nothing has been changed, so exit right now
-        //
-        return;
-    }
+    settings["alias"]             = editAlias->text();
+    settings["modality"]          = editModality->text();
+    settings["video-channel"]     = getListText(listChannels);
+    settings["format"]            = getListData(listFormats);
+    settings["size"]              = getListData(listSizes);
+    settings["video-encoder"]     = getListData(listVideoCodecs);
+    settings["video-muxer"]       = getListData(listVideoMuxers);
+    settings["rtp-payloader"]     = getListData(listRtpPayloaders);
+    settings["image-encoder"]     = getListData(listImageCodecs);
+    settings["enable-rtp"]        = checkEnableRtp->isChecked();
+    settings["rtp-clients"]       = editRtpClients->text();
+    settings["enable-http"]       = checkEnableHttp->isChecked();
+    settings["http-push-url"]     = editHttpPushUrl->text();
+    settings["bitrate"]           = spinBitrate->value();
+    settings["video-deinterlace"] = checkDeinterlace->isChecked();
 
-    settings.beginGroup("gst");
-
-    auto device = getListData(listDevices).toStringList();
-    if (device.isEmpty())
-    {
-        settings.remove("device-type");
-        settings.remove("device");
-    }
-    else
-    {
-        settings.setValue("device-type", device.takeFirst());
-        settings.setValue("device", device.takeFirst());
-    }
-    settings.setValue("video-channel", getListText(listChannels));
-    settings.setValue("format",        getListData(listFormats));
-    settings.setValue("size",          getListData(listSizes));
-    settings.setValue("video-encoder", getListData(listVideoCodecs));
-    settings.setValue("video-muxer",   getListData(listVideoMuxers));
-    settings.setValue("rtp-payloader", getListData(listRtpPayloaders));
-    settings.setValue("image-encoder", getListData(listImageCodecs));
-    settings.setValue("enable-rtp",    checkEnableRtp->isChecked());
-    settings.setValue("rtp-clients",   textRtpClients->text());
-    settings.setValue("enable-http",   checkEnableHttp->isChecked());
-    settings.setValue("http-push-url", textHttpPushUrl->text());
-    settings.setValue("bitrate",       spinBitrate->value());
-    settings.setValue("video-deinterlace", checkDeinterlace->isChecked());
     if (spinFps)
     {
-        settings.setValue("limit-video-fps", checkFps->isChecked());
-        settings.setValue("video-max-fps", spinFps->value() > 0? spinFps->value(): QVariant());
+        settings["limit-video-fps"] = checkFps->isChecked();
+        settings["video-max-fps"] = spinFps->value() > 0? spinFps->value(): QVariant();
     }
-    settings.endGroup();
 }
-#endif

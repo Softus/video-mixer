@@ -29,6 +29,7 @@ class QComboBox;
 class QLineEdit;
 class QSpinBox;
 class QTextEdit;
+class QxtLineEdit;
 QT_END_NAMESPACE
 
 #define DEFAULT_VIDEOBITRATE 4000
@@ -36,6 +37,8 @@ QT_END_NAMESPACE
 class VideoSourceDetails : public QDialog
 {
     Q_OBJECT
+    QLineEdit *editAlias;
+    QxtLineEdit *editModality;
     QComboBox *listChannels;
     QComboBox *listFormats;
     QComboBox *listSizes;
@@ -46,18 +49,24 @@ class VideoSourceDetails : public QDialog
     QCheckBox *checkFps;
     QSpinBox  *spinFps;
     QSpinBox  *spinBitrate;
-    QLineEdit *textRtpClients;
+    QLineEdit *editRtpClients;
     QCheckBox *checkEnableRtp;
-    QLineEdit *textHttpPushUrl;
+    QLineEdit *editHttpPushUrl;
     QCheckBox *checkEnableHttp;
     QCheckBox *checkDeinterlace;
     QGst::CapsPtr caps;
 
-    void updateDevice(const QString& device, const QString& elmName, const QString& propName);
-    QString updateGstList(const char* setting, const char* def, unsigned long long type, QComboBox* cb);
+    QVariant selectedChannel;
+    QString  selectedFormat;
+    QSize    selectedSize;
+
+    QString updateGstList(const QVariantMap& parameters, const char* settingName, const char* def,
+                          unsigned long long type, QComboBox* cb);
 
 public:
-    explicit VideoSourceDetails(const QString& device, const QString& propName, const QString& elmName, QWidget *parent = 0);
+    explicit VideoSourceDetails(const QVariantMap& parameters, QWidget *parent = 0);
+    void updateDevice(const QString& device, const QString& deviceType);
+    void updateParameters(QVariantMap& parameters);
 
 signals:
     

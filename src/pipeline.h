@@ -21,6 +21,7 @@
 
 #include <QDir>
 #include <QObject>
+#include <QSettings>
 
 #include <QGlib/Error>
 #include <QGlib/Value>
@@ -35,7 +36,7 @@ class Pipeline : public QObject
 {
     Q_OBJECT
     int           index;
-    QString       name;
+    QString       alias;
     QString       pipelineDef;
 
     void onBusMessage(const QGst::MessagePtr& msg);
@@ -43,7 +44,7 @@ class Pipeline : public QObject
     void onImageReady(const QGst::BufferPtr&);
     void onClipFrame(const QGst::BufferPtr&);
     void onVideoFrame(const QGst::BufferPtr&);
-    QString buildPipeline();
+    QString buildPipeline(const QSettings& settings, const QString& outputPathDef, bool enableVideoLog);
     void releasePipeline();
     void errorGlib(const QGlib::ObjectPtr& obj, const QGlib::Error& ex);
     void setElementProperty(const char* elm, const char* prop = nullptr, const QGlib::Value& value = nullptr, QGst::State minimumState = QGst::StatePlaying);
