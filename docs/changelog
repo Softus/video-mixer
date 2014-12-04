@@ -1,3 +1,9 @@
+beryllium (1.1.6) debian;
+
+  * All files, scheduled for removal, now got removed before uplading to DICOM.
+
+ -- Pavel Bludov <pbludov@gmail.com>  Thu, 04 Dec 2014 12:54:00 +0800
+
 beryllium (1.1.5) debian;
 
   * Configurable long-press-timeout, in msecs (long-press-timeout=500 in config file).
