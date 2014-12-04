@@ -654,6 +654,7 @@ void ArchiveWindow::onSwitchModeClick(QAction* action)
 
 void ArchiveWindow::onShowFolderClick()
 {
+    reallyDeleteFiles();
     QDesktopServices::openUrl(QUrl::fromLocalFile(curr.absolutePath()));
 }
 
@@ -772,6 +773,7 @@ void ArchiveWindow::onStoreClick()
         return;
     }
 
+    reallyDeleteFiles();
     dlg.savePatientData(&patientDs);
     QFileInfoList files = curr.entryInfoList(QDir::Files);
 
