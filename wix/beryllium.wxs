@@ -155,7 +155,9 @@
       <ComponentRef Id="Comp_QtLibs32" />
       <ComponentRef Id="Comp_QtGstLibs32" />
       <ComponentRef Id="Comp_QtImageFormats32" />
+      <?if $(var.QtVersion)>4 ?>
       <ComponentRef Id="Comp_QtPlatforms32" />
+      <?endif ?>
       <ComponentRef Id="Comp_DBusService32" />
       <ComponentRef Id="Comp_opencv32" />
       <?if $(var.Platform)=x64 ?>
@@ -165,7 +167,9 @@
       <ComponentRef Id="Comp_QtLibs64" />
       <ComponentRef Id="Comp_QtGstLibs64" />
       <ComponentRef Id="Comp_QtImageFormats64" />
+      <?if $(var.QtVersion)>4 ?>
       <ComponentRef Id="Comp_QtPlatforms64" />
+      <?endif ?>
       <ComponentRef Id="Comp_opencv64" />
       <?endif ?>
     </Feature>

@@ -46,12 +46,12 @@
       <ParseFiles>false</ParseFiles>
     </Filter>
     <Filter Include="Generated Files\Debug">
-      <UniqueIdentifier>{ada98636-eaff-4491-839b-bc3fd0c8dba5}</UniqueIdentifier>
+      <UniqueIdentifier>{93a6e833-386e-49b9-8898-4a4927ed569b}</UniqueIdentifier>
       <Extensions>cpp;moc</Extensions>
       <SourceControlFiles>False</SourceControlFiles>
     </Filter>
     <Filter Include="Generated Files\Release">
-      <UniqueIdentifier>{48b21ffc-8b8c-4eef-b67a-c231564ccc27}</UniqueIdentifier>
+      <UniqueIdentifier>{b0654f92-6dda-4366-a4cc-185679042967}</UniqueIdentifier>
       <Extensions>cpp;moc</Extensions>
       <SourceControlFiles>False</SourceControlFiles>
     </Filter>
@@ -72,7 +72,7 @@
     <ClCompile Include="src\touch\clickfilter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\settings\confirmationsettings.cpp">
+    <ClCompile Include="src\settings\confirmations.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\dicom\dcmclient.cpp">
@@ -81,7 +81,7 @@
     <ClCompile Include="src\dicom\dcmconverter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\settings\debugsettings.cpp">
+    <ClCompile Include="src\settings\debug.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\dicom\detailsdialog.cpp">
@@ -108,10 +108,13 @@
     <ClCompile Include="gst\motioncells\gstmotioncells.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="gst\soup\gstsouphttpclientsink.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="src\hotkeyedit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\settings\hotkeysettings.cpp">
+    <ClCompile Include="src\settings\hotkeys.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\mainwindow.cpp">
@@ -123,13 +126,10 @@
     <ClCompile Include="src\mandatoryfieldgroup.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\settings\mandatoryfieldssettings.cpp">
+    <ClCompile Include="src\settings\mandatoryfields.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="gst\motioncells\motioncells_wrapper.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\mouseshortcut.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="gst\mpeg_sys_type_find.cpp">
@@ -138,7 +138,10 @@
     <ClCompile Include="src\patientdatadialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\settings\physicianssettings.cpp">
+    <ClCompile Include="src\settings\physicians.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\pipeline.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="libqxt\qxtconfirmationmessage.cpp">
@@ -150,19 +153,25 @@
     <ClCompile Include="libqxt\qxtspanslider.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\settings.cpp">
+    <ClCompile Include="src\settingsdialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\touch\slidingstackedwidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\smartshortcut.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\smartshortcut_win.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="src\sound.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\settings\storagesettings.cpp">
+    <ClCompile Include="src\settings\storage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\settings\studiessettings.cpp">
+    <ClCompile Include="src\settings\studies.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\thumbnaillist.cpp">
@@ -180,10 +189,16 @@
     <ClCompile Include="src\videoencodingprogressdialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\settings\videorecordsettings.cpp">
+    <ClCompile Include="src\settings\videorecord.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\settings\videosourcesettings.cpp">
+    <ClCompile Include="src\settings\videosourcedetails.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\settings\videosources.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\videowidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\dicom\worklist.cpp">
@@ -219,10 +234,10 @@
     <ClCompile Include="Release\moc_comboboxwithpopupsignal.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Debug\moc_confirmationsettings.cpp">
+    <ClCompile Include="Debug\moc_confirmations.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="Release\moc_confirmationsettings.cpp">
+    <ClCompile Include="Release\moc_confirmations.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_dcmclient.cpp">
@@ -231,10 +246,10 @@
     <ClCompile Include="Release\moc_dcmclient.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Debug\moc_debugsettings.cpp">
+    <ClCompile Include="Debug\moc_debug.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="Release\moc_debugsettings.cpp">
+    <ClCompile Include="Release\moc_debug.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_detailsdialog.cpp">
@@ -279,10 +294,10 @@
     <ClCompile Include="Release\moc_hotkeyedit.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Debug\moc_hotkeysettings.cpp">
+    <ClCompile Include="Debug\moc_hotkeys.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="Release\moc_hotkeysettings.cpp">
+    <ClCompile Include="Release\moc_hotkeys.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_mainwindow.cpp">
@@ -303,16 +318,10 @@
     <ClCompile Include="Release\moc_mandatoryfieldgroup.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Debug\moc_mandatoryfieldssettings.cpp">
+    <ClCompile Include="Debug\moc_mandatoryfields.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="Release\moc_mandatoryfieldssettings.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_mouseshortcut.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_mouseshortcut.cpp">
+    <ClCompile Include="Release\moc_mandatoryfields.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_patientdatadialog.cpp">
@@ -321,10 +330,16 @@
     <ClCompile Include="Release\moc_patientdatadialog.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Debug\moc_physicianssettings.cpp">
+    <ClCompile Include="Debug\moc_physicians.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="Release\moc_physicianssettings.cpp">
+    <ClCompile Include="Release\moc_physicians.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_pipeline.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_pipeline.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_qxtconfirmationmessage.cpp">
@@ -351,10 +366,10 @@
     <ClCompile Include="Release\moc_qxtspanslider_p.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Debug\moc_settings.cpp">
+    <ClCompile Include="Debug\moc_settingsdialog.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="Release\moc_settings.cpp">
+    <ClCompile Include="Release\moc_settingsdialog.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_slidingstackedwidget.cpp">
@@ -369,22 +384,28 @@
     <ClCompile Include="Release\moc_slidingstackedwidget_p.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="Debug\moc_smartshortcut.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_smartshortcut.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
     <ClCompile Include="Debug\moc_sound.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_sound.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Debug\moc_storagesettings.cpp">
+    <ClCompile Include="Debug\moc_storage.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="Release\moc_storagesettings.cpp">
+    <ClCompile Include="Release\moc_storage.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Debug\moc_studiessettings.cpp">
+    <ClCompile Include="Debug\moc_studies.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="Release\moc_studiessettings.cpp">
+    <ClCompile Include="Release\moc_studies.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_thumbnaillist.cpp">
@@ -405,16 +426,28 @@
     <ClCompile Include="Release\moc_videoencodingprogressdialog.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Debug\moc_videorecordsettings.cpp">
+    <ClCompile Include="Debug\moc_videorecord.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="Release\moc_videorecordsettings.cpp">
+    <ClCompile Include="Release\moc_videorecord.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Debug\moc_videosourcesettings.cpp">
+    <ClCompile Include="Debug\moc_videosourcedetails.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="Release\moc_videosourcesettings.cpp">
+    <ClCompile Include="Release\moc_videosourcedetails.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_videosources.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_videosources.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_videowidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_videowidget.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_worklist.cpp">
@@ -455,7 +488,7 @@
     <CustomBuild Include="src\comboboxwithpopupsignal.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="src\settings\confirmationsettings.h">
+    <CustomBuild Include="src\settings\confirmations.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="src\dicom\dcmclient.h">
@@ -464,7 +497,7 @@
     <ClInclude Include="src\dicom\dcmconverter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <CustomBuild Include="src\settings\debugsettings.h">
+    <CustomBuild Include="src\settings\debug.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <ClInclude Include="src\defaults.h">
@@ -491,10 +524,13 @@
     <ClInclude Include="gst\motioncells\gstmotioncells.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="gst\soup\gstsouphttpclientsink.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <CustomBuild Include="src\hotkeyedit.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="src\settings\hotkeysettings.h">
+    <CustomBuild Include="src\settings\hotkeys.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="src\mainwindow.h">
@@ -506,19 +542,19 @@
     <CustomBuild Include="src\mandatoryfieldgroup.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="src\settings\mandatoryfieldssettings.h">
+    <CustomBuild Include="src\settings\mandatoryfields.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <ClInclude Include="gst\motioncells\motioncells_wrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <CustomBuild Include="src\mouseshortcut.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="src\patientdatadialog.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="src\settings\physicianssettings.h">
+    <CustomBuild Include="src\settings\physicians.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\pipeline.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <ClInclude Include="src\product.h">
@@ -539,7 +575,7 @@
     <CustomBuild Include="libqxt\qxtspanslider_p.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="src\settings.h">
+    <CustomBuild Include="src\settingsdialog.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="src\touch\slidingstackedwidget.h">
@@ -548,13 +584,16 @@
     <CustomBuild Include="src\touch\slidingstackedwidget_p.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="src\smartshortcut.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
     <CustomBuild Include="src\sound.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="src\settings\storagesettings.h">
+    <CustomBuild Include="src\settings\storage.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="src\settings\studiessettings.h">
+    <CustomBuild Include="src\settings\studies.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="src\thumbnaillist.h">
@@ -572,10 +611,16 @@
     <CustomBuild Include="src\videoencodingprogressdialog.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="src\settings\videorecordsettings.h">
+    <CustomBuild Include="src\settings\videorecord.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="src\settings\videosourcesettings.h">
+    <CustomBuild Include="src\settings\videosourcedetails.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\settings\videosources.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\videowidget.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="src\dicom\worklist.h">
@@ -694,6 +739,9 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="pixmaps\stop.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="pixmaps\undo.png">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="pixmaps\up.png">
