@@ -129,7 +129,7 @@ QString TypeDetect(const QString& filePath)
 
         source->setProperty("location", filePath);
         pipeline->setState(QGst::StatePaused);
-        auto timeout = QGst::ClockTime::fromSeconds(10);
+        QGst::ClockTime timeout(10ULL * 1000 * 1000 * 1000); // 10 Sec
         if (QGst::StateChangeSuccess == pipeline->getState(&state, nullptr, timeout))
         {
             auto prop = typefind->property("caps");
@@ -207,7 +207,7 @@ QImage ExtractImage(const QGst::BufferPtr& buf, int width = 0)
         if (vaapi? QGst::Element::linkMany(src, vaapi, cvt, sink): QGst::Element::linkMany(src, cvt, sink))
         {
             pipeline->setState(QGst::StatePaused);
-            auto timeout = QGst::ClockTime::fromMSecs(200);
+            QGst::ClockTime timeout(200ULL * 1000 * 1000); // 200 msec
             if (QGst::StateChangeSuccess == pipeline->getState(&state, nullptr, timeout))
             {
                 QGlib::emit<void>(src, "push-buffer", buf);
