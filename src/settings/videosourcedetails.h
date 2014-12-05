@@ -17,9 +17,11 @@
 #ifndef VIDEOSETTINGS_H
 #define VIDEOSETTINGS_H
 
-#include <QWidget>
+#include <QDialog>
 #include <QSettings>
 #include <QtGlobal>
+
+#include <QGst/Caps>
 
 QT_BEGIN_NAMESPACE
 class QCheckBox;
@@ -27,27 +29,16 @@ class QComboBox;
 class QLineEdit;
 class QSpinBox;
 class QTextEdit;
+class QxtLineEdit;
 QT_END_NAMESPACE
-
-#if defined (Q_OS_WIN)
-#define PLATFORM_SPECIFIC_SOURCE "dshowvideosrc"
-#define PLATFORM_SPECIFIC_PROPERTY "device-name"
-#elif defined (Q_OS_UNIX)
-#define PLATFORM_SPECIFIC_SOURCE "v4l2src"
-#define PLATFORM_SPECIFIC_PROPERTY "device"
-#elif defined (Q_OS_DARWIN)
-#define PLATFORM_SPECIFIC_SOURCE "osxvideosrc"
-#define PLATFORM_SPECIFIC_PROPERTY "device"
-#else
-#error The platform is not supported.
-#endif
 
 #define DEFAULT_VIDEOBITRATE 4000
 
-class VideoSourceSettings : public QWidget
+class VideoSourceDetails : public QDialog
 {
     Q_OBJECT
-    QComboBox *listDevices;
+    QLineEdit *editAlias;
+    QxtLineEdit *editModality;
     QComboBox *listChannels;
     QComboBox *listFormats;
     QComboBox *listSizes;
@@ -58,30 +49,30 @@ class VideoSourceSettings : public QWidget
     QCheckBox *checkFps;
     QSpinBox  *spinFps;
     QSpinBox  *spinBitrate;
-    QLineEdit *textRtpClients;
+    QLineEdit *editRtpClients;
     QCheckBox *checkEnableRtp;
-    QLineEdit *textHttpPushUrl;
+    QLineEdit *editHttpPushUrl;
     QCheckBox *checkEnableHttp;
     QCheckBox *checkDeinterlace;
+    QGst::CapsPtr caps;
 
-    void updateDeviceList(const char *elmName, const char *propName);
-    QString updateGstList(const char* setting, const char* def, unsigned long long type, QComboBox* cb);
+    QVariant selectedChannel;
+    QString  selectedFormat;
+    QSize    selectedSize;
+
+    QString updateGstList(const QVariantMap& parameters, const char* settingName, const char* def,
+                          unsigned long long type, QComboBox* cb);
 
 public:
-    Q_INVOKABLE explicit VideoSourceSettings(QWidget *parent = 0);
-
-protected:
-    virtual void showEvent(QShowEvent *);
+    explicit VideoSourceDetails(const QVariantMap& parameters, QWidget *parent = 0);
+    void updateDevice(const QString& device, const QString& deviceType);
+    void updateParameters(QVariantMap& parameters);
 
 signals:
     
 private slots:
-    void videoDeviceChanged(int index);
     void inputChannelChanged(int index);
     void formatChanged(int index);
-
-public slots:
-    void save(QSettings& settings);
 };
 
 #endif // VIDEOSETTINGS_H

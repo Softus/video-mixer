@@ -14,7 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "hotkeysettings.h"
+#include "hotkeys.h"
 #include "../defaults.h"
 #include "../hotkeyedit.h"
 #include "../smartshortcut.h"

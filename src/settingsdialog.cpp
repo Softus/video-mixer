@@ -16,15 +16,16 @@
 
 #include "settingsdialog.h"
 
-#include "settings/confirmationsettings.h"
-#include "settings/debugsettings.h"
-#include "settings/hotkeysettings.h"
-#include "settings/mandatoryfieldssettings.h"
-#include "settings/physicianssettings.h"
-#include "settings/storagesettings.h"
-#include "settings/studiessettings.h"
-#include "settings/videorecordsettings.h"
-#include "settings/videosourcesettings.h"
+#include "settings/confirmations.h"
+#include "settings/debug.h"
+#include "settings/hotkeys.h"
+#include "settings/mandatoryfields.h"
+#include "settings/physicians.h"
+#include "settings/storage.h"
+#include "settings/studies.h"
+#include "settings/videorecord.h"
+#include "settings/videosources.h"
+
 
 #ifdef WITH_DICOM
 #include "dicom/dicomdevicesettings.h"
@@ -157,7 +158,7 @@ void SettingsDialog::createPages()
     createPage(tr("Worklist query settings"), WorklistQuerySettings::staticMetaObject);
 #endif
 
-    createPage(tr("Video source"), VideoSourceSettings::staticMetaObject);
+    createPage(tr("Video sources"), VideoSources::staticMetaObject);
     createPage(tr("Video recording"), VideoRecordSettings::staticMetaObject);
     createPage(tr("Storage"), StorageSettings::staticMetaObject);
     createPage(tr("Physicians"), PhysiciansSettings::staticMetaObject);

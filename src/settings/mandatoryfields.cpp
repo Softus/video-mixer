@@ -14,7 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "mandatoryfieldssettings.h"
+#include "mandatoryfields.h"
 #include "../defaults.h"
 #include <QBoxLayout>
 #include <QGroupBox>

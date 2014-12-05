@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2013-2014 Irkutsk Diagnostic Center.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; version 2.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef PIPELINE_H
 #define PIPELINE_H
 
@@ -5,6 +21,7 @@
 
 #include <QDir>
 #include <QObject>
+#include <QSettings>
 
 #include <QGlib/Error>
 #include <QGlib/Value>
@@ -18,8 +35,6 @@
 class Pipeline : public QObject
 {
     Q_OBJECT
-    int           index;
-    QString       name;
     QString       pipelineDef;
 
     void onBusMessage(const QGst::MessagePtr& msg);
@@ -27,11 +42,16 @@ class Pipeline : public QObject
     void onImageReady(const QGst::BufferPtr&);
     void onClipFrame(const QGst::BufferPtr&);
     void onVideoFrame(const QGst::BufferPtr&);
-    QString buildPipeline();
+    QString buildPipeline(const QSettings& settings, const QString& outputPathDef,
+                          bool enableVideoLog, const QString &detectMotion);
     void releasePipeline();
     void errorGlib(const QGlib::ObjectPtr& obj, const QGlib::Error& ex);
-    void setElementProperty(const char* elm, const char* prop = nullptr, const QGlib::Value& value = nullptr, QGst::State minimumState = QGst::StatePlaying);
-    void setElementProperty(QGst::ElementPtr& elm, const char* prop = nullptr, const QGlib::Value& value = nullptr, QGst::State minimumState = QGst::StatePlaying);
+    void setElementProperty(const char* elm, const char* prop = nullptr,
+                            const QGlib::Value& value = nullptr,
+                            QGst::State minimumState = QGst::StatePlaying);
+    void setElementProperty(QGst::ElementPtr& elm, const char* prop = nullptr,
+                            const QGlib::Value& value = nullptr,
+                            QGst::State minimumState = QGst::StatePlaying);
 
 public:
     Pipeline(int index, QObject *parent = 0);
@@ -53,6 +73,9 @@ public:
     QGst::ElementPtr  displayOverlay;
     VideoWidget*      displayWidget;
 
+    int           index;
+    QString       alias;
+    QString       modality;
     bool          motionDetected;
     bool          motionStart;
     bool          motionStop;

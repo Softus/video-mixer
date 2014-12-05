@@ -268,6 +268,7 @@ void ArchiveWindow::showEvent(QShowEvent *evt)
 #ifndef WITH_TOUCH
 void ArchiveWindow::hideEvent(QHideEvent *evt)
 {
+    reallyDeleteFiles();
     QSettings settings;
     settings.beginGroup("ui");
     settings.setValue("archive-geometry", saveGeometry());
@@ -1101,6 +1102,7 @@ void ArchiveWindow::onStateChangedMessage(const QGst::StateChangedMessagePtr& me
 #ifdef WITH_TOUCH
 void ArchiveWindow::onBackToMainWindowClick()
 {
+    reallyDeleteFiles();
     auto stackWidget = static_cast<SlidingStackedWidget*>(parent()->qt_metacast("SlidingStackedWidget"));
     if (stackWidget)
     {

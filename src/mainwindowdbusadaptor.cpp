@@ -55,7 +55,7 @@ bool MainWindowDBusAdaptor::busy()
 
 bool MainWindowDBusAdaptor::recording()
 {
-    return wnd->activePipeline->recording;
+    return wnd->activePipeline && wnd->activePipeline->recording;
 }
 
 bool MainWindowDBusAdaptor::startStudy

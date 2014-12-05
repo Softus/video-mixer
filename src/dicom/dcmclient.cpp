@@ -657,8 +657,12 @@ bool DcmClient::sendToServer(const QString& server, DcmDataset* dsPatient, const
     }
     else
     {
-        auto modality = QSettings().value("dicom/modality", DEFAULT_MODALITY).toString().toUpper().toUtf8();
-        ds.putAndInsertString(DCM_Modality, modality);
+        auto modality = GetFileExtAttribute(file, "modality");
+        if (modality.isEmpty())
+        {
+            modality = QSettings().value("dicom/modality", DEFAULT_MODALITY).toString();
+        }
+        ds.putAndInsertString(DCM_Modality, modality.toUpper().toUtf8());
         cond = readAndInsertPixelData(file, &ds, writeXfer);
     }
 

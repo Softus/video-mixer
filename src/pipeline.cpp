@@ -1,6 +1,23 @@
+/*
+ * Copyright (C) 2013-2014 Irkutsk Diagnostic Center.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; version 2.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "pipeline.h"
 #include "defaults.h"
-#include "settings/videosourcesettings.h"
+#include "typedetect.h"
+#include "settings/videosources.h"
 
 #include <QApplication>
 
@@ -33,6 +50,8 @@ Pipeline::~Pipeline()
     {
         releasePipeline();
     }
+
+    delete displayWidget;
 }
 
 void Pipeline::releasePipeline()
@@ -52,7 +71,7 @@ void Pipeline::releasePipeline()
 
 /*
 
-  The pipeline is:
+The pipeline for software encoder:
 
                  [video src #]
                       |
@@ -74,10 +93,10 @@ void Pipeline::releasePipeline()
   [image writer]             [video encoder]
                                    |
                                    V
-                       +----[video splitter]----+--------------+
-                       |           |            |              |
-                       V           V            V              V
-            [movie writer]   [clip valve]  [rtp sender]  [http sender]
+                       +----[video splitter]----+---------------+
+                       |           |            |               |
+                       V           V            V               V
+            [movie writer]   [clip valve]  [rtp sender #] [http sender #]
                                    |
                                    V
                             [clip writer]
@@ -92,28 +111,30 @@ Sample:
                 videosplitter. ! identity  name=clipinspect drop-probability=1.0 ! queue ! valve name=clipvalve ! [ mpegpsmux name=clipmux ! filesink name=clipsink]
         splitter. ! identity name=imagevalve drop-probability=1.0 ! jpegenc ! multifilesink name=imagesink post-messages=1 async=0 sync=0 location=/video/image
 
-                [video src]
+The pipeline for hardware encoder:
+
+                [video src #]
                      |
                      V
-         +----[video splitter]----+----------+
-         |           |            |          |
-         V           V            V          V
-[movie writer] [clip valve] [rtp sender] [decoder]
-                     |                       |
-                     V                       V
-               [clip writer]            [splitter]------+
-                                             |          |
-                                             V          V
-                                      [image valve]  [detector]
-                                             |          |
-                                             V          V
-                                     [image encoder] [display]
-                                             |
-                                             V
+         +----[video splitter #]----+----------+------------+
+         |           |              |          |            |
+         V           V              V          V            V
+[movie writer] [clip valve] [rtp sender #] [decoder #] [http sender #]
+                     |                        |
+                     V                        V
+               [clip writer]             [splitter]-------+
+                                              |           |
+                                              V           V
+                                       [image valve]  [detector]
+                                              |           |
+                                              V           V
+                                      [image encoder] [display]
+                                              |
+                                              V
                                       [image writer]
 */
 
-QString appendVideo(QString& pipe, QSettings& settings, int index)
+QString appendVideo(QString& pipe, const QVariantMap& settings, bool enableVideoLog)
 {
 /*
                        +----[video splitter]----+-------------+
@@ -129,10 +150,7 @@ QString appendVideo(QString& pipe, QSettings& settings, int index)
     auto rtpPayParams    = settings.value(rtpPayDef + "-parameters").toString();
     auto rtpSinkDef      = settings.value("rtp-sink",       DEFAULT_RTP_SINK).toString();
     auto rtpSinkParams   = settings.value(rtpSinkDef + "-parameters").toString();
-    auto enableVideoLog  = settings.value("enable-video").toBool();
 
-    settings.beginReadArray("src");
-    settings.setArrayIndex(index);
     auto rtpClients      = settings.value("rtp-clients").toString();
     auto enableRtp       = !rtpSinkDef.isEmpty() && !rtpClients.isEmpty()
                             && settings.value("enable-rtp").toBool();
@@ -140,7 +158,6 @@ QString appendVideo(QString& pipe, QSettings& settings, int index)
     auto enableHttp      = !httpSinkDef.isEmpty() && settings.value("enable-http").toBool();
     auto httpPushUrl     = settings.value("http-push-url").toString();
     auto httpSinkParams  = settings.value(httpSinkDef + "-parameters").toString();
-    settings.endArray();
 
     pipe.append(" ! tee name=videosplitter");
     if (enableRtp || enableHttp || enableVideoLog)
@@ -177,39 +194,55 @@ QString appendVideo(QString& pipe, QSettings& settings, int index)
     return pipe.append("\nvideosplitter. ! identity name=clipinspect drop-probability=1.0 ! queue ! valve name=clipvalve drop=1");
 }
 
-QString Pipeline::buildPipeline()
+QString buildDetectMotion(const QSettings& settings)
 {
-    QSettings settings;
+    QString pipe;
+    auto detectMotion = settings.value("detect-motion", DEFAULT_MOTION_DETECTION).toBool();
 
+    if (detectMotion)
+    {
+        auto motionDebug       = settings.value("motion-debug", false).toString();
+        auto motionSensitivity = settings.value("motion-sensitivity", DEFAULT_MOTION_SENSITIVITY).toString();
+        auto motionThreshold   = settings.value("motion-threshold",   DEFAULT_MOTION_THRESHOLD).toString();
+        auto motionMinFrames   = settings.value("motion-min-frames",  DEFAULT_MOTION_MIN_FRAMES).toString();
+        auto motionGap         = settings.value("motion-gap",         DEFAULT_MOTION_GAP).toString();
+
+        pipe.append(" ! motioncells name=motion-detector display=").append(motionDebug)
+            .append(" sensitivity=").append(motionSensitivity)
+            .append(" threshold=").append(motionThreshold)
+            .append(" minimummotionframes=").append(motionMinFrames)
+            .append(" gap=").append(motionGap);
+    }
+    return pipe;
+}
+
+QString Pipeline::buildPipeline(const QSettings &settings, const QString &outputPathDef,
+                                bool enableVideoLog, const QString &detectMotion)
+{
     // v4l2src device=/dev/video1 name=(channel) ! video/x-raw-yuv,format=YUY2,width=720,height=576 ! colorspace
     // dv1394src guid="9025895599807395" ! video/x-dv,format=PAL ! dvdemux ! dvdec ! colorspace
     //
     QString pipe;
 
-    auto outputPathDef  = settings.value("storage/output-path",    DEFAULT_OUTPUT_PATH).toString();
-
-    settings.beginGroup("gst");
-    settings.beginReadArray("src");
-    settings.setArrayIndex(index);
-
-    auto deviceType     = settings.value("device-type", PLATFORM_SPECIFIC_SOURCE).toString();
     auto deviceDef      = settings.value("device").toString();
-    auto inputChannel   = settings.value("video-channel").toString();
-    auto formatDef      = settings.value("format").toString();
-    auto sizeDef        = settings.value("size").toSize();
-    auto srcDeinterlace = settings.value("video-deinterlace").toBool();
-    auto srcParams      = settings.value("src-parameters").toString();
-    name                = settings.value("name").toString();
-    settings.endArray();
+    auto parameters     = settings.value("parameters").toMap();
+    auto deviceType     = parameters.value("device-type", PLATFORM_SPECIFIC_SOURCE).toString();
+    auto inputChannel   = parameters.value("video-channel").toString();
+    auto formatDef      = parameters.value("format").toString();
+    auto sizeDef        = parameters.value("size").toSize();
+    auto srcDeinterlace = parameters.value("video-deinterlace").toBool();
+    auto srcParams      = parameters.value("src-parameters").toString();
+    alias               = parameters.value("alias").toString();
+    modality            = parameters.value("modality").toString();
 
-    if (name.isEmpty())
+    if (alias.isEmpty())
     {
-        name = QString("src%1").arg(index);
+        alias = QString("src%1").arg(index);
     }
 
-    auto colorConverter = QString(" ! ").append(settings.value("color-converter", "ffmpegcolorspace").toString());
-    auto videoCodec     = settings.value("video-encoder",  DEFAULT_VIDEO_ENCODER).toString();
-    auto bitrate        = settings.value("bitrate").toString();
+    auto colorConverter = QString(" ! ").append(parameters.value("color-converter", "ffmpegcolorspace").toString());
+    auto videoCodec     = parameters.value("video-encoder",  DEFAULT_VIDEO_ENCODER).toString();
+    auto bitrate        = parameters.value("bitrate").toString();
 
     pipe.append(deviceType);
 
@@ -224,6 +257,15 @@ QString Pipeline::buildPipeline()
         if (!deviceDef.isEmpty())
         {
             pipe.append(" guid=\"").append(deviceDef).append("\"");
+        }
+    }
+    else if (deviceType == "videotestsrc")
+    {
+        // Special handling of test video sources
+        //
+        if (inputChannel.toInt() > 0)
+        {
+            pipe.append(" pattern=").append(inputChannel).append("");
         }
     }
     else
@@ -258,7 +300,7 @@ QString Pipeline::buildPipeline()
 
     if (videoCodec.isEmpty())
     {
-        appendVideo(pipe, settings, index);
+        appendVideo(pipe, parameters, enableVideoLog);
         pipe.append("\nvideosplitter.");
     }
 
@@ -278,40 +320,24 @@ QString Pipeline::buildPipeline()
 
     // v4l2src ... ! tee name=splitter [! colorspace ! motioncells] ! colorspace ! autovideosink");
     //
-    auto displaySinkDef  = settings.value("display-sink", DEFAULT_DISPLAY_SINK).toString();
-    auto displayParams   = settings.value(displaySinkDef + "-parameters").toString();
+    auto displaySinkDef  = parameters.value("display-sink", DEFAULT_DISPLAY_SINK).toString();
+    auto displayParams   = parameters.value(displaySinkDef + "-parameters").toString();
 
-    auto detectMotion    = settings.value("enable-video").toBool() &&
-                           settings.value("detect-motion", DEFAULT_MOTION_DETECTION).toBool();
     pipe.append(" ! tee name=splitter");
     if (!displaySinkDef.isEmpty())
     {
-        pipe.append("\nsplitter.").append(colorConverter);
-        if (detectMotion)
-        {
-            auto motionDebug       = settings.value("motion-debug", false).toString();
-            auto motionSensitivity = settings.value("motion-sensitivity", DEFAULT_MOTION_SENSITIVITY).toString();
-            auto motionThreshold   = settings.value("motion-threshold",   DEFAULT_MOTION_THRESHOLD).toString();
-            auto motionMinFrames   = settings.value("motion-min-frames",  DEFAULT_MOTION_MIN_FRAMES).toString();
-            auto motionGap         = settings.value("motion-gap",         DEFAULT_MOTION_GAP).toString();
-
-            pipe.append(" ! motioncells name=motion-detector display=").append(motionDebug)
-                .append(" sensitivity=").append(motionSensitivity)
-                .append(" threshold=").append(motionThreshold)
-                .append(" minimummotionframes=").append(motionMinFrames)
-                .append(" gap=").append(motionGap);
-        }
-        pipe.append(" ! textoverlay name=displayoverlay color=-1 halignment=right valignment=top text=* xpad=8 ypad=0 font-desc=16")
+        pipe.append("\nsplitter.").append(colorConverter).append(detectMotion)
+            .append(" ! textoverlay name=displayoverlay color=-1 halignment=right valignment=top text=* xpad=8 ypad=0 font-desc=16")
             .append(colorConverter)
             .append(" ! " ).append(displaySinkDef).append(" name=displaysink async=0 ").append(displayParams);
     }
 
     // ... splitter. ! identity name=imagevalve ! jpegenc ! multifilesink splitter.
     //
-    auto imageEncoderDef = settings.value("image-encoder", DEFAULT_IMAGE_ENCODER).toString();
-    auto imageEncoderFixColor = settings.value(imageEncoderDef + "-colorspace", false).toBool();
-    auto imageEncoderParams = settings.value(imageEncoderDef + "-parameters").toString();
-    auto imageSinkDef       = settings.value("image-sink", DEFAULT_IMAGE_SINK).toString();
+    auto imageEncoderDef = parameters.value("image-encoder", DEFAULT_IMAGE_ENCODER).toString();
+    auto imageEncoderFixColor = parameters.value(imageEncoderDef + "-colorspace", false).toBool();
+    auto imageEncoderParams = parameters.value(imageEncoderDef + "-parameters").toString();
+    auto imageSinkDef       = parameters.value("image-sink", DEFAULT_IMAGE_SINK).toString();
     if (!imageSinkDef.isEmpty())
     {
         pipe.append("\nsplitter. ! identity name=imagevalve drop-probability=1.0")
@@ -329,11 +355,11 @@ QString Pipeline::buildPipeline()
         //                videosplitter. ! queue ! rtph264pay ! udpsink
         //                videosplitter. ! identity name=clipinspect ! queue ! mpegpsmux ! filesink
         //
-        auto videoMaxRate       = settings.value("limit-video-fps", DEFAULT_LIMIT_VIDEO_FPS).toBool()?
-                                  settings.value("video-max-fps",  DEFAULT_VIDEO_MAX_FPS).toInt(): 0;
-        auto videoFixColor      = settings.value(videoCodec + "-colorspace").toBool();
-        auto videoEncoderParams = settings.value(videoCodec + "-parameters").toString();
-        auto noIdleStream       = settings.value("no-idle-stream").toBool();
+        auto videoMaxRate       = parameters.value("limit-video-fps", DEFAULT_LIMIT_VIDEO_FPS).toBool()?
+                                  parameters.value("video-max-fps",  DEFAULT_VIDEO_MAX_FPS).toInt(): 0;
+        auto videoFixColor      = parameters.value(videoCodec + "-colorspace").toBool();
+        auto videoEncoderParams = parameters.value(videoCodec + "-parameters").toString();
+        auto noIdleStream       = parameters.value("no-idle-stream").toBool();
 
         pipe.append("\nsplitter.");
         if (videoMaxRate > 0)
@@ -353,7 +379,7 @@ QString Pipeline::buildPipeline()
             .append(videoFixColor? colorConverter: "")
             .append(" ! ").append(videoCodec).append(" name=videoencoder ").append(videoEncoderParams);
 
-        appendVideo(pipe, settings, index);
+        appendVideo(pipe, parameters, enableVideoLog);
     }
 
     return pipe;
@@ -361,16 +387,21 @@ QString Pipeline::buildPipeline()
 
 bool Pipeline::updatePipeline()
 {
-    auto newPipelineDef = buildPipeline();
+    QSettings settings;
+    auto outputPathDef  = settings.value("storage/output-path",    DEFAULT_OUTPUT_PATH).toString();
+
+    settings.beginGroup("gst");
+    auto enableVideoLog = settings.value("enable-video").toBool();
+    auto detectMotion = enableVideoLog? buildDetectMotion(settings): QString();
+
+    settings.beginReadArray("src");
+    settings.setArrayIndex(index);
+
+    auto newPipelineDef = buildPipeline(settings, outputPathDef, enableVideoLog, detectMotion);
     if (newPipelineDef == pipelineDef)
     {
         return false;
     }
-
-    QSettings settings;
-    settings.beginGroup("gst");
-    settings.beginReadArray("src");
-    settings.setArrayIndex(index);
 
     qDebug() << "The pipeline has been changed, restarting";
     if (pipeline)
@@ -467,10 +498,8 @@ bool Pipeline::updatePipeline()
     auto details = GstDebugGraphDetails(flags);
     GST_DEBUG_BIN_TO_DOT_FILE_WITH_TS(pipeline.staticCast<QGst::Bin>(), details, qApp->applicationName().toUtf8());
 
-    auto detectMotion = settings.value("enable-video").toBool() &&
-                        settings.value("detect-motion", DEFAULT_MOTION_DETECTION).toBool();
-    motionStart  = detectMotion && settings.value("motion-start", DEFAULT_MOTION_START).toBool();
-    motionStop   = detectMotion && settings.value("motion-stop", DEFAULT_MOTION_STOP).toBool();
+    motionStart  = !detectMotion.isEmpty() && settings.value("motion-start", DEFAULT_MOTION_START).toBool();
+    motionStop   = !detectMotion.isEmpty() && settings.value("motion-stop", DEFAULT_MOTION_STOP).toBool();
 
     // Start the pipeline
     pipeline->setState(QGst::StatePlaying);
@@ -569,7 +598,11 @@ QString Pipeline::appendVideoTail(const QDir& dir, const QString& prefix, QStrin
     else
     {
         sink = QGst::ElementFactory::make("multifilesink", (prefix + "sink").toUtf8());
-        if (!sink || !sink->findProperty("max-file-size"))
+        if (sink && sink->findProperty("max-file-size"))
+        {
+            sink->setProperty("post-messages", true);
+        }
+        else
         {
             split = false;
             qDebug() << "multiflesink does not support 'max-file-size' property, replaced with filesink";
@@ -606,7 +639,7 @@ QString Pipeline::appendVideoTail(const QDir& dir, const QString& prefix, QStrin
 
     // Manually increment video/clip file name
     //
-    clipFileName.replace("%src%", name).append(split? "%02d": "").append(videoExt);
+    clipFileName.replace("%src%", alias).append(split? "%02d": "").append(videoExt);
     auto absPath = dir.absoluteFilePath(clipFileName);
     sink->setProperty("location", absPath);
     if (split)
@@ -620,7 +653,12 @@ QString Pipeline::appendVideoTail(const QDir& dir, const QString& prefix, QStrin
 
     // Replace '%02d' with '00' to get the real clip name
     //
-    return split? absPath.replace("%02d","00"): absPath;
+    auto realFileName = split? absPath.replace("%02d","00"): absPath;
+    if (!modality.isEmpty())
+    {
+        SetFileExtAttribute(realFileName, "modality", modality);
+    }
+    return realFileName;
 }
 
 void Pipeline::removeVideoTail(const QString& prefix)
@@ -657,6 +695,12 @@ void Pipeline::removeVideoTail(const QString& prefix)
         valve->unlink(sink);
     }
     pipeline->remove(sink);
+
+    if (!modality.isEmpty())
+    {
+        auto realFileName = sink->property("location").toString().replace("%02d","00");
+        SetFileExtAttribute(realFileName, "modality", modality);
+    }
 }
 
 void Pipeline::updateOverlayText(int countdown)
@@ -680,7 +724,7 @@ void Pipeline::updateOverlayText(int countdown)
         text.append(" log");
     }
 
-    text.append(' ').append(name);
+    text.append(' ').append(alias);
 
     displayOverlay->setProperty("color", 0xFFFF0000);
     displayOverlay->setProperty("outline-color", 0xFFFF0000);
@@ -730,7 +774,7 @@ void Pipeline::onBusMessage(const QGst::MessagePtr& msg)
         //
         if (msg->source() == pipeline)
         {
-            Q_FOREACH (auto w, qApp->topLevelWidgets())
+            foreach (auto w, qApp->topLevelWidgets())
             {
                 w->update();
             }
@@ -774,24 +818,32 @@ void Pipeline::onElementMessage(const QGst::ElementMessagePtr& msg)
         return;
     }
 
-    if (s->name() == "GstMultiFileSink" && msg->source() == imageSink)
+    if (s->name() == "GstMultiFileSink")
     {
         QString filename = s->value("filename").toString();
-        QString tooltip = filename;
-        QPixmap pm;
-
-        auto lastBuffer = msg->source()->property("last-buffer").get<QGst::BufferPtr>();
-        bool ok = lastBuffer && pm.loadFromData(lastBuffer->data(), lastBuffer->size());
-
-        // If we can not load from the buffer, try to load from the file
-        //
-        if (!ok && !pm.load(filename))
+        if (msg->source() == imageSink)
         {
-            tooltip = tr("Failed to load image %1").arg(filename);
-            pm.load(":/buttons/stop");
+            QString tooltip = filename;
+            QPixmap pm;
+
+            auto lastBuffer = msg->source()->property("last-buffer").get<QGst::BufferPtr>();
+            bool ok = lastBuffer && pm.loadFromData(lastBuffer->data(), lastBuffer->size());
+
+            // If we can not load from the buffer, try to load from the file
+            //
+            if (!ok && !pm.load(filename))
+            {
+                tooltip = tr("Failed to load image %1").arg(filename);
+                pm.load(":/buttons/stop");
+            }
+
+            imageSaved(filename, tooltip, pm);
         }
 
-        imageSaved(filename, tooltip, pm);
+        if (!modality.isEmpty())
+        {
+            SetFileExtAttribute(filename, "modality", modality);
+        }
         return;
     }
 
