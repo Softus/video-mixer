@@ -44,6 +44,7 @@ class VideoSources : public QWidget
     Q_OBJECT
     QTreeWidget* listSources;
     QPushButton* btnDetails;
+    QPushButton* btnRemove;
 
     void updateDeviceList(const char *elmName, const char *propName);
 
@@ -55,6 +56,7 @@ protected:
 
 private slots:
     void onAddClicked();
+    void onRemoveClicked();
     void onEditClicked();
     void onTreeItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
     void onItemDoubleClicked(QTreeWidgetItem*, int);

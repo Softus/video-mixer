@@ -35,7 +35,7 @@ newItem(const QString& name, const QString& device, const QVariantMap& parameter
                                     << parameters.value("modality").toString()
                                     << parameters.value("alias").toString()
                                     );
-    item->setFlags(Qt::ItemNeverHasChildren | Qt::ItemIsEnabled | Qt::ItemIsUserCheckable | Qt::ItemIsSelectable);
+    item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsUserCheckable | Qt::ItemIsSelectable);
     item->setCheckState(0, enabled? Qt::Checked: Qt::Unchecked);
     item->setData(0, Qt::UserRole, device);
     item->setData(1, Qt::UserRole, name);
@@ -51,7 +51,7 @@ VideoSources::VideoSources(QWidget *parent) :
     mainLayout->setContentsMargins(4,0,4,0);
     listSources = new QTreeWidget;
 
-    listSources->setColumnCount(2);
+    listSources->setColumnCount(3);
     listSources->setHeaderLabels(QStringList() << tr("Device") << tr("Modality") << tr("Alias"));
     listSources->setColumnWidth(0, 320);
     listSources->setColumnWidth(1, 80);
@@ -71,6 +71,11 @@ VideoSources::VideoSources(QWidget *parent) :
         connect(btnAdd, SIGNAL(clicked()), this, SLOT(onAddClicked()));
         buttonsLayout->addWidget(btnAdd);
     }
+
+    btnRemove = new QPushButton(tr("&Remove"));
+    connect(btnRemove, SIGNAL(clicked()), this, SLOT(onRemoveClicked()));
+    buttonsLayout->addWidget(btnRemove);
+
     buttonsLayout->addStretch(1);
     mainLayout->addItem(buttonsLayout);
     setLayout(mainLayout);
@@ -84,7 +89,6 @@ VideoSources::VideoSources(QWidget *parent) :
         auto friendlyName = settings.value("device-name").toString();
         auto enabled      = settings.value("enabled").toBool();
         auto parameters   = settings.value("parameters").toMap();
-        parameters["device-type"] = settings.value("device-type", PLATFORM_SPECIFIC_SOURCE);
         auto item = newItem(friendlyName, device, parameters, enabled);
         listSources->addTopLevelItem(item);
     }
@@ -92,6 +96,7 @@ VideoSources::VideoSources(QWidget *parent) :
     settings.endGroup();
 
     btnDetails->setEnabled(false);
+    btnRemove->setEnabled(false);
 }
 
 void VideoSources::showEvent(QShowEvent *e)
@@ -124,9 +129,13 @@ void VideoSources::updateDeviceList(const char* elmName, const char* propName)
     {
         //get a list of devices that the element supports
         auto devices = propertyProbe->probeAndGetValues(propName);
-        foreach (const QGlib::Value& device, devices)
+        foreach (const QGlib::Value& deviceId, devices)
         {
-            auto deviceName = device.toString();
+            // Switch to the device
+            //
+            src->setProperty(propName, deviceId);
+
+            auto deviceName   = deviceId.toString();
             auto friendlyName = src->property("device-name").toString();
             auto found = false;
 
@@ -155,6 +164,7 @@ void VideoSources::updateDeviceList(const char* elmName, const char* propName)
 void VideoSources::onTreeItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *)
 {
     btnDetails->setEnabled(current != nullptr);
+    btnRemove->setEnabled(current != nullptr);
 }
 
 void VideoSources::onItemDoubleClicked(QTreeWidgetItem*, int)
@@ -180,6 +190,12 @@ void VideoSources::onEditClicked()
         item->setText(1, parameters["modality"].toString());
         item->setText(2, parameters["alias"].toString());
     }
+}
+
+void VideoSources::onRemoveClicked()
+{
+    auto item = listSources->currentItem();
+    delete item;
 }
 
 void VideoSources::onAddClicked()

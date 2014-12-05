@@ -16,6 +16,7 @@
 
 #include "pipeline.h"
 #include "defaults.h"
+#include "typedetect.h"
 #include "settings/videosources.h"
 
 #include <QApplication>
@@ -49,6 +50,8 @@ Pipeline::~Pipeline()
     {
         releasePipeline();
     }
+
+    delete displayWidget;
 }
 
 void Pipeline::releasePipeline()
@@ -191,7 +194,30 @@ QString appendVideo(QString& pipe, const QVariantMap& settings, bool enableVideo
     return pipe.append("\nvideosplitter. ! identity name=clipinspect drop-probability=1.0 ! queue ! valve name=clipvalve drop=1");
 }
 
-QString Pipeline::buildPipeline(const QSettings &settings, const QString &outputPathDef, bool enableVideoLog)
+QString buildDetectMotion(const QSettings& settings)
+{
+    QString pipe;
+    auto detectMotion = settings.value("detect-motion", DEFAULT_MOTION_DETECTION).toBool();
+
+    if (detectMotion)
+    {
+        auto motionDebug       = settings.value("motion-debug", false).toString();
+        auto motionSensitivity = settings.value("motion-sensitivity", DEFAULT_MOTION_SENSITIVITY).toString();
+        auto motionThreshold   = settings.value("motion-threshold",   DEFAULT_MOTION_THRESHOLD).toString();
+        auto motionMinFrames   = settings.value("motion-min-frames",  DEFAULT_MOTION_MIN_FRAMES).toString();
+        auto motionGap         = settings.value("motion-gap",         DEFAULT_MOTION_GAP).toString();
+
+        pipe.append(" ! motioncells name=motion-detector display=").append(motionDebug)
+            .append(" sensitivity=").append(motionSensitivity)
+            .append(" threshold=").append(motionThreshold)
+            .append(" minimummotionframes=").append(motionMinFrames)
+            .append(" gap=").append(motionGap);
+    }
+    return pipe;
+}
+
+QString Pipeline::buildPipeline(const QSettings &settings, const QString &outputPathDef,
+                                bool enableVideoLog, const QString &detectMotion)
 {
     // v4l2src device=/dev/video1 name=(channel) ! video/x-raw-yuv,format=YUY2,width=720,height=576 ! colorspace
     // dv1394src guid="9025895599807395" ! video/x-dv,format=PAL ! dvdemux ! dvdec ! colorspace
@@ -207,6 +233,7 @@ QString Pipeline::buildPipeline(const QSettings &settings, const QString &output
     auto srcDeinterlace = parameters.value("video-deinterlace").toBool();
     auto srcParams      = parameters.value("src-parameters").toString();
     alias               = parameters.value("alias").toString();
+    modality            = parameters.value("modality").toString();
 
     if (alias.isEmpty())
     {
@@ -296,27 +323,11 @@ QString Pipeline::buildPipeline(const QSettings &settings, const QString &output
     auto displaySinkDef  = parameters.value("display-sink", DEFAULT_DISPLAY_SINK).toString();
     auto displayParams   = parameters.value(displaySinkDef + "-parameters").toString();
 
-    auto detectMotion    = parameters.value("enable-video").toBool() &&
-                           parameters.value("detect-motion", DEFAULT_MOTION_DETECTION).toBool();
     pipe.append(" ! tee name=splitter");
     if (!displaySinkDef.isEmpty())
     {
-        pipe.append("\nsplitter.").append(colorConverter);
-        if (detectMotion)
-        {
-            auto motionDebug       = parameters.value("motion-debug", false).toString();
-            auto motionSensitivity = parameters.value("motion-sensitivity", DEFAULT_MOTION_SENSITIVITY).toString();
-            auto motionThreshold   = parameters.value("motion-threshold",   DEFAULT_MOTION_THRESHOLD).toString();
-            auto motionMinFrames   = parameters.value("motion-min-frames",  DEFAULT_MOTION_MIN_FRAMES).toString();
-            auto motionGap         = parameters.value("motion-gap",         DEFAULT_MOTION_GAP).toString();
-
-            pipe.append(" ! motioncells name=motion-detector display=").append(motionDebug)
-                .append(" sensitivity=").append(motionSensitivity)
-                .append(" threshold=").append(motionThreshold)
-                .append(" minimummotionframes=").append(motionMinFrames)
-                .append(" gap=").append(motionGap);
-        }
-        pipe.append(" ! textoverlay name=displayoverlay color=-1 halignment=right valignment=top text=* xpad=8 ypad=0 font-desc=16")
+        pipe.append("\nsplitter.").append(colorConverter).append(detectMotion)
+            .append(" ! textoverlay name=displayoverlay color=-1 halignment=right valignment=top text=* xpad=8 ypad=0 font-desc=16")
             .append(colorConverter)
             .append(" ! " ).append(displaySinkDef).append(" name=displaysink async=0 ").append(displayParams);
     }
@@ -378,13 +389,15 @@ bool Pipeline::updatePipeline()
 {
     QSettings settings;
     auto outputPathDef  = settings.value("storage/output-path",    DEFAULT_OUTPUT_PATH).toString();
-    auto enableVideoLog = settings.value("enable-video").toBool();
 
     settings.beginGroup("gst");
+    auto enableVideoLog = settings.value("enable-video").toBool();
+    auto detectMotion = enableVideoLog? buildDetectMotion(settings): QString();
+
     settings.beginReadArray("src");
     settings.setArrayIndex(index);
 
-    auto newPipelineDef = buildPipeline(settings, outputPathDef, enableVideoLog);
+    auto newPipelineDef = buildPipeline(settings, outputPathDef, enableVideoLog, detectMotion);
     if (newPipelineDef == pipelineDef)
     {
         return false;
@@ -485,10 +498,8 @@ bool Pipeline::updatePipeline()
     auto details = GstDebugGraphDetails(flags);
     GST_DEBUG_BIN_TO_DOT_FILE_WITH_TS(pipeline.staticCast<QGst::Bin>(), details, qApp->applicationName().toUtf8());
 
-    auto detectMotion = settings.value("enable-video").toBool() &&
-                        settings.value("detect-motion", DEFAULT_MOTION_DETECTION).toBool();
-    motionStart  = detectMotion && settings.value("motion-start", DEFAULT_MOTION_START).toBool();
-    motionStop   = detectMotion && settings.value("motion-stop", DEFAULT_MOTION_STOP).toBool();
+    motionStart  = !detectMotion.isEmpty() && settings.value("motion-start", DEFAULT_MOTION_START).toBool();
+    motionStop   = !detectMotion.isEmpty() && settings.value("motion-stop", DEFAULT_MOTION_STOP).toBool();
 
     // Start the pipeline
     pipeline->setState(QGst::StatePlaying);
@@ -587,7 +598,11 @@ QString Pipeline::appendVideoTail(const QDir& dir, const QString& prefix, QStrin
     else
     {
         sink = QGst::ElementFactory::make("multifilesink", (prefix + "sink").toUtf8());
-        if (!sink || !sink->findProperty("max-file-size"))
+        if (sink && sink->findProperty("max-file-size"))
+        {
+            sink->setProperty("post-messages", true);
+        }
+        else
         {
             split = false;
             qDebug() << "multiflesink does not support 'max-file-size' property, replaced with filesink";
@@ -638,7 +653,12 @@ QString Pipeline::appendVideoTail(const QDir& dir, const QString& prefix, QStrin
 
     // Replace '%02d' with '00' to get the real clip name
     //
-    return split? absPath.replace("%02d","00"): absPath;
+    auto realFileName = split? absPath.replace("%02d","00"): absPath;
+    if (!modality.isEmpty())
+    {
+        SetFileExtAttribute(realFileName, "modality", modality);
+    }
+    return realFileName;
 }
 
 void Pipeline::removeVideoTail(const QString& prefix)
@@ -675,6 +695,12 @@ void Pipeline::removeVideoTail(const QString& prefix)
         valve->unlink(sink);
     }
     pipeline->remove(sink);
+
+    if (!modality.isEmpty())
+    {
+        auto realFileName = sink->property("location").toString().replace("%02d","00");
+        SetFileExtAttribute(realFileName, "modality", modality);
+    }
 }
 
 void Pipeline::updateOverlayText(int countdown)
@@ -748,7 +774,7 @@ void Pipeline::onBusMessage(const QGst::MessagePtr& msg)
         //
         if (msg->source() == pipeline)
         {
-            Q_FOREACH (auto w, qApp->topLevelWidgets())
+            foreach (auto w, qApp->topLevelWidgets())
             {
                 w->update();
             }
@@ -792,24 +818,32 @@ void Pipeline::onElementMessage(const QGst::ElementMessagePtr& msg)
         return;
     }
 
-    if (s->name() == "GstMultiFileSink" && msg->source() == imageSink)
+    if (s->name() == "GstMultiFileSink")
     {
         QString filename = s->value("filename").toString();
-        QString tooltip = filename;
-        QPixmap pm;
-
-        auto lastBuffer = msg->source()->property("last-buffer").get<QGst::BufferPtr>();
-        bool ok = lastBuffer && pm.loadFromData(lastBuffer->data(), lastBuffer->size());
-
-        // If we can not load from the buffer, try to load from the file
-        //
-        if (!ok && !pm.load(filename))
+        if (msg->source() == imageSink)
         {
-            tooltip = tr("Failed to load image %1").arg(filename);
-            pm.load(":/buttons/stop");
+            QString tooltip = filename;
+            QPixmap pm;
+
+            auto lastBuffer = msg->source()->property("last-buffer").get<QGst::BufferPtr>();
+            bool ok = lastBuffer && pm.loadFromData(lastBuffer->data(), lastBuffer->size());
+
+            // If we can not load from the buffer, try to load from the file
+            //
+            if (!ok && !pm.load(filename))
+            {
+                tooltip = tr("Failed to load image %1").arg(filename);
+                pm.load(":/buttons/stop");
+            }
+
+            imageSaved(filename, tooltip, pm);
         }
 
-        imageSaved(filename, tooltip, pm);
+        if (!modality.isEmpty())
+        {
+            SetFileExtAttribute(filename, "modality", modality);
+        }
         return;
     }
 

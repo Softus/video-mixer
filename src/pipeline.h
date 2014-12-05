@@ -35,8 +35,6 @@
 class Pipeline : public QObject
 {
     Q_OBJECT
-    int           index;
-    QString       alias;
     QString       pipelineDef;
 
     void onBusMessage(const QGst::MessagePtr& msg);
@@ -44,11 +42,16 @@ class Pipeline : public QObject
     void onImageReady(const QGst::BufferPtr&);
     void onClipFrame(const QGst::BufferPtr&);
     void onVideoFrame(const QGst::BufferPtr&);
-    QString buildPipeline(const QSettings& settings, const QString& outputPathDef, bool enableVideoLog);
+    QString buildPipeline(const QSettings& settings, const QString& outputPathDef,
+                          bool enableVideoLog, const QString &detectMotion);
     void releasePipeline();
     void errorGlib(const QGlib::ObjectPtr& obj, const QGlib::Error& ex);
-    void setElementProperty(const char* elm, const char* prop = nullptr, const QGlib::Value& value = nullptr, QGst::State minimumState = QGst::StatePlaying);
-    void setElementProperty(QGst::ElementPtr& elm, const char* prop = nullptr, const QGlib::Value& value = nullptr, QGst::State minimumState = QGst::StatePlaying);
+    void setElementProperty(const char* elm, const char* prop = nullptr,
+                            const QGlib::Value& value = nullptr,
+                            QGst::State minimumState = QGst::StatePlaying);
+    void setElementProperty(QGst::ElementPtr& elm, const char* prop = nullptr,
+                            const QGlib::Value& value = nullptr,
+                            QGst::State minimumState = QGst::StatePlaying);
 
 public:
     Pipeline(int index, QObject *parent = 0);
@@ -70,6 +73,9 @@ public:
     QGst::ElementPtr  displayOverlay;
     VideoWidget*      displayWidget;
 
+    int           index;
+    QString       alias;
+    QString       modality;
     bool          motionDetected;
     bool          motionStart;
     bool          motionStop;

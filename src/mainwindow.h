@@ -108,6 +108,8 @@ class MainWindow : public QWidget
     void updateWindowTitle();
     QDir checkPath(const QString tpl, bool needUnique);
     void updateOutputPath(bool needUnique);
+    bool checkPipelines();
+    void rebuildPipelines();
 
     bool startVideoRecord();
     void updateStartDialog();
@@ -130,7 +132,7 @@ signals:
     void updateOverlayText(int);
 
 public slots:
-    void updatePipeline();
+    void applySettings();
     void toggleSetting();
 
 private slots:

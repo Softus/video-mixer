@@ -244,15 +244,15 @@ void VideoSourceDetails::updateDevice(const QString& device, const QString& devi
             else if (deviceType == "videotestsrc")
             {
 #if GST_CHECK_VERSION(1,0,0)
-                auto numPatterns = 23;
+                auto numPatterns = 22;
 #else
-                auto numPatterns = 21;
+                auto numPatterns = 20;
 #endif
-                for (int i = 1; i <= numPatterns; ++i)
+                for (int i = 0; i <= numPatterns; ++i)
                 {
                     listChannels->addItem(QString::number(i));
                 }
-                idx = selectedChannel.toInt();
+                idx = selectedChannel.toInt() + 1;
             }
         }
 
