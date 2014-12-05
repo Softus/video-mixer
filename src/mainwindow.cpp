@@ -458,7 +458,7 @@ bool MainWindow::checkPipelines()
 {
     QSettings settings;
     settings.beginGroup("gst");
-    auto nSources = std::max(settings.beginReadArray("src"), 1);
+    auto nSources = qMax(settings.beginReadArray("src"), 1);
 
     auto nPipeline = 0;
     for (int i = 0; i < nSources; ++i)
@@ -500,7 +500,7 @@ void MainWindow::rebuildPipelines()
 
     QSettings settings;
     settings.beginGroup("gst");
-    auto nSources = std::max(settings.beginReadArray("src"), 1);
+    auto nSources = qMax(settings.beginReadArray("src"), 1);
 
     for (int i = 0; i < nSources; ++i)
     {
@@ -769,7 +769,7 @@ void MainWindow::onImageSaved(const QString& filename, const QString &tooltip, c
         painter.drawPixmap(pm.rect(), pmOverlay);
         clipPreviewFileName.clear();
 #ifdef Q_OS_WIN
-        SetFileAttributesW(fileName.toStdWString().c_str(), FILE_ATTRIBUTE_HIDDEN);
+        SetFileAttributesW(filename.toStdWString().c_str(), FILE_ATTRIBUTE_HIDDEN);
 #endif
     }
 
