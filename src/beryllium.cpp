@@ -14,9 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifdef WITH_TOUCH
 #include "touch/clickfilter.h"
-#endif
 
 #include "product.h"
 #include "archivewindow.h"
@@ -481,10 +479,8 @@ int main(int argc, char *argv[])
 
     if (wnd)
     {
-#ifdef WITH_TOUCH
         new ClickFilter(wnd);
         wnd->grabGesture(Qt::TapAndHoldGesture);
-#endif
         new SmartShortcut(wnd);
         fullScreen? wnd->showFullScreen(): wnd->show();
         errCode = app.exec();

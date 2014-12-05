@@ -36,9 +36,7 @@
 #include "dicom/worklistquerysettings.h"
 #endif
 
-#ifdef WITH_TOUCH
 #include "touch/slidingstackedwidget.h"
-#endif
 
 #include <QListWidget>
 #include <QBoxLayout>

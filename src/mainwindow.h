@@ -64,9 +64,7 @@ class MainWindow : public QWidget
     Worklist*     worklist;
     QString       pendingSOPInstanceUID;
 #endif
-#ifdef WITH_TOUCH
     SlidingStackedWidget* mainStack;
-#endif
     QListWidget*  listImagesAndClips;
     QDir          outputPath;
     QDir          videoOutputPath;

@@ -79,9 +79,6 @@ public:
     ~ArchiveWindow();
 protected:
     virtual void showEvent(QShowEvent *);
-#ifndef WITH_TOUCH
-    virtual void hideEvent(QHideEvent *);
-#endif
     virtual void timerEvent(QTimerEvent *);
 
 signals:
@@ -102,9 +99,7 @@ public slots:
 #ifdef WITH_DICOM
     void onStoreClick();
 #endif
-#ifdef WITH_TOUCH
     void onBackToMainWindowClick();
-#endif
     void onPrevClick();
     void onNextClick();
     void onSeekClick();

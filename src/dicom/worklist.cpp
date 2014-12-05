@@ -22,9 +22,7 @@
 #include "dcmclient.h"
 #include "transcyrillic.h"
 
-#ifdef WITH_TOUCH
 #include "../touch/slidingstackedwidget.h"
-#endif
 
 #include <QAction>
 #include <QApplication>
@@ -57,9 +55,6 @@ Worklist::Worklist(QWidget *parent) :
     QSettings settings;
     settings.beginGroup("dicom");
 
-#ifndef WITH_TOUCH
-    setWindowTitle(tr("Worklist - %1").arg(settings.value("mwl-server").toString()));
-#endif
 
     auto cols = settings.value("worklist-columns").toStringList();
     if (cols.size() == 0)
@@ -96,23 +91,14 @@ Worklist::Worklist(QWidget *parent) :
     table->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
     auto layoutMain = new QVBoxLayout();
-#ifndef WITH_TOUCH
-    layoutMain->addWidget(createToolBar());
-#endif
     layoutMain->addWidget(table);
-#ifdef WITH_TOUCH
     layoutMain->addWidget(createToolBar());
     table->viewport()->ungrabGesture(Qt::PanGesture);
-#endif
     setLayout(layoutMain);
 
     setMinimumSize(640, 480);
 
     settings.beginGroup("ui");
-#ifndef WITH_TOUCH
-    restoreGeometry(settings.value("worklist-geometry").toByteArray());
-    setWindowState((Qt::WindowState)settings.value("worklist-state").toInt());
-#endif
     table->horizontalHeader()->restoreState(settings.value("worklist-columns-width").toByteArray());
     settings.endGroup();
 
@@ -130,10 +116,8 @@ QToolBar* Worklist::createToolBar()
     QToolBar* bar = new QToolBar(tr("Worklist"));
     bar->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 
-#ifdef WITH_TOUCH
     auto actionBack = bar->addAction(QIcon(":buttons/back"), tr("Back"), this, SLOT(onBackToMainWindowClick()));
     actionBack->setShortcut(Qt::Key_Back);
-#endif
 
     actionLoad   = bar->addAction(QIcon(":/buttons/refresh"), tr("&Refresh"), this, SLOT(onLoadClick()));
     actionDetail = bar->addAction(QIcon(":/buttons/details"), tr("&Details"), this, SLOT(onShowDetailsClick()));
@@ -204,10 +188,6 @@ void Worklist::hideEvent(QHideEvent *e)
 {
     QSettings settings;
     settings.beginGroup("ui");
-#ifndef WITH_TOUCH
-    settings.setValue("worklist-geometry", saveGeometry());
-    settings.setValue("worklist-state", (int)windowState() & ~Qt::WindowMinimized);
-#endif
     settings.setValue("worklist-columns-width", table->horizontalHeader()->saveState());
     settings.endGroup();
     QWidget::hideEvent(e);
@@ -308,7 +288,6 @@ void Worklist::onStartStudyClick()
     }
 }
 
-#ifdef WITH_TOUCH
 void Worklist::onBackToMainWindowClick()
 {
     auto stackWidget = static_cast<SlidingStackedWidget*>(parent()->qt_metacast("SlidingStackedWidget"));
@@ -317,4 +296,3 @@ void Worklist::onBackToMainWindowClick()
         stackWidget->slideInWidget("Main");
     }
 }
-#endif

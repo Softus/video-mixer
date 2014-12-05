@@ -75,6 +75,8 @@ SOURCES += \
     src/smartshortcut.cpp \
     src/sound.cpp \
     src/thumbnaillist.cpp \
+    src/touch/clickfilter.cpp \
+    src/touch/slidingstackedwidget.cpp \
     src/typedetect.cpp \
     src/videoeditor.cpp \
     src/videoencodingprogressdialog.cpp \
@@ -118,6 +120,9 @@ HEADERS += \
     src/smartshortcut.h \
     src/sound.h \
     src/thumbnaillist.h \
+    src/touch/clickfilter.h \
+    src/touch/slidingstackedwidget.h \
+    src/touch/slidingstackedwidget_p.h \
     src/typedetect.h \
     src/videoeditor.h \
     src/videoencodingprogressdialog.h \
@@ -162,5 +167,4 @@ unix {
     INSTALLS += dbus translations sound shortcut icon man
 }
 
-include (src/touch/touch.pri)
 include (src/dicom/dicom.pri) # Must be very last line of this file

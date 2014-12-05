@@ -28,9 +28,7 @@
 #include <dcmtk/dcmdata/dcuid.h>
 #endif
 
-#ifdef WITH_TOUCH
 #include "touch/slidingstackedwidget.h"
-#endif
 
 #include <QAction>
 #include <QApplication>
@@ -88,10 +86,8 @@ ArchiveWindow::ArchiveWindow(QWidget *parent)
 
     auto barArchive = new QToolBar(tr("Archive"));
     barArchive->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-#ifdef WITH_TOUCH
     actionBack = barArchive->addAction(QIcon(":buttons/back"), tr("Back"), this, SLOT(onBackToMainWindowClick()));
     actionBack->setShortcut(Qt::Key_Back);
-#endif
 
     actionDelete = barArchive->addAction(QIcon(":buttons/delete"), tr("Delete"), this, SLOT(onDeleteClick()));
     actionDelete->setEnabled(false);
@@ -127,9 +123,6 @@ ArchiveWindow::ArchiveWindow(QWidget *parent)
 
     actionBrowse = barArchive->addAction(QIcon(":buttons/folder"), tr("File browser"), this, SLOT(onShowFolderClick()));
 
-#ifndef WITH_TOUCH
-    layoutMain->addWidget(barArchive);
-#endif
 
     barPath = new QToolBar(tr("Path"));
     layoutMain->addWidget(barPath);
@@ -206,18 +199,9 @@ ArchiveWindow::ArchiveWindow(QWidget *parent)
     listFiles->addAction(actionEnter);
     layoutMain->addWidget(listFiles);
 
-#ifdef WITH_TOUCH
     layoutMain->addWidget(barArchive);
-#endif
     setLayout(layoutMain);
 
-#ifndef WITH_TOUCH
-    settings.beginGroup("ui");
-    restoreGeometry(settings.value("archive-geometry").toByteArray());
-    setWindowState((Qt::WindowState)settings.value("archive-state").toInt());
-    setAttribute(Qt::WA_DeleteOnClose, false);
-    settings.endGroup();
-#endif
     updateHotkeys(settings);
 }
 
@@ -258,25 +242,11 @@ ArchiveWindow::~ArchiveWindow()
 
 void ArchiveWindow::showEvent(QShowEvent *evt)
 {
-#ifdef WITH_TOUCH
     actionBack->setVisible(parent() != nullptr);
-#endif
     onDirectoryChanged(QString());
     QWidget::showEvent(evt);
 }
 
-#ifndef WITH_TOUCH
-void ArchiveWindow::hideEvent(QHideEvent *evt)
-{
-    reallyDeleteFiles();
-    QSettings settings;
-    settings.beginGroup("ui");
-    settings.setValue("archive-geometry", saveGeometry());
-    settings.setValue("archive-state", (int)windowState() & ~Qt::WindowMinimized);
-    settings.endGroup();
-    QWidget::hideEvent(evt);
-}
-#endif
 
 void ArchiveWindow::timerEvent(QTimerEvent* evt)
 {
@@ -785,18 +755,7 @@ void ArchiveWindow::onStoreClick()
             tr("All files were successfully stored."), QMessageBox::Close | QMessageBox::Ok, QMessageBox::Close);
         if (QMessageBox::Close == userChoice)
         {
-#ifdef WITH_TOUCH
             onBackToMainWindowClick();
-#else
-            if (parent())
-            {
-                hide();
-            }
-            else
-            {
-                close();
-            }
-#endif
         }
     }
 }
@@ -881,9 +840,6 @@ void ArchiveWindow::onPlayPauseClick()
 
 void ArchiveWindow::stopMedia()
 {
-#ifndef WITH_TOUCH
-    setWindowTitle(tr("Archive"));
-#endif
     foreach (auto action, barMediaControls->actions())
     {
         action->setVisible(false);
@@ -934,9 +890,6 @@ void ArchiveWindow::playMediaFile(const QFileInfo& fi)
         pipeline->getState(nullptr, nullptr, GST_SECOND * 10); // 10 sec
         auto details = GstDebugGraphDetails(GST_DEBUG_GRAPH_SHOW_MEDIA_TYPE | GST_DEBUG_GRAPH_SHOW_NON_DEFAULT_PARAMS | GST_DEBUG_GRAPH_SHOW_STATES);
         GST_DEBUG_BIN_TO_DOT_FILE_WITH_TS(pipeline.staticCast<QGst::Bin>(), details, qApp->applicationName().append(".archive").toUtf8());
-#ifndef WITH_TOUCH
-        setWindowTitle(tr("Archive - %1").arg(fi.fileName()));
-#endif
         isVideo = caps.startsWith("video/");
     }
     catch (const QGlib::Error& ex)
@@ -1099,7 +1052,6 @@ void ArchiveWindow::onStateChangedMessage(const QGst::StateChangedMessagePtr& me
     }
 }
 
-#ifdef WITH_TOUCH
 void ArchiveWindow::onBackToMainWindowClick()
 {
     reallyDeleteFiles();
@@ -1109,4 +1061,3 @@ void ArchiveWindow::onBackToMainWindowClick()
         stackWidget->slideInWidget("Main");
     }
 }
-#endif

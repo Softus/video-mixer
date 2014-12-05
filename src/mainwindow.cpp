@@ -45,9 +45,7 @@ static DcmTagKey DCM_ImageNo(0x5000, 0x8001);
 static DcmTagKey DCM_ClipNo(0x5000,  0x8002);
 #endif
 
-#ifdef WITH_TOUCH
 #include "touch/slidingstackedwidget.h"
-#endif
 
 #include <QApplication>
 #include <QBoxLayout>
@@ -118,9 +116,6 @@ MainWindow::MainWindow(QWidget *parent) :
     font.setPointSize(font.pointSize() * 1.5);
     extraTitle->setFont(font);
     layoutMain->addWidget(extraTitle);
-#ifndef WITH_TOUCH
-    layoutMain->addWidget(createToolBar());
-#endif
     listImagesAndClips = new ThumbnailList();
     listImagesAndClips->setViewMode(QListView::IconMode);
     listImagesAndClips->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
@@ -129,7 +124,6 @@ MainWindow::MainWindow(QWidget *parent) :
     listImagesAndClips->setIconSize(QSize(144,144));
     listImagesAndClips->setMovement(QListView::Snap);
 
-#ifdef WITH_TOUCH
     mainStack = new SlidingStackedWidget();
     layoutMain->addWidget(mainStack);
 
@@ -152,10 +146,6 @@ MainWindow::MainWindow(QWidget *parent) :
     archiveWindow->updateRoot();
     archiveWindow->setObjectName("Archive");
     mainStack->addWidget(archiveWindow);
-#else
-    layoutMain->addWidget(displayWidget);
-    layoutMain->addWidget(listImagesAndClips);
-#endif
 
     settings.beginGroup("ui");
     altSrcSize = settings.value("alt-src-size", DEFAULT_ALT_SRC_SIZE).toSize();
@@ -228,33 +218,9 @@ void MainWindow::closeEvent(QCloseEvent *evt)
         evt->ignore();
         hide();
 
-#ifndef WITH_TOUCH
-        if (archiveWindow)
-        {
-            archiveWindow->hide();
-        }
-#ifdef WITH_DICOM
-        if (worklist)
-        {
-            worklist->hide();
-        }
-#endif
-#endif
         return;
     }
 
-#ifndef WITH_TOUCH
-    if (archiveWindow)
-    {
-        archiveWindow->close();
-    }
-#ifdef WITH_DICOM
-    if (worklist)
-    {
-        worklist->close();
-    }
-#endif
-#endif
 
     QWidget::closeEvent(evt);
 }
@@ -642,10 +608,8 @@ void MainWindow::applySettings()
     delete worklist;
     worklist = new Worklist();
     connect(worklist, SIGNAL(startStudy(DcmDataset*)), this, SLOT(onStartStudy(DcmDataset*)));
-#ifdef WITH_TOUCH
     worklist->setObjectName("Worklist");
     mainStack->addWidget(worklist);
-#endif
     updateShortcut(actionWorklist, settings.value("capture-worklist",   DEFAULT_HOTKEY_WORKLIST).toInt());
 #endif
     settings.endGroup();
@@ -1123,20 +1087,8 @@ void MainWindow::onShowAboutClick()
 
 void MainWindow::onShowArchiveClick()
 {
-#ifndef WITH_TOUCH
-    if (archiveWindow == nullptr)
-    {
-        archiveWindow = new ArchiveWindow();
-        archiveWindow->updateRoot();
-    }
-#endif
     archiveWindow->setPath(outputPath.absolutePath());
-#ifdef WITH_TOUCH
     mainStack->slideInWidget(archiveWindow);
-#else
-    archiveWindow->show();
-    archiveWindow->activateWindow();
-#endif
 }
 
 void MainWindow::onShowSettingsClick()
@@ -1184,11 +1136,7 @@ void MainWindow::onStartStudy()
     //
     activateWindow();
 
-#ifdef WITH_TOUCH
     mainStack->slideInWidget("Main");
-#else
-    show();
-#endif
 
     if (running)
     {
@@ -1480,16 +1428,6 @@ void MainWindow::onSwapSources(QWidget* dst)
 #ifdef WITH_DICOM
 void MainWindow::onShowWorkListClick()
 {
-#ifndef WITH_TOUCH
-    if (worklist == nullptr)
-    {
-        worklist = new Worklist();
-        connect(worklist, SIGNAL(startStudy(DcmDataset*)), this, SLOT(onStartStudy(DcmDataset*)));
-    }
-    worklist->show();
-    worklist->activateWindow();
-#else
     mainStack->slideInWidget(worklist);
-#endif
 }
 #endif

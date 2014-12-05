@@ -69,9 +69,7 @@ private slots:
     void onItemDoubleClicked(QTableWidgetItem* item);
     void onCurrentItemChanged(QTableWidgetItem*,QTableWidgetItem*);
     void onAddRow(DcmDataset* responseIdentifiers);
-#ifdef WITH_TOUCH
     void onBackToMainWindowClick();
-#endif
 };
 
 #endif // WORKLIST_H

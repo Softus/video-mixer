@@ -92,9 +92,6 @@ VideoEditor::VideoEditor(const QString& filePath, QWidget *parent)
     auto actionSnapshot = barEditor->addAction(QIcon(":buttons/camera"), tr("Snapshot"), this, SLOT(onSnapshotClick()));
     actionSnapshot->setShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_H));
 
-#ifndef WITH_TOUCH
-    layoutMain->addWidget(barEditor);
-#endif
 
     videoWidget = new QGst::Ui::VideoWidget;
     layoutMain->addWidget(videoWidget);
@@ -154,9 +151,7 @@ VideoEditor::VideoEditor(const QString& filePath, QWidget *parent)
     connect(sliderRange, SIGNAL(upperPositionChanged(int)), this, SLOT(setUpperPosition(int)));
     layoutMain->addWidget(sliderRange);
 
-#ifdef WITH_TOUCH
     layoutMain->addWidget(barEditor);
-#endif
     setLayout(layoutMain);
 
     QSettings settings;
