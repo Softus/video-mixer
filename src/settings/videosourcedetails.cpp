@@ -306,7 +306,7 @@ void VideoSourceDetails::inputChannelChanged(int index)
     for (uint i = 0; i < caps->size(); ++i)
     {
         auto s = caps->internalStructure(i);
-        Q_FOREACH (auto format, getFormats(s->value("format")))
+        foreach (auto format, getFormats(s->value("format")))
         {
             auto formatName = !format.isValid()? s->name(): s->name().append(",format=").append(valueToString(format));
             if (listFormats->findData(formatName) >= 0)
@@ -414,7 +414,7 @@ void VideoSourceDetails::formatChanged(int index)
     //
     sizes.erase(std::unique (sizes.begin(), sizes.end()), sizes.end());
 
-    Q_FOREACH(auto size, sizes)
+    foreach (auto size, sizes)
     {
         QString name = tr("%1x%2").arg(size.width()).arg(size.height());
         listSizes->addItem(name, size);

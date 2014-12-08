@@ -98,7 +98,7 @@ cfgPathCallback(const gchar *, const gchar *value, gpointer, GError **)
         QSettings fileSettings(QSettings::IniFormat, QSettings::SystemScope, ORGANIZATION_DOMAIN, PRODUCT_SHORT_NAME);
         // Copy settings from file to memory
         //
-        Q_FOREACH (auto key, fileSettings.allKeys())
+        foreach (auto key, fileSettings.allKeys())
         {
             systemSettings.setValue(key, fileSettings.value(key));
         }
@@ -108,7 +108,7 @@ cfgPathCallback(const gchar *, const gchar *value, gpointer, GError **)
         QSettings fileSettings(path, QSettings::IniFormat);
         // Copy settings from file to memory
         //
-        Q_FOREACH (auto key, fileSettings.allKeys())
+        foreach (auto key, fileSettings.allKeys())
         {
             systemSettings.setValue(key, fileSettings.value(key));
         }

@@ -275,7 +275,7 @@ void SettingsDialog::saveToFile()
         save(settings);
 
         QSettings fileSettings(dlg.selectedFiles().first(), QSettings::NativeFormat);
-        Q_FOREACH (auto key, settings.allKeys())
+        foreach (auto key, settings.allKeys())
         {
             fileSettings.setValue(key, settings.value(key));
         }
@@ -292,7 +292,7 @@ void SettingsDialog::loadFromFile()
     {
         QSettings settings;
         QSettings fileSettings(dlg.selectedFiles().first(), QSettings::NativeFormat);
-        Q_FOREACH (auto key, fileSettings.allKeys())
+        foreach (auto key, fileSettings.allKeys())
         {
             settings.setValue(key, fileSettings.value(key));
         }

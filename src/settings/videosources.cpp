@@ -28,7 +28,7 @@
 #include <QGst/PropertyProbe>
 
 static QTreeWidgetItem*
-newItem(const QString& name, const QString& device, const QVariantMap& parameters, bool enabled = true)
+newItem(const QString& name, const QString& device, const QVariantMap& parameters, bool enabled)
 {
     auto title = name.isEmpty()? device: device + " (" + name + ")";
     auto item = new QTreeWidgetItem(QStringList()
@@ -89,6 +89,7 @@ VideoSources::VideoSources(QWidget *parent) :
     auto cnt = settings.beginReadArray("src");
     if (cnt == 0)
     {
+        settings.endArray();
         // Migration from version < 1.2
         //
         addItem(settings);
@@ -100,8 +101,8 @@ VideoSources::VideoSources(QWidget *parent) :
             settings.setArrayIndex(i);
             addItem(settings);
         }
+        settings.endArray();
     }
-    settings.endArray();
     settings.endGroup();
 
     btnDetails->setEnabled(false);
@@ -161,6 +162,8 @@ void VideoSources::updateDeviceList(const char* elmName, const char* propName)
         return;
     }
 
+    auto defaultDevice = src->property(propName).toString();
+
     // Look for device-name for windows and "device" for linux/macosx
     //
     QGst::PropertyProbePtr propertyProbe = src.dynamicCast<QGst::PropertyProbe>();
@@ -180,11 +183,49 @@ void VideoSources::updateDeviceList(const char* elmName, const char* propName)
 
             foreach (auto item, listSources->findItems(deviceName, Qt::MatchStartsWith))
             {
-                if (item->data(0, Qt::UserRole).toString() == deviceName &&
-                    item->data(1, Qt::UserRole).toString() == friendlyName)
+                auto currDeviceName   = item->data(0, Qt::UserRole).toString();
+                auto currFriendlyName = item->data(1, Qt::UserRole).toString();
+
+                if (currFriendlyName == friendlyName && currDeviceName == deviceName)
                 {
                     found = true;
                     break;
+                }
+            }
+
+            // Check for migration from version < 1.2
+            //
+            if (!found && listSources->topLevelItemCount() > 0)
+            {
+                auto item = listSources->topLevelItem(0);
+                auto currDeviceName   = item->data(0, Qt::UserRole).toString();
+                auto currFriendlyName = item->data(1, Qt::UserRole).toString();
+
+                if (currDeviceName.isEmpty())
+                {
+                    currDeviceName = defaultDevice;
+                }
+
+                if ((currFriendlyName.isEmpty() || currFriendlyName == friendlyName) &&
+                    (currDeviceName == deviceName))
+                {
+                    item->setData(1, Qt::UserRole, friendlyName);
+                    item->setData(0, Qt::UserRole, deviceName);
+                    auto title = friendlyName.isEmpty()? deviceName: deviceName + " (" + friendlyName + ")";
+                    item->setText(0, title);
+
+                    auto alias = item->text(2);
+                    if (alias.isEmpty())
+                    {
+                        alias = "src0";
+                        item->setText(2, alias);
+                    }
+
+                    auto parameters = item->data(2, Qt::UserRole).toMap();
+                    parameters["alias"] = alias;
+                    parameters["device-type"] = elmName;
+                    item->setData(2, Qt::UserRole, parameters);
+                    found = true;
                 }
             }
 
@@ -194,7 +235,7 @@ void VideoSources::updateDeviceList(const char* elmName, const char* propName)
                 QVariantMap parameters;
                 parameters["alias"] = alias;
                 parameters["device-type"] = elmName;
-                listSources->addTopLevelItem(newItem(friendlyName, deviceName, parameters));
+                listSources->addTopLevelItem(newItem(friendlyName, deviceName, parameters, false));
             }
         }
     }
@@ -242,7 +283,7 @@ void VideoSources::onAddClicked()
     QVariantMap parameters;
     parameters["alias"] = QString("src%1").arg(listSources->topLevelItemCount());
     parameters["device-type"] = "videotestsrc";
-    listSources->addTopLevelItem(newItem("", "Video test source", parameters));
+    listSources->addTopLevelItem(newItem("", "Video test source", parameters, true));
 }
 
 void VideoSources::save(QSettings& settings)

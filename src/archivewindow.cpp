@@ -651,7 +651,7 @@ void ArchiveWindow::reallyDeleteFiles()
         return;
     }
 
-    Q_FOREACH(auto file, deleteLater)
+    foreach (auto file, deleteLater)
     {
         removeFileOrFolder(file);
     }
@@ -779,7 +779,7 @@ void ArchiveWindow::onEditClick()
     if (!QProcess::startDetached(editorExecutable, editorSwitches))
     {
         auto err = tr("Failed to launch ").append(editorExecutable);
-        Q_FOREACH (auto arg, editorSwitches)
+        foreach (auto arg, editorSwitches)
         {
             err.append(' ').append(arg);
         }

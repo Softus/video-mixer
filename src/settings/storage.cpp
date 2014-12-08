@@ -80,7 +80,7 @@ StorageSettings::StorageSettings(QWidget *parent)
                   "%birthdate%|patient birthdate|%physician%|physician name|%study%|study name");
 
     int cnt = 0;
-    Q_FOREACH(auto lbl, str.split('|'))
+    foreach (auto lbl, str.split('|'))
     {
         layoutLegend->addWidget(new QLabel(lbl), cnt / 4, cnt % 4);
         ++cnt;

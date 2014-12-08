@@ -122,7 +122,7 @@ struct SmartHandler
 
     bool isActive()
     {
-        Q_FOREACH (auto t, targets)
+        foreach (auto t, targets)
         {
             if (isActiveTarget(t))
                 return true;
@@ -141,10 +141,12 @@ struct SmartHandler
 
         bool longPress = SmartShortcut::longPressTimeout(ts);
 
-        Q_FOREACH (auto t, targets)
+        foreach (auto t, targets)
         {
             if (triggerTarget(longPress, t))
+            {
                 return true;
+            }
         }
 
         return false;
@@ -169,7 +171,7 @@ void SmartShortcut::remove(QObject *target)
 
         if (global)
         {
-            Q_FOREACH (auto t, h.value().targets)
+            foreach (auto t, h.value().targets)
             {
                 if (t.global)
                 {
@@ -199,7 +201,7 @@ void SmartShortcut::removeAll()
 {
     for (auto h = handlers.begin(); h != handlers.end(); ++h)
     {
-        Q_FOREACH (auto t, h.value().targets)
+        foreach (auto t, h.value().targets)
         {
             if (t.global)
             {

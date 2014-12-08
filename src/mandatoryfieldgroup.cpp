@@ -149,7 +149,7 @@ void MandatoryFieldGroup::changed()
         return;
 
     bool enable = true;
-    Q_FOREACH (auto widget, widgets)
+    foreach (auto widget, widgets)
     {
         if ((widget->inherits("QCheckBox") && ((QCheckBox*)widget->qt_metacast("QCheckBox"))->checkState() == Qt::PartiallyChecked)
             || (widget->inherits("QLineEdit") && ((QLineEdit*)widget->qt_metacast("QLineEdit"))->text().isEmpty()))
@@ -167,7 +167,7 @@ void MandatoryFieldGroup::changed()
 
 void MandatoryFieldGroup::clear()
 {
-    Q_FOREACH (auto widget, widgets)
+    foreach (auto widget, widgets)
     {
         widget->setProperty("mandatoryField", false);
     }
