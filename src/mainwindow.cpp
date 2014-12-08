@@ -456,11 +456,18 @@ QString MainWindow::replace(QString str, int seqNo)
 
 bool MainWindow::checkPipelines()
 {
+    auto nPipeline = 0;
     QSettings settings;
     settings.beginGroup("gst");
-    auto nSources = qMax(settings.beginReadArray("src"), 1);
+    auto nSources = settings.beginReadArray("src");
 
-    auto nPipeline = 0;
+    if (nSources == 0)
+    {
+        // Migration from version < 1.2
+        //
+        ++nPipeline;
+    }
+
     for (int i = 0; i < nSources; ++i)
     {
         settings.setArrayIndex(i);
@@ -474,7 +481,7 @@ bool MainWindow::checkPipelines()
             return false;
         }
 
-        auto alias = settings.value("parameters").toMap().value("alias").toString();
+        auto alias = settings.value("alias").toString();
         if (pipelines[nPipeline]->index != i || pipelines[nPipeline]->alias != alias)
         {
             return false;
@@ -486,6 +493,38 @@ bool MainWindow::checkPipelines()
     settings.endGroup();
 
     return nPipeline == pipelines.size();
+}
+
+void MainWindow::createPipeline(int index, int order)
+{
+    auto p = new Pipeline(index, this);
+    connect(p, SIGNAL(imageSaved(const QString&, const QString&, const QPixmap&)),
+            this, SLOT(onImageSaved(const QString&, const QString&, const QPixmap&)), Qt::QueuedConnection);
+    connect(p, SIGNAL(clipFrameReady()), this, SLOT(onClipFrameReady()), Qt::QueuedConnection);
+    connect(p, SIGNAL(videoFrameReady()), this, SLOT(onVideoFrameReady()), Qt::QueuedConnection);
+    connect(p, SIGNAL(pipelineError(const QString&)), this, SLOT(onPipelineError(const QString&)), Qt::QueuedConnection);
+    connect(p, SIGNAL(motion(bool)), this, SLOT(onMotion(bool)), Qt::QueuedConnection);
+    connect(this, SIGNAL(updateOverlayText(int)), p, SLOT(updateOverlayText(int)), Qt::QueuedConnection);
+    connect(p->displayWidget, SIGNAL(swapWith(QWidget*)), this, SLOT(onSwapSources(QWidget*)));
+    connect(p->displayWidget, SIGNAL(click()), this, SLOT(onSourceClick()));
+    connect(p->displayWidget, SIGNAL(copy()), this, SLOT(onSourceSnapshot()));
+    pipelines.push_back(p);
+
+    if (order < 0 && !activePipeline)
+    {
+        p->displayWidget->setMinimumSize(mainSrcSize);
+        p->displayWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        layoutVideo->insertWidget(0, p->displayWidget);
+        activePipeline = p;
+    }
+    else
+    {
+        p->displayWidget->setMinimumSize(altSrcSize);
+        p->displayWidget->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+        layoutSources->insertWidget(order < 0? layoutSources->count(): order, p->displayWidget, 0, Qt::AlignTop);
+    }
+
+    p->updatePipeline();
 }
 
 void MainWindow::rebuildPipelines()
@@ -500,47 +539,26 @@ void MainWindow::rebuildPipelines()
 
     QSettings settings;
     settings.beginGroup("gst");
-    auto nSources = qMax(settings.beginReadArray("src"), 1);
+    auto nSources = settings.beginReadArray("src");
 
-    for (int i = 0; i < nSources; ++i)
+    if (nSources == 0)
     {
-        settings.setArrayIndex(i);
-        if (!settings.value("enabled", true).toBool())
-        {
-            continue;
-        }
-
-        auto p = new Pipeline(i, this);
-        connect(p, SIGNAL(imageSaved(const QString&, const QString&, const QPixmap&)),
-                this, SLOT(onImageSaved(const QString&, const QString&, const QPixmap&)), Qt::QueuedConnection);
-        connect(p, SIGNAL(clipFrameReady()), this, SLOT(onClipFrameReady()), Qt::QueuedConnection);
-        connect(p, SIGNAL(videoFrameReady()), this, SLOT(onVideoFrameReady()), Qt::QueuedConnection);
-        connect(p, SIGNAL(pipelineError(const QString&)), this, SLOT(onPipelineError(const QString&)), Qt::QueuedConnection);
-        connect(p, SIGNAL(motion(bool)), this, SLOT(onMotion(bool)), Qt::QueuedConnection);
-        connect(this, SIGNAL(updateOverlayText(int)), p, SLOT(updateOverlayText(int)), Qt::QueuedConnection);
-        connect(p->displayWidget, SIGNAL(swapWith(QWidget*)), this, SLOT(onSwapSources(QWidget*)));
-        connect(p->displayWidget, SIGNAL(click()), this, SLOT(onSourceClick()));
-        connect(p->displayWidget, SIGNAL(copy()), this, SLOT(onSourceSnapshot()));
-        pipelines.push_back(p);
-
-        auto order = settings.value("order", -1).toInt();
-        if (order < 0 && !activePipeline)
-        {
-            p->displayWidget->setMinimumSize(mainSrcSize);
-            p->displayWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-            layoutVideo->insertWidget(0, p->displayWidget);
-            activePipeline = p;
-        }
-        else
-        {
-            p->displayWidget->setMinimumSize(altSrcSize);
-            p->displayWidget->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-            layoutSources->insertWidget(order < 0? nSources: order, p->displayWidget, 0, Qt::AlignTop);
-        }
-
-        p->updatePipeline();
+        createPipeline(-1, 0);
     }
+    else
+    {
+        for (int i = 0; i < nSources; ++i)
+        {
+            settings.setArrayIndex(i);
+            if (!settings.value("enabled", true).toBool())
+            {
+                continue;
+            }
 
+            auto order = settings.value("order", -1).toInt();
+            createPipeline(i, order);
+        }
+    }
     settings.endArray();
     settings.endGroup();
 

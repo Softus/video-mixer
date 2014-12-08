@@ -134,7 +134,7 @@ The pipeline for hardware encoder:
                                       [image writer]
 */
 
-QString appendVideo(QString& pipe, const QVariantMap& settings, bool enableVideoLog)
+QString appendVideo(QString& pipe, const QSettings& settings, bool enableVideoLog)
 {
 /*
                        +----[video splitter]----+-------------+
@@ -225,24 +225,23 @@ QString Pipeline::buildPipeline(const QSettings &settings, const QString &output
     QString pipe;
 
     auto deviceDef      = settings.value("device").toString();
-    auto parameters     = settings.value("parameters").toMap();
-    auto deviceType     = parameters.value("device-type", PLATFORM_SPECIFIC_SOURCE).toString();
-    auto inputChannel   = parameters.value("video-channel").toString();
-    auto formatDef      = parameters.value("format").toString();
-    auto sizeDef        = parameters.value("size").toSize();
-    auto srcDeinterlace = parameters.value("video-deinterlace").toBool();
-    auto srcParams      = parameters.value("src-parameters").toString();
-    alias               = parameters.value("alias").toString();
-    modality            = parameters.value("modality").toString();
+    auto deviceType     = settings.value("device-type", PLATFORM_SPECIFIC_SOURCE).toString();
+    auto inputChannel   = settings.value("video-channel").toString();
+    auto formatDef      = settings.value("format").toString();
+    auto sizeDef        = settings.value("size").toSize();
+    auto srcDeinterlace = settings.value("video-deinterlace").toBool();
+    auto srcParams      = settings.value("src-parameters").toString();
+    alias               = settings.value("alias").toString();
+    modality            = settings.value("modality").toString();
 
     if (alias.isEmpty())
     {
         alias = QString("src%1").arg(index);
     }
 
-    auto colorConverter = QString(" ! ").append(parameters.value("color-converter", "ffmpegcolorspace").toString());
-    auto videoCodec     = parameters.value("video-encoder",  DEFAULT_VIDEO_ENCODER).toString();
-    auto bitrate        = parameters.value("bitrate").toString();
+    auto colorConverter = QString(" ! ").append(settings.value("color-converter", "ffmpegcolorspace").toString());
+    auto videoCodec     = settings.value("video-encoder",  DEFAULT_VIDEO_ENCODER).toString();
+    auto bitrate        = settings.value("bitrate").toString();
 
     pipe.append(deviceType);
 
@@ -300,7 +299,7 @@ QString Pipeline::buildPipeline(const QSettings &settings, const QString &output
 
     if (videoCodec.isEmpty())
     {
-        appendVideo(pipe, parameters, enableVideoLog);
+        appendVideo(pipe, settings, enableVideoLog);
         pipe.append("\nvideosplitter.");
     }
 
@@ -320,8 +319,8 @@ QString Pipeline::buildPipeline(const QSettings &settings, const QString &output
 
     // v4l2src ... ! tee name=splitter [! colorspace ! motioncells] ! colorspace ! autovideosink");
     //
-    auto displaySinkDef  = parameters.value("display-sink", DEFAULT_DISPLAY_SINK).toString();
-    auto displayParams   = parameters.value(displaySinkDef + "-parameters").toString();
+    auto displaySinkDef  = settings.value("display-sink", DEFAULT_DISPLAY_SINK).toString();
+    auto displayParams   = settings.value(displaySinkDef + "-parameters").toString();
 
     pipe.append(" ! tee name=splitter");
     if (!displaySinkDef.isEmpty())
@@ -334,10 +333,10 @@ QString Pipeline::buildPipeline(const QSettings &settings, const QString &output
 
     // ... splitter. ! identity name=imagevalve ! jpegenc ! multifilesink splitter.
     //
-    auto imageEncoderDef = parameters.value("image-encoder", DEFAULT_IMAGE_ENCODER).toString();
-    auto imageEncoderFixColor = parameters.value(imageEncoderDef + "-colorspace", false).toBool();
-    auto imageEncoderParams = parameters.value(imageEncoderDef + "-parameters").toString();
-    auto imageSinkDef       = parameters.value("image-sink", DEFAULT_IMAGE_SINK).toString();
+    auto imageEncoderDef = settings.value("image-encoder", DEFAULT_IMAGE_ENCODER).toString();
+    auto imageEncoderFixColor = settings.value(imageEncoderDef + "-colorspace", false).toBool();
+    auto imageEncoderParams = settings.value(imageEncoderDef + "-parameters").toString();
+    auto imageSinkDef       = settings.value("image-sink", DEFAULT_IMAGE_SINK).toString();
     if (!imageSinkDef.isEmpty())
     {
         pipe.append("\nsplitter. ! identity name=imagevalve drop-probability=1.0")
@@ -355,11 +354,11 @@ QString Pipeline::buildPipeline(const QSettings &settings, const QString &output
         //                videosplitter. ! queue ! rtph264pay ! udpsink
         //                videosplitter. ! identity name=clipinspect ! queue ! mpegpsmux ! filesink
         //
-        auto videoMaxRate       = parameters.value("limit-video-fps", DEFAULT_LIMIT_VIDEO_FPS).toBool()?
-                                  parameters.value("video-max-fps",  DEFAULT_VIDEO_MAX_FPS).toInt(): 0;
-        auto videoFixColor      = parameters.value(videoCodec + "-colorspace").toBool();
-        auto videoEncoderParams = parameters.value(videoCodec + "-parameters").toString();
-        auto noIdleStream       = parameters.value("no-idle-stream").toBool();
+        auto videoMaxRate       = settings.value("limit-video-fps", DEFAULT_LIMIT_VIDEO_FPS).toBool()?
+                                  settings.value("video-max-fps",  DEFAULT_VIDEO_MAX_FPS).toInt(): 0;
+        auto videoFixColor      = settings.value(videoCodec + "-colorspace").toBool();
+        auto videoEncoderParams = settings.value(videoCodec + "-parameters").toString();
+        auto noIdleStream       = settings.value("no-idle-stream").toBool();
 
         pipe.append("\nsplitter.");
         if (videoMaxRate > 0)
@@ -379,7 +378,7 @@ QString Pipeline::buildPipeline(const QSettings &settings, const QString &output
             .append(videoFixColor? colorConverter: "")
             .append(" ! ").append(videoCodec).append(" name=videoencoder ").append(videoEncoderParams);
 
-        appendVideo(pipe, parameters, enableVideoLog);
+        appendVideo(pipe, settings, enableVideoLog);
     }
 
     return pipe;
@@ -395,7 +394,10 @@ bool Pipeline::updatePipeline()
     auto detectMotion = enableVideoLog? buildDetectMotion(settings): QString();
 
     settings.beginReadArray("src");
-    settings.setArrayIndex(index);
+    if (index >= 0)
+    {
+        settings.setArrayIndex(index);
+    }
 
     auto newPipelineDef = buildPipeline(settings, outputPathDef, enableVideoLog, detectMotion);
     if (newPipelineDef == pipelineDef)

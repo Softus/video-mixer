@@ -15,6 +15,7 @@
  */
 
 #include "videosources.h"
+#include "../defaults.h"
 #include "videosourcedetails.h"
 
 #include <QApplication>
@@ -62,15 +63,19 @@ VideoSources::VideoSources(QWidget *parent) :
 
     mainLayout->addWidget(listSources);
     QBoxLayout* buttonsLayout = new QVBoxLayout;
-    btnDetails = new QPushButton(tr("&Edit"));
-    connect(btnDetails, SIGNAL(clicked()), this, SLOT(onEditClicked()));
-    buttonsLayout->addWidget(btnDetails);
+
+    // For debug purposes
+    //
     if (qApp->keyboardModifiers().testFlag(Qt::ShiftModifier))
     {
         auto btnAdd = new QPushButton(tr("&Add test\nsource"));
         connect(btnAdd, SIGNAL(clicked()), this, SLOT(onAddClicked()));
         buttonsLayout->addWidget(btnAdd);
     }
+
+    btnDetails = new QPushButton(tr("&Edit"));
+    connect(btnDetails, SIGNAL(clicked()), this, SLOT(onEditClicked()));
+    buttonsLayout->addWidget(btnDetails);
 
     btnRemove = new QPushButton(tr("&Remove"));
     connect(btnRemove, SIGNAL(clicked()), this, SLOT(onRemoveClicked()));
@@ -82,21 +87,55 @@ VideoSources::VideoSources(QWidget *parent) :
 
     settings.beginGroup("gst");
     auto cnt = settings.beginReadArray("src");
-    for (int i = 0; i < cnt; ++i)
+    if (cnt == 0)
     {
-        settings.setArrayIndex(i);
-        auto device       = settings.value("device").toString();
-        auto friendlyName = settings.value("device-name").toString();
-        auto enabled      = settings.value("enabled").toBool();
-        auto parameters   = settings.value("parameters").toMap();
-        auto item = newItem(friendlyName, device, parameters, enabled);
-        listSources->addTopLevelItem(item);
+        // Migration from version < 1.2
+        //
+        addItem(settings);
+    }
+    else
+    {
+        for (int i = 0; i < cnt; ++i)
+        {
+            settings.setArrayIndex(i);
+            addItem(settings);
+        }
     }
     settings.endArray();
     settings.endGroup();
 
     btnDetails->setEnabled(false);
     btnRemove->setEnabled(false);
+}
+
+void VideoSources::addItem(const QSettings& settings)
+{
+    QString device;
+    QString friendlyName;
+    bool    enabled = true;
+    QVariantMap parameters;
+
+    foreach (auto key, settings.childKeys())
+    {
+        if (key == "device")
+        {
+            device = settings.value(key).toString();
+        }
+        else if (key == "device-name")
+        {
+            friendlyName = settings.value(key).toString();
+        }
+        else if (key == "enabled")
+        {
+            enabled = settings.value(key).toBool();
+        }
+        else
+        {
+            parameters[key] = settings.value(key);
+        }
+    }
+    auto item = newItem(friendlyName, device, parameters, enabled);
+    listSources->addTopLevelItem(item);
 }
 
 void VideoSources::showEvent(QShowEvent *e)
@@ -218,7 +257,11 @@ void VideoSources::save(QSettings& settings)
         settings.setValue("device", item->data(0, Qt::UserRole));
         settings.setValue("device-name", item->data(1, Qt::UserRole));
         settings.setValue("enabled", item->checkState(0) == Qt::Checked);
-        settings.setValue("parameters", item->data(2, Qt::UserRole));
+        auto parameters = item->data(2, Qt::UserRole).toMap();
+        for (auto p = parameters.begin(); p != parameters.end(); ++p)
+        {
+            settings.setValue(p.key(), p.value());
+        }
     }
     settings.endArray();
     settings.endGroup();
