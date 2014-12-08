@@ -67,7 +67,7 @@ VideoSources::VideoSources(QWidget *parent) :
     buttonsLayout->addWidget(btnDetails);
     if (qApp->keyboardModifiers().testFlag(Qt::ShiftModifier))
     {
-        auto btnAdd = new QPushButton(tr("&Add test source"));
+        auto btnAdd = new QPushButton(tr("&Add test\nsource"));
         connect(btnAdd, SIGNAL(clicked()), this, SLOT(onAddClicked()));
         buttonsLayout->addWidget(btnAdd);
     }
