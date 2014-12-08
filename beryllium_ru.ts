@@ -929,35 +929,35 @@ Continue?</source>
         <translation>О программе %1</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="636"/>
-        <location filename="src/mainwindow.cpp" line="641"/>
-        <location filename="src/mainwindow.cpp" line="646"/>
-        <location filename="src/mainwindow.cpp" line="651"/>
+        <location filename="src/mainwindow.cpp" line="654"/>
+        <location filename="src/mainwindow.cpp" line="659"/>
+        <location filename="src/mainwindow.cpp" line="664"/>
+        <location filename="src/mainwindow.cpp" line="669"/>
         <source> - </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="679"/>
+        <location filename="src/mainwindow.cpp" line="697"/>
         <source>Failed to create &apos;%1&apos;</source>
         <translation>Не удалось создать &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="799"/>
+        <location filename="src/mainwindow.cpp" line="817"/>
         <source>Failed to start recording.
 Please, adjust the video source settings.</source>
         <translation>Невозможно начать запись.
 Проверьте настройки видео.</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="818"/>
-        <location filename="src/mainwindow.cpp" line="999"/>
+        <location filename="src/mainwindow.cpp" line="836"/>
+        <location filename="src/mainwindow.cpp" line="1017"/>
         <source>Failed to start recording.
 Check the error log for details.</source>
         <translation>Невозможно начать запись.
 Проверьте журнал ожибок.</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1143"/>
+        <location filename="src/mainwindow.cpp" line="1161"/>
         <source>Failed to start a study.
 Another study is in progress.</source>
         <translation>Невозможно начать исследование.
@@ -980,17 +980,17 @@ Another study is in progress.</source>
         <translation type="obsolete">Отправить</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="858"/>
+        <location filename="src/mainwindow.cpp" line="876"/>
         <source>End the study?</source>
         <translation>Завершить исследование?</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1039"/>
+        <location filename="src/mainwindow.cpp" line="1057"/>
         <source>End study</source>
         <translation>Завершить исследование</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1039"/>
+        <location filename="src/mainwindow.cpp" line="1057"/>
         <source>Start study</source>
         <translation>Начать исследование</translation>
     </message>
@@ -1286,7 +1286,7 @@ Another study is in progress.</source>
 <context>
     <name>Pipeline</name>
     <message>
-        <location filename="src/pipeline.cpp" line="836"/>
+        <location filename="src/pipeline.cpp" line="838"/>
         <source>Failed to load image %1</source>
         <translation>Не удалось загрузить снимок %1</translation>
     </message>
@@ -2199,39 +2199,41 @@ Are you want to continue?</source>
 <context>
     <name>VideoSources</name>
     <message>
-        <location filename="src/settings/videosources.cpp" line="55"/>
+        <location filename="src/settings/videosources.cpp" line="56"/>
         <source>Device</source>
         <translation>Устройство</translation>
     </message>
     <message>
-        <location filename="src/settings/videosources.cpp" line="55"/>
+        <location filename="src/settings/videosources.cpp" line="56"/>
         <source>Modality</source>
         <translation>Методика</translation>
     </message>
     <message>
-        <location filename="src/settings/videosources.cpp" line="55"/>
+        <location filename="src/settings/videosources.cpp" line="56"/>
         <source>Alias</source>
         <translation>Имя</translation>
     </message>
     <message>
-        <location filename="src/settings/videosources.cpp" line="65"/>
+        <location filename="src/settings/videosources.cpp" line="66"/>
         <source>&amp;Edit</source>
         <translation>&amp;Правка</translation>
     </message>
     <message>
-        <location filename="src/settings/videosources.cpp" line="70"/>
+        <location filename="src/settings/videosources.cpp" line="71"/>
         <source>&amp;Add test
 source</source>
         <oldsource>&amp;Add test source</oldsource>
-        <translation>&amp;Добавить\nтестовый\nисточник</translation>
+        <translation>&amp;Добавить
+тестовый
+источник</translation>
     </message>
     <message>
-        <location filename="src/settings/videosources.cpp" line="75"/>
+        <location filename="src/settings/videosources.cpp" line="76"/>
         <source>&amp;Remove</source>
         <translation>&amp;Удалить</translation>
     </message>
     <message>
-        <location filename="src/settings/videosources.cpp" line="121"/>
+        <location filename="src/settings/videosources.cpp" line="156"/>
         <source>Failed to create element &apos;%1&apos;</source>
         <translation>Не удалось создать элемент &apos;%1&apos;</translation>
     </message>

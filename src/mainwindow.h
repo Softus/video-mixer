@@ -108,6 +108,7 @@ class MainWindow : public QWidget
     void updateOutputPath(bool needUnique);
     bool checkPipelines();
     void rebuildPipelines();
+    void createPipeline(int index, int order);
 
     bool startVideoRecord();
     void updateStartDialog();

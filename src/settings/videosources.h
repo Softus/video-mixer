@@ -47,6 +47,7 @@ class VideoSources : public QWidget
     QPushButton* btnRemove;
 
     void updateDeviceList(const char *elmName, const char *propName);
+    void addItem(const QSettings& settings);
 
 public:
     Q_INVOKABLE explicit VideoSources(QWidget *parent = 0);
