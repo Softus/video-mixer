@@ -393,9 +393,9 @@ bool Pipeline::updatePipeline()
     auto enableVideoLog = settings.value("enable-video").toBool();
     auto detectMotion = enableVideoLog? buildDetectMotion(settings): QString();
 
-    settings.beginReadArray("src");
     if (index >= 0)
     {
+        settings.beginReadArray("src");
         settings.setArrayIndex(index);
     }
 
@@ -449,7 +449,11 @@ bool Pipeline::updatePipeline()
             g_object_unref(tuner);
         }
     }
-    settings.endArray();
+
+    if (index >= 0)
+    {
+        settings.endArray();
+    }
 
     pipeline->bus()->addSignalWatch();
     displayWidget->watchPipeline(pipeline);
@@ -566,8 +570,21 @@ QString Pipeline::appendVideoTail(const QDir& dir, const QString& prefix, QStrin
 {
     QSettings settings;
     settings.beginGroup("gst");
+    if (index >= 0)
+    {
+        settings.beginReadArray("src");
+        settings.setArrayIndex(index);
+    }
+
     auto muxDef  = settings.value("video-muxer",    DEFAULT_VIDEO_MUXER).toString();
+
+    if (index >= 0)
+    {
+        settings.endArray();
+    }
+
     auto maxSize = split? settings.value("video-max-file-size", DEFAULT_VIDEO_MAX_FILE_SIZE).toLongLong() * 1024 * 1024: 0;
+    settings.endGroup();
 
     QString videoExt;
     split = maxSize > 0;
@@ -590,7 +607,6 @@ QString Pipeline::appendVideoTail(const QDir& dir, const QString& prefix, QStrin
         }
         pipeline->add(mux);
     }
-
 
     QGst::ElementPtr sink;
     if (!split)
