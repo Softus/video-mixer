@@ -6,13 +6,13 @@
     For QT5:
         sudo apt-get install libqt5opengl5-dev
     For QT4:
-        sudo apt-get install libqt4-opengl-dev libqtgstreamer-dev
+        sudo apt-get install libqt4-opengl-dev
 
 2. Make Makefile:
-	qmake CONFIG+=dicom beryllium.pro
+  qmake CONFIG+=dicom beryllium.pro
 
 3. Make Beryllium:
-	make
+  make
 
 === Suse ===
 
@@ -24,8 +24,8 @@
         sudo zypper install make rpm-build qt-devel qt-gstreamer-devel libQtGlib-devel dcmtk-devel tcp_wrappers-devel openssl-devel mediainfo-devel
 
 2. Make Makefile:
-	qmake-qt4 CONFIG+=dicom beryllium.pro
+  qmake-qt4 CONFIG+=dicom beryllium.pro
 
 3. Make Beryllium:
-	make
+  make
 

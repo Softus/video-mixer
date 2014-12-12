@@ -8,9 +8,9 @@
     <File Id="File_Qt5Widgets_x86" Name="Qt5Widgets.dll" />
     <File Id="File_libEGL_x86" Name="libEGL.dll" />
     <File Id="File_libGLESv2_x86" Name="libGLESv2.dll" />
-    <File Id="File_icuin51_x86" Name="icuin51.dll" />
-    <File Id="File_icudt51_x86" Name="icudt51.dll" />
-    <File Id="File_icuuc51_x86" Name="icuuc51.dll" />
+    <File Id="File_icuin_x86" Name="icuin53.dll" />
+    <File Id="File_icudt_x86" Name="icudt53.dll" />
+    <File Id="File_icuuc_x86" Name="icuuc53.dll" />
 
 
   </Component>
