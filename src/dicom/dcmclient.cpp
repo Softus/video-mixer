@@ -299,18 +299,23 @@ T_ASC_Parameters* DcmClient::initAssocParams(const QString& server, const char* 
     QSettings settings;
     QString missedParameter = tr("Required settings parameter %1 is missing");
 
+    // Format is server=AE_TITLE,host,port,timeout
+    //
     auto values = settings.value(srvName).toStringList();
-    if (values.count() < 6)
+    if (values.isEmpty())
     {
         cond = makeOFCondition(0, 2, OF_error, missedParameter.arg(srvName).toLocal8Bit());
         return nullptr;
     }
 
-    auto peerAet = values[0].toUtf8();
-    auto peerAddress = QString("%1:%2").arg(values[1], values[2]);
-    auto timeout = values[3].toInt();
+    auto peerAet = values.takeFirst();
 
-    return initAssocParams(peerAet, peerAddress, timeout, transferSyntax);
+    auto peerAddress = values.isEmpty()? peerAet.toLower(): values.takeFirst();
+    peerAddress.append(':').append(values.isEmpty()? QString::number(DEFAULT_DICOM_PORT): values.takeFirst());
+
+    auto timeout = values.isEmpty()? DEFAULT_TIMEOUT: values.takeFirst().toInt();
+
+    return initAssocParams(peerAet.toUtf8(), peerAddress, timeout, transferSyntax);
 }
 
 T_ASC_Parameters* DcmClient::initAssocParams(const QString& peerAet, const QString& peerAddress, int timeout, const char* transferSyntax)

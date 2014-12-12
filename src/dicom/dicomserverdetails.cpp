@@ -16,6 +16,7 @@
 
 #include "dicomserverdetails.h"
 #include "dcmclient.h"
+#include "../defaults.h"
 #include "../qwaitcursor.h"
 #include <dcmtk/dcmdata/dcuid.h>
 
@@ -29,12 +30,6 @@
 #include <QSettings>
 #include <QSpinBox>
 
-#ifdef QT_DEBUG
-#define DEFAULT_TIMEOUT 3 // 3 seconds for test builds
-#else
-#define DEFAULT_TIMEOUT 30 // 30 seconds for prodaction builds
-#endif
-
 DicomServerDetails::DicomServerDetails(QWidget *parent) :
     QDialog(parent)
 {
@@ -45,21 +40,12 @@ DicomServerDetails::DicomServerDetails(QWidget *parent) :
     layoutMain->addRow(tr("&IP address"), textIp = new QLineEdit);
     layoutMain->addRow(tr("&Port"), spinPort = new QSpinBox);
     spinPort->setRange(0, 65535);
+    spinPort->setValue(DEFAULT_DICOM_PORT);
     layoutMain->addRow(tr("Time&out"), spinTimeout = new QSpinBox);
     spinTimeout->setValue(DEFAULT_TIMEOUT);
     spinTimeout->setSuffix(tr(" seconds"));
     spinTimeout->setRange(0, 60000);
     spinTimeout->setSingleStep(10);
-#ifdef ENABLE_DICOM_OLD_SOPCLASS
-    layoutMain->addRow(nullptr, checkEcho = new QCheckBox(tr("&Echo")));
-    checkEcho->setChecked(true);
-    auto layoutSopClass = new QHBoxLayout;
-    layoutSopClass->addWidget(radioNew = new QRadioButton(tr("Ne&w")));
-    radioNew->setChecked(true);
-    layoutSopClass->addWidget(radioRetire = new QRadioButton(tr("&Retire")));
-    layoutSopClass->addStretch(1);
-    layoutMain->addRow(tr("SOP class"), layoutSopClass);
-#endif
     layoutMain->addItem(new QSpacerItem(30,30));
 
     auto layoutBtns = new QHBoxLayout;
@@ -93,14 +79,6 @@ void DicomServerDetails::setValues(const QString& name, const QStringList& value
         spinPort->setValue(values.at(2).toInt());
     if (values.count() > 3)
         spinTimeout->setValue(values.at(3).toInt());
-#ifdef ENABLE_DICOM_OLD_SOPCLASS
-    if (values.count() > 4)
-        checkEcho->setChecked(values.at(4) == "Echo");
-    if (values.count() > 5)
-        radioNew->setChecked(values.at(5) == "New");
-
-    radioRetire->setChecked(!radioNew->isChecked());
-#endif
 }
 
 QString DicomServerDetails::name() const
@@ -115,11 +93,7 @@ QStringList DicomServerDetails::values() const
         << textIp->text()
         << QString::number(spinPort->value())
         << QString::number(spinTimeout->value())
-#ifdef ENABLE_DICOM_OLD_SOPCLASS
-        << QString(checkEcho->isChecked()? "Echo": "No echo")
-        << QString(radioNew->isChecked()? "New": "Retire")
-#endif
-           ;
+        ;
 }
 
 void DicomServerDetails::onClickTest()

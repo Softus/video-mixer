@@ -97,6 +97,7 @@
 #define DEFAULT_EXPORT_CLIPS_TO_DICOM true
 #define DEFAULT_EXPORT_VIDEO_TO_DICOM false
 #define DEFAULT_MODALITY              "ES"
+#define DEFAULT_DICOM_PORT            104
 #define DEFAULT_TRANSLATE_CYRILLIC    true
 #define DEFAULT_WORKLIST_COLUMNS      (QStringList() << "0010,0020" << "0010,0010" \
         << "0010,0030" << "0010,0040" << "0040,0007" << "0040,0002" << "0040,0003")
