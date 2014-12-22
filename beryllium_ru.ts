@@ -293,17 +293,17 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</source>
         <translation>Необходимый параметр %1 не задан в настройках</translation>
     </message>
     <message>
-        <location filename="src/dicom/dcmclient.cpp" line="409"/>
+        <location filename="src/dicom/dcmclient.cpp" line="414"/>
         <source>Accepted presentation context ID not found</source>
         <translation>Принятый ID контекста представления не найден</translation>
     </message>
     <message>
-        <location filename="src/dicom/dcmclient.cpp" line="820"/>
+        <location filename="src/dicom/dcmclient.cpp" line="825"/>
         <source>Storing &apos;%1&apos; to &apos;%2&apos;</source>
         <translation>Отправка &apos;%1&apos; на &apos;%2&apos; </translation>
     </message>
     <message>
-        <location filename="src/dicom/dcmclient.cpp" line="829"/>
+        <location filename="src/dicom/dcmclient.cpp" line="834"/>
         <source>Failed to send &apos;%1&apos; to &apos;%2&apos;:
 %3
 Continue?</source>
@@ -523,72 +523,68 @@ Continue?</source>
 <context>
     <name>DicomServerDetails</name>
     <message>
-        <location filename="src/dicom/dicomserverdetails.cpp" line="42"/>
+        <location filename="src/dicom/dicomserverdetails.cpp" line="37"/>
         <source>&amp;Name</source>
         <translation>&amp;Имя</translation>
     </message>
     <message>
-        <location filename="src/dicom/dicomserverdetails.cpp" line="44"/>
+        <location filename="src/dicom/dicomserverdetails.cpp" line="39"/>
         <source>&amp;AE title</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="src/dicom/dicomserverdetails.cpp" line="45"/>
+        <location filename="src/dicom/dicomserverdetails.cpp" line="40"/>
         <source>&amp;IP address</source>
         <translation>IP &amp;адрес</translation>
     </message>
     <message>
-        <location filename="src/dicom/dicomserverdetails.cpp" line="46"/>
+        <location filename="src/dicom/dicomserverdetails.cpp" line="41"/>
         <source>&amp;Port</source>
         <translation>&amp;Порт</translation>
     </message>
     <message>
-        <location filename="src/dicom/dicomserverdetails.cpp" line="48"/>
+        <location filename="src/dicom/dicomserverdetails.cpp" line="44"/>
         <source>Time&amp;out</source>
         <translation>Та&amp;ймаут</translation>
     </message>
     <message>
-        <location filename="src/dicom/dicomserverdetails.cpp" line="50"/>
+        <location filename="src/dicom/dicomserverdetails.cpp" line="46"/>
         <source> seconds</source>
         <translation> секунд</translation>
     </message>
     <message>
-        <location filename="src/dicom/dicomserverdetails.cpp" line="54"/>
         <source>&amp;Echo</source>
-        <translation>&amp;Эхо</translation>
+        <translation type="obsolete">&amp;Эхо</translation>
     </message>
     <message>
-        <location filename="src/dicom/dicomserverdetails.cpp" line="57"/>
         <source>Ne&amp;w</source>
-        <translation>Нов&amp;ый</translation>
+        <translation type="obsolete">Нов&amp;ый</translation>
     </message>
     <message>
-        <location filename="src/dicom/dicomserverdetails.cpp" line="59"/>
         <source>&amp;Retire</source>
-        <translation>&amp;Старый</translation>
+        <translation type="obsolete">&amp;Старый</translation>
     </message>
     <message>
-        <location filename="src/dicom/dicomserverdetails.cpp" line="61"/>
         <source>SOP class</source>
-        <translation>SOP класс</translation>
+        <translation type="obsolete">SOP класс</translation>
     </message>
     <message>
-        <location filename="src/dicom/dicomserverdetails.cpp" line="67"/>
+        <location filename="src/dicom/dicomserverdetails.cpp" line="53"/>
         <source>&amp;Test</source>
         <translation>&amp;Проверить</translation>
     </message>
     <message>
-        <location filename="src/dicom/dicomserverdetails.cpp" line="70"/>
+        <location filename="src/dicom/dicomserverdetails.cpp" line="56"/>
         <source>Cancel</source>
         <translation>Отменить</translation>
     </message>
     <message>
-        <location filename="src/dicom/dicomserverdetails.cpp" line="73"/>
+        <location filename="src/dicom/dicomserverdetails.cpp" line="59"/>
         <source>Save</source>
         <translation>Сохранить</translation>
     </message>
     <message>
-        <location filename="src/dicom/dicomserverdetails.cpp" line="131"/>
+        <location filename="src/dicom/dicomserverdetails.cpp" line="105"/>
         <source>Server check result:
 
 %1
@@ -622,17 +618,17 @@ Continue?</source>
         <translation>Порт</translation>
     </message>
     <message>
-        <location filename="src/dicom/dicomserversettings.cpp" line="76"/>
+        <location filename="src/dicom/dicomserversettings.cpp" line="72"/>
         <source>&amp;Add</source>
         <translation>Д&amp;обавить</translation>
     </message>
     <message>
-        <location filename="src/dicom/dicomserversettings.cpp" line="80"/>
+        <location filename="src/dicom/dicomserversettings.cpp" line="76"/>
         <source>&amp;Edit</source>
         <translation>&amp;Правка</translation>
     </message>
     <message>
-        <location filename="src/dicom/dicomserversettings.cpp" line="85"/>
+        <location filename="src/dicom/dicomserversettings.cpp" line="81"/>
         <source>&amp;Remove</source>
         <translation>&amp;Удалить</translation>
     </message>
@@ -1286,7 +1282,7 @@ Another study is in progress.</source>
 <context>
     <name>Pipeline</name>
     <message>
-        <location filename="src/pipeline.cpp" line="838"/>
+        <location filename="src/pipeline.cpp" line="865"/>
         <source>Failed to load image %1</source>
         <translation>Не удалось загрузить снимок %1</translation>
     </message>
@@ -1531,7 +1527,7 @@ Another study is in progress.</source>
 <context>
     <name>SmartShortcut</name>
     <message>
-        <location filename="src/smartshortcut.cpp" line="257"/>
+        <location filename="src/smartshortcut.cpp" line="259"/>
         <source>(not set)</source>
         <translation>(не задано)</translation>
     </message>
@@ -1651,9 +1647,9 @@ Another study is in progress.</source>
     </message>
     <message>
         <location filename="src/settings/storage.cpp" line="78"/>
-        <source>%yyyy%|year|%mm%|month|%dd%|day|%hh%|hour|%min%|minute|%nn%|sequential number|%id%|patient id|%name%|patient name|%sex%|patient sex|%birthdate%|patient birthdate|%physician%|physician name|%study%|study name</source>
-        <translation>%yyyy%|год|%mm%|месяц|%dd%|день|%hh%|час|%min%|минуты|%nn%|порядковый номер|%id%|номер карты|%name%|ФИО|%sex%|пол|%birthdate%|дата рождения|%physician%|врач|%study%|тип исследования
-</translation>
+        <source>%yyyy%|year|%mm%|month|%dd%|day|%hh%|hour|%min%|minute|%nn%|sequential number|%an%|accession number|%id%|patient id|%name%|patient name|%sex%|patient sex|%birthdate%|patient birthdate|%physician%|physician name|%study%|study name|%src%|source name</source>
+        <oldsource>%yyyy%|year|%mm%|month|%dd%|day|%hh%|hour|%min%|minute|%nn%|sequential number|%id%|patient id|%name%|patient name|%sex%|patient sex|%birthdate%|patient birthdate|%physician%|physician name|%study%|study name</oldsource>
+        <translation>%yyyy%|год|%mm%|месяц|%dd%|день|%hh%|час|%min%|минуты|%nn%|порядковый номер|%an%|идентификатор исследования|%id%|номер карты|%name%|ФИО пациента|%sex%|пол|%birthdate%|дата рождения|%physician%|врач|%study%|тип исследования|%src%|имя источника</translation>
     </message>
     <message>
         <location filename="src/settings/storage.cpp" line="61"/>
@@ -2214,7 +2210,7 @@ Are you want to continue?</source>
         <translation>Имя</translation>
     </message>
     <message>
-        <location filename="src/settings/videosources.cpp" line="66"/>
+        <location filename="src/settings/videosources.cpp" line="76"/>
         <source>&amp;Edit</source>
         <translation>&amp;Правка</translation>
     </message>
@@ -2228,12 +2224,12 @@ source</source>
 источник</translation>
     </message>
     <message>
-        <location filename="src/settings/videosources.cpp" line="76"/>
+        <location filename="src/settings/videosources.cpp" line="80"/>
         <source>&amp;Remove</source>
         <translation>&amp;Удалить</translation>
     </message>
     <message>
-        <location filename="src/settings/videosources.cpp" line="156"/>
+        <location filename="src/settings/videosources.cpp" line="161"/>
         <source>Failed to create element &apos;%1&apos;</source>
         <translation>Не удалось создать элемент &apos;%1&apos;</translation>
     </message>
