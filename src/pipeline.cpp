@@ -27,6 +27,11 @@
 #include <QGst/ElementFactory>
 #include <QGst/Parse>
 
+#include <gst/gst.h>
+#if GST_CHECK_VERSION(1,0,0)
+#include <QGst/VideoOverlay>
+#endif
+
 // From Gstreamer SDK
 //
 #include <gst/gstdebugutils.h>
@@ -765,7 +770,7 @@ void Pipeline::enableVideo(bool enable)
         enable && (!motionStart || motionDetected)? 0.0: 1.0);
 }
 
-void Pipeline::setImageLocation(const QString& filename)
+void Pipeline::setImageLocation(QString filename)
 {
     if (!imageSink)
     {
@@ -773,6 +778,12 @@ void Pipeline::setImageLocation(const QString& filename)
         return;
     }
 
+    // Pay attention to %src% macro, which can not be evaluated till now.
+    //
+    filename.replace("%src%", alias);
+
+    // Do not bother the pipeline, if the location is the same.
+    //
     auto location = imageSink->property("location").toString();
     if (location != filename)
     {
@@ -865,7 +876,11 @@ void Pipeline::onElementMessage(const QGst::ElementMessagePtr& msg)
         return;
     }
 
+#if GST_CHECK_VERSION(1,0,0)
+    if (QGst::VideoOverlay::isPrepareWindowHandleMessage(msg))
+#else
     if (s->name() == "prepare-xwindow-id" || s->name() == "prepare-window-handle")
+#endif
     {
         // At this time the video output finally has a sink, so set it up now
         //

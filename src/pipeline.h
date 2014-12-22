@@ -63,7 +63,7 @@ public:
     void enableEncoder(bool enable);
     void enableClip(bool enable);
     void enableVideo(bool enable);
-    void setImageLocation(const QString& filename);
+    void setImageLocation(QString filename);
 
     QGst::PipelinePtr pipeline;
     QGst::ElementPtr  displaySink;
