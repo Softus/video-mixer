@@ -442,7 +442,9 @@ static QVariant getListData(const QComboBox* cb)
 void VideoSourceDetails::updateParameters(QVariantMap& settings)
 {
     settings["alias"]             = editAlias->text();
+#ifdef WITH_DICOM
     settings["modality"]          = editModality->text();
+#endif
     settings["video-channel"]     = getListText(listChannels);
     settings["format"]            = getListData(listFormats);
     settings["size"]              = getListData(listSizes);

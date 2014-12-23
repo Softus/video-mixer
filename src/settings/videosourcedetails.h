@@ -38,7 +38,9 @@ class VideoSourceDetails : public QDialog
 {
     Q_OBJECT
     QLineEdit *editAlias;
+#ifdef WITH_DICOM
     QxtLineEdit *editModality;
+#endif
     QComboBox *listChannels;
     QComboBox *listFormats;
     QComboBox *listSizes;
