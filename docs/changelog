@@ -1,3 +1,9 @@
+beryllium (1.2.1) debian;
+
+  * Bug fix release.
+
+ -- Pavel Bludov <pbludov@gmail.com>  Mon, 23 Dec 2014 18:13:00 +0800
+
 beryllium (1.2.0) debian;
 
   * Multiple video sources. No more non-touch version.
