@@ -36,7 +36,7 @@ protected:
     virtual void dropEvent(QDropEvent *e);
 
 signals:
-    void swapWith(QWidget* w);
+    void swapWith(QWidget* src, QWidget* dst);
     void click();
     void copy();
 

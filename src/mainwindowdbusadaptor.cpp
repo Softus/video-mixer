@@ -53,9 +53,24 @@ bool MainWindowDBusAdaptor::busy()
     return wnd->running;
 }
 
-bool MainWindowDBusAdaptor::recording()
+bool MainWindowDBusAdaptor::recording(const QString& src)
 {
-    return wnd->activePipeline && wnd->activePipeline->recording;
+    auto pipeline = src.isEmpty()? wnd->activePipeline: wnd->findPipeline(src);
+    return pipeline && pipeline->recording;
+}
+
+QString MainWindowDBusAdaptor::src()
+{
+    return wnd->activePipeline? wnd->activePipeline->alias: QString();
+}
+
+void MainWindowDBusAdaptor::setSrc(const QString& value)
+{
+    auto pipeline = wnd->findPipeline(value);
+    if (pipeline && pipeline != wnd->activePipeline)
+    {
+        wnd->onSwapSources(pipeline->displayWidget, nullptr);
+    }
 }
 
 bool MainWindowDBusAdaptor::startStudy
@@ -123,25 +138,29 @@ bool MainWindowDBusAdaptor::stopStudy()
 }
 
 bool MainWindowDBusAdaptor::takeSnapshot
-    (const QString &imageFileTemplate
+    ( const QString &imageFileTemplate
+     , const QString &src
     )
 {
-    return wnd->takeSnapshot(nullptr, imageFileTemplate);
+    return wnd->takeSnapshot(wnd->findPipeline(src), imageFileTemplate);
 }
 
 bool MainWindowDBusAdaptor::startRecord
-    (int duration
+    ( int duration
     , const QString &clipFileTemplate
+    , const QString &src
     )
 {
-    return wnd->startRecord(duration, clipFileTemplate);
+    return wnd->startRecord(wnd->findPipeline(src), duration, clipFileTemplate);
 }
 
-bool MainWindowDBusAdaptor::stopRecord()
+bool MainWindowDBusAdaptor::stopRecord(const QString &src)
 {
-    if (recording())
+    auto pipeline = src.isEmpty()? wnd->activePipeline: wnd->findPipeline(src);
+
+    if (pipeline && pipeline->recording)
     {
-        wnd->onRecordStopClick();
+        wnd->stopRecord(pipeline);
         return true;
     }
 

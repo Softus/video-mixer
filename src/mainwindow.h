@@ -109,7 +109,9 @@ class MainWindow : public QWidget
     void updateStartDialog();
     bool confirmStopStudy();
     bool takeSnapshot(Pipeline* pipeline = nullptr, const QString& imageTemplate = QString());
-    bool startRecord(int duration = 0, const QString &clipFileTemplate = QString());
+    bool startRecord(Pipeline* pipeline = nullptr, int duration = 0, const QString &clipFileTemplate = QString());
+    void stopRecord(Pipeline* pipeline = nullptr);
+    Pipeline* findPipeline(const QString& alias);
 
 public:
     explicit MainWindow(QWidget *parent = 0);
@@ -151,7 +153,7 @@ private slots:
     void onSourceSnapshot();
     void onStartClick();
     void onStopStudy();
-    void onSwapSources(QWidget*);
+    void onSwapSources(QWidget *src, QWidget *dst);
 
     friend class MainWindowDBusAdaptor;
 };

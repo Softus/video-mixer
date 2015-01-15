@@ -85,7 +85,7 @@ void VideoWidget::mouseMoveEvent(QMouseEvent *evt)
      case Qt::MoveAction:
         if (drag->source() != drag->target())
         {
-            emit swapWith(static_cast<QWidget*>(drag->target()));
+            emit swapWith(this, static_cast<QWidget*>(drag->target()));
         }
         break;
      case Qt::CopyAction:

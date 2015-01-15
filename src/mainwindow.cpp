@@ -474,6 +474,24 @@ bool MainWindow::checkPipelines()
     return nPipeline == pipelines.size();
 }
 
+Pipeline* MainWindow::findPipeline(const QString& alias)
+{
+    if (alias.isEmpty())
+    {
+        return nullptr;
+    }
+
+    foreach (auto p, pipelines)
+    {
+        if (p->alias == alias)
+        {
+            return p;
+        }
+    }
+
+    return nullptr;
+}
+
 void MainWindow::createPipeline(int index, int order)
 {
     auto p = new Pipeline(index, this);
@@ -482,7 +500,7 @@ void MainWindow::createPipeline(int index, int order)
     connect(p, SIGNAL(clipFrameReady()), this, SLOT(onClipFrameReady()), Qt::QueuedConnection);
     connect(p, SIGNAL(pipelineError(const QString&)), this, SLOT(onPipelineError(const QString&)), Qt::QueuedConnection);
     connect(p, SIGNAL(playSound(QString)), this, SLOT(playSound(QString)), Qt::QueuedConnection);
-    connect(p->displayWidget, SIGNAL(swapWith(QWidget*)), this, SLOT(onSwapSources(QWidget*)));
+    connect(p->displayWidget, SIGNAL(swapWith(QWidget*,QWidget*)), this, SLOT(onSwapSources(QWidget*,QWidget*)));
     connect(p->displayWidget, SIGNAL(click()), this, SLOT(onSourceClick()));
     connect(p->displayWidget, SIGNAL(copy()), this, SLOT(onSourceSnapshot()));
     pipelines.push_back(p);
@@ -856,13 +874,14 @@ void MainWindow::onSourceSnapshot()
 
 void MainWindow::onSourceClick()
 {
-    if (activePipeline->displayWidget == sender())
+    auto src = static_cast<QWidget*>(sender());
+    if (activePipeline->displayWidget == src)
     {
         takeSnapshot(activePipeline);
     }
     else
     {
-        onSwapSources(activePipeline->displayWidget);
+        onSwapSources(src, activePipeline->displayWidget);
     }
 }
 
@@ -904,14 +923,24 @@ bool MainWindow::takeSnapshot(Pipeline* pipeline, const QString& imageTemplate)
 
 void MainWindow::onRecordStartClick()
 {
-    startRecord(0);
+    startRecord();
 }
 
-bool MainWindow::startRecord(int duration, const QString &clipFileTemplate)
+void MainWindow::onRecordStopClick()
+{
+    stopRecord();
+}
+
+bool MainWindow::startRecord(Pipeline* pipeline, int duration, const QString &clipFileTemplate)
 {
     if (!running)
     {
         return false;
+    }
+
+    if (!pipeline)
+    {
+        pipeline = activePipeline;
     }
 
     QSettings settings;
@@ -919,13 +948,13 @@ bool MainWindow::startRecord(int duration, const QString &clipFileTemplate)
         settings.value("storage/clip-template", DEFAULT_CLIP_TEMPLATE).toString();
 
     settings.beginGroup("gst");
-    activePipeline->recordLimit = duration > 0? duration:
+    pipeline->recordLimit = duration > 0? duration:
         settings.value("clip-limit", DEFAULT_CLIP_LIMIT).toBool()?
             settings.value("clip-countdown", DEFAULT_CLIP_COUNTDOWN).toInt(): 0;
 
-    if (!activePipeline->recording)
+    if (!pipeline->recording)
     {
-        auto clipFileName = activePipeline->appendVideoTail(outputPath, "clip", replace(actualTemplate, ++clipNo), false);
+        auto clipFileName = pipeline->appendVideoTail(outputPath, "clip", replace(actualTemplate, ++clipNo), false);
         qDebug() << clipFileName;
 
         if (!clipFileName.isEmpty())
@@ -942,12 +971,12 @@ bool MainWindow::startRecord(int duration, const QString &clipFileTemplate)
             // Until the real clip recording starts, we should disable this button
             //
             btnRecordStart->setEnabled(false);
-            activePipeline->recording = true;
-            activePipeline->enableClip(true);
+            pipeline->recording = true;
+            pipeline->enableClip(true);
         }
         else
         {
-            activePipeline->removeVideoTail("clip");
+            pipeline->removeVideoTail("clip");
             QMessageBox::critical(this, windowTitle(),
                 tr("Failed to start recording.\nCheck the error log for details."), QMessageBox::Ok);
         }
@@ -956,18 +985,23 @@ bool MainWindow::startRecord(int duration, const QString &clipFileTemplate)
     {
         // Extend recording time
         //
-        activePipeline->countdown = activePipeline->recordLimit;
+        pipeline->countdown = pipeline->recordLimit;
     }
 
     playSound("record");
     return true;
 }
 
-void MainWindow::onRecordStopClick()
+void MainWindow::stopRecord(Pipeline* pipeline)
 {
-    activePipeline->stopRecordingVideoClip();
+    if (!pipeline)
+    {
+        pipeline = activePipeline;
+    }
 
-    btnRecordStop->setEnabled(false);
+    pipeline->stopRecordingVideoClip();
+
+    btnRecordStop->setEnabled(running && activePipeline->recording);
 }
 
 void MainWindow::updateStartButton()
@@ -1290,10 +1324,8 @@ void MainWindow::onStopStudy()
     listImagesAndClips->clear();
 }
 
-void MainWindow::onSwapSources(QWidget* dst)
+void MainWindow::onSwapSources(QWidget* src, QWidget* dst)
 {
-    auto src = static_cast<QWidget*>(sender());
-
     // Swap with main video widget
     //
     if (dst == nullptr)

@@ -1,3 +1,9 @@
+beryllium (1.2.2) debian;
+
+  * d-bus: record clips/take snapshots for each src; select active src.
+
+ -- Pavel Bludov <pbludov@gmail.com>  Thu, 15 Jan 2015 15:33:00 +0800
+
 beryllium (1.2.1) debian;
 
   * Bug fix release.

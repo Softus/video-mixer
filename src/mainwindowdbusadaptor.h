@@ -26,7 +26,7 @@ class MainWindowDBusAdaptor : public QDBusAbstractAdaptor
     Q_OBJECT
     Q_CLASSINFO("D-Bus Interface", "ru.baikal.dc.beryllium.Main") // Preprocessor won't work here
     Q_PROPERTY(bool busy READ busy)
-    Q_PROPERTY(bool recording READ recording)
+    Q_PROPERTY(QString src READ src WRITE setSrc)
 
 private:
     MainWindow *wnd;
@@ -37,7 +37,14 @@ public:
 
 public slots:
     bool busy();
-    bool recording();
+    bool recording
+        ( const QString& src = QString()
+        );
+
+    QString src();
+    void setSrc
+        ( const QString& value
+        );
     bool startStudy
         ( const QString &accessionNumber = QString()
         , const QString &id = QString(), const QString &name = QString()
@@ -48,12 +55,16 @@ public slots:
     bool stopStudy();
     bool takeSnapshot
         ( const QString &imageFileTemplate = QString()
+        , const QString &src = QString()
         );
     bool startRecord
         ( int duration = 0
         , const QString &clipFileTemplate = QString()
+        , const QString &src = QString()
         );
-    bool stopRecord();
+    bool stopRecord
+        ( const QString &src = QString()
+        );
     QString value
         ( const QString &name
         );
