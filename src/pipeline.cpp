@@ -20,6 +20,7 @@
 #include "settings/videosources.h"
 
 #include <QApplication>
+#include <QPainter>
 
 #include <QGlib/Connect>
 
@@ -37,13 +38,24 @@
 #include <gst/gstdebugutils.h>
 #include <gst/interfaces/tuner.h>
 
+#ifdef Q_OS_WIN
+  #ifndef FILE_ATTRIBUTE_HIDDEN
+    #define FILE_ATTRIBUTE_HIDDEN 0x00000002
+    extern "C" __declspec(dllimport) int __stdcall SetFileAttributesW(const wchar_t* lpFileName, quint32 dwFileAttributes);
+  #endif
+#endif
+
 Pipeline::Pipeline(int index, QObject *parent) :
     QObject(parent),
     index(index),
     motionDetected(false),
     motionStart(false),
     motionStop(false),
-    recording(false)
+    recording(false),
+    recordNotify(0),
+    countdown(0),
+    recordLimit(0),
+    recordTimerId(0)
 {
     displayWidget = new VideoWidget();
     displayWidget->setProperty("index", index);
@@ -72,6 +84,26 @@ void Pipeline::releasePipeline()
     displayOverlay.clear();
     displayWidget->stopPipelineWatch();
     pipeline.clear();
+}
+
+void Pipeline::timerEvent(QTimerEvent* evt)
+{
+    if (evt->timerId() == recordTimerId)
+    {
+        if (--countdown <= recordNotify)
+        {
+            playSound("notify");
+        }
+
+        if (countdown == 0 && recording)
+        {
+            stopRecordingVideoClip();
+        }
+        else
+        {
+            updateOverlayText();
+        }
+    }
 }
 
 /*
@@ -395,6 +427,10 @@ bool Pipeline::updatePipeline()
     auto outputPathDef  = settings.value("storage/output-path",    DEFAULT_OUTPUT_PATH).toString();
 
     settings.beginGroup("gst");
+
+    recordNotify = settings.value("notify-clip-limit", DEFAULT_NOTIFY_CLIP_LIMIT).toBool()?
+        settings.value("notify-clip-countdown", DEFAULT_NOTIFY_CLIP_COUNTDOWN).toInt(): -1;
+
     auto enableVideoLog = settings.value("enable-video").toBool();
     auto detectMotion = enableVideoLog? buildDetectMotion(settings): QString();
 
@@ -516,6 +552,7 @@ bool Pipeline::updatePipeline()
     pipeline->setState(QGst::StatePlaying);
 
     settings.endGroup();
+    updateOverlayText();
     return true;
 }
 
@@ -581,7 +618,8 @@ QString Pipeline::appendVideoTail(const QDir& dir, const QString& prefix, QStrin
         settings.setArrayIndex(index);
     }
 
-    auto muxDef  = settings.value("video-muxer",    DEFAULT_VIDEO_MUXER).toString();
+    auto muxDef   = settings.value("video-muxer",    DEFAULT_VIDEO_MUXER).toString();
+    auto imageExt = getExt(settings.value("image-encoder", DEFAULT_IMAGE_ENCODER).toString());
 
     if (index >= 0)
     {
@@ -681,6 +719,16 @@ QString Pipeline::appendVideoTail(const QDir& dir, const QString& prefix, QStrin
     {
         SetFileExtAttribute(realFileName, "modality", modality);
     }
+
+    if (prefix == "clip" && settings.value("save-clip-thumbnails", DEFAULT_SAVE_CLIP_THUMBNAILS).toBool())
+    {
+        QFileInfo fi(realFileName);
+        clipPreviewFileName = fi.absolutePath()
+            .append(QDir::separator()).append('.').append(fi.fileName()).append(imageExt);
+
+        setImageLocation(clipPreviewFileName);
+    }
+
     return realFileName;
 }
 
@@ -726,7 +774,7 @@ void Pipeline::removeVideoTail(const QString& prefix)
     }
 }
 
-void Pipeline::updateOverlayText(int countdown)
+void Pipeline::updateOverlayText()
 {
     if (!displayOverlay)
         return;
@@ -752,6 +800,24 @@ void Pipeline::updateOverlayText(int countdown)
     displayOverlay->setProperty("color", 0xFFFF0000);
     displayOverlay->setProperty("outline-color", 0xFFFF0000);
     displayOverlay->setProperty("text", text);
+}
+
+void Pipeline::stopRecordingVideoClip()
+{
+    removeVideoTail("clip");
+
+    clipPreviewFileName.clear();
+
+    if (recordTimerId)
+    {
+        killTimer(recordTimerId);
+        recordTimerId = 0;
+    }
+
+    countdown = 0;
+    recording = false;
+    updateOverlayText();
+    clipRecordComplete();
 }
 
 void Pipeline::enableEncoder(bool enable)
@@ -866,6 +932,20 @@ void Pipeline::onElementMessage(const QGst::ElementMessagePtr& msg)
                 pm.load(":/buttons/stop");
             }
 
+            if (clipPreviewFileName == filename)
+            {
+                // Got a snapshot for a clip file. Add a fency overlay to it
+                //
+                QPixmap pmOverlay(":/buttons/film");
+                QPainter painter(&pm);
+                painter.setOpacity(0.75);
+                painter.drawPixmap(pm.rect(), pmOverlay);
+                clipPreviewFileName.clear();
+        #ifdef Q_OS_WIN
+                SetFileAttributesW(filename.toStdWString().c_str(), FILE_ATTRIBUTE_HIDDEN);
+        #endif
+            }
+
             imageSaved(filename, tooltip, pm);
         }
 
@@ -909,7 +989,7 @@ void Pipeline::onElementMessage(const QGst::ElementMessagePtr& msg)
             }
         }
 
-        motion(motionDetected);
+        updateOverlayText();
         return;
     }
 
@@ -933,7 +1013,25 @@ void Pipeline::onClipFrame(const QGst::BufferPtr& buf)
     // Once we got an I-Frame, open second valve
     //
     setElementProperty("clipvalve", "drop", false);
+
+    if (recordLimit > 0 && recordTimerId == 0)
+    {
+        countdown = recordLimit;
+        recordTimerId = startTimer(1000);
+    }
+
+    // Notify the main window
+    //
     clipFrameReady();
+
+    if (!clipPreviewFileName.isEmpty())
+    {
+        // Turn the valve on for a while.
+        //
+        imageValve->setProperty("drop-probability", 0.0);
+    }
+
+    updateOverlayText();
 }
 
 void Pipeline::onVideoFrame(const QGst::BufferPtr& buf)
@@ -946,5 +1044,5 @@ void Pipeline::onVideoFrame(const QGst::BufferPtr& buf)
     // Once we got an I-Frame, open second valve
     //
     setElementProperty("videovalve", "drop", false);
-    videoFrameReady();
+    updateOverlayText();
 }

@@ -64,6 +64,8 @@ public:
     void enableClip(bool enable);
     void enableVideo(bool enable);
     void setImageLocation(QString filename);
+    void stopRecordingVideoClip();
+    void updateOverlayText();
 
     QGst::PipelinePtr pipeline;
     QGst::ElementPtr  displaySink;
@@ -80,18 +82,23 @@ public:
     bool          motionStart;
     bool          motionStop;
     bool          recording;
+    int           recordNotify;
+    int           countdown;
+    int           recordLimit;
+    int           recordTimerId;
+    QString       clipPreviewFileName;
+
+protected:
+    virtual void timerEvent(QTimerEvent*);
 
 signals:
     void imageReady();
     void clipFrameReady();
-    void videoFrameReady();
+    void clipRecordComplete();
     void pipelineError(const QString& text);
     void imageSaved(const QString& filename, const QString& tooltip, const QPixmap& pm);
     void motion(bool detected);
-
-public slots:
-    void updateOverlayText(int countdown);
-
+    void playSound(const QString& file);
 };
 
 #endif // PIPELINE_H

@@ -96,10 +96,6 @@ MainWindow::MainWindow(QWidget *parent) :
     imageNo(0),
     clipNo(0),
     studyNo(0),
-    recordTimerId(0),
-    recordLimit(0),
-    recordNotify(0),
-    countdown(0),
     running(false),
     activePipeline(nullptr)
 {
@@ -272,23 +268,6 @@ void MainWindow::resizeEvent(QResizeEvent *evt)
         extraTitle->setVisible(true);
     }
     QWidget::resizeEvent(evt);
-}
-
-void MainWindow::timerEvent(QTimerEvent* evt)
-{
-    if (evt->timerId() == recordTimerId)
-    {
-        if (--countdown <= recordNotify)
-        {
-            sound->play(DATA_FOLDER + "/sound/notify.ac3");
-        }
-
-        if (countdown == 0)
-        {
-            onRecordStopClick();
-        }
-        updateOverlayText(countdown);
-    }
 }
 
 QMenuBar* MainWindow::createMenuBar()
@@ -495,17 +474,34 @@ bool MainWindow::checkPipelines()
     return nPipeline == pipelines.size();
 }
 
+Pipeline* MainWindow::findPipeline(const QString& alias)
+{
+    if (alias.isEmpty())
+    {
+        return nullptr;
+    }
+
+    foreach (auto p, pipelines)
+    {
+        if (p->alias == alias)
+        {
+            return p;
+        }
+    }
+
+    return nullptr;
+}
+
 void MainWindow::createPipeline(int index, int order)
 {
     auto p = new Pipeline(index, this);
     connect(p, SIGNAL(imageSaved(const QString&, const QString&, const QPixmap&)),
             this, SLOT(onImageSaved(const QString&, const QString&, const QPixmap&)), Qt::QueuedConnection);
     connect(p, SIGNAL(clipFrameReady()), this, SLOT(onClipFrameReady()), Qt::QueuedConnection);
-    connect(p, SIGNAL(videoFrameReady()), this, SLOT(onVideoFrameReady()), Qt::QueuedConnection);
+    connect(p, SIGNAL(clipRecordComplete()), this, SLOT(onClipRecordComplete()), Qt::QueuedConnection);
     connect(p, SIGNAL(pipelineError(const QString&)), this, SLOT(onPipelineError(const QString&)), Qt::QueuedConnection);
-    connect(p, SIGNAL(motion(bool)), this, SLOT(onMotion(bool)), Qt::QueuedConnection);
-    connect(this, SIGNAL(updateOverlayText(int)), p, SLOT(updateOverlayText(int)), Qt::QueuedConnection);
-    connect(p->displayWidget, SIGNAL(swapWith(QWidget*)), this, SLOT(onSwapSources(QWidget*)));
+    connect(p, SIGNAL(playSound(QString)), this, SLOT(playSound(QString)), Qt::QueuedConnection);
+    connect(p->displayWidget, SIGNAL(swapWith(QWidget*,QWidget*)), this, SLOT(onSwapSources(QWidget*,QWidget*)));
     connect(p->displayWidget, SIGNAL(click()), this, SLOT(onSourceClick()));
     connect(p->displayWidget, SIGNAL(copy()), this, SLOT(onSourceSnapshot()));
     pipelines.push_back(p);
@@ -591,12 +587,6 @@ void MainWindow::applySettings()
     }
 
     QSettings settings;
-    settings.beginGroup("gst");
-
-    recordNotify = settings.value("notify-clip-limit", DEFAULT_NOTIFY_CLIP_LIMIT).toBool()?
-        settings.value("notify-clip-countdown", DEFAULT_NOTIFY_CLIP_COUNTDOWN).toInt(): -1;
-
-    settings.endGroup();
 
     btnStart->setEnabled(activePipeline && activePipeline->pipeline);
 
@@ -635,8 +625,6 @@ void MainWindow::applySettings()
 #ifdef WITH_DICOM
     actionWorklist->setEnabled(!settings.value("dicom/mwl-server").toString().isEmpty());
 #endif
-
-    updateOverlayText(countdown);
 }
 
 void MainWindow::updateWindowTitle()
@@ -734,32 +722,18 @@ void MainWindow::updateOutputPath(bool needUnique)
 
 void MainWindow::onClipFrameReady()
 {
-    if (recordLimit > 0 && recordTimerId == 0)
-    {
-        countdown = recordLimit;
-        recordTimerId = startTimer(1000);
-    }
     enableWidget(btnRecordStart, true);
-    enableWidget(btnRecordStop, true);
-    updateOverlayText(countdown);
 
-    if (!clipPreviewFileName.isEmpty())
+    auto pipeline = static_cast<Pipeline*>(sender());
+    if (!pipeline->clipPreviewFileName.isEmpty())
     {
-        auto pipeline = static_cast<Pipeline*>(sender());
-
-        // Turn the valve on for a while.
-        //
-        pipeline->imageValve->setProperty("drop-probability", 0.0);
 
         // Once an image will be ready, the valve will be turned off again.
         //
         enableWidget(btnSnapshot, false);
     }
-}
 
-void MainWindow::onVideoFrameReady()
-{
-    updateOverlayText(countdown);
+    enableWidget(btnRecordStop, activePipeline->recording);
 }
 
 void MainWindow::onPipelineError(const QString& text)
@@ -768,28 +742,9 @@ void MainWindow::onPipelineError(const QString& text)
     onStopStudy();
 }
 
-void MainWindow::onMotion(bool)
-{
-    updateOverlayText(countdown);
-}
-
 void MainWindow::onImageSaved(const QString& filename, const QString &tooltip, const QPixmap& pixmap)
 {
     QPixmap pm = pixmap.copy();
-
-    if (clipPreviewFileName == filename)
-    {
-        // Got a snapshot for a clip file. Add a fency overlay to it
-        //
-        QPixmap pmOverlay(":/buttons/film");
-        QPainter painter(&pm);
-        painter.setOpacity(0.75);
-        painter.drawPixmap(pm.rect(), pmOverlay);
-        clipPreviewFileName.clear();
-#ifdef Q_OS_WIN
-        SetFileAttributesW(filename.toStdWString().c_str(), FILE_ATTRIBUTE_HIDDEN);
-#endif
-    }
 
     auto baseName = QFileInfo(filename).completeBaseName();
     if (baseName.startsWith('.'))
@@ -837,6 +792,7 @@ bool MainWindow::startVideoRecord()
                 ok = false;
                 break;
             }
+            p->updateOverlayText();
         }
 
         if (ok)
@@ -919,14 +875,20 @@ void MainWindow::onSourceSnapshot()
 
 void MainWindow::onSourceClick()
 {
-    if (activePipeline->displayWidget == sender())
+    auto src = static_cast<QWidget*>(sender());
+    if (activePipeline->displayWidget == src)
     {
         takeSnapshot(activePipeline);
     }
     else
     {
-        onSwapSources(activePipeline->displayWidget);
+        onSwapSources(src, activePipeline->displayWidget);
     }
+}
+
+void MainWindow::playSound(const QString& file)
+{
+    sound->play(DATA_FOLDER + "/sound/" + file + ".ac3");
 }
 
 bool MainWindow::takeSnapshot(Pipeline* pipeline, const QString& imageTemplate)
@@ -947,7 +909,7 @@ bool MainWindow::takeSnapshot(Pipeline* pipeline, const QString& imageTemplate)
             settings.value("storage/image-template", DEFAULT_IMAGE_TEMPLATE).toString();
     auto imageFileName = replace(actualImageTemplate, ++imageNo).append(imageExt);
 
-    sound->play(DATA_FOLDER + "/sound/shutter.ac3");
+    playSound("shutter");
 
     pipeline->setImageLocation(outputPath.absoluteFilePath(imageFileName));
 
@@ -962,14 +924,24 @@ bool MainWindow::takeSnapshot(Pipeline* pipeline, const QString& imageTemplate)
 
 void MainWindow::onRecordStartClick()
 {
-    startRecord(0);
+    startRecord();
 }
 
-bool MainWindow::startRecord(int duration, const QString &clipFileTemplate)
+void MainWindow::onRecordStopClick()
+{
+    stopRecord();
+}
+
+bool MainWindow::startRecord(Pipeline* pipeline, int duration, const QString &clipFileTemplate)
 {
     if (!running)
     {
         return false;
+    }
+
+    if (!pipeline)
+    {
+        pipeline = activePipeline;
     }
 
     QSettings settings;
@@ -977,24 +949,18 @@ bool MainWindow::startRecord(int duration, const QString &clipFileTemplate)
         settings.value("storage/clip-template", DEFAULT_CLIP_TEMPLATE).toString();
 
     settings.beginGroup("gst");
-    recordLimit = duration > 0? duration:
+    pipeline->recordLimit = duration > 0? duration:
         settings.value("clip-limit", DEFAULT_CLIP_LIMIT).toBool()?
             settings.value("clip-countdown", DEFAULT_CLIP_COUNTDOWN).toInt(): 0;
 
-    if (!activePipeline->recording)
+    if (!pipeline->recording)
     {
-        QString imageExt = getExt(settings.value("image-encoder", DEFAULT_IMAGE_ENCODER).toString());
-        auto clipFileName = activePipeline->appendVideoTail(outputPath, "clip", replace(actualTemplate, ++clipNo), false);
+        auto clipFileName = pipeline->appendVideoTail(outputPath, "clip", replace(actualTemplate, ++clipNo), false);
         qDebug() << clipFileName;
+
         if (!clipFileName.isEmpty())
         {
-            if (settings.value("save-clip-thumbnails", DEFAULT_SAVE_CLIP_THUMBNAILS).toBool())
-            {
-                QFileInfo fi(clipFileName);
-                clipPreviewFileName = fi.absolutePath()
-                    .append(QDir::separator()).append('.').append(fi.fileName()).append(imageExt);
-            }
-            else
+            if (!settings.value("save-clip-thumbnails", DEFAULT_SAVE_CLIP_THUMBNAILS).toBool())
             {
                 auto item = new QListWidgetItem(QFileInfo(clipFileName).baseName(), listImagesAndClips);
                 item->setToolTip(clipFileName);
@@ -1006,13 +972,12 @@ bool MainWindow::startRecord(int duration, const QString &clipFileTemplate)
             // Until the real clip recording starts, we should disable this button
             //
             btnRecordStart->setEnabled(false);
-            activePipeline->recording = true;
-            activePipeline->setImageLocation(clipPreviewFileName);
-            activePipeline->enableClip(true);
+            pipeline->recording = true;
+            pipeline->enableClip(true);
         }
         else
         {
-            activePipeline->removeVideoTail("clip");
+            pipeline->removeVideoTail("clip");
             QMessageBox::critical(this, windowTitle(),
                 tr("Failed to start recording.\nCheck the error log for details."), QMessageBox::Ok);
         }
@@ -1021,34 +986,26 @@ bool MainWindow::startRecord(int duration, const QString &clipFileTemplate)
     {
         // Extend recording time
         //
-        countdown = recordLimit;
+        pipeline->countdown = pipeline->recordLimit;
     }
 
-    sound->play(DATA_FOLDER + "/sound/record.ac3");
+    playSound("record");
     return true;
 }
 
-void MainWindow::onRecordStopClick()
+void MainWindow::stopRecord(Pipeline* pipeline)
 {
-    foreach (auto p, pipelines)
+    if (!pipeline)
     {
-        if (p->recording)
-        {
-            p->removeVideoTail("clip");
-            p->recording = false;
-        }
+        pipeline = activePipeline;
     }
 
-    clipPreviewFileName.clear();
-    countdown = 0;
-    if (recordTimerId)
-    {
-        killTimer(recordTimerId);
-        recordTimerId = 0;
-    }
+    pipeline->stopRecordingVideoClip();
+}
 
-    btnRecordStop->setEnabled(false);
-    updateOverlayText(countdown);
+void MainWindow::onClipRecordComplete()
+{
+    btnRecordStop->setEnabled(running && activePipeline->recording);
 }
 
 void MainWindow::updateStartButton()
@@ -1283,7 +1240,6 @@ void MainWindow::onStartStudy()
 
     running = startVideoRecord();
     activePipeline->enableEncoder(running);
-    updateOverlayText(countdown);
     updateStartButton();
     updateWindowTitle();
     activePipeline->displayWidget->update();
@@ -1304,7 +1260,6 @@ void MainWindow::onStopStudy()
     }
 
     running = false;
-    updateOverlayText(countdown);
 
 #ifdef WITH_DICOM
     if (pendingPatient)
@@ -1365,6 +1320,7 @@ void MainWindow::onStopStudy()
     {
         p->enableEncoder(false);
         p->displayWidget->update();
+        p->updateOverlayText();
     }
 
     // Clear the capture list
@@ -1372,10 +1328,8 @@ void MainWindow::onStopStudy()
     listImagesAndClips->clear();
 }
 
-void MainWindow::onSwapSources(QWidget* dst)
+void MainWindow::onSwapSources(QWidget* src, QWidget* dst)
 {
-    auto src = static_cast<QWidget*>(sender());
-
     // Swap with main video widget
     //
     if (dst == nullptr)
@@ -1437,6 +1391,7 @@ void MainWindow::onSwapSources(QWidget* dst)
         if (idx < 0)
         {
             activePipeline = p;
+            btnRecordStop->setEnabled(running && p->recording);
         }
     }
     settings.endArray();

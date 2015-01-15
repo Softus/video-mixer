@@ -68,7 +68,6 @@ class MainWindow : public QWidget
     QListWidget*  listImagesAndClips;
     QDir          outputPath;
     QDir          videoOutputPath;
-    QString       clipPreviewFileName;
 
     QString       accessionNumber;
     QString       patientId;
@@ -81,10 +80,6 @@ class MainWindow : public QWidget
     ushort        imageNo;
     ushort        clipNo;
     int           studyNo;
-    int           recordTimerId;
-    int           recordLimit;
-    int           recordNotify;
-    int           countdown;
     Sound*        sound;
 
     QMenuBar* createMenuBar();
@@ -114,7 +109,9 @@ class MainWindow : public QWidget
     void updateStartDialog();
     bool confirmStopStudy();
     bool takeSnapshot(Pipeline* pipeline = nullptr, const QString& imageTemplate = QString());
-    bool startRecord(int duration = 0, const QString &clipFileTemplate = QString());
+    bool startRecord(Pipeline* pipeline = nullptr, int duration = 0, const QString &clipFileTemplate = QString());
+    void stopRecord(Pipeline* pipeline = nullptr);
+    Pipeline* findPipeline(const QString& alias);
 
 public:
     explicit MainWindow(QWidget *parent = 0);
@@ -125,14 +122,15 @@ protected:
     virtual void showEvent(QShowEvent*);
     virtual void hideEvent(QHideEvent*);
     virtual void resizeEvent(QResizeEvent*);
-    virtual void timerEvent(QTimerEvent*);
+
 signals:
     void enableWidget(QWidget*, bool);
-    void updateOverlayText(int);
 
 public slots:
     void applySettings();
     void toggleSetting();
+    void playSound(const QString& file);
+    void onClipRecordComplete();
 
 private slots:
 #ifdef WITH_DICOM
@@ -144,7 +142,6 @@ private slots:
     void onClipFrameReady();
     void onEnableWidget(QWidget*, bool);
     void onImageSaved(const QString& filename, const QString& tooltip, const QPixmap& pm);
-    void onMotion(bool detected);
     void onPipelineError(const QString& text);
     void onPrepareSettingsMenu();
     void onRecordStartClick();
@@ -157,8 +154,7 @@ private slots:
     void onSourceSnapshot();
     void onStartClick();
     void onStopStudy();
-    void onSwapSources(QWidget*);
-    void onVideoFrameReady();
+    void onSwapSources(QWidget *src, QWidget *dst);
 
     friend class MainWindowDBusAdaptor;
 };
