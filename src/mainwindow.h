@@ -68,7 +68,6 @@ class MainWindow : public QWidget
     QListWidget*  listImagesAndClips;
     QDir          outputPath;
     QDir          videoOutputPath;
-    QString       clipPreviewFileName;
 
     QString       accessionNumber;
     QString       patientId;
@@ -81,10 +80,6 @@ class MainWindow : public QWidget
     ushort        imageNo;
     ushort        clipNo;
     int           studyNo;
-    int           recordTimerId;
-    int           recordLimit;
-    int           recordNotify;
-    int           countdown;
     Sound*        sound;
 
     QMenuBar* createMenuBar();
@@ -125,14 +120,14 @@ protected:
     virtual void showEvent(QShowEvent*);
     virtual void hideEvent(QHideEvent*);
     virtual void resizeEvent(QResizeEvent*);
-    virtual void timerEvent(QTimerEvent*);
+
 signals:
     void enableWidget(QWidget*, bool);
-    void updateOverlayText(int);
 
 public slots:
     void applySettings();
     void toggleSetting();
+    void playSound(const QString& file);
 
 private slots:
 #ifdef WITH_DICOM
@@ -144,7 +139,6 @@ private slots:
     void onClipFrameReady();
     void onEnableWidget(QWidget*, bool);
     void onImageSaved(const QString& filename, const QString& tooltip, const QPixmap& pm);
-    void onMotion(bool detected);
     void onPipelineError(const QString& text);
     void onPrepareSettingsMenu();
     void onRecordStartClick();
@@ -158,7 +152,6 @@ private slots:
     void onStartClick();
     void onStopStudy();
     void onSwapSources(QWidget*);
-    void onVideoFrameReady();
 
     friend class MainWindowDBusAdaptor;
 };
