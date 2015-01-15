@@ -130,6 +130,7 @@ public slots:
     void applySettings();
     void toggleSetting();
     void playSound(const QString& file);
+    void onClipRecordComplete();
 
 private slots:
 #ifdef WITH_DICOM

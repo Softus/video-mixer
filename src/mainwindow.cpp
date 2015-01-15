@@ -498,6 +498,7 @@ void MainWindow::createPipeline(int index, int order)
     connect(p, SIGNAL(imageSaved(const QString&, const QString&, const QPixmap&)),
             this, SLOT(onImageSaved(const QString&, const QString&, const QPixmap&)), Qt::QueuedConnection);
     connect(p, SIGNAL(clipFrameReady()), this, SLOT(onClipFrameReady()), Qt::QueuedConnection);
+    connect(p, SIGNAL(clipRecordComplete()), this, SLOT(onClipRecordComplete()), Qt::QueuedConnection);
     connect(p, SIGNAL(pipelineError(const QString&)), this, SLOT(onPipelineError(const QString&)), Qt::QueuedConnection);
     connect(p, SIGNAL(playSound(QString)), this, SLOT(playSound(QString)), Qt::QueuedConnection);
     connect(p->displayWidget, SIGNAL(swapWith(QWidget*,QWidget*)), this, SLOT(onSwapSources(QWidget*,QWidget*)));
@@ -1000,7 +1001,10 @@ void MainWindow::stopRecord(Pipeline* pipeline)
     }
 
     pipeline->stopRecordingVideoClip();
+}
 
+void MainWindow::onClipRecordComplete()
+{
     btnRecordStop->setEnabled(running && activePipeline->recording);
 }
 

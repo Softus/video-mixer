@@ -95,7 +95,14 @@ void Pipeline::timerEvent(QTimerEvent* evt)
             playSound("notify");
         }
 
-        updateOverlayText();
+        if (countdown == 0 && recording)
+        {
+            stopRecordingVideoClip();
+        }
+        else
+        {
+            updateOverlayText();
+        }
     }
 }
 
@@ -772,11 +779,6 @@ void Pipeline::updateOverlayText()
     if (!displayOverlay)
         return;
 
-    if (countdown == 0 && recording)
-    {
-        stopRecordingVideoClip();
-    }
-
     QString text;
     if (recording)
     {
@@ -815,6 +817,7 @@ void Pipeline::stopRecordingVideoClip()
     countdown = 0;
     recording = false;
     updateOverlayText();
+    clipRecordComplete();
 }
 
 void Pipeline::enableEncoder(bool enable)

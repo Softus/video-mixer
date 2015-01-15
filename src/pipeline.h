@@ -94,6 +94,7 @@ protected:
 signals:
     void imageReady();
     void clipFrameReady();
+    void clipRecordComplete();
     void pipelineError(const QString& text);
     void imageSaved(const QString& filename, const QString& tooltip, const QPixmap& pm);
     void motion(bool detected);
