@@ -109,7 +109,7 @@ class MainWindow : public QWidget
     void updateStartDialog();
     bool confirmStopStudy();
     bool takeSnapshot(Pipeline* pipeline = nullptr, const QString& imageTemplate = QString());
-    bool startRecord(Pipeline* pipeline = nullptr, int duration = 0, const QString &clipFileTemplate = QString());
+    bool startRecord(int duration = 0, Pipeline* pipeline = nullptr, const QString &clipFileTemplate = QString());
     void stopRecord(Pipeline* pipeline = nullptr);
     Pipeline* findPipeline(const QString& alias);
 

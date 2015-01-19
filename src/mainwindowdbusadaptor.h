@@ -54,13 +54,13 @@ public slots:
         );
     bool stopStudy();
     bool takeSnapshot
-        ( const QString &imageFileTemplate = QString()
-        , const QString &src = QString()
+        ( const QString &src = QString()
+        , const QString &imageFileTemplate = QString()
         );
     bool startRecord
         ( int duration = 0
-        , const QString &clipFileTemplate = QString()
         , const QString &src = QString()
+        , const QString &clipFileTemplate = QString()
         );
     bool stopRecord
         ( const QString &src = QString()

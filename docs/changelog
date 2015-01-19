@@ -1,3 +1,9 @@
+beryllium (1.2.3) debian;
+
+  * d-bus: record clip/take snapshot: pull src parameter up.
+
+ -- Pavel Bludov <pbludov@gmail.com>  Thu, 19 Jan 2015 11:11:00 +0800
+
 beryllium (1.2.2) debian;
 
   * d-bus: record clips/take snapshots for each src; select active src.
