@@ -262,6 +262,7 @@ static gchar *patientSex = nullptr;
 static gchar *physician = nullptr;
 static gchar *studyDescription = nullptr;
 static gboolean autoStart = false;
+static gboolean printVersion = false;
 
 static GOptionEntry options[] = {
     {"archive", '\x0', G_OPTION_FLAG_OPTIONAL_ARG, G_OPTION_ARG_CALLBACK, (gpointer)setModeCallback,
@@ -293,6 +294,8 @@ static GOptionEntry options[] = {
         QT_TRANSLATE_NOOP_UTF8("cmdline", "Patient sex."), QT_TRANSLATE_NOOP_UTF8("cmdline", "F|M|O|U")},
     {"auto-start", '\x0', 0, G_OPTION_ARG_NONE, (gpointer)&autoStart,
         QT_TRANSLATE_NOOP_UTF8("cmdline", "Automatically start the study."), nullptr},
+    {"version", '\x0', 0, G_OPTION_ARG_NONE, (gpointer)&printVersion,
+        QT_TRANSLATE_NOOP_UTF8("cmdline", "Print version information and exit."), nullptr},
 
     {G_OPTION_REMAINING, '\x0', 0, G_OPTION_ARG_CALLBACK, (gpointer)setValueCallback,
         nullptr, nullptr},
@@ -319,8 +322,8 @@ bool switchToRunningInstance()
 
 int main(int argc, char *argv[])
 {
-    qDebug() << PRODUCT_FULL_NAME << PRODUCT_VERSION_STR << "\nBuilt by " CVAUX_STR(USERNAME) " on " \
-                CVAUX_STR(OS_DISTRO) " " CVAUX_STR(OS_REVISION) " at " __DATE__ " " __TIME__;
+    qDebug() << PRODUCT_FULL_NAME << PRODUCT_VERSION_STR;
+    qDebug() << PRODUCT_SITE_URL;
 
     signal(SIGSEGV, sighandler);
 
@@ -335,7 +338,7 @@ int main(int argc, char *argv[])
     //
     if (!g_thread_supported())
     {
-      g_thread_init(nullptr);
+        g_thread_init(nullptr);
     }
 #endif
 
@@ -348,7 +351,7 @@ int main(int argc, char *argv[])
 
 #ifdef WITH_DICOM
     auto dcmtkGroup = g_option_group_new ("dcmtk", QT_TRANSLATE_NOOP_UTF8("cmdline", "DCMTK Options"),
-        QT_TRANSLATE_NOOP_UTF8("cmdline", "Show DCMTK Options"), NULL, NULL);
+        QT_TRANSLATE_NOOP_UTF8("cmdline", "Show DCMTK Options"), nullptr, nullptr);
     g_option_context_add_group(ctx, dcmtkGroup);
     g_option_group_add_entries (dcmtkGroup, dcmtkOptions);
 #endif
@@ -360,10 +363,18 @@ int main(int argc, char *argv[])
 
     if (err)
     {
-      g_print(QT_TRANSLATE_NOOP_UTF8("cmdline", "Error initializing: %s\n"), GST_STR_NULL(err->message));
-      g_error_free(err);
-      return 1;
+        g_print(QT_TRANSLATE_NOOP_UTF8("cmdline", "Error initializing: %s\n"), GST_STR_NULL(err->message));
+        g_error_free(err);
+        return 1;
     }
+
+    if (printVersion)
+    {
+        return 0;
+    }
+
+    qDebug() << "Built by " CVAUX_STR(USERNAME) " on " \
+                CVAUX_STR(OS_DISTRO) " " CVAUX_STR(OS_REVISION) " at " __DATE__ " " __TIME__;
 
     // At this time it is safe to use QSettings
     //

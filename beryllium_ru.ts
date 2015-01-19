@@ -884,22 +884,22 @@ Continue?</source>
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="src/mainwindow.cpp" line="377"/>
+        <location filename="src/mainwindow.cpp" line="356"/>
         <source>&amp;Archive</source>
         <translation>&amp;Архив</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="373"/>
+        <location filename="src/mainwindow.cpp" line="352"/>
         <source>&amp;Worlkist</source>
         <translation>&amp;Рабочий лист</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="380"/>
+        <location filename="src/mainwindow.cpp" line="359"/>
         <source>&amp;Preferences</source>
         <translation>&amp;Настройки</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="331"/>
+        <location filename="src/mainwindow.cpp" line="310"/>
         <source>Main</source>
         <oldsource>main</oldsource>
         <translation>Главная</translation>
@@ -909,51 +909,51 @@ Continue?</source>
         <translation type="obsolete">Сделать &amp;снимок</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="378"/>
+        <location filename="src/mainwindow.cpp" line="357"/>
         <source>Show studies archive</source>
         <translation>Открыть архив исследований</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="382"/>
+        <location filename="src/mainwindow.cpp" line="361"/>
         <source>Edit settings</source>
         <translation>Открыть окно настроек</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="386"/>
+        <location filename="src/mainwindow.cpp" line="365"/>
         <source>About %1</source>
         <oldsource>About berillyum</oldsource>
         <translation>О программе %1</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="654"/>
-        <location filename="src/mainwindow.cpp" line="659"/>
-        <location filename="src/mainwindow.cpp" line="664"/>
-        <location filename="src/mainwindow.cpp" line="669"/>
+        <location filename="src/mainwindow.cpp" line="642"/>
+        <location filename="src/mainwindow.cpp" line="647"/>
+        <location filename="src/mainwindow.cpp" line="652"/>
+        <location filename="src/mainwindow.cpp" line="657"/>
         <source> - </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="697"/>
+        <location filename="src/mainwindow.cpp" line="685"/>
         <source>Failed to create &apos;%1&apos;</source>
         <translation>Не удалось создать &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="817"/>
+        <location filename="src/mainwindow.cpp" line="772"/>
         <source>Failed to start recording.
 Please, adjust the video source settings.</source>
         <translation>Невозможно начать запись.
 Проверьте настройки видео.</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="836"/>
-        <location filename="src/mainwindow.cpp" line="1017"/>
+        <location filename="src/mainwindow.cpp" line="791"/>
+        <location filename="src/mainwindow.cpp" line="982"/>
         <source>Failed to start recording.
 Check the error log for details.</source>
         <translation>Невозможно начать запись.
 Проверьте журнал ожибок.</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1161"/>
+        <location filename="src/mainwindow.cpp" line="1118"/>
         <source>Failed to start a study.
 Another study is in progress.</source>
         <translation>Невозможно начать исследование.
@@ -976,17 +976,17 @@ Another study is in progress.</source>
         <translation type="obsolete">Отправить</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="876"/>
+        <location filename="src/mainwindow.cpp" line="832"/>
         <source>End the study?</source>
         <translation>Завершить исследование?</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1057"/>
+        <location filename="src/mainwindow.cpp" line="1014"/>
         <source>End study</source>
         <translation>Завершить исследование</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1057"/>
+        <location filename="src/mainwindow.cpp" line="1014"/>
         <source>Start study</source>
         <translation>Начать исследование</translation>
     </message>
@@ -1015,42 +1015,42 @@ Another study is in progress.</source>
         <translation type="obsolete">З&amp;апись</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="297"/>
+        <location filename="src/mainwindow.cpp" line="276"/>
         <source>&amp;Menu</source>
         <translation>&amp;Меню</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="384"/>
+        <location filename="src/mainwindow.cpp" line="363"/>
         <source>A&amp;bout %1</source>
         <translation>&amp;О %1</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="308"/>
+        <location filename="src/mainwindow.cpp" line="287"/>
         <source>&amp;Enable RTP streaming</source>
         <translation>Включить RTP &amp;поток</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="312"/>
+        <location filename="src/mainwindow.cpp" line="291"/>
         <source>&amp;Record entire study</source>
         <translation>Записывать исследование &amp;целиком</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="319"/>
+        <location filename="src/mainwindow.cpp" line="298"/>
         <source>E&amp;xit</source>
         <translation>В&amp;ыход</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="344"/>
+        <location filename="src/mainwindow.cpp" line="323"/>
         <source>Take snapshot</source>
         <translation>Сделать снимок</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="353"/>
+        <location filename="src/mainwindow.cpp" line="332"/>
         <source>Start clip</source>
         <translation>Записать фрагмент</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="362"/>
+        <location filename="src/mainwindow.cpp" line="341"/>
         <source>Clip done</source>
         <translation>Завершить фрагмент</translation>
     </message>
@@ -1282,7 +1282,7 @@ Another study is in progress.</source>
 <context>
     <name>Pipeline</name>
     <message>
-        <location filename="src/pipeline.cpp" line="865"/>
+        <location filename="src/pipeline.cpp" line="931"/>
         <source>Failed to load image %1</source>
         <translation>Не удалось загрузить снимок %1</translation>
     </message>
@@ -2351,7 +2351,7 @@ date</source>
     <message>
         <location filename="src/beryllium.cpp" line="228"/>
         <location filename="src/beryllium.cpp" line="232"/>
-        <location filename="src/beryllium.cpp" line="270"/>
+        <location filename="src/beryllium.cpp" line="271"/>
         <source>FILE</source>
         <translation>ФАЙЛ</translation>
     </message>
@@ -2371,121 +2371,126 @@ date</source>
         <translation>Файл настроек журнала DCMTK.</translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="268"/>
+        <location filename="src/beryllium.cpp" line="269"/>
         <source>Show the archive window.</source>
         <translation>Открыть окно архива.</translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="268"/>
-        <location filename="src/beryllium.cpp" line="278"/>
+        <location filename="src/beryllium.cpp" line="269"/>
+        <location filename="src/beryllium.cpp" line="279"/>
         <source>PATH</source>
         <translation>ПУТЬ</translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="270"/>
+        <location filename="src/beryllium.cpp" line="271"/>
         <source>Show the video editor window.</source>
         <translation>Открыть редактор видео.</translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="272"/>
+        <location filename="src/beryllium.cpp" line="273"/>
         <source>Show the settings window.</source>
         <translation>Открыть окно настроек.</translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="272"/>
+        <location filename="src/beryllium.cpp" line="273"/>
         <source>PAGE</source>
         <translation>ВКЛАДКА</translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="274"/>
+        <location filename="src/beryllium.cpp" line="275"/>
         <source>Run the program in safe mode.</source>
         <translation>Запустить программу в безопасном режиме.</translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="276"/>
+        <location filename="src/beryllium.cpp" line="277"/>
         <source>Run the program in X synchronous mode.</source>
         <translation>Запустить программу в синхронном режиме X11.</translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="278"/>
+        <location filename="src/beryllium.cpp" line="279"/>
         <source>Set root path to the settings file.</source>
         <translation>Задать путь к файлу настроек.</translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="281"/>
+        <location filename="src/beryllium.cpp" line="282"/>
         <source>Study accession number (id).</source>
         <translation>Код исследования.</translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="281"/>
-        <location filename="src/beryllium.cpp" line="287"/>
+        <location filename="src/beryllium.cpp" line="282"/>
+        <location filename="src/beryllium.cpp" line="288"/>
         <source>ID</source>
         <translation>КОД</translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="283"/>
+        <location filename="src/beryllium.cpp" line="284"/>
         <source>Patient birthdate.</source>
         <translation>Дата рождения пациента.</translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="283"/>
+        <location filename="src/beryllium.cpp" line="284"/>
         <source>YYYYMMDD</source>
         <translation>ГГГГММДД</translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="285"/>
+        <location filename="src/beryllium.cpp" line="286"/>
         <source>Study description.</source>
         <translation>Описание исследования.</translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="285"/>
-        <location filename="src/beryllium.cpp" line="289"/>
-        <location filename="src/beryllium.cpp" line="291"/>
+        <location filename="src/beryllium.cpp" line="286"/>
+        <location filename="src/beryllium.cpp" line="290"/>
+        <location filename="src/beryllium.cpp" line="292"/>
         <source>STRING</source>
         <translation>СТРОКА</translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="287"/>
+        <location filename="src/beryllium.cpp" line="288"/>
         <source>Patient id.</source>
         <translation>Карта пациента.</translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="289"/>
+        <location filename="src/beryllium.cpp" line="290"/>
         <source>Patient name.</source>
         <translation>Имя пациента.</translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="291"/>
+        <location filename="src/beryllium.cpp" line="292"/>
         <source>Performing physician name.</source>
         <translation>Имя выполняющего исследование врача.</translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="293"/>
+        <location filename="src/beryllium.cpp" line="294"/>
         <source>Patient sex.</source>
         <translation>Пол пациента.</translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="293"/>
+        <location filename="src/beryllium.cpp" line="294"/>
         <source>F|M|O|U</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="295"/>
+        <location filename="src/beryllium.cpp" line="296"/>
         <source>Automatically start the study.</source>
         <translation>Автоматически начинать исследование.</translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="350"/>
+        <location filename="src/beryllium.cpp" line="298"/>
+        <source>Print version information and exit.</source>
+        <translation>Показать текущую версию и завершить работу.</translation>
+    </message>
+    <message>
+        <location filename="src/beryllium.cpp" line="353"/>
         <source>DCMTK Options</source>
         <translation>Параметры DCMTK</translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="351"/>
+        <location filename="src/beryllium.cpp" line="354"/>
         <source>Show DCMTK Options</source>
         <translation>Показать параметры DCMTK</translation>
     </message>
     <message>
-        <location filename="src/beryllium.cpp" line="363"/>
+        <location filename="src/beryllium.cpp" line="366"/>
         <source>Error initializing: %s
 </source>
         <translation>Ошибка инициализации: %s</translation>
