@@ -38,12 +38,18 @@ bool MainWindowDBusAdaptor::connectToService(bool systemBus, const QString &serv
     //
     new QDBusInterface(service, path, interface, bus, this);
 
-    ok = ok && (bus.connect(service, path, interface, "takeSnapshot", this, SLOT(takeSnapshot()))
-             || bus.connect(service, path, interface, "takeSnapshot", "string", this, SLOT(takeSnapshot(String))));
-    ok = ok && (bus.connect(service, path, interface, "startRecord",  this, SLOT(startRecord()))
-             || bus.connect(service, path, interface, "startRecord", "int32",  this, SLOT(startRecord(int)))
-             || bus.connect(service, path, interface, "startRecord", "int32,string",  this, SLOT(startRecord(int,String))));
-    ok = ok && (bus.connect(service, path, interface, "stopRecord",   this, SLOT(stopRecord())));
+    ok = ok && (bus.connect(service, path, interface, "takeSnapshot", this, SLOT(takeSnapshot(QString,QString)))
+             || bus.connect(service, path, interface, "takeSnapshot", this, SLOT(takeSnapshot(QString)))
+             || bus.connect(service, path, interface, "takeSnapshot", this, SLOT(takeSnapshot()))
+             );
+    ok = ok && (bus.connect(service, path, interface, "startRecord",  this, SLOT(startRecord(int,QString,QString)))
+             || bus.connect(service, path, interface, "startRecord",  this, SLOT(startRecord(int,QString)))
+             || bus.connect(service, path, interface, "startRecord",  this, SLOT(startRecord(int)))
+             || bus.connect(service, path, interface, "startRecord",  this, SLOT(startRecord()))
+             );
+    ok = ok && (bus.connect(service, path, interface, "stopRecord",   this, SLOT(stopRecord(QString)))
+             || bus.connect(service, path, interface, "stopRecord",   this, SLOT(stopRecord()))
+             );
 
     return ok;
 }
