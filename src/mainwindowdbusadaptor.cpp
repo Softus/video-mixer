@@ -138,8 +138,8 @@ bool MainWindowDBusAdaptor::stopStudy()
 }
 
 bool MainWindowDBusAdaptor::takeSnapshot
-    ( const QString &imageFileTemplate
-     , const QString &src
+    ( const QString &src
+    , const QString &imageFileTemplate
     )
 {
     return wnd->takeSnapshot(wnd->findPipeline(src), imageFileTemplate);
@@ -147,11 +147,11 @@ bool MainWindowDBusAdaptor::takeSnapshot
 
 bool MainWindowDBusAdaptor::startRecord
     ( int duration
-    , const QString &clipFileTemplate
     , const QString &src
+    , const QString &clipFileTemplate
     )
 {
-    return wnd->startRecord(wnd->findPipeline(src), duration, clipFileTemplate);
+    return wnd->startRecord(duration, wnd->findPipeline(src), clipFileTemplate);
 }
 
 bool MainWindowDBusAdaptor::stopRecord(const QString &src)

@@ -932,7 +932,7 @@ void MainWindow::onRecordStopClick()
     stopRecord();
 }
 
-bool MainWindow::startRecord(Pipeline* pipeline, int duration, const QString &clipFileTemplate)
+bool MainWindow::startRecord(int duration, Pipeline* pipeline, const QString &clipFileTemplate)
 {
     if (!running)
     {
