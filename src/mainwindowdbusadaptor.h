@@ -33,7 +33,7 @@ private:
 
 public:
     MainWindowDBusAdaptor(MainWindow *wnd);
-    bool connectToService(bool systemBus, const QString &service, const QString &path, const QString &interface);
+    int connectToService(bool systemBus, const QString &service, const QString &path, const QString &interface);
 
 public slots:
     bool busy();

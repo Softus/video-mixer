@@ -22,6 +22,7 @@
 #include <QDBusConnection>
 #include <QDBusInterface>
 #include <QDebug>
+#include <QMetaMethod>
 #include <QSettings>
 
 MainWindowDBusAdaptor::MainWindowDBusAdaptor(MainWindow *wnd)
@@ -29,29 +30,45 @@ MainWindowDBusAdaptor::MainWindowDBusAdaptor(MainWindow *wnd)
 {
 }
 
-bool MainWindowDBusAdaptor::connectToService(bool systemBus, const QString &service, const QString &path, const QString &interface)
+int MainWindowDBusAdaptor::connectToService(bool systemBus, const QString &service, const QString &path, const QString &interface)
 {
-    auto ok = true;
+    auto succeeded = 0;
     auto bus = systemBus? QDBusConnection::systemBus(): QDBusConnection::sessionBus();
 
     // Activate the service
     //
-    new QDBusInterface(service, path, interface, bus, this);
+    auto obj = (new QDBusInterface(service, path, interface, bus, this))->metaObject();
 
-    ok = ok && (bus.connect(service, path, interface, "takeSnapshot", this, SLOT(takeSnapshot(QString,QString)))
-             || bus.connect(service, path, interface, "takeSnapshot", this, SLOT(takeSnapshot(QString)))
-             || bus.connect(service, path, interface, "takeSnapshot", this, SLOT(takeSnapshot()))
-             );
-    ok = ok && (bus.connect(service, path, interface, "startRecord",  this, SLOT(startRecord(int,QString,QString)))
-             || bus.connect(service, path, interface, "startRecord",  this, SLOT(startRecord(int,QString)))
-             || bus.connect(service, path, interface, "startRecord",  this, SLOT(startRecord(int)))
-             || bus.connect(service, path, interface, "startRecord",  this, SLOT(startRecord()))
-             );
-    ok = ok && (bus.connect(service, path, interface, "stopRecord",   this, SLOT(stopRecord(QString)))
-             || bus.connect(service, path, interface, "stopRecord",   this, SLOT(stopRecord()))
-             );
+    for (int i = 0; i < obj->methodCount(); ++i)
+    {
+        auto method = obj->method(i);
+        if (0 == (method.attributes() & QMetaMethod::Scriptable) || method.methodType() != QMetaMethod::Signal)
+        {
+            // Not a connectible signal
+            //
+            continue;
+        }
 
-    return ok;
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+        auto sign = QString::fromUtf8(method.methodSignature());
+        auto name = method.name();
+#else
+        auto sign = QString::fromUtf8(method.signature());
+        auto name = sign.split("(").front();
+#endif
+
+        if (bus.connect(service, path, interface, name,  this, QString("1").append(sign).toUtf8()))
+        {
+            qDebug() << "Connected to signal" << sign;
+            ++succeeded;
+        }
+        else
+        {
+            qDebug() << "Failed to connect to signal" << sign;
+        }
+    }
+
+    return succeeded;
 }
 
 bool MainWindowDBusAdaptor::busy()
