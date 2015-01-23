@@ -99,6 +99,9 @@ signals:
     void imageSaved(const QString& filename, const QString& tooltip, const QPixmap& pm);
     void motion(bool detected);
     void playSound(const QString& file);
+    void switchToUIThreadAndStartCountdownTimer();
+private slots:
+    void startCountdownTimer();
 };
 
 #endif // PIPELINE_H

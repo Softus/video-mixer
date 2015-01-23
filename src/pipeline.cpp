@@ -59,6 +59,10 @@ Pipeline::Pipeline(int index, QObject *parent) :
 {
     displayWidget = new VideoWidget();
     displayWidget->setProperty("index", index);
+
+    // This magic required for updating timers from worker threads on Microsoft (R) Windows (TM)
+    //
+    connect(this, SIGNAL(switchToUIThreadAndStartCountdownTimer()), this, SLOT(startCountdownTimer()), Qt::QueuedConnection);
 }
 
 Pipeline::~Pipeline()
@@ -1017,7 +1021,7 @@ void Pipeline::onClipFrame(const QGst::BufferPtr& buf)
     if (recordLimit > 0 && recordTimerId == 0)
     {
         countdown = recordLimit;
-        recordTimerId = startTimer(1000);
+        switchToUIThreadAndStartCountdownTimer();
     }
 
     // Notify the main window
@@ -1032,6 +1036,11 @@ void Pipeline::onClipFrame(const QGst::BufferPtr& buf)
     }
 
     updateOverlayText();
+}
+
+void Pipeline::startCountdownTimer()
+{
+    recordTimerId = startTimer(1000);
 }
 
 void Pipeline::onVideoFrame(const QGst::BufferPtr& buf)
