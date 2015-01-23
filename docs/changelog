@@ -1,3 +1,9 @@
+beryllium (1.2.5) debian;
+
+  * fix clip record countdown timer issue with qt 5.4
+
+ -- Pavel Bludov <pbludov@gmail.com>  Thu, 23 Jan 2015 13:34:00 +0800
+
 beryllium (1.2.4) debian;
 
   * d-bus: fix d-bus service connection
