@@ -4,7 +4,6 @@
         <file alias="camera">pixmaps/camera.png</file>
         <file alias="pause">pixmaps/pause.png</file>
         <file alias="details">pixmaps/details.png</file>
-        <file alias="add_patient">pixmaps/user_add.png</file>
         <file alias="show_worklist">pixmaps/user_manage.png</file>
         <file alias="about">pixmaps/about.png</file>
         <file alias="folder">pixmaps/folder.png</file>

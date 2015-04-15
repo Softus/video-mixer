@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013-2014 Irkutsk Diagnostic Center.
+ * Copyright (C) 2013-2015 Irkutsk Diagnostic Center.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -94,11 +94,8 @@ void ThumbnailList::dragMoveEvent(QDragMoveEvent *evt)
 
 void ThumbnailList::dropEvent(QDropEvent *evt)
 {
-    if (evt->mimeData()->hasFormat("videowidget"))
-    {
-        evt->setDropAction(Qt::CopyAction);
-        evt->accept();
-    }
+    evt->setDropAction(evt->mimeData()->hasFormat("videowidget")? Qt::CopyAction: Qt::MoveAction);
+    evt->accept();
 }
 
 void ThumbnailList::wheelEvent(QWheelEvent *e)

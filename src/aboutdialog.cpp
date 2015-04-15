@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013-2014 Irkutsk Diagnostic Center.
+ * Copyright (C) 2013-2015 Irkutsk Diagnostic Center.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -112,9 +112,6 @@ AboutDialog::AboutDialog(QWidget *parent) :
     // Media
     //
 
-    auto lblIconsSimplico = new QLabel(tr("<a href=\"http://neurovit.deviantart.com/art/simplicio-92311415\">Simplicio icon set by Neurovit</a>"));
-    lblIconsSimplico->setOpenExternalLinks(true);
-    layoutText->addWidget(lblIconsSimplico);
     auto lblIconsWin8 = new QLabel(tr("<a href=\"http://icons8.com/\">Icons8 icon set by VisualPharm</a>"));
     lblIconsWin8->setOpenExternalLinks(true);
     layoutText->addWidget(lblIconsWin8);
@@ -124,7 +121,7 @@ AboutDialog::AboutDialog(QWidget *parent) :
     // Copyright & warranty
     //
 
-    auto lblCopyright = new QLabel(tr("<p>Copyright (C) 2013-2014 <a href=\"%1\">%2</a>. All rights reserved.</p>")
+    auto lblCopyright = new QLabel(tr("<p>Copyright (C) 2013-2015 <a href=\"%1\">%2</a>. All rights reserved.</p>")
                                    .arg(PRODUCT_SITE_URL, tr("Irkutsk Diagnostic Center")/*ORGANIZATION_FULL_NAME*/));
     lblCopyright->setOpenExternalLinks(true);
     layoutText->addWidget(lblCopyright);

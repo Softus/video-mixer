@@ -1,3 +1,10 @@
+beryllium (1.2.6) debian;
+
+  * fix clip remove on click
+  * Mono style icons
+
+ -- Pavel Bludov <pbludov@gmail.com>  Thu, 15 Apr 2015 12:41:00 +0800
+
 beryllium (1.2.5) debian;
 
   * fix clip record countdown timer issue with qt 5.4

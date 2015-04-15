@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013-2014 Irkutsk Diagnostic Center.
+ * Copyright (C) 2013-2015 Irkutsk Diagnostic Center.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -23,8 +23,8 @@
 #define PRODUCT_FULL_NAME       "Beryllium"
 #define PRODUCT_SHORT_NAME      "beryllium" // lowercase, no spaces
 
-#define PRODUCT_VERSION         0x010205
-#define PRODUCT_VERSION_STR     "1.2.5"
+#define PRODUCT_VERSION         0x010206
+#define PRODUCT_VERSION_STR     "1.2.6"
 
 #define PRODUCT_SITE_URL        "http://" ORGANIZATION_DOMAIN "/projects/" PRODUCT_SHORT_NAME "/"
 #define PRODUCT_NAMESPACE       "ru.baikal.dc." PRODUCT_SHORT_NAME
