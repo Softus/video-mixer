@@ -332,6 +332,7 @@ int main(int argc, char *argv[])
     QApplication::setOrganizationName(ORGANIZATION_DOMAIN);
     QApplication::setApplicationName(PRODUCT_SHORT_NAME);
     QApplication::setApplicationVersion(PRODUCT_VERSION_STR);
+    QSettings::setDefaultFormat(QSettings::IniFormat);
 
 #if !GLIB_CHECK_VERSION(2, 32, 0)
     // Must initialise the threading system before using any other GLib funtion
