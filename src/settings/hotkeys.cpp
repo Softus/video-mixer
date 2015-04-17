@@ -82,11 +82,13 @@ HotKeySettings::HotKeySettings(QWidget *parent) :
     auto itemArchive = new QTreeWidgetItem(QStringList(tr("Archive window")));
     itemArchive->setFlags(Qt::ItemIsEnabled);
     tree->addTopLevelItem(itemArchive);
+    itemArchive->addChild(newItem(settings, tr("Back"),      "archive-back",          DEFAULT_HOTKEY_BACK));
     itemArchive->addChild(newItem(settings, tr("Delete"),    "archive-delete",        DEFAULT_HOTKEY_DELETE));
     itemArchive->addChild(newItem(settings, tr("Restore"),   "archive-restore",       DEFAULT_HOTKEY_RESTORE));
 #ifdef WITH_DICOM
     itemArchive->addChild(newItem(settings, tr("Upload"),    "archive-upload",        DEFAULT_HOTKEY_UPLOAD));
 #endif
+    itemArchive->addChild(newItem(settings, tr("to USB"),    "archive-usb",           DEFAULT_HOTKEY_USB));
     itemArchive->addChild(newItem(settings, tr("Edit"),      "archive-edit",          DEFAULT_HOTKEY_EDIT));
     itemArchive->addChild(newItem(settings, tr("Up"),        "archive-parent-folder", DEFAULT_HOTKEY_PARENT_FOLDER));
 
@@ -108,6 +110,7 @@ HotKeySettings::HotKeySettings(QWidget *parent) :
     auto itemWorklist = new QTreeWidgetItem(QStringList(tr("Worklist window")));
     itemWorklist->setFlags(Qt::ItemIsEnabled);
     tree->addTopLevelItem(itemWorklist);
+    itemWorklist->addChild(newItem(settings, tr("Back"),            "worklist-back",         DEFAULT_HOTKEY_BACK));
     itemWorklist->addChild(newItem(settings, tr("Start study"),     "worklist-start",        DEFAULT_HOTKEY_START));
     itemWorklist->addChild(newItem(settings, tr("Show details"),    "worklist-show-details", DEFAULT_HOTKEY_SHOW_DETAILS));
     itemWorklist->addChild(newItem(settings, tr("Reload worklist"), "worklist-refresh",      DEFAULT_HOTKEY_REFRESH));

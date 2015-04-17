@@ -106,6 +106,7 @@ Worklist::Worklist(QWidget *parent) :
     updateShortcut(actionDetail,     settings.value("worklist-show-details", DEFAULT_HOTKEY_SHOW_DETAILS).toInt());
     updateShortcut(actionStartStudy, settings.value("worklist-start",        DEFAULT_HOTKEY_START).toInt());
     updateShortcut(actionLoad,       settings.value("worklist-refresh",      DEFAULT_HOTKEY_REFRESH).toInt());
+    updateShortcut(actionBack,       settings.value("worklist-back",         DEFAULT_HOTKEY_BACK).toInt());
     settings.endGroup();
 
     setAttribute(Qt::WA_DeleteOnClose, false);
@@ -116,9 +117,7 @@ QToolBar* Worklist::createToolBar()
     QToolBar* bar = new QToolBar(tr("Worklist"));
     bar->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 
-    auto actionBack = bar->addAction(QIcon(":buttons/back"), tr("Back"), this, SLOT(onBackToMainWindowClick()));
-    actionBack->setShortcut(Qt::Key_Back);
-
+    actionBack   = bar->addAction(QIcon(":buttons/back"), tr("Back"), this, SLOT(onBackToMainWindowClick()));
     actionLoad   = bar->addAction(QIcon(":/buttons/refresh"), tr("&Refresh"), this, SLOT(onLoadClick()));
     actionDetail = bar->addAction(QIcon(":/buttons/details"), tr("&Details"), this, SLOT(onShowDetailsClick()));
     actionDetail->setEnabled(false);

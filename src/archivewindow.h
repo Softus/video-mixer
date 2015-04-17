@@ -31,6 +31,7 @@ class QListWidget;
 class QListWidgetItem;
 class QStackedWidget;
 class QToolBar;
+class QToolButton;
 QT_END_NAMESPACE
 
 class ArchiveWindow : public QWidget
@@ -42,6 +43,7 @@ class ArchiveWindow : public QWidget
 #ifdef WITH_DICOM
     QAction*               actionStore;
 #endif
+    QToolButton*           btnUsbStore;
     QAction*               actionBack;
     QAction*               actionEdit;
     QAction*               actionPlay;
@@ -64,6 +66,7 @@ class ArchiveWindow : public QWidget
     QFileSystemWatcher*    dirWatcher;
     QStringList            deleteLater;
     int                    updateTimerId;
+    int                    updateUsbTimerId;
 
     void reallyDeleteFiles();
     void queueFileDeletion(QListWidgetItem* item);
@@ -73,6 +76,7 @@ class ArchiveWindow : public QWidget
     void onStateChangedMessage(const QGst::StateChangedMessagePtr& message);
     void createSubDirMenu(QAction* parentAction);
     void switchViewMode(int mode);
+    void copyToFolder(const QString& targetPath);
 
 public:
     explicit ArchiveWindow(QWidget *parent = 0);
@@ -84,6 +88,7 @@ protected:
 signals:
     
 public slots:
+    void updateUsbStoreButton();
     void updateRoot();
     void updateHotkeys(QSettings &settings);
     void updatePath();
@@ -99,6 +104,8 @@ public slots:
 #ifdef WITH_DICOM
     void onStoreClick();
 #endif
+    void onUsbStoreClick();
+    void onUsbStoreMenuClick(QAction* action);
     void onBackToMainWindowClick();
     void onPrevClick();
     void onNextClick();
@@ -113,6 +120,7 @@ private slots:
     void onListItemDoubleClicked(QListWidgetItem* item);
     void onListItemDraggedOut(QListWidgetItem* item);
     void onDirectoryChanged(const QString&);
+    void onUsbDiskChanged();
     void onUpFolderClick();
     void onRestoreClick();
 };

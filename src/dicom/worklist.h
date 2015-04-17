@@ -40,6 +40,7 @@ class Worklist : public QWidget
     QDateTime     maxDate;
     int           timeColumn;
     int           dateColumn;
+    QAction*      actionBack;
     QAction*      actionLoad;
     QAction*      actionDetail;
     QAction*      actionStartStudy;

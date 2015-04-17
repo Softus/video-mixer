@@ -61,7 +61,7 @@ static bool isActiveTarget(const SmartTarget& t)
         if (action->isEnabled())
         {
             auto widget = action->parentWidget();
-            if (t.global || !widget || widget->window() == qApp->activeWindow())
+            if (t.global || !widget || (widget->isVisible() && widget->window() == qApp->activeWindow()))
             {
                 return true;
             }
@@ -70,7 +70,7 @@ static bool isActiveTarget(const SmartTarget& t)
     else if (t.target->inherits("QAbstractButton"))
     {
         auto btn = static_cast<QAbstractButton*>(t.target);
-        if (btn->isEnabled() && (t.global || btn->window() == qApp->activeWindow()))
+        if (btn->isEnabled() && (t.global || (btn->isVisible() && btn->window() == qApp->activeWindow())))
         {
             return true;
         }
@@ -92,7 +92,7 @@ static bool triggerTarget(bool longPress, const SmartTarget& t)
         if (action->isEnabled())
         {
             auto widget = action->parentWidget();
-            if (t.global || !widget || widget->window() == qApp->activeWindow())
+            if (t.global || !widget || (widget->isVisible() && widget->window() == qApp->activeWindow()))
             {
                 action->trigger();
                 return true;
@@ -102,7 +102,7 @@ static bool triggerTarget(bool longPress, const SmartTarget& t)
     else if (t.target->inherits("QAbstractButton"))
     {
         auto btn = static_cast<QAbstractButton*>(t.target);
-        if (btn->isEnabled() && (t.global || btn->window() == qApp->activeWindow()))
+        if (btn->isEnabled() && (t.global || (btn->isVisible() && btn->window() == qApp->activeWindow())))
         {
             btn->click();
             return true;
@@ -136,6 +136,11 @@ struct SmartHandler
         if (qApp->activeModalWidget())
         {
             qApp->beep();
+            return false;
+        }
+
+        if (qApp->activePopupWidget())
+        {
             return false;
         }
 
@@ -445,6 +450,6 @@ qint64 SmartShortcut::timestamp()
 
 bool SmartShortcut::longPressTimeout(qint64 ts)
 {
-    qDebug() << timestamp() <<  ts << timestamp() - ts;
+    //qDebug() << timestamp() <<  ts << timestamp() - ts;
     return timestamp() - ts > longPressTimeoutInMsec;
 }

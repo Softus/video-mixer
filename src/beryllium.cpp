@@ -35,7 +35,8 @@
 #include <QLocale>
 #include <QSettings>
 #include <QTranslator>
-#ifdef Q_WS_X11
+//#ifdef Q_WS_X11
+#ifdef Q_OS_LINUX
 #include <QX11Info>
 #include <X11/Xlib.h>
 #endif
@@ -142,7 +143,7 @@ setValueCallback(const gchar *name, const gchar *value, gpointer, GError **err)
 static gboolean
 xSyncCallback(const gchar *, const gchar *, gpointer, GError **)
 {
-#ifdef Q_WS_X11
+#ifdef Q_OS_LINUX
     XSynchronize(QX11Info::display(), true);
 #endif
     return true;
@@ -332,7 +333,10 @@ int main(int argc, char *argv[])
     QApplication::setOrganizationName(ORGANIZATION_DOMAIN);
     QApplication::setApplicationName(PRODUCT_SHORT_NAME);
     QApplication::setApplicationVersion(PRODUCT_VERSION_STR);
+
+#ifdef Q_OS_WIN
     QSettings::setDefaultFormat(QSettings::IniFormat);
+#endif
 
 #if !GLIB_CHECK_VERSION(2, 32, 0)
     // Must initialise the threading system before using any other GLib funtion
