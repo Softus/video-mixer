@@ -71,11 +71,10 @@ static DcmTagKey DCM_ClipNo(0x5000,  0x8002);
 #define SAFE_MODE_KEYS (Qt::AltModifier | Qt::ControlModifier | Qt::ShiftModifier)
 
 #ifdef Q_OS_WIN
+  #include <qt_windows.h>
+  #include <dbt.h>
+  static const GUID GUID_DEVINTERFACE_USBSTOR = { 0xA5DCBF10L, 0x6530, 0x11D2, { 0x90, 0x1F, 0x00, 0xC0, 0x4F, 0xB9, 0x51, 0xED } };
   #define DATA_FOLDER qApp->applicationDirPath()
-  #ifndef FILE_ATTRIBUTE_HIDDEN
-    #define FILE_ATTRIBUTE_HIDDEN 0x00000002
-    extern "C" __declspec(dllimport) int __stdcall SetFileAttributesW(const wchar_t* lpFileName, quint32 dwFileAttributes);
-  #endif
 #else
   #define DATA_FOLDER qApp->applicationDirPath() + "/../share/" PRODUCT_SHORT_NAME
 #endif
@@ -171,6 +170,16 @@ MainWindow::MainWindow(QWidget *parent) :
     d.addEntry(new DcmDictEntry(DCM_ClipNo.getGroup(), DCM_ClipNo.getElement(), EVR_US, "ClipNo",
                                 0, 0, nullptr, false, nullptr));
     dcmDataDict.unlock();
+#endif
+
+#ifdef Q_OS_WIN
+    // Archive window need this, but only the top level window may receive this message
+    //
+    DEV_BROADCAST_DEVICEINTERFACE dbd = {0,};
+    dbd.dbcc_size = sizeof(DEV_BROADCAST_DEVICEINTERFACE);
+    dbd.dbcc_devicetype = DBT_DEVTYP_DEVICEINTERFACE;
+    dbd.dbcc_classguid = GUID_DEVINTERFACE_USBSTOR;
+    RegisterDeviceNotification(winId(), &dbd, DEVICE_NOTIFY_WINDOW_HANDLE);
 #endif
 }
 
@@ -269,6 +278,18 @@ void MainWindow::resizeEvent(QResizeEvent *evt)
     }
     QWidget::resizeEvent(evt);
 }
+
+#ifdef Q_WS_WIN
+bool MainWindow::winEvent(MSG *message, long *result)
+{
+    if (archiveWindow && message->message == WM_DEVICECHANGE)
+    {
+        archiveWindow->onUsbDiskChanged();
+    }
+    return QWidget::winEvent(message, result);
+}
+#endif
+
 
 QMenuBar* MainWindow::createMenuBar()
 {

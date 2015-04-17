@@ -72,6 +72,10 @@
 
 #include <gst/gstdebugutils.h>
 
+#ifdef Q_OS_WIN
+  #include <qt_windows.h>
+#endif
+
 #define GALLERY_MODE 2
 
 static QSize videoSize(352, 258);
@@ -91,12 +95,12 @@ static QStringList collectRemovableDrives()
         //
         foreach (auto path, paths)
         {
-            QDBusInterface interface("org.freedesktop.UDisks", path.path(),
+            QDBusInterface iface("org.freedesktop.UDisks", path.path(),
                                      "org.freedesktop.DBus.Properties", QDBusConnection::systemBus());
-            if (!interface.isValid())
+            if (!iface.isValid())
                 continue;
 
-            QDBusReply<QVariant> reply = interface.call("Get", "org.freedesktop.UDisks.Device", "DeviceIsRemovable");
+            QDBusReply<QVariant> reply = iface.call("Get", "org.freedesktop.UDisks.Device", "DeviceIsRemovable");
             if (reply.isValid() && reply.value().toBool())
             {
                 removableDrives << path;
@@ -107,13 +111,13 @@ static QStringList collectRemovableDrives()
         //
         foreach (auto path, paths)
         {
-            QDBusInterface interface("org.freedesktop.UDisks", path.path(),
+            QDBusInterface iface("org.freedesktop.UDisks", path.path(),
                                      "org.freedesktop.DBus.Properties", QDBusConnection::systemBus());
 
-            if (!interface.isValid())
+            if (!iface.isValid())
                 continue;
 
-            QDBusReply<QVariant> reply = interface.call("Get", "org.freedesktop.UDisks.Device", "PartitionSlave");
+            QDBusReply<QVariant> reply = iface.call("Get", "org.freedesktop.UDisks.Device", "PartitionSlave");
             if (!reply.isValid() || !removableDrives.contains(reply.value().value<QDBusObjectPath>()))
             {
                 // Not a partition of a removable drive
@@ -121,7 +125,7 @@ static QStringList collectRemovableDrives()
                 continue;
             }
 
-            reply = interface.call("Get", "org.freedesktop.UDisks.Device", "DeviceIsReadOnly");
+            reply = iface.call("Get", "org.freedesktop.UDisks.Device", "DeviceIsReadOnly");
             if (!reply.isValid() || reply.value().toBool())
             {
                 // ReadOnly or not ready (password protected, etc)
@@ -129,7 +133,7 @@ static QStringList collectRemovableDrives()
                 continue;
             }
 
-            reply = interface.call("Get", "org.freedesktop.UDisks.Device", "DeviceMountPaths");
+            reply = iface.call("Get", "org.freedesktop.UDisks.Device", "DeviceMountPaths");
             if (reply.isValid() && !reply.value().toString().isEmpty())
             {
                 // Save mount path
@@ -138,6 +142,25 @@ static QStringList collectRemovableDrives()
             }
         }
     }
+#ifdef Q_OS_WIN
+    else
+    {
+        Uint32 dummy = 0, drives = GetLogicalDrives();
+        wchar_t drvPath[] = {'0', ':', '\\', '\x0'};
+
+        for (int i = 0; i < 26; ++i)
+        {
+            if (!(drives & (1 << i)))
+                continue;
+
+            drvPath[0] = 'A' + i;
+            if (GetDriveTypeW(drvPath) == 2 && GetDiskFreeSpaceW(drvPath, &dummy, &dummy, &dummy, &dummy))
+            {
+                ret.append(QString::fromWCharArray(drvPath));
+            }
+        }
+    }
+#endif
 
     return ret;
 }
@@ -850,7 +873,12 @@ void ArchiveWindow::updateUsbStoreButton()
             menu = new QMenu;
             foreach (auto disk, disks)
             {
-                menu->addAction(QIcon(":/buttons/usb"), QFileInfo(disk).fileName())->setData(disk);
+                auto diskLabel = QFileInfo(disk).fileName();
+                if (diskLabel.isEmpty())
+                {
+                    diskLabel = disk;
+                }
+                menu->addAction(QIcon(":/buttons/usb"), diskLabel)->setData(disk);
             }
         }
         btnUsbStore->setMenu(menu);

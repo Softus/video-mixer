@@ -81,6 +81,8 @@ class ArchiveWindow : public QWidget
 public:
     explicit ArchiveWindow(QWidget *parent = 0);
     ~ArchiveWindow();
+    void onUsbDiskChanged();
+
 protected:
     virtual void showEvent(QShowEvent *);
     virtual void timerEvent(QTimerEvent *);
@@ -120,7 +122,6 @@ private slots:
     void onListItemDoubleClicked(QListWidgetItem* item);
     void onListItemDraggedOut(QListWidgetItem* item);
     void onDirectoryChanged(const QString&);
-    void onUsbDiskChanged();
     void onUpFolderClick();
     void onRestoreClick();
 };

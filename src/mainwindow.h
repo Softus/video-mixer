@@ -122,6 +122,9 @@ protected:
     virtual void showEvent(QShowEvent*);
     virtual void hideEvent(QHideEvent*);
     virtual void resizeEvent(QResizeEvent*);
+#ifdef Q_WS_WIN
+    virtual bool winEvent(MSG *message, long *result);
+#endif
 
 signals:
     void enableWidget(QWidget*, bool);
