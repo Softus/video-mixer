@@ -852,5 +852,5 @@ bool DcmClient::sendToServer(QWidget *parent, DcmDataset *dsPatient, const QFile
         delete dsPatient;
     }
 
-    return result;
+    return result && !pdlg.wasCanceled();
 }

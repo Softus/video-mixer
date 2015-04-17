@@ -33,6 +33,9 @@
 #include <QAction>
 #include <QApplication>
 #include <QBoxLayout>
+#include <QDBusInterface>
+#include <QDBusObjectPath>
+#include <QDBusReply>
 #include <QDebug>
 #include <QDesktopServices>
 #include <QDir>
@@ -45,6 +48,7 @@
 #include <QMessageBox>
 #include <QProcess>
 #include <QPainter>
+#include <QProgressDialog>
 #include <QPushButton>
 #include <QSettings>
 #include <QStackedWidget>
@@ -72,9 +76,76 @@
 
 static QSize videoSize(352, 258);
 
+static QStringList collectRemovableDrives()
+{
+    QStringList ret;
+    QList<QDBusObjectPath> removableDrives;
+    QDBusReply<QList<QDBusObjectPath> > reply = QDBusConnection::systemBus().call(
+        QDBusMessage::createMethodCall("org.freedesktop.UDisks", "/org/freedesktop/UDisks",
+                                       "org.freedesktop.UDisks", "EnumerateDevices"));
+    if (reply.isValid())
+    {
+        auto paths = reply.value();
+
+        // Collect all removable drives
+        //
+        foreach (auto path, paths)
+        {
+            QDBusInterface interface("org.freedesktop.UDisks", path.path(),
+                                     "org.freedesktop.DBus.Properties", QDBusConnection::systemBus());
+            if (!interface.isValid())
+                continue;
+
+            QDBusReply<QVariant> reply = interface.call("Get", "org.freedesktop.UDisks.Device", "DeviceIsRemovable");
+            if (reply.isValid() && reply.value().toBool())
+            {
+                removableDrives << path;
+            }
+        }
+
+        // Now find all partitions belongs to removable drives collected before.
+        //
+        foreach (auto path, paths)
+        {
+            QDBusInterface interface("org.freedesktop.UDisks", path.path(),
+                                     "org.freedesktop.DBus.Properties", QDBusConnection::systemBus());
+
+            if (!interface.isValid())
+                continue;
+
+            QDBusReply<QVariant> reply = interface.call("Get", "org.freedesktop.UDisks.Device", "PartitionSlave");
+            if (!reply.isValid() || !removableDrives.contains(reply.value().value<QDBusObjectPath>()))
+            {
+                // Not a partition of a removable drive
+                //
+                continue;
+            }
+
+            reply = interface.call("Get", "org.freedesktop.UDisks.Device", "DeviceIsReadOnly");
+            if (!reply.isValid() || reply.value().toBool())
+            {
+                // ReadOnly or not ready (password protected, etc)
+                //
+                continue;
+            }
+
+            reply = interface.call("Get", "org.freedesktop.UDisks.Device", "DeviceMountPaths");
+            if (reply.isValid() && !reply.value().toString().isEmpty())
+            {
+                // Save mount path
+                //
+                ret.append(reply.value().toString());
+            }
+        }
+    }
+
+    return ret;
+}
+
 ArchiveWindow::ArchiveWindow(QWidget *parent)
     : QWidget(parent)
     , updateTimerId(0)
+    , updateUsbTimerId(0)
 {
     QSettings settings;
     root = QDir::root();
@@ -87,7 +158,6 @@ ArchiveWindow::ArchiveWindow(QWidget *parent)
     auto barArchive = new QToolBar(tr("Archive"));
     barArchive->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     actionBack = barArchive->addAction(QIcon(":buttons/back"), tr("Back"), this, SLOT(onBackToMainWindowClick()));
-    actionBack->setShortcut(Qt::Key_Back);
 
     actionDelete = barArchive->addAction(QIcon(":buttons/delete"), tr("Delete"), this, SLOT(onDeleteClick()));
     actionDelete->setEnabled(false);
@@ -97,6 +167,15 @@ ArchiveWindow::ArchiveWindow(QWidget *parent)
 #ifdef WITH_DICOM
     actionStore = barArchive->addAction(QIcon(":buttons/dicom"), tr("Upload"), this, SLOT(onStoreClick()));
 #endif
+    btnUsbStore = new QToolButton;
+    btnUsbStore->setIcon(QIcon(":buttons/usb"));
+    btnUsbStore->setText(tr("to USB"));
+    btnUsbStore->setToolButtonStyle(barArchive->toolButtonStyle());
+    btnUsbStore->setPopupMode(QToolButton::InstantPopup);
+    connect(btnUsbStore, SIGNAL(clicked()), this, SLOT(onUsbStoreClick()));
+    connect(btnUsbStore, SIGNAL(triggered(QAction*)), this, SLOT(onUsbStoreMenuClick(QAction*)));
+    barArchive->addWidget(btnUsbStore);
+
     actionEdit = barArchive->addAction(QIcon(":buttons/edit"), tr("Edit"), this, SLOT(onEditClick()));
     actionEdit->setEnabled(false);
     actionUp = barArchive->addAction(QIcon(":/buttons/up"), tr("Up"), this, SLOT(onUpFolderClick()));
@@ -203,16 +282,28 @@ ArchiveWindow::ArchiveWindow(QWidget *parent)
     setLayout(layoutMain);
 
     updateHotkeys(settings);
+
+    QDBusConnection::systemBus().connect("org.freedesktop.UDisks", "/org/freedesktop/UDisks",
+                                         "org.freedesktop.UDisks", "DeviceAdded",
+                                         this, SLOT(onUsbDiskChanged()));
+    QDBusConnection::systemBus().connect("org.freedesktop.UDisks", "/org/freedesktop/UDisks",
+                                         "org.freedesktop.UDisks", "DeviceRemoved",
+                                         this, SLOT(onUsbDiskChanged()));
+    QDBusConnection::systemBus().connect("org.freedesktop.UDisks", "/org/freedesktop/UDisks",
+                                         "org.freedesktop.UDisks", "DeviceChanged",
+                                         this, SLOT(onUsbDiskChanged()));
 }
 
 void ArchiveWindow::updateHotkeys(QSettings& settings)
 {
     settings.beginGroup("hotkeys");
+    updateShortcut(actionBack,        settings.value("archive-back",          DEFAULT_HOTKEY_BACK).toInt());
     updateShortcut(actionDelete,      settings.value("archive-delete",        DEFAULT_HOTKEY_DELETE).toInt());
     updateShortcut(actionRestore,     settings.value("archive-restore",       DEFAULT_HOTKEY_RESTORE).toInt());
 #ifdef WITH_DICOM
     updateShortcut(actionStore,       settings.value("archive-upload",        DEFAULT_HOTKEY_UPLOAD).toInt());
 #endif
+    updateShortcut(btnUsbStore,       settings.value("archive-usb",           DEFAULT_HOTKEY_USB).toInt());
     updateShortcut(actionEdit,        settings.value("archive-edit",          DEFAULT_HOTKEY_EDIT).toInt());
     updateShortcut(actionUp,          settings.value("archive-parent-folder", DEFAULT_HOTKEY_PARENT_FOLDER).toInt());
 
@@ -244,9 +335,9 @@ void ArchiveWindow::showEvent(QShowEvent *evt)
 {
     actionBack->setVisible(parent() != nullptr);
     onDirectoryChanged(QString());
+    onUsbDiskChanged();
     QWidget::showEvent(evt);
 }
-
 
 void ArchiveWindow::timerEvent(QTimerEvent* evt)
 {
@@ -255,6 +346,12 @@ void ArchiveWindow::timerEvent(QTimerEvent* evt)
         killTimer(updateTimerId);
         updateTimerId = 0;
         updatePath();
+    }
+    else if (evt->timerId() == updateUsbTimerId)
+    {
+        killTimer(updateUsbTimerId);
+        updateUsbTimerId = 0;
+        updateUsbStoreButton();
     }
 }
 
@@ -368,18 +465,17 @@ void ArchiveWindow::preparePathPopupMenu()
     }
 }
 
-#ifdef WITH_DICOM
-static QString addDicomStatusOverlay(const QString& filePath, QIcon& icon)
+static QString addStatusOverlay(const QString& filePath, QIcon& icon, const QString& attr, const QString& iconPath)
 {
     //qDebug() << filePath;
 
-    auto dicomStatus = GetFileExtAttribute(filePath, "dicom-status");
-    if (!dicomStatus.isEmpty())
+    auto archiveStatus = GetFileExtAttribute(filePath, attr);
+    if (!archiveStatus.isEmpty())
     {
         QPixmap pmOverlay;
-        if (dicomStatus == "ok")
+        if (archiveStatus == "ok")
         {
-            pmOverlay.load(":/buttons/database");
+            pmOverlay.load(iconPath);
         }
         else
         {
@@ -398,9 +494,8 @@ static QString addDicomStatusOverlay(const QString& filePath, QIcon& icon)
         icon.addPixmap(pm);
     }
 
-    return dicomStatus;
+    return archiveStatus;
 }
-#endif
 
 void ArchiveWindow::updateList()
 {
@@ -469,7 +564,7 @@ void ArchiveWindow::updateList()
         auto toolTip = fi.absoluteFilePath();
 
 #ifdef WITH_DICOM
-        auto dicomStatus = addDicomStatusOverlay(fi.absoluteFilePath(),  icon);
+        auto dicomStatus = addStatusOverlay(fi.absoluteFilePath(),  icon, "dicom-status", ":/buttons/database");
         if (!dicomStatus.isEmpty())
         {
             if (dicomStatus == "ok")
@@ -480,6 +575,17 @@ void ArchiveWindow::updateList()
             toolTip += "\n" + dicomStatus;
         }
 #endif
+
+        auto usbStatus = addStatusOverlay(fi.absoluteFilePath(),  icon, "usb-status", ":/buttons/usb");
+        if (!usbStatus.isEmpty())
+        {
+            if (usbStatus == "ok")
+            {
+                usbStatus = tr("The file was copied to an usb drive");
+            }
+
+            toolTip += "\n" + usbStatus;
+        }
 
         auto item = new QListWidgetItem(icon, fi.fileName(), listFiles);
         item->setToolTip(toolTip);
@@ -719,6 +825,113 @@ void ArchiveWindow::onDeleteClick()
         queueFileDeletion(item);
     }
     actionRestore->setEnabled(true);
+}
+
+void ArchiveWindow::onUsbDiskChanged()
+{
+    killTimer(updateUsbTimerId);
+    updateUsbTimerId = startTimer(200);
+}
+
+void ArchiveWindow::updateUsbStoreButton()
+{
+    auto disks = collectRemovableDrives();
+    btnUsbStore->setDisabled(disks.empty());
+
+    if (btnUsbStore->isEnabled())
+    {
+        btnUsbStore->setProperty("disk", disks.first());
+        QMenu* menu = nullptr;
+
+        // Omit the menu if the user has nothing to choose
+        //
+        if (disks.size() > 1)
+        {
+            menu = new QMenu;
+            foreach (auto disk, disks)
+            {
+                menu->addAction(QIcon(":/buttons/usb"), QFileInfo(disk).fileName())->setData(disk);
+            }
+        }
+        btnUsbStore->setMenu(menu);
+    }
+}
+
+void ArchiveWindow::onUsbStoreMenuClick(QAction* action)
+{
+    copyToFolder(action->data().toString());
+}
+
+void ArchiveWindow::onUsbStoreClick()
+{
+    copyToFolder(sender()->property("disk").toString());
+}
+
+void ArchiveWindow::copyToFolder(const QString& targetPath)
+{
+    QFileInfoList files = curr.entryInfoList(QDir::Files);
+
+    if (files.empty())
+    {
+        return;
+    }
+
+    auto subDir = root.relativeFilePath(curr.absolutePath());
+    QDir targetDir(targetPath);
+    targetDir.mkpath(subDir);
+    targetDir.cd(subDir);
+
+    QProgressDialog pdlg(this);
+    pdlg.setRange(0, files.count());
+    pdlg.setMinimumDuration(0);
+
+    bool result = true;
+    for (auto i = 0; !pdlg.wasCanceled() && i < files.count(); ++i)
+    {
+        auto file = files[i];
+        auto filePath = file.absoluteFilePath();
+        if (QFile::exists(curr.filePath(file.completeBaseName())))
+        {
+            // Skip clip thumbnail
+            //
+            continue;
+        }
+
+        pdlg.setValue(i);
+        pdlg.setLabelText(tr("Copying '%1' to '%2'").arg(file.fileName(), targetDir.absolutePath()));
+        qApp->processEvents();
+        if (!QFile::copy(filePath, targetDir.absoluteFilePath(file.fileName())))
+        {
+            auto error = QString::fromLocal8Bit(strerror(errno));
+            SetFileExtAttribute(filePath, "usb-status", error);
+            if (QMessageBox::Yes != QMessageBox::critical(&pdlg, windowTitle(),
+                  tr("Failed to copy '%1' to '%2':\n%3\nContinue?")
+                      .arg(file.fileName(), targetDir.absolutePath(), error),
+                  QMessageBox::Yes, QMessageBox::No))
+            {
+                // The user choose to cancel
+                //
+                result = false;
+                break;
+            }
+        }
+        else
+        {
+            SetFileExtAttribute(filePath, "usb-status", "ok");
+        }
+    }
+    result = result && !pdlg.wasCanceled();
+    pdlg.close();
+
+    if (result)
+    {
+        int userChoice = QMessageBox::information(this, windowTitle(),
+            tr("All files were successfully copied."), QMessageBox::Close | QMessageBox::Ok, QMessageBox::Close);
+        if (QMessageBox::Close == userChoice)
+        {
+            onBackToMainWindowClick();
+        }
+    }
 }
 
 #ifdef WITH_DICOM

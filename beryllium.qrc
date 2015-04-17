@@ -33,6 +33,7 @@
         <file alias="play">pixmaps/play.png</file>
         <file alias="record_done">pixmaps/record_done.png</file>
         <file alias="undo">pixmaps/undo.png</file>
+        <file alias="usb">pixmaps/usb.png</file>
     </qresource>
     <qresource prefix="/app">
         <file alias="product">pixmaps/beryllium.png</file>
