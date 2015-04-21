@@ -17,12 +17,13 @@ DEFINES += PREFIX=$$PREFIX
 
 QT += core gui dbus opengl
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
-unix: !lessThan(QT_VERSION, 5.1): QT += x11extras
 
 # GCC tuning
 *-g++*:QMAKE_CXXFLAGS += -std=c++0x -Wno-multichar
 
 win32 {
+    greaterThan(QT_MAJOR_VERSION, 4): QT += gui-private
+
     INCLUDEPATH += c:/usr/include
     QMAKE_LIBDIR += c:/usr/lib
     LIBS += advapi32.lib netapi32.lib wsock32.lib
@@ -32,6 +33,8 @@ win32 {
     OS_REVISION = $$system($$quote("cmd.exe /c ver | gawk 'match($0,/[0-9]\.[0-9]/){print substr($0,RSTART,RLENGTH)}'"))
 }
 unix {
+    !lessThan(QT_VERSION, 5.1): QT += x11extras
+
     LIBS += -lX11
 
     USERNAME    = $$(USER)

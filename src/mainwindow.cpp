@@ -69,10 +69,12 @@ static DcmTagKey DCM_ClipNo(0x5000,  0x8002);
 #include <QxtConfirmationMessage>
 
 #define SAFE_MODE_KEYS (Qt::AltModifier | Qt::ControlModifier | Qt::ShiftModifier)
-
 #ifdef Q_OS_WIN
   #include <qt_windows.h>
   #include <dbt.h>
+  #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+    #include <qpa/qplatformnativeinterface.h>
+  #endif
   static const GUID GUID_DEVINTERFACE_USBSTOR = { 0xA5DCBF10L, 0x6530, 0x11D2, { 0x90, 0x1F, 0x00, 0xC0, 0x4F, 0xB9, 0x51, 0xED } };
   #define DATA_FOLDER qApp->applicationDirPath()
 #else
@@ -179,7 +181,12 @@ MainWindow::MainWindow(QWidget *parent) :
     dbd.dbcc_size = sizeof(DEV_BROADCAST_DEVICEINTERFACE);
     dbd.dbcc_devicetype = DBT_DEVTYP_DEVICEINTERFACE;
     dbd.dbcc_classguid = GUID_DEVINTERFACE_USBSTOR;
-    RegisterDeviceNotification(static_cast<HANDLE>(winId()), &dbd, DEVICE_NOTIFY_WINDOW_HANDLE);
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+    HWND hwnd  = (HWND)qApp->platformNativeInterface()->nativeResourceForWindow(QByteArrayLiteral("handle"), windowHandle());
+#else
+    HWND hwnd  = (HWND)winId();
+#endif
+    RegisterDeviceNotification(hwnd, &dbd, DEVICE_NOTIFY_WINDOW_HANDLE);
 #endif
 }
 
