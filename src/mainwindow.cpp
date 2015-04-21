@@ -179,7 +179,7 @@ MainWindow::MainWindow(QWidget *parent) :
     dbd.dbcc_size = sizeof(DEV_BROADCAST_DEVICEINTERFACE);
     dbd.dbcc_devicetype = DBT_DEVTYP_DEVICEINTERFACE;
     dbd.dbcc_classguid = GUID_DEVINTERFACE_USBSTOR;
-    RegisterDeviceNotification(winId(), &dbd, DEVICE_NOTIFY_WINDOW_HANDLE);
+    RegisterDeviceNotification(static_cast<HANDLE>(winId()), &dbd, DEVICE_NOTIFY_WINDOW_HANDLE);
 #endif
 }
 
