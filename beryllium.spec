@@ -28,13 +28,12 @@ Requires: libgstreamer-0_10-0 >= 0.10.35, libqt4 >= 4.6.0
 %endif
 
 %if %dicom == 1
-Requires: libmediainfo0, libzen0
 BuildRequires: libmediainfo-devel, dcmtk-devel, tcp_wrappers-devel
 %if %distro == centos
-Requires: dcmtk, openssl
+Requires: dcmtk, openssl, libmediainfo, libzen
 BuildRequires: openssl-devel
 %else
-Requires: libdcmtk3_6, libopenssl1_0_0
+Requires: libdcmtk3_6, libopenssl1_0_0, libmediainfo0, libzen0
 BuildRequires: libopenssl-devel
 %endif
 
@@ -71,3 +70,7 @@ make install INSTALL_ROOT="%buildroot";
 * Wed Sep 11 2013 Pavel Bludov <pbludov@gmail.com>
 + Version 0.3.8
 - First rpm spec for automated builds.
+
+* Tue Apr 21 2015 Pavel Bludov <pbludov@gmail.com>
++ Version 1.2.6
+- Change centos dependencies
