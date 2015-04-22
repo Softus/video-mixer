@@ -173,21 +173,6 @@ MainWindow::MainWindow(QWidget *parent) :
                                 0, 0, nullptr, false, nullptr));
     dcmDataDict.unlock();
 #endif
-
-#ifdef Q_OS_WIN
-    // Archive window need this, but only the top level window may receive this message
-    //
-    DEV_BROADCAST_DEVICEINTERFACE dbd = {0,};
-    dbd.dbcc_size = sizeof(DEV_BROADCAST_DEVICEINTERFACE);
-    dbd.dbcc_devicetype = DBT_DEVTYP_DEVICEINTERFACE;
-    dbd.dbcc_classguid = GUID_DEVINTERFACE_USBSTOR;
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
-    HWND hwnd  = (HWND)qApp->platformNativeInterface()->nativeResourceForWindow(QByteArrayLiteral("handle"), windowHandle());
-#else
-    HWND hwnd  = (HWND)winId();
-#endif
-    RegisterDeviceNotification(hwnd, &dbd, DEVICE_NOTIFY_WINDOW_HANDLE);
-#endif
 }
 
 MainWindow::~MainWindow()
@@ -259,6 +244,20 @@ void MainWindow::showEvent(QShowEvent *evt)
         {
             applySettings();
         }
+#ifdef Q_OS_WIN
+    // Archive window need this, but only the top level window may receive this message
+    //
+    DEV_BROADCAST_DEVICEINTERFACE dbd = {0,};
+    dbd.dbcc_size = sizeof(DEV_BROADCAST_DEVICEINTERFACE);
+    dbd.dbcc_devicetype = DBT_DEVTYP_DEVICEINTERFACE;
+    dbd.dbcc_classguid = GUID_DEVINTERFACE_USBSTOR;
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+    HWND hwnd  = (HWND)qApp->platformNativeInterface()->nativeResourceForWindow(QByteArrayLiteral("handle"), windowHandle());
+#else
+    HWND hwnd  = (HWND)winId();
+#endif
+    qDebug() << hwnd << RegisterDeviceNotification(hwnd, &dbd, DEVICE_NOTIFY_WINDOW_HANDLE);
+#endif
     }
 
     QWidget::showEvent(evt);
@@ -286,7 +285,18 @@ void MainWindow::resizeEvent(QResizeEvent *evt)
     QWidget::resizeEvent(evt);
 }
 
-#ifdef Q_WS_WIN
+#ifdef Q_OS_WIN
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+bool MainWindow::nativeEvent(const QByteArray& eventType, void *msg, long *result)
+{
+    MSG* message = reinterpret_cast<MSG*>(msg);
+    if (archiveWindow && message->message == WM_DEVICECHANGE)
+    {
+        archiveWindow->onUsbDiskChanged();
+    }
+    return QWidget::nativeEvent(eventType, msg, result);
+}
+#else
 bool MainWindow::winEvent(MSG *message, long *result)
 {
     if (archiveWindow && message->message == WM_DEVICECHANGE)
@@ -295,7 +305,8 @@ bool MainWindow::winEvent(MSG *message, long *result)
     }
     return QWidget::winEvent(message, result);
 }
-#endif
+#endif // QT_VERSION >= 5.0
+#endif // Q_OS_WIN
 
 
 QMenuBar* MainWindow::createMenuBar()

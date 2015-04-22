@@ -122,8 +122,12 @@ protected:
     virtual void showEvent(QShowEvent*);
     virtual void hideEvent(QHideEvent*);
     virtual void resizeEvent(QResizeEvent*);
-#ifdef Q_WS_WIN
+#ifdef Q_OS_WIN
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+    virtual bool nativeEvent(const QByteArray& eventType, void *msg, long *result);
+#else
     virtual bool winEvent(MSG *message, long *result);
+#endif
 #endif
 
 signals:

@@ -335,6 +335,11 @@ int main(int argc, char *argv[])
     QApplication::setApplicationVersion(PRODUCT_VERSION_STR);
 
 #ifdef Q_OS_WIN
+    QStringList paths = QCoreApplication::libraryPaths();
+        paths.prepend(".");
+        paths.prepend("imageformats");
+        paths.prepend("platforms");
+    QCoreApplication::setLibraryPaths(paths);
     QSettings::setDefaultFormat(QSettings::IniFormat);
 #endif
 
