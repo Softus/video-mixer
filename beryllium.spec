@@ -67,10 +67,10 @@ make install INSTALL_ROOT="%buildroot";
 %{_datadir}/icons/%{name}.png
 
 %changelog
-* Wed Sep 11 2013 Pavel Bludov <pbludov@gmail.com>
-+ Version 0.3.8
-- First rpm spec for automated builds.
-
 * Tue Apr 21 2015 Pavel Bludov <pbludov@gmail.com>
 + Version 1.2.6
 - Change centos dependencies
+
+* Wed Sep 11 2013 Pavel Bludov <pbludov@gmail.com>
++ Version 0.3.8
+- First rpm spec for automated builds.
