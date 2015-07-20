@@ -1,17 +1,16 @@
-Source: beryllium
+Source: videomixer
 Section: contrib/misc
 Priority: optional
 Maintainer: Beryllium team <beryllium@dc.baikal.ru>
 Standards-Version: 3.2.1
-Build-Depends: libboost-dev, libopencv-dev, libsoup2.4-dev,
-  libgstreamer0.10-dev, libgstreamer-plugins-base0.10-dev,
-  libqt5opengl5-dev | libqt4-opengl-dev,
-  libdcmtk2-dev, libmediainfo-dev, libssl-dev, libwrap0-dev
+Build-Depends: libgstreamer1.0-dev | libgstreamer0.10-dev,
+  libgstreamer-plugins-base1.0-dev | libgstreamer-plugins-base0.10-dev,
+  libqt5opengl5-dev | libqt4-opengl-dev
 
-Package: beryllium
+Package: videomixer
 Architecture: i386 amd64
 Pre-Depends: debconf (>= 1.1) | debconf-2.0
-Depends: ${shlibs:Depends}, gstreamer0.10-gnonlin
-Suggests: gstreamer0.10-ffmpeg | gstreamer0.10-libav, gstreamer0.10-vaapi
-Description: Beryllium DICOM edition
-  Video and image capturing for medicine.
+Depends: ${shlibs:Depends}
+Suggests: beryllium
+Description: Video mixer
+  Combines multiple video streams into one.

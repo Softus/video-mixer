@@ -1,9 +1,9 @@
 Format: http://dep.debian.net/deps/dep5
-Upstream-Name: beryllium
+Upstream-Name: videomiser
 Source: http://dc.baikal.ru/products/beryllium/packages
 
 Files: *
-Copyright: 2013 Beryllium team <beryllium@dc.baikal.ru>
+Copyright: 2015 Beryllium team <beryllium@dc.baikal.ru>
 License: LGPL-2.1+
 
 License: LGPL-2.1+

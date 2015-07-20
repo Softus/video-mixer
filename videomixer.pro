@@ -18,8 +18,8 @@ CONFIG   -= app_bundle
 
 TEMPLATE = app
 
-SOURCES += main.cpp \
-    mixer.cpp
+SOURCES += src/main.cpp \
+    src/mixer.cpp
 
 HEADERS += \
-    mixer.h
+    src/mixer.h
