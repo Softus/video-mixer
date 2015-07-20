@@ -21,13 +21,13 @@
 #define VIDEO_XRAW      "video/x-raw"
 #define FOURCC_I420     "(string)I420"
 #define VIDEOCONVERTER  "videoconvert"
-#define VIDEODECODER    "tsdemux ! avdec_mpeg2video"
-#define DEFAULT_ENCODER "avenc_mpeg2video bitrate=1000000"
+#define DEFAULT_DECODER "tsdemux ! avdec_mpeg2video"
+#define DEFAULT_ENCODER "avenc_mpeg2video bitrate=1000000 ! mpegtsmux"
 #else
 #define VIDEO_XRAW      "video/x-raw-yuv"
 #define FOURCC_I420     "(fourcc)I420"
 #define VIDEOCONVERTER  "ffmpegcolorspace"
-#define VIDEODECODER    "mpegtsdemux ! ffdec_mpeg2video"
+#define DEFAULT_DECODER "mpegtsdemux ! ffdec_mpeg2video ! mpegtsmux"
 #define DEFAULT_ENCODER "ffenc_mpeg2video bitrate=1000000"
 #endif
 
@@ -36,23 +36,27 @@ Mixer::Mixer(const QString& group, QObject *parent) :
 {
     QSettings settings;
 
-    width   = settings.value("width",   DEFAULT_WIDTH).toInt();
-    height  = settings.value("height",  DEFAULT_HEIGHT).toInt();
-    delay   = settings.value("delay",   DEFAULT_RESTART_DELAY).toInt();
-    padding = settings.value("padding", DEFAULT_PADDING).toInt();
-    margins = settings.value("margins", DEFAULT_MARGINS).toRect();
-    encoder = settings.value("encoder", DEFAULT_ENCODER).toString();
-    message = settings.value("message", DEFAULT_MESSAGE).toString();
+    width     = settings.value("width",   DEFAULT_WIDTH).toInt();
+    height    = settings.value("height",  DEFAULT_HEIGHT).toInt();
+    delay     = settings.value("delay",   DEFAULT_RESTART_DELAY).toInt();
+    padding   = settings.value("padding", DEFAULT_PADDING).toInt();
+    margins   = settings.value("margins", DEFAULT_MARGINS).toRect();
+    decoder   = settings.value("decoder", DEFAULT_DECODER).toString();
+    encoder   = settings.value("encoder", DEFAULT_ENCODER).toString();
+    message   = settings.value("message", DEFAULT_MESSAGE).toString();
+    zOrderFix = settings.value("zorderfix", false).toBool();
 
     auto size = settings.beginReadArray(group);
-    dstUri  = settings.value("dst").toString();
-    width   = settings.value("width",   width).toInt();
-    height  = settings.value("height",  height).toInt();
-    delay   = settings.value("delay",   delay).toInt();
-    padding = settings.value("padding", padding).toInt();
-    margins = settings.value("margins", margins).toRect();
-    encoder = settings.value("encoder", encoder).toString();
-    message = settings.value("message", message).toString();
+    dstUri    = settings.value("dst").toString();
+    width     = settings.value("width",   width).toInt();
+    height    = settings.value("height",  height).toInt();
+    delay     = settings.value("delay",   delay).toInt();
+    padding   = settings.value("padding", padding).toInt();
+    margins   = settings.value("margins", margins).toRect();
+    decoder   = settings.value("decoder", decoder).toString();
+    encoder   = settings.value("encoder", encoder).toString();
+    message   = settings.value("message", message).toString();
+    zOrderFix = settings.value("zorderfix", zOrderFix).toBool();
 
     for (int i = 0; i < size; ++i)
     {
@@ -61,6 +65,10 @@ Mixer::Mixer(const QString& group, QObject *parent) :
             QPair<QString, bool>(settings.value("name").toString(), settings.value("enabled").toBool()));
     }
     settings.endArray();
+
+    // This magic required to start/stop timers from the worker threads on Microsoft (R) Windows (TM)
+    //
+    connect(this, SIGNAL(restart(int)), this, SLOT(onRestart(int)), Qt::QueuedConnection);
 
     buildPipeline();
 }
@@ -83,21 +91,60 @@ void Mixer::releasePipeline()
     }
 }
 
+QString Mixer::buildBackground(bool inactive, int rowSize)
+{
+    QString pipelineDef;
+
+    pipelineDef
+        .append("videotestsrc pattern=").append(inactive? "18":"2")
+        .append(" is-live=1 do-timestamp=1 ! " VIDEO_XRAW ",format=" FOURCC_I420)
+        .append(",width=") .append(QString::number(margins.left() + margins.width()  + width  * rowSize + padding * (rowSize - 1)))
+        .append(",height=").append(QString::number(margins.top()  + margins.height() + height * rowSize + padding * (rowSize - 1)))
+        ;
+
+    // Add label if all sources are gone
+    //
+    if (inactive)
+    {
+        pipelineDef.append(" ! textoverlay halignment=center font-desc=24 text=\"").append(message).append('"');
+        restart(60 * 1000); // Restart every 1 min
+    }
+
+    pipelineDef.append(" ! videobox border-alpha=0 ! mix.\n");
+
+    return pipelineDef;
+}
+
 void Mixer::buildPipeline()
 {
     int rowSize = rint(ceil(sqrt(srcMap.size())));
     int top = rowSize - 1, left = rowSize - (rowSize * rowSize - srcMap.size()) - 1;
-    int inactiveStreams = 0;
+    int streamNo = 0, inactiveStreams = 0;
     QString pipelineDef;
 
     releasePipeline();
+
+    // Count the number of inactive streams
+    //
+    for (auto src = srcMap.begin(); src != srcMap.end(); ++src)
+    {
+        if (!src.value().second)
+        {
+            inactiveStreams++;
+        }
+    }
 
     // Append output
     //
     pipelineDef
         .append("videomixer name=mix ! " VIDEOCONVERTER)
         .append(" ! ").append(encoder)
-        .append(" ! mpegtsmux ! queue ! souphttpclientsink sync=0 location=").append(dstUri).append('\n');
+        .append(" ! queue ! souphttpclientsink sync=0 location=").append(dstUri).append('\n');
+
+    if (zOrderFix)
+    {
+        pipelineDef.append(buildBackground(inactiveStreams == srcMap.size(), rowSize));
+    }
 
     // For each input...
     //
@@ -112,7 +159,7 @@ void Mixer::buildPipeline()
             auto text = src.value().first;
             pipelineDef
                 .append("souphttpsrc timeout=1 do-timestamp=1 location=").append(src.key())
-                .append(" ! queue ! " VIDEODECODER " ! videoscale ! " VIDEO_XRAW ",width=")
+                .append(" ! queue ! ").append(decoder).append(" ! videoscale ! " VIDEO_XRAW ",width=")
                     .append(QString::number(width)).append(",height=").append(QString::number(height))
                     .append(" ! " VIDEOCONVERTER " ! textoverlay valignment=bottom halignment=right xpad=2 ypad=2 font-desc=24 text=")
                     .append(text).append(" ! videobox")
@@ -122,13 +169,12 @@ void Mixer::buildPipeline()
         }
         else
         {
-            // ...append http source only. And wait for data.
+            // ...append http source only. And wait for the video stream.
             //
             pipelineDef
                 .append("souphttpsrc location=").append(src.key())
-                .append(" ! fakesink name=s").append(QString::number(inactiveStreams))
+                .append(" ! fakesink name=s").append(QString::number(streamNo++))
                 .append(" sync=0 async=0 signal-handoffs=true\n");
-            inactiveStreams++;
         }
 
         if (--left < 0)
@@ -138,22 +184,12 @@ void Mixer::buildPipeline()
         }
     }
 
-    pipelineDef
-        .append("videotestsrc pattern=").append(inactiveStreams == srcMap.size()? "18":"2")
-        .append(" is-live=1 do-timestamp=1 ! " VIDEO_XRAW ",format=" FOURCC_I420)
-        .append(",width=") .append(QString::number(margins.left() + margins.width()  + width  * rowSize + padding * (rowSize - 1)))
-        .append(",height=").append(QString::number(margins.top()  + margins.height() + height * rowSize + padding * (rowSize - 1)))
-        ;
+    Q_ASSERT(streamNo == inactiveStreams);
 
-    // Add label if all sources are gone
-    //
-    if (inactiveStreams == srcMap.size())
+    if (!zOrderFix)
     {
-        pipelineDef.append(" ! textoverlay halignment=center font-desc=24 text=\"").append(message).append('"');
-        restart(60 * 1000); // Restart every 1 min
+        pipelineDef.append(buildBackground(inactiveStreams == srcMap.size(), rowSize));
     }
-
-    pipelineDef.append(" ! videobox border-alpha=0 ! mix.");
 
     qDebug() << pipelineDef;
     pl = QGst::Parse::launch(pipelineDef).dynamicCast<QGst::Pipeline>();
@@ -162,7 +198,7 @@ void Mixer::buildPipeline()
     bus->addSignalWatch();
     bus->enableSyncMessageEmission();
 
-    // For all inactive streams register a callback.
+    // For all inactive streams bind the handoff handler.
     //
     for (int i = 0; i < inactiveStreams; ++i)
     {
@@ -175,7 +211,7 @@ void Mixer::buildPipeline()
 
 void Mixer::onBusMessage(const QGst::MessagePtr& msg)
 {
-//    qDebug() << msg->typeName() << " " << msg->source()->property("name").toString();
+    //qDebug() << msg->typeName() << " " << msg->source()->property("name").toString();
     if (msg->type() == QGst::MessageError)
     {
         auto uri = msg->source()->property("location").toString();
@@ -191,7 +227,7 @@ void Mixer::onBusMessage(const QGst::MessagePtr& msg)
         else
         {
             qDebug() << msg.staticCast<QGst::ErrorMessage>()->error();
-            // Something bad happend, restarting with a longer delay
+            // Something really bad happend, restarting with a longer delay
             //
             restart(delay * 5);
         }
@@ -200,6 +236,8 @@ void Mixer::onBusMessage(const QGst::MessagePtr& msg)
 
 void Mixer::onHttpFrame(const QGst::BufferPtr& b, const QGst::PadPtr& pad)
 {
+    // Ignore any garbage. The MPEGTS frame length is always 4k.
+    //
     if (b->size() != 4096)
     {
         return;
@@ -225,7 +263,7 @@ void Mixer::timerEvent(QTimerEvent *)
     buildPipeline();
 }
 
-void Mixer::restart(int delay)
+void Mixer::onRestart(int delay)
 {
     qDebug() << "restarting in" << delay << "msec";
     if (updateTimerId)

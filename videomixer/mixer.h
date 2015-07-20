@@ -20,7 +20,9 @@ class Mixer : public QObject
     int                 height;
     int                 delay;
     int                 padding;
+    bool                zOrderFix;
     QRect               margins;
+    QString             decoder;
     QString             encoder;
     QString             message;
 
@@ -28,7 +30,7 @@ class Mixer : public QObject
     void onHttpFrame(const QGst::BufferPtr&, const QGst::PadPtr& padding);
     void buildPipeline();
     void releasePipeline();
-    void restart(int delay);
+    QString buildBackground(bool inactive, int rowSize);
 
 public:
     Mixer(const QString& group, QObject *parent = 0);
@@ -38,8 +40,11 @@ protected:
     virtual void timerEvent(QTimerEvent *);
 
 signals:
+    void restart(int delay);
 
-public slots:
+private slots:
+    void onRestart(int delay);
+
 };
 
 #endif // MIXER_H
