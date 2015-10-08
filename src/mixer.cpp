@@ -17,6 +17,9 @@
 #define DEFAULT_MARGINS       QRect(32, 32, 32, 32)
 #define DEFAULT_MESSAGE       "No active sources"
 
+#define DEFAULT_SOURCE  "souphttpsrc timeout=1"
+#define DEFAULT_SINK    "souphttpclientsink"
+
 #if GST_CHECK_VERSION(1,0,0)
 #define VIDEO_XRAW      "video/x-raw"
 #define FOURCC_I420     "(string)I420"
@@ -27,8 +30,8 @@
 #define VIDEO_XRAW      "video/x-raw-yuv"
 #define FOURCC_I420     "(fourcc)I420"
 #define VIDEOCONVERTER  "ffmpegcolorspace"
-#define DEFAULT_DECODER "mpegtsdemux ! ffdec_mpeg2video ! mpegtsmux"
-#define DEFAULT_ENCODER "ffenc_mpeg2video bitrate=1000000"
+#define DEFAULT_DECODER "mpegtsdemux ! ffdec_mpeg2video"
+#define DEFAULT_ENCODER "ffenc_mpeg2video bitrate=1000000 ! mpegtsmux"
 #endif
 
 Mixer::Mixer(const QString& group, QObject *parent) :
@@ -44,6 +47,8 @@ Mixer::Mixer(const QString& group, QObject *parent) :
     decoder   = settings.value("decoder", DEFAULT_DECODER).toString();
     encoder   = settings.value("encoder", DEFAULT_ENCODER).toString();
     message   = settings.value("message", DEFAULT_MESSAGE).toString();
+    source    = settings.value("source",  DEFAULT_SOURCE).toString();
+    sink      = settings.value("sink",    DEFAULT_SINK).toString();
     zOrderFix = settings.value("zorderfix", false).toBool();
 
     auto size = settings.beginReadArray(group);
@@ -56,6 +61,8 @@ Mixer::Mixer(const QString& group, QObject *parent) :
     decoder   = settings.value("decoder", decoder).toString();
     encoder   = settings.value("encoder", encoder).toString();
     message   = settings.value("message", message).toString();
+    source    = settings.value("source",  source).toString();
+    sink      = settings.value("sink",    sink).toString();
     zOrderFix = settings.value("zorderfix", zOrderFix).toBool();
 
     for (int i = 0; i < size; ++i)
@@ -118,7 +125,7 @@ QString Mixer::buildBackground(bool inactive, int rowSize)
 void Mixer::buildPipeline()
 {
     int rowSize = rint(ceil(sqrt(srcMap.size())));
-    int top = rowSize - 1, left = rowSize - (rowSize * rowSize - srcMap.size()) - 1;
+    int top = (srcMap.size() + rowSize - 1) / rowSize - 1 , left = (srcMap.size() - 1) % rowSize;
     int streamNo = 0, inactiveStreams = 0;
     QString pipelineDef;
 
@@ -139,7 +146,7 @@ void Mixer::buildPipeline()
     pipelineDef
         .append("videomixer name=mix ! " VIDEOCONVERTER)
         .append(" ! ").append(encoder)
-        .append(" ! queue ! souphttpclientsink sync=0 location=").append(dstUri).append('\n');
+        .append(" ! queue ! ").append(sink).append(" sync=0 location=").append(dstUri).append("\n");
 
     if (zOrderFix)
     {
@@ -158,7 +165,7 @@ void Mixer::buildPipeline()
             //
             auto text = src.value().first;
             pipelineDef
-                .append("souphttpsrc timeout=1 do-timestamp=1 location=").append(src.key())
+                .append(source).append(" do-timestamp=1 location=").append(src.key())
                 .append(" ! queue ! ").append(decoder).append(" ! videoscale ! " VIDEO_XRAW ",width=")
                     .append(QString::number(width)).append(",height=").append(QString::number(height))
                     .append(" ! " VIDEOCONVERTER " ! textoverlay valignment=bottom halignment=right xpad=2 ypad=2 font-desc=24 text=")
@@ -172,7 +179,7 @@ void Mixer::buildPipeline()
             // ...append http source only. And wait for the video stream.
             //
             pipelineDef
-                .append("souphttpsrc location=").append(src.key())
+                .append(source).append(" location=").append(src.key())
                 .append(" ! fakesink name=s").append(QString::number(streamNo++))
                 .append(" sync=0 async=0 signal-handoffs=true\n");
         }

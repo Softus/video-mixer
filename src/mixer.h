@@ -22,6 +22,8 @@ class Mixer : public QObject
     int                 padding;
     bool                zOrderFix;
     QRect               margins;
+    QString             source;
+    QString             sink;
     QString             decoder;
     QString             encoder;
     QString             message;
