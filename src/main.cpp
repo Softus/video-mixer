@@ -9,11 +9,9 @@
 #include <QGst/Init>
 #include <QGlib/Error>
 
-#define MAX_GROUPS 32
-
-void sighandler(int)
+void sighandler(int code)
 {
-    qApp->quit();
+    qApp->exit(code);
 }
 
 int main(int argc, char *argv[])

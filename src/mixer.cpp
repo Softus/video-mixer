@@ -1,4 +1,5 @@
 #include "mixer.h"
+#include <QApplication>
 #include <QDebug>
 #include <QSettings>
 #include <QTimer>
@@ -94,6 +95,13 @@ void Mixer::releasePipeline()
         {
             qDebug() << "Failed to stop the pipeline";
         }
+
+        QGst::BusPtr bus = pl->bus();
+        QGlib::disconnect(bus, "message", this, &Mixer::onBusMessage);
+        bus->removeSignalWatch();
+        bus->disableSyncMessageEmission();
+
+        bus.clear();
         pl.clear();
     }
 }
@@ -125,7 +133,7 @@ QString Mixer::buildBackground(bool inactive, int rowSize)
 void Mixer::buildPipeline()
 {
     int rowSize = rint(ceil(sqrt(srcMap.size())));
-    int top = (srcMap.size() + rowSize - 1) / rowSize - 1 , left = (srcMap.size() - 1) % rowSize;
+    int top = (srcMap.size() + rowSize - 1) / rowSize - 1, left = (srcMap.size() - 1) % rowSize;
     int streamNo = 0, inactiveStreams = 0;
     QString pipelineDef;
 
@@ -199,7 +207,20 @@ void Mixer::buildPipeline()
     }
 
     qDebug() << pipelineDef;
-    pl = QGst::Parse::launch(pipelineDef).dynamicCast<QGst::Pipeline>();
+    try
+    {
+        pl = QGst::Parse::launch(pipelineDef).dynamicCast<QGst::Pipeline>();
+    }
+    catch (const QGlib::Error& ex)
+    {
+        qCritical() << ex.message();
+        qApp->exit(ex.code());
+
+        // Force switch to the main tread
+        restart(0);
+        return;
+    }
+
     QGst::BusPtr bus = pl->bus();
     QGlib::connect(bus, "message", this, &Mixer::onBusMessage);
     bus->addSignalWatch();
@@ -243,7 +264,7 @@ void Mixer::onBusMessage(const QGst::MessagePtr& msg)
 
 void Mixer::onHttpFrame(const QGst::BufferPtr& b, const QGst::PadPtr& pad)
 {
-    // Ignore any garbage. The MPEGTS frame length is always 4k.
+    // Ignore any garbage. The MPEGTS/RTMP frame length is always 4k.
     //
     if (b->size() != 4096)
     {
