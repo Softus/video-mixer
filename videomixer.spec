@@ -47,6 +47,6 @@ make install INSTALL_ROOT="%buildroot";
 %{_datadir}/icons/%{name}.png
 
 %changelog
-* Mon, 20 Jul 2015 Pavel Bludov <pbludov@gmail.com>
+* Mon Jul 20 2015 Pavel Bludov <pbludov@gmail.com>
 + Version 0.0.1
 - Initial version.
