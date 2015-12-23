@@ -1,7 +1,7 @@
 Summary: Video mixer
 Name: videomixer
 Provides: videomixer
-Version: 0.0.1
+Version: 1.0.0
 Release: 1
 License: LGPL-2.1+
 Source: %{name}.tar.gz

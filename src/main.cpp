@@ -6,6 +6,7 @@
 #include <QProcess>
 #include <QSettings>
 #include <QStringList>
+#include <QThread>
 
 #include <QGst/Init>
 #include <QGlib/Error>
@@ -35,8 +36,16 @@ static void sighandler(int signum)
 static int minionMode(int argc, char *argv[])
 {
     QCoreApplication app(argc, argv);
-    Mixer mixer(argv[1]);
-    return app.exec();
+    try
+    {
+        Mixer mixer(argv[1]);
+        return app.exec();
+    }
+    catch (const QGlib::Error& ex)
+    {
+        qCritical() << ex.message();
+        return ex.code();
+    }
 }
 
 static int gryuMode(int /*argc*/, char *argv[])
@@ -48,12 +57,12 @@ static int gryuMode(int /*argc*/, char *argv[])
 
     Q_FOREACH (auto group, settings.childGroups())
     {
-        qDebug() << group;
+        qDebug() << "Starting" << group;
         auto p = new QProcess();
         p->start(argv[0], QStringList(group));
         if (!p->waitForStarted())
         {
-            qDebug() << "Failed to start minion" << group << "err" << p->errorString();
+            qCritical() << "Failed to start minion" << group << "err" << p->errorString();
             delete p;
             continue;
         }
@@ -66,31 +75,43 @@ static int gryuMode(int /*argc*/, char *argv[])
         return 0;
     }
 
-    while (runnung)
+    while (runnung && !minions.isEmpty())
     {
         for (auto minion = minions.begin(); minion != minions.end(); ++minion)
         {
             auto p = minion.value();
-            p->waitForFinished(0);
-            if (p->state() == QProcess::NotRunning)
+            if (p->waitForFinished(100))
             {
                 auto group = minion.key();
-                qDebug() << "Restarting minion" << group;
-                delete p;
+                qDebug() << "Restarting" << group;
+                if (p->exitCode())
+                {
+                    qCritical() << "Failed to restart minion" << group << "err" << p->exitCode() << p->errorString();
+                    delete p;
+                    minions.remove(group);
+                    break;
+                }
 
+                delete p;
                 p = new QProcess();
                 p->start(argv[0], QStringList(group));
                 if (!p->waitForStarted())
                 {
-                    qDebug() << "Failed to restart minion" << group << "err" << p->errorString();
+                    qCritical() << "Failed to restart minion" << group << "err" << p->errorString();
                     delete p;
-                    p = nullptr;
+                    minions.remove(group);
                 }
-                minions[group] = p;
+                else
+                {
+                    minions[group] = p;
+                }
+
+                // Exit the loop since we may change the map internals and it is not safe
+                // to continue the enumeration now.
+                //
                 break;
             }
         }
-        sleep(1);
     }
 
     for (auto minion = minions.begin(); minion != minions.end(); ++minion)

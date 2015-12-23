@@ -13,12 +13,12 @@
 
 #define DEFAULT_WIDTH         160
 #define DEFAULT_HEIGHT        120
-#define DEFAULT_RESTART_DELAY 1000
+#define DEFAULT_RESTART_DELAY 250
 #define DEFAULT_PADDING       8
 #define DEFAULT_MARGINS       QRect(32, 32, 32, 32)
 #define DEFAULT_MESSAGE       "No active sources"
 
-#define DEFAULT_SOURCE  "souphttpsrc timeout=1"
+#define DEFAULT_SOURCE  "souphttpsrc"
 #define DEFAULT_SINK    "souphttpclientsink"
 
 #if GST_CHECK_VERSION(1,0,0)
@@ -27,16 +27,20 @@
 #define VIDEOCONVERTER  "videoconvert"
 #define DEFAULT_DECODER "tsdemux ! avdec_mpeg2video"
 #define DEFAULT_ENCODER "avenc_mpeg2video bitrate=1000000 ! mpegtsmux"
+#define ACTIVE_SOURCE_PARAMS " timeout=1"
+#define INACTIVE_SOURCE_PARAMS " timeout=60 retries=30000"
 #else
 #define VIDEO_XRAW      "video/x-raw-yuv"
 #define FOURCC_I420     "(fourcc)I420"
 #define VIDEOCONVERTER  "ffmpegcolorspace"
 #define DEFAULT_DECODER "mpegtsdemux ! ffdec_mpeg2video"
 #define DEFAULT_ENCODER "ffenc_mpeg2video bitrate=1000000 ! mpegtsmux"
+#define ACTIVE_SOURCE_PARAMS " timeout=1"
+#define INACTIVE_SOURCE_PARAMS " timeout=0"
 #endif
 
 Mixer::Mixer(const QString& group, QObject *parent) :
-    QObject(parent), updateTimerId(0)
+    QObject(parent), group(group), updateTimerId(0)
 {
     QSettings settings;
 
@@ -83,6 +87,16 @@ Mixer::Mixer(const QString& group, QObject *parent) :
 
 Mixer::~Mixer()
 {
+    QSettings settings;
+    auto size = settings.beginReadArray(group);
+    for (int i = 0; i < size; ++i)
+    {
+        settings.setArrayIndex(i);
+        auto url = settings.value("src").toString();
+        settings.setValue("enabled", srcMap[url].second);
+    }
+    settings.endArray();
+
     releasePipeline();
 }
 
@@ -122,7 +136,7 @@ QString Mixer::buildBackground(bool inactive, int rowSize)
     if (inactive)
     {
         pipelineDef.append(" ! textoverlay halignment=center font-desc=24 text=\"").append(message).append('"');
-        restart(60 * 1000); // Restart every 1 min
+        restart(10 * 60 * 1000); // Restart every 10 min while in idle mode. Just in case.
     }
 
     pipelineDef.append(" ! videobox border-alpha=0 ! mix.\n");
@@ -136,8 +150,6 @@ void Mixer::buildPipeline()
     int top = (srcMap.size() + rowSize - 1) / rowSize - 1, left = (srcMap.size() - 1) % rowSize;
     int streamNo = 0, inactiveStreams = 0;
     QString pipelineDef;
-
-    releasePipeline();
 
     // Count the number of inactive streams
     //
@@ -173,7 +185,7 @@ void Mixer::buildPipeline()
             //
             auto text = src.value().first;
             pipelineDef
-                .append(source).append(" do-timestamp=1 location=").append(src.key())
+                .append(source).append(ACTIVE_SOURCE_PARAMS " do-timestamp=1 location=").append(src.key())
                 .append(" ! queue ! ").append(decoder).append(" ! videoscale ! " VIDEO_XRAW ",width=")
                     .append(QString::number(width)).append(",height=").append(QString::number(height))
                     .append(" ! " VIDEOCONVERTER " ! textoverlay valignment=bottom halignment=right xpad=2 ypad=2 font-desc=24 text=")
@@ -187,7 +199,7 @@ void Mixer::buildPipeline()
             // ...append http source only. And wait for the video stream.
             //
             pipelineDef
-                .append(source).append(" location=").append(src.key())
+                .append(source).append(INACTIVE_SOURCE_PARAMS " location=").append(src.key())
                 .append(" ! fakesink name=s").append(QString::number(streamNo++))
                 .append(" sync=0 async=0 signal-handoffs=true\n");
         }
@@ -207,19 +219,7 @@ void Mixer::buildPipeline()
     }
 
     qDebug() << pipelineDef;
-    try
-    {
-        pl = QGst::Parse::launch(pipelineDef).dynamicCast<QGst::Pipeline>();
-    }
-    catch (const QGlib::Error& ex)
-    {
-        qCritical() << ex.message();
-        qApp->exit(ex.code());
-
-        // Force switch to the main tread
-        restart(0);
-        return;
-    }
+    pl = QGst::Parse::launch(pipelineDef).dynamicCast<QGst::Pipeline>();
 
     QGst::BusPtr bus = pl->bus();
     QGlib::connect(bus, "message", this, &Mixer::onBusMessage);
@@ -245,19 +245,16 @@ void Mixer::onBusMessage(const QGst::MessagePtr& msg)
         auto uri = msg->source()->property("location").toString();
         if (!uri.isEmpty() && srcMap.contains(uri))
         {
-            if (srcMap[uri].second)
-            {
-                qDebug() << uri << "is dead" << msg.staticCast<QGst::ErrorMessage>()->error();
-                srcMap[uri].second = false;
-                restart(delay);
-            }
+            qDebug() << uri << "is dead" << msg.staticCast<QGst::ErrorMessage>()->error();
+            srcMap[uri].second = false;
+            restart(delay);
         }
         else
         {
             qDebug() << msg.staticCast<QGst::ErrorMessage>()->error();
             // Something really bad happend, restarting with a longer delay
             //
-            restart(delay * 5);
+            restart(delay * 10);
         }
     }
 }
@@ -288,11 +285,17 @@ void Mixer::timerEvent(QTimerEvent *)
         updateTimerId = 0;
     }
 
-    buildPipeline();
+    qApp->exit();
 }
 
 void Mixer::onRestart(int delay)
 {
+    if (!delay)
+    {
+        qApp->exit(1);
+        return;
+    }
+
     qDebug() << "restarting in" << delay << "msec";
     if (updateTimerId)
     {

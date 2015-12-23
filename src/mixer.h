@@ -14,6 +14,7 @@ class Mixer : public QObject
     Q_OBJECT
     QGst::PipelinePtr   pl;
     QString             dstUri;
+    QString             group;
     QMap<QString, QPair<QString, bool>> srcMap;
     int                 updateTimerId;
     int                 width;
