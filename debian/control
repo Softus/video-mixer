@@ -10,7 +10,10 @@ Build-Depends: libgstreamer1.0-dev | libgstreamer0.10-dev,
 Package: videomixer
 Architecture: i386 amd64
 Pre-Depends: debconf (>= 1.1) | debconf-2.0
-Depends: ${shlibs:Depends}
+Depends: ${shlibs:Depends},
+  gstreamer1.0-plugins-bad | gstreamer0.10-plugins-bad,
+  gstreamer1.0-plugins-ugly | gstreamer0.10-plugins-ugly,
+  gstreamer1.0-libav | gstreamer0.10-ffmpeg
 Suggests: beryllium
 Description: Video mixer
   Combines multiple video streams into one.

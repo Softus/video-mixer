@@ -78,6 +78,18 @@ Mixer::Mixer(const QString& group, QObject *parent) :
     }
     settings.endArray();
 
+    if (srcMap.isEmpty())
+    {
+        qCritical() << "No sources defined";
+        return;
+    }
+
+    if (dstUri.isEmpty())
+    {
+        qCritical() << "No destination URI";
+        return;
+    }
+
     // This magic required to start/stop timers from the worker threads on Microsoft (R) Windows (TM)
     //
     connect(this, SIGNAL(restart(int)), this, SLOT(onRestart(int)), Qt::QueuedConnection);

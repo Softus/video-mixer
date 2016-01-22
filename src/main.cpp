@@ -3,6 +3,7 @@
 #include <signal.h>
 #include <QCoreApplication>
 #include <QDebug>
+#include <QFileInfo>
 #include <QProcess>
 #include <QSettings>
 #include <QStringList>
@@ -10,8 +11,23 @@
 
 #include <QGst/Init>
 #include <QGlib/Error>
+#include <gst/gst.h>
 
 #define MAX_GROUPS 32
+#define ORGANIZATION_DOMAIN "dc.baikal.ru"
+#define PRODUCT_SHORT_NAME "videomixer"
+
+static gchar *groupName = nullptr;
+static gchar *configDir = nullptr;
+
+static GOptionEntry options[] = {
+    {"group", 'g', 0, G_OPTION_ARG_STRING, (gpointer)&groupName,
+        QT_TRANSLATE_NOOP_UTF8("cmdline", "Group to mix."), QT_TRANSLATE_NOOP_UTF8("cmdline", "STRING")},
+    {"config", 'c', 0, G_OPTION_ARG_STRING, (gpointer)&configDir,
+        QT_TRANSLATE_NOOP_UTF8("cmdline", "Path to settings root."), QT_TRANSLATE_NOOP_UTF8("cmdline", "DIR")},
+    {nullptr, '\x0', 0, G_OPTION_ARG_NONE, nullptr,
+        nullptr, nullptr},
+};
 
 volatile sig_atomic_t runnung = 1;
 static void sighandler(int signum)
@@ -33,22 +49,26 @@ static void sighandler(int signum)
     signal(signum, SIG_DFL);
 }
 
-static int minionMode(int argc, char *argv[])
+QProcess* startMinion(const QString& app, const QString group)
 {
-    QCoreApplication app(argc, argv);
-    try
+    auto p = new QProcess();
+    QStringList args;
+    if (configDir)
     {
-        Mixer mixer(argv[1]);
-        return app.exec();
+        args << "--config" << configDir;
     }
-    catch (const QGlib::Error& ex)
+    args << "--group" << group;
+    qDebug() << "Starting" << app << args;
+    p->start(app, args);
+    if (!p->waitForStarted())
     {
-        qCritical() << ex.message();
-        return ex.code();
+        delete p;
+        p = nullptr;
     }
+    return p;
 }
 
-static int gryuMode(int /*argc*/, char *argv[])
+static int gryuMode(const QString& app)
 {
     // Gryu mode
     //
@@ -57,13 +77,10 @@ static int gryuMode(int /*argc*/, char *argv[])
 
     Q_FOREACH (auto group, settings.childGroups())
     {
-        qDebug() << "Starting" << group;
-        auto p = new QProcess();
-        p->start(argv[0], QStringList(group));
-        if (!p->waitForStarted())
+        auto p = startMinion(app, group);
+        if (!p)
         {
-            qCritical() << "Failed to start minion" << group << "err" << p->errorString();
-            delete p;
+            qCritical() << "Failed to start minion" << group;
             continue;
         }
         minions[group] = p;
@@ -86,19 +103,17 @@ static int gryuMode(int /*argc*/, char *argv[])
                 qDebug() << "Restarting" << group;
                 if (p->exitCode())
                 {
-                    qCritical() << "Failed to restart minion" << group << "err" << p->exitCode() << p->errorString();
+                    qCritical() << "Will not restart minion" << group << "err" << p->exitCode() << p->errorString();
                     delete p;
                     minions.remove(group);
                     break;
                 }
 
                 delete p;
-                p = new QProcess();
-                p->start(argv[0], QStringList(group));
-                if (!p->waitForStarted())
+                p = startMinion(app, group);
+                if (!p)
                 {
-                    qCritical() << "Failed to restart minion" << group << "err" << p->errorString();
-                    delete p;
+                    qCritical() << "Failed to restart minion" << group;
                     minions.remove(group);
                 }
                 else
@@ -128,17 +143,58 @@ static int gryuMode(int /*argc*/, char *argv[])
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication::setOrganizationName("dc.baikal.ru");
-    QCoreApplication::setApplicationName("videomixer");
+    QCoreApplication::setOrganizationName(ORGANIZATION_DOMAIN);
+    QCoreApplication::setApplicationName(PRODUCT_SHORT_NAME);
+
+    // Pass some arguments to gstreamer.
+    // For example --gst-debug-level=5
+    //
+    GError* err = nullptr;
+    auto ctx = g_option_context_new("");
+    g_option_context_add_main_entries(ctx, options, PRODUCT_SHORT_NAME);
+    g_option_context_add_group(ctx, gst_init_get_option_group());
+    g_option_context_set_ignore_unknown_options(ctx, false);
+    g_option_context_parse(ctx, &argc, &argv, &err);
+    g_option_context_free(ctx);
+
+    if (err)
+    {
+        g_print(QT_TRANSLATE_NOOP_UTF8("cmdline", "Error initializing: %s\n"), GST_STR_NULL(err->message));
+        g_error_free(err);
+        return 1;
+    }
 
     // QGStreamer stuff
     //
-    QGst::init(&argc, &argv);
+    QGst::init();
 
     signal(SIGINT, sighandler);
     signal(SIGTERM, sighandler);
 
-    int exitCode = argc > 1? minionMode(argc, argv): gryuMode(argc, argv);
+    if (configDir)
+    {
+        QSettings::setPath(QSettings::NativeFormat, QSettings::UserScope, configDir);
+    }
+
+    int exitCode;
+    if (groupName)
+    {
+        QCoreApplication app(argc, argv);
+        try
+        {
+            Mixer mixer(groupName);
+            exitCode = app.exec();
+        }
+        catch (const QGlib::Error& ex)
+        {
+            qCritical() << ex.message();
+            exitCode = ex.code();
+        }
+    }
+    else
+    {
+        exitCode = gryuMode(argv[0]);
+    }
 
     QGst::cleanup();
     return exitCode;
