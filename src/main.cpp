@@ -58,7 +58,8 @@ QProcess* startMinion(const QString& app, const QString group)
         args << "--config" << configDir;
     }
     args << "--group" << group;
-    qDebug() << "Starting" << app << args;
+    qDebug() << "[Gryu] Starting" << app << args;
+    p->setProcessChannelMode(QProcess::ForwardedChannels);
     p->start(app, args);
     if (!p->waitForStarted())
     {
@@ -80,7 +81,7 @@ static int gryuMode(const QString& app)
         auto p = startMinion(app, group);
         if (!p)
         {
-            qCritical() << "Failed to start minion" << group;
+            qCritical() << "[Gryu] Failed to start" << group;
             continue;
         }
         minions[group] = p;
@@ -88,7 +89,7 @@ static int gryuMode(const QString& app)
 
     if (minions.isEmpty())
     {
-        qCritical() << "No groups defined";
+        qCritical() << "[Gryu] No groups defined";
         return 0;
     }
 
@@ -100,10 +101,10 @@ static int gryuMode(const QString& app)
             if (p->waitForFinished(100))
             {
                 auto group = minion.key();
-                qDebug() << "Restarting" << group;
+                qDebug() << "[Gryu]" << group << "has been finished";
                 if (p->exitCode())
                 {
-                    qCritical() << "Will not restart minion" << group << "err" << p->exitCode() << p->errorString();
+                    qCritical() << "[Gryu] Will not restart minion" << group << "err" << p->exitCode() << p->errorString();
                     delete p;
                     minions.remove(group);
                     break;
@@ -113,7 +114,7 @@ static int gryuMode(const QString& app)
                 p = startMinion(app, group);
                 if (!p)
                 {
-                    qCritical() << "Failed to restart minion" << group;
+                    qCritical() << "[Gryu] Failed to restart minion" << group;
                     minions.remove(group);
                 }
                 else
@@ -132,7 +133,7 @@ static int gryuMode(const QString& app)
     for (auto minion = minions.begin(); minion != minions.end(); ++minion)
     {
         auto p = minion.value();
-        qDebug() << "minion" << minion.key() << p->pid() << "killed";
+        qDebug() << "[Gryu] minion" << minion.key() << p->pid() << "killed";
         p->kill();
         p->waitForFinished(100);
         delete p;
