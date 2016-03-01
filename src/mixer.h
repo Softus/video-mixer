@@ -21,7 +21,6 @@ class Mixer : public QObject
     int                 height;
     int                 delay;
     int                 padding;
-    bool                zOrderFix;
     QRect               margins;
     QString             source;
     QString             sink;

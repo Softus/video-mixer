@@ -18,26 +18,10 @@
 #define DEFAULT_MARGINS       QRect(32, 32, 32, 32)
 #define DEFAULT_MESSAGE       "No active sources"
 
-#define DEFAULT_SOURCE  "souphttpsrc"
-#define DEFAULT_SINK    "souphttpclientsink"
-
-#if GST_CHECK_VERSION(1,0,0)
-#define VIDEO_XRAW      "video/x-raw"
-#define FOURCC_I420     "(string)I420"
-#define VIDEOCONVERTER  "videoconvert"
+#define DEFAULT_SOURCE  "souphttpsrc is-live=1 timeout=1 do-timestamp=1 location="
+#define DEFAULT_SINK    "souphttpclientsink sync=0 location="
 #define DEFAULT_DECODER "tsdemux ! avdec_mpeg2video"
 #define DEFAULT_ENCODER "avenc_mpeg2video bitrate=1000000 ! mpegtsmux"
-#define ACTIVE_SOURCE_PARAMS " timeout=1"
-#define INACTIVE_SOURCE_PARAMS " timeout=60 retries=30000"
-#else
-#define VIDEO_XRAW      "video/x-raw-yuv"
-#define FOURCC_I420     "(fourcc)I420"
-#define VIDEOCONVERTER  "ffmpegcolorspace"
-#define DEFAULT_DECODER "mpegtsdemux ! ffdec_mpeg2video"
-#define DEFAULT_ENCODER "ffenc_mpeg2video bitrate=1000000 ! mpegtsmux"
-#define ACTIVE_SOURCE_PARAMS " timeout=1"
-#define INACTIVE_SOURCE_PARAMS " timeout=0"
-#endif
 
 Mixer::Mixer(const QString& group, QObject *parent) :
     QObject(parent), group(group), updateTimerId(0)
@@ -54,7 +38,6 @@ Mixer::Mixer(const QString& group, QObject *parent) :
     message   = settings.value("message", DEFAULT_MESSAGE).toString();
     source    = settings.value("source",  DEFAULT_SOURCE).toString();
     sink      = settings.value("sink",    DEFAULT_SINK).toString();
-    zOrderFix = settings.value("zorderfix", false).toBool();
 
     auto size = settings.beginReadArray(group);
     dstUri    = settings.value("dst").toString();
@@ -68,7 +51,6 @@ Mixer::Mixer(const QString& group, QObject *parent) :
     message   = settings.value("message", message).toString();
     source    = settings.value("source",  source).toString();
     sink      = settings.value("sink",    sink).toString();
-    zOrderFix = settings.value("zorderfix", zOrderFix).toBool();
 
     for (int i = 0; i < size; ++i)
     {
@@ -132,58 +114,20 @@ void Mixer::releasePipeline()
     }
 }
 
-QString Mixer::buildBackground(bool inactive, int rowSize)
-{
-    QString pipelineDef;
-
-    pipelineDef
-        .append("\tvideotestsrc pattern=").append(inactive? "18":"2")
-        .append(" is-live=1 do-timestamp=1 ! " VIDEO_XRAW ",format=" FOURCC_I420)
-        .append(",width=") .append(QString::number(margins.left() + margins.width()  + width  * rowSize + padding * (rowSize - 1)))
-        .append(",height=").append(QString::number(margins.top()  + margins.height() + height * rowSize + padding * (rowSize - 1)))
-        ;
-
-    // Add label if all sources are gone
-    //
-    if (inactive)
-    {
-        pipelineDef.append(" ! textoverlay halignment=center font-desc=24 text=\"").append(message).append('"');
-        restart(10 * 60 * 1000); // Restart every 10 min while in idle mode. Just in case.
-    }
-
-    pipelineDef.append(" ! videobox border-alpha=0 ! mix.\n");
-
-    return pipelineDef;
-}
-
 void Mixer::buildPipeline()
 {
     int rowSize = rint(ceil(sqrt(srcMap.size())));
-    int top = (srcMap.size() + rowSize - 1) / rowSize - 1, left = (srcMap.size() - 1) % rowSize;
-    int streamNo = 0, inactiveStreams = 0;
+    int ypos = (srcMap.size() + rowSize - 1) / rowSize - 1, xpos = (srcMap.size() - 1) % rowSize;
+    int inactiveStreams = 0;
     QString pipelineDef;
-
-    // Count the number of inactive streams
-    //
-    for (auto src = srcMap.begin(); src != srcMap.end(); ++src)
-    {
-        if (!src.value().second)
-        {
-            inactiveStreams++;
-        }
-    }
 
     // Append output
     //
     pipelineDef
-        .append("\tvideomixer name=mix ! " VIDEOCONVERTER)
-        .append(" ! ").append(encoder)
-        .append(" ! queue ! ").append(sink).append(" sync=0 location=").append(dstUri).append("\n");
-
-    if (zOrderFix)
-    {
-        pipelineDef.append(buildBackground(inactiveStreams == srcMap.size(), rowSize));
-    }
+        .append("compositor name=mix background=black ! video/x-raw")
+        .append(",width=") .append(QString::number(margins.left() + margins.width()  + width  * rowSize + padding * (rowSize - 1)))
+        .append(",height=").append(QString::number(margins.top()  + margins.height() + height * rowSize + padding * (rowSize - 1)))
+        .append(" ! ").append(encoder).append(" ! queue ! ").append(sink).append(dstUri).append("\n");
 
     // For each input...
     //
@@ -196,41 +140,39 @@ void Mixer::buildPipeline()
             // ...append http source with demuxer and decoder.
             //
             auto text = src.value().first;
-            pipelineDef.append("\t")
-                .append(source).append(ACTIVE_SOURCE_PARAMS " do-timestamp=1 location=").append(src.key())
-                .append(" ! queue ! ").append(decoder).append(" ! videoscale ! " VIDEO_XRAW ",width=")
-                    .append(QString::number(width)).append(",height=").append(QString::number(height))
-                    .append(" ! " VIDEOCONVERTER " ! textoverlay valignment=bottom halignment=right xpad=2 ypad=2 font-desc=24 text=")
-                    .append(text).append(" ! videobox")
-                    .append(" left=-").append(QString::number(margins.left() + (padding + width)  * left))
-                    .append(" top=-") .append(QString::number(margins.top()  + (padding + height) * top))
-                    .append(" ! mix.\n");
+            pipelineDef
+                .append(source).append(src.key())
+                .append(" ! queue ! ").append(decoder)
+                .append(" ! textoverlay valignment=bottom halignment=right xpad=2 ypad=2 font-desc=32 text=\"")
+                .append(text).append("\" ! mix.\n");
         }
         else
         {
             // ...append http source only. And wait for the video stream.
             //
-            pipelineDef.append("\t")
-                .append(source).append(INACTIVE_SOURCE_PARAMS " location=").append(src.key())
-                .append(" ! fakesink name=s").append(QString::number(streamNo++))
+            pipelineDef
+                .append(source).append(" timeout=60 retries=30000 location=").append(src.key())
+                .append(" ! fakesink name=s").append(QString::number(inactiveStreams++))
                 .append(" sync=0 async=0 signal-handoffs=true\n");
         }
-
-        if (--left < 0)
-        {
-            left = rowSize - 1;
-            --top;
-        }
     }
 
-    Q_ASSERT(streamNo == inactiveStreams);
-
-    if (!zOrderFix)
+    // No active sources? Add fake one to indicate that mixer itself is alive
+    //
+    if (inactiveStreams == srcMap.size())
     {
-        pipelineDef.append(buildBackground(inactiveStreams == srcMap.size(), rowSize));
+        pipelineDef
+            .append("videotestsrc pattern=18 is-live=1 do-timestamp=1 ! video/x-raw")
+            .append(",width=") .append(QString::number(margins.left() + margins.width()  + width  * rowSize + padding * (rowSize - 1)))
+            .append(",height=").append(QString::number(margins.top()  + margins.height() + height * rowSize + padding * (rowSize - 1)))
+            .append(" ! textoverlay halignment=center font-desc=24 text=\"").append(message).append("\" ! mix.\n")
+            ;
+        restart(10 * 60 * 1000); // Restart every 10 min while in idle mode. Just in case.
     }
 
-    qDebug() << group << pipelineDef;
+    // Prepare the pipeline
+    //
+    qDebug() << pipelineDef;
     pl = QGst::Parse::launch(pipelineDef).dynamicCast<QGst::Pipeline>();
 
     QGst::BusPtr bus = pl->bus();
@@ -246,6 +188,36 @@ void Mixer::buildPipeline()
         QGlib::connect(sink, "handoff", this, &Mixer::onHttpFrame);
     }
 
+    // Arrange active streams
+    //
+    if (inactiveStreams < srcMap.size())
+    {
+        auto mix = pl->getElementByName("mix");
+        int activeStreams = 0;
+
+        for (auto src = srcMap.begin(); src != srcMap.end(); ++src)
+        {
+            // ...if it is still alive...
+            //
+            if (src.value().second)
+            {
+                auto sink = mix->getStaticPad(QString("sink_%1").arg(activeStreams++).toUtf8());
+                sink->setProperty("width",  width);
+                sink->setProperty("height", height);
+                sink->setProperty("xpos", margins.left() + (padding + width)  * xpos);
+                sink->setProperty("ypos", margins.top()  + (padding + height) * ypos);
+            }
+
+            if (--xpos < 0)
+            {
+                xpos = rowSize - 1;
+                --ypos;
+            }
+        }
+    }
+
+    // Finally start the pipeline
+    //
     pl->setState(QGst::StatePlaying);
 }
 

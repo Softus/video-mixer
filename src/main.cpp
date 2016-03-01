@@ -58,7 +58,11 @@ QProcess* startMinion(const QString& app, const QString group)
         args << "--config" << configDir;
     }
     args << "--group" << group;
+<<<<<<< HEAD
     qDebug() << "[Gryu] Starting" << app << args;
+=======
+    qDebug() << "Starting" << app << args;
+>>>>>>> 124b7ca991d227390b09c76a4c95f37542d8c050
     p->setProcessChannelMode(QProcess::ForwardedChannels);
     p->start(app, args);
     if (!p->waitForStarted())
