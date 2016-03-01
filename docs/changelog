@@ -1,3 +1,16 @@
+videomixer (1.1.0) debian;
+
+  * Now requires gstreamer >= 1.0
+  * Uses compositor element from gst-plugins-bad
+
+ -- Pavel Bludov <pbludov@gmail.com>  Tue, 1 Mar 2016 12:20:00 +0800
+
+videomixer (1.0.1) debian;
+
+  * Increase log verbosity
+
+ -- Pavel Bludov <pbludov@gmail.com>  Fri, 29 Jan 2016 15:13:00 +0800
+
 videomixer (1.0.0) debian;
 
   * Rewritten with Gryu/minion modes

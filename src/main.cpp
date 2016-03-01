@@ -59,6 +59,7 @@ QProcess* startMinion(const QString& app, const QString group)
     }
     args << "--group" << group;
     qDebug() << "Starting" << app << args;
+    p->setProcessChannelMode(QProcess::ForwardedChannels);
     p->start(app, args);
     if (!p->waitForStarted())
     {
