@@ -20,24 +20,8 @@
 
 #define DEFAULT_SOURCE  "souphttpsrc"
 #define DEFAULT_SINK    "souphttpclientsink"
-
-#if GST_CHECK_VERSION(1,0,0)
-#define VIDEO_XRAW      "video/x-raw"
-#define FOURCC_I420     "(string)I420"
-#define VIDEOCONVERTER  "videoconvert"
 #define DEFAULT_DECODER "tsdemux ! avdec_mpeg2video"
 #define DEFAULT_ENCODER "avenc_mpeg2video bitrate=1000000 ! mpegtsmux"
-#define ACTIVE_SOURCE_PARAMS " timeout=1"
-#define INACTIVE_SOURCE_PARAMS " timeout=60 retries=30000"
-#else
-#define VIDEO_XRAW      "video/x-raw-yuv"
-#define FOURCC_I420     "(fourcc)I420"
-#define VIDEOCONVERTER  "ffmpegcolorspace"
-#define DEFAULT_DECODER "mpegtsdemux ! ffdec_mpeg2video"
-#define DEFAULT_ENCODER "ffenc_mpeg2video bitrate=1000000 ! mpegtsmux"
-#define ACTIVE_SOURCE_PARAMS " timeout=1"
-#define INACTIVE_SOURCE_PARAMS " timeout=0"
-#endif
 
 Mixer::Mixer(const QString& group, QObject *parent) :
     QObject(parent), group(group), updateTimerId(0)
@@ -138,7 +122,7 @@ QString Mixer::buildBackground(bool inactive, int rowSize)
 
     pipelineDef
         .append("videotestsrc pattern=").append(inactive? "18":"2")
-        .append(" is-live=1 do-timestamp=1 ! " VIDEO_XRAW ",format=" FOURCC_I420)
+        .append(" is-live=1 do-timestamp=1 ! video/x-raw,format=(string)I420")
         .append(",width=") .append(QString::number(margins.left() + margins.width()  + width  * rowSize + padding * (rowSize - 1)))
         .append(",height=").append(QString::number(margins.top()  + margins.height() + height * rowSize + padding * (rowSize - 1)))
         ;
@@ -176,8 +160,7 @@ void Mixer::buildPipeline()
     // Append output
     //
     pipelineDef
-        .append("videomixer name=mix ! " VIDEOCONVERTER)
-        .append(" ! ").append(encoder)
+        .append("videomixer name=mix ! videoconvert ! ").append(encoder)
         .append(" ! queue ! ").append(sink).append(" sync=0 location=").append(dstUri).append("\n");
 
     if (zOrderFix)
@@ -197,10 +180,10 @@ void Mixer::buildPipeline()
             //
             auto text = src.value().first;
             pipelineDef
-                .append(source).append(ACTIVE_SOURCE_PARAMS " do-timestamp=1 location=").append(src.key())
-                .append(" ! queue ! ").append(decoder).append(" ! videoscale ! " VIDEO_XRAW ",width=")
+                .append(source).append(" timeout=1 do-timestamp=1 location=").append(src.key())
+                .append(" ! queue ! ").append(decoder).append(" ! videoscale ! video/x-raw,width=")
                     .append(QString::number(width)).append(",height=").append(QString::number(height))
-                    .append(" ! " VIDEOCONVERTER " ! textoverlay valignment=bottom halignment=right xpad=2 ypad=2 font-desc=24 text=")
+                    .append(" ! videoconvert ! textoverlay valignment=bottom halignment=right xpad=2 ypad=2 font-desc=24 text=")
                     .append(text).append(" ! videobox")
                     .append(" left=-").append(QString::number(margins.left() + (padding + width)  * left))
                     .append(" top=-") .append(QString::number(margins.top()  + (padding + height) * top))
@@ -211,7 +194,7 @@ void Mixer::buildPipeline()
             // ...append http source only. And wait for the video stream.
             //
             pipelineDef
-                .append(source).append(INACTIVE_SOURCE_PARAMS " location=").append(src.key())
+                .append(source).append(" timeout=60 retries=30000 location=").append(src.key())
                 .append(" ! fakesink name=s").append(QString::number(streamNo++))
                 .append(" sync=0 async=0 signal-handoffs=true\n");
         }
