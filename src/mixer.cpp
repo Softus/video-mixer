@@ -18,7 +18,7 @@
 #define DEFAULT_MARGINS       QRect(32, 32, 32, 32)
 #define DEFAULT_MESSAGE       "No active sources"
 
-#define DEFAULT_SOURCE  "souphttpsrc is-live=1 timeout=1 do-timestamp=1 location="
+#define DEFAULT_SOURCE  "souphttpsrc is-live=1 do-timestamp=1 timeout=60 retries=30000 location="
 #define DEFAULT_SINK    "souphttpclientsink sync=0 location="
 #define DEFAULT_DECODER "tsdemux ! avdec_mpeg2video"
 #define DEFAULT_ENCODER "avenc_mpeg2video bitrate=1000000 ! mpegtsmux"
@@ -151,7 +151,7 @@ void Mixer::buildPipeline()
             // ...append http source only. And wait for the video stream.
             //
             pipelineDef
-                .append(source).append(" timeout=60 retries=30000 location=").append(src.key())
+                .append(source).append(src.key())
                 .append(" ! fakesink name=s").append(QString::number(inactiveStreams++))
                 .append(" sync=0 async=0 signal-handoffs=true\n");
         }
