@@ -165,10 +165,6 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    // QGStreamer stuff
-    //
-    QGst::init();
-
     signal(SIGINT, sighandler);
     signal(SIGTERM, sighandler);
 
@@ -180,6 +176,10 @@ int main(int argc, char *argv[])
     int exitCode;
     if (groupName)
     {
+        // QGStreamer stuff
+        //
+        QGst::init();
+
         QCoreApplication app(argc, argv);
         try
         {
@@ -191,12 +191,13 @@ int main(int argc, char *argv[])
             qCritical() << ex.message();
             exitCode = ex.code();
         }
+
+        QGst::cleanup();
     }
     else
     {
         exitCode = gryuMode(argv[0]);
     }
 
-    QGst::cleanup();
     return exitCode;
 }
