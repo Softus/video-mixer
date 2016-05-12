@@ -180,18 +180,19 @@ int main(int argc, char *argv[])
         //
         QGst::init();
 
-        QCoreApplication app(argc, argv);
-        try
-        {
-            Mixer mixer(groupName);
-            exitCode = app.exec();
-        }
-        catch (const QGlib::Error& ex)
-        {
-            qCritical() << ex.message();
-            exitCode = ex.code();
-        }
-
+        {// app scope
+            QCoreApplication app(argc, argv);
+            try
+            {
+                Mixer mixer(groupName);
+                exitCode = app.exec();
+            }
+            catch (const QGlib::Error& ex)
+            {
+                qCritical() << ex.message();
+                exitCode = ex.code();
+            }
+        }// app scope
         QGst::cleanup();
     }
     else
