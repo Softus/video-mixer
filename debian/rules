@@ -1,5 +1,5 @@
 #!/usr/bin/make -f
-APPNAME := videomixer
+APPNAME := video-mixer
 builddir:
 	mkdir -p builddir
 

@@ -2,16 +2,15 @@
 
 <?define ProductBuild     = "1.0" ?>
 <?define ProductRevision  = "1" ?>
-<?define ProductName      = "Videomixer" ?>
+<?define ProductName      = "Video-mixer" ?>
 
-<?define Manufacturer    = "dc.baikal.ru" ?>
+<?define Manufacturer    = "softus.org" ?>
 <?define ProductVersion  = "$(var.ProductBuild).$(var.ProductRevision)" ?>
 <?define UpgradeCode     = "{B100D0FF-BD78-0000-0314-079500628307}" ?>
 <?define SrcDir32        = "../$(var.Configuration)\" ?>
 <?define SrcDir64        = "../$(var.Configuration)\" ?>
 
 <?define RequiresAdmin    = "True" ?>
-<?define QtVersion        = "5" ?>
 
 <?if $(var.Platform)=x64?>
 <?define Win64   = "yes" ?>
@@ -30,6 +29,8 @@
   <?define DstDir            = "CommonAppDataFolder" ?>
   <?define SysEnv            = "no" ?>
 <?endif ?>
+
+<?define GstreamerVersion  = "1.0" ?>
 
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
   <Product Id="*"
@@ -59,15 +60,15 @@
     </Upgrade>
 
     <Property Id="GSTREAMERSDKROOT_X86" Secure="yes">
-      <RegistrySearch Id="GstreamerSdkRoot_key" Root="HKLM" Key="SOFTWARE\GStreamerSDK\x86" Name="InstallDir" Type="raw" />
+      <RegistrySearch Id="GstreamerSdkRoot_key" Root="HKLM" Key="SOFTWARE\GStreamer$(var.GstreamerVersion)\x86" Name="InstallDir" Type="raw" />
     </Property>
     <Property Id="GSTREAMERSDKVERSION_X86" Secure="yes">
-      <RegistrySearch Id="GstreamerSdkVersion_key" Root="HKLM" Key="SOFTWARE\GStreamerSDK\x86" Name="SdkVersion" Type="raw" />
+      <RegistrySearch Id="GstreamerSdkVersion_key" Root="HKLM" Key="SOFTWARE\GStreamer$(var.GstreamerVersion)\x86" Name="SdkVersion" Type="raw" />
     </Property>
 
     <Property Id="ARPURLINFOABOUT">http://$(var.Manufacturer)/products/$(var.ProductName)</Property>
     <Property Id="ARPURLUPDATEINFO">http://$(var.Manufacturer)/products/$(var.ProductName)</Property>
-    <Media Id="1" Cabinet="$(var.ProductName).cab" EmbedCab="yes" CompressionLevel="high" />
+    <Media Id="1" Cabinet="video_mixer.cab" EmbedCab="yes" CompressionLevel="high" />
 
     <Directory Id="TARGETDIR" Name="SourceDir">
       <Directory Id="ProgramMenuFolder" Name="Programs"/>
@@ -77,25 +78,16 @@
           <Directory Id="ProductFolder32" Name="$(var.ProductName)" FileSource="$(var.SrcDir32)">
             <Component Id="Comp_Application32" Guid="B100D0FF-BD79-0101-0314-079500628307" Win64="no">
               <Environment Id="PATH" Name="PATH" Value="[GSTREAMERSDKROOT_X86]\[GSTREAMERSDKVERSION_X86]\x86\bin" Permanent="no" Part="first" Action="set" System="$(var.SysEnv)" />
-              <File Id="File_Beryllium_x86" Name="videomixer.exe" KeyPath="yes">
-                <Shortcut Id="Shortcut_Videomixer_x86" Directory="ProgramMenuFolder" Name="Videomixer" Advertise="yes" Icon="videomixer.ico">
-                  <Icon Id="videomixer.ico" SourceFile="../videomixer.ico" />
+              <File Id="File_Beryllium_x86" Name="video-mixer.exe" KeyPath="yes">
+                <Shortcut Id="Shortcut_Video_mixer_x86" Directory="ProgramMenuFolder" Name="Video-mixer" Advertise="yes" Icon="video_mixer.ico">
+                  <Icon Id="video_mixer.ico" SourceFile="../video-mixer.ico" />
                 </Shortcut>
               </File>
               <?if $(var.Configuration)=Debug ?>
-                <File Id="File_Videomixer_pdb_x86" Name="videomixer.pdb" />
+                <File Id="File_Video_mixer_pdb_x86" Name="video-mixer.pdb" />
               <?endif ?>
             </Component>
-            <Directory Id="Translations32" Name="translations" FileSource="../">
-              <Component Id="Comp_Translations32" Guid="B100D0FF-BD7A-0102-0314-079500628307" Win64="no">
-                <File Id="File_Videomixer_ru_qm_x86" Name="videomixer_ru.qm"  Source="../videomixer_ru.qm"/>
-              </Component>
-            </Directory>
-            <?if $(var.QtVersion)=4 ?>
-              <?include Qt4Runtime32.wxi ?>
-            <?else ?>
-              <?include Qt5Runtime32.wxi ?>
-            <?endif ?>
+            <?include $(env.Qt_Runtime) ?>
           </Directory>
         </Directory>
        </Directory>
@@ -103,14 +95,10 @@
 
     <Feature Id="Complete" Title="Complete Feature" Level="1">
       <ComponentRef Id="Comp_Application32" />
-      <ComponentRef Id="Comp_Translations32" />
-      <ComponentRef Id="Comp_Sound32" />
       <ComponentRef Id="Comp_QtLibs32" />
       <ComponentRef Id="Comp_QtGstLibs32" />
       <ComponentRef Id="Comp_QtImageFormats32" />
-      <?if $(var.QtVersion)>4 ?>
       <ComponentRef Id="Comp_QtPlatforms32" />
-      <?endif ?>
      </Feature>
 
     <InstallExecuteSequence>

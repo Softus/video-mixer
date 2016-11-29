@@ -1,1 +1,0 @@
-msbuild "/property:configuration=Release" "wix\msi.wixproj"

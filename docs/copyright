@@ -1,9 +1,9 @@
 Format: http://dep.debian.net/deps/dep5
-Upstream-Name: videomiser
-Source: http://dc.baikal.ru/products/beryllium/packages
+Upstream-Name: video-mixer
+Source: http://softus.org/products/video-mixer/packages
 
 Files: *
-Copyright: 2015 Beryllium team <beryllium@dc.baikal.ru>
+Copyright: 2015-2016 Softus Inc. <contact@softus.org>
 License: LGPL-2.1+
 
 License: LGPL-2.1+
