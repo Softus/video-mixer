@@ -3,7 +3,7 @@ Section: contrib/misc
 Priority: optional
 Maintainer: Softus Inc. <contact@softus.org>
 Standards-Version: 3.2.1
-Build-Depends: libgstreamer1.0-dev | libgstreamer0.10-dev,
+Build-Depends: debhelper, libgstreamer1.0-dev | libgstreamer0.10-dev,
   libgstreamer-plugins-base1.0-dev | libgstreamer-plugins-base0.10-dev,
   libqt5opengl5-dev | libqt4-opengl-dev
 

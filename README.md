@@ -2,7 +2,7 @@ Video mixer
 ===========
 
 [![Build Status](https://api.travis-ci.org/Softus/video-mixer.svg?branch=master)](https://travis-ci.org/Softus/video-mixer)
-[![Build status](https://ci.appveyor.com/api/projects/status/TODO?svg=true)](https://ci.appveyor.com/project/pbludov/video-mixer)
+[![Build status](https://ci.appveyor.com/api/projects/status/0ew19agatl87brwj?svg=true)](https://ci.appveyor.com/project/pbludov/video-mixer)
 
 Introduction
 ============
@@ -10,17 +10,17 @@ Introduction
 Video mixer is a small daemon written in c++.
 It combines multiple video streams into one. For example, four input
 streams stm1, stm2, stm3, stm4 may be combined into one who looks like:
-
-+--------------+
-|+----+  +----+|
-||stm1|  |stm2||
-|+----+  +----+|
-|              |
-|+----+  +----+|
-||stm3|  |stm4||
-|+----+  +----+|
-+--------------+
-
+```
++----------------+
+| +----+  +----+ |
+| |stm1|  |stm2| |
+| +----+  +----+ |
+|                |
+| +----+  +----+ |
+| |stm3|  |stm4| |
+| +----+  +----+ |
++----------------+
+```
 May be used with (but not limited to) [gst-streaming-server](https://gstreamer.freedesktop.org/modules/gst-streaming-server.html).
 
 Requirements
