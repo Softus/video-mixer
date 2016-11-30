@@ -4,17 +4,14 @@ Priority: optional
 Maintainer: Softus Inc. <contact@softus.org>
 Standards-Version: 3.2.1
 Build-Depends: debhelper, qt5-default,
-  libgstreamer1.0-dev | libgstreamer0.10-dev,
-  libgstreamer-plugins-base1.0-dev | libgstreamer-plugins-base0.10-dev,
-  libqt5opengl5-dev | libqt4-opengl-dev
+  libgstreamer1.0-dev, libqt5gstreamer-dev,
+  libgstreamer-plugins-base1.0-dev, libqt5opengl5-dev
 
 Package: video-mixer
 Architecture: i386 amd64
 Pre-Depends: debconf (>= 1.1) | debconf-2.0
 Depends: ${shlibs:Depends},
-  gstreamer1.0-plugins-bad | gstreamer0.10-plugins-bad,
-  gstreamer1.0-plugins-ugly | gstreamer0.10-plugins-ugly,
-  gstreamer1.0-libav | gstreamer0.10-ffmpeg
+  gstreamer1.0-plugins-bad, gstreamer1.0-plugins-ugly, gstreamer1.0-libav
 Suggests: beryllium
 Description: Video mixer
   Combines multiple video streams into one.
