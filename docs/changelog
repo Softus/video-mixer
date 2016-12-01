@@ -1,3 +1,9 @@
+video-mixer (1.1.1) debian;
+
+  * Initially set all sources to off
+
+ -- Pavel Bludov <pbludov@gmail.com>  Thu, 1 Dec 2016 10:47:00 +0800
+
 video-mixer (1.1.0) debian;
 
   * Now requires gstreamer >= 1.0
