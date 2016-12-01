@@ -29,9 +29,8 @@
 #include <QGlib/Error>
 #include <gst/gst.h>
 
-#define MAX_GROUPS 32
-#define ORGANIZATION_DOMAIN "dc.baikal.ru"
-#define PRODUCT_SHORT_NAME "videomixer"
+#define ORGANIZATION_DOMAIN "softus.org"
+#define PRODUCT_SHORT_NAME "video-mixer"
 
 static gchar *groupName = nullptr;
 static gchar *configDir = nullptr;
@@ -94,6 +93,20 @@ static int gryuMode(const QString& app)
 
     Q_FOREACH (auto group, settings.childGroups())
     {
+        // Initially set all sources to off
+        //
+        auto size = settings.beginReadArray(group);
+        settings.endArray();
+
+        settings.beginWriteArray(group);
+        for (int i = 0; i < size; ++i)
+        {
+            settings.setArrayIndex(i);
+            settings.setValue("enabled", false);
+        }
+        settings.endArray();
+        settings.sync();
+
         auto p = startMinion(app, group);
         if (!p)
         {
