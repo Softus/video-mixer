@@ -1,50 +1,65 @@
-Summary: Video mixer
-Name: videomixer
-Provides: videomixer
+Name: video-mixer
+Provides: video-mixer
 Version: 1.0.0
-Release: 1
+Release: 1%{?dist}
 License: LGPL-2.1+
 Source: %{name}.tar.gz
-#Source: %{name}-%{version}.tar.bz2
-URL: http://dc.baikal.ru/products/beryllium
-Vendor: Beryllium team <beryllium@dc.baikal.ru>
-Packager: Beryllium team <beryllium@dc.baikal.ru>
-
-BuildRequires: make
-
-%if %distro == centos
-BuildRequires: gstreamer-devel, qt-devel
-Requires: gstreamer >= 0.10.35, qt4 >= 4.6.0
-Requires: gstreamer-plugins-base >= 0.10.31, gstreamer-plugins-good >= 0.10.23
-%else
-BuildRequires: gstreamer-0_10-devel, libqt4-devel
-Requires: gstreamer-0_10-plugins-base >= 0.10.31, gstreamer-0_10-plugins-good >= 0.10.23
-Requires: libgstreamer-0_10-0 >= 0.10.35, libqt4 >= 4.6.0
-%endif
+URL: http://softus.org/products/beryllium
+Vendor: Softus Inc. <contact@softus.org>
+Packager: Softus Inc. <contact@softus.org>
+Summary: Video mixer
 
 %description
+Video mixer.
+
+
 Combines multiple video streams into one.
 
-%define _rpmfilename %{distro}-%{rev}-%%{NAME}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm
+%global debug_package %{nil}
+
+BuildRequires: make, gcc-c++
+
+%{?fedora:BuildRequires: gstreamer1-devel, qt5-qtbase-devel, qt5-gstreamer-devel}
+%{?fedora:Requires: gstreamer1-plugins-base, gstreamer1-plugins-good, gstreamer1-plugins-bad-free}
+
+%{?rhel:BuildRequires: gstreamer1-devel, qt5-qtbase-devel, qt5-qtx11extras-devel}
+%{?rhel:Requires: gstreamer1-plugins-base, gstreamer1-plugins-good, gstreamer1-plugins-bad-free}
+
+%{?suse_version:BuildRequires: libqt5-linguist, libqt5-qtbase-devel, gstreamer-plugins-qt5-devel}
+%{?suse_version:Requires: gstreamer-plugins-base, gstreamer-plugins-good, gstreamer-plugins-bad}
+
+%if 0%{?mageia}
+%define qmake qmake
+%define lrelease lrelease
+BuildRequires: qttools5
+%ifarch x86_64 amd64
+BuildRequires: lib64qt5-gstreamer-devel, lib64boost-devel, lib64gstreamer1.0-devel, lib64gstreamer-plugins-base1.0-devel, lib64qt5base5-devel
+Requires: lib64gstreamer-plugins-base1.0_0
+%else
+BuildRequires: libqt5-gstreamer-devel,   libboost-devel,   libgstreamer1.0-devel,   libgstreamer-plugins-base1.0-devel,   libqt5base5-devel
+Requires: libgstreamer-plugins-base1.0_0
+%endif
+%else
+%define qmake qmake-qt5
+%define lrelease lrelease-qt5
+%endif
 
 %prep
 %setup -c %{name}
  
 %build
-qmake PREFIX=%{_prefix} QMAKE_CFLAGS+="%optflags" QMAKE_CXXFLAGS+="%optflags";
-make -j 2 %{?_smp_mflags};
+%{qmake} PREFIX=%{_prefix} QMAKE_CFLAGS+="%optflags" QMAKE_CXXFLAGS+="%optflags";
+make %{?_smp_mflags};
 
 %install
-make install INSTALL_ROOT="%buildroot";
+make install INSTALL_ROOT="%buildroot"
 
 %files
 %doc docs/*
-%{_mandir}/man1/%{name}.1.gz
-%{_bindir}/beryllium
-%{_datadir}/dbus-1/services
-%{_datadir}/%{name}
-%{_datadir}/applications/%{name}.desktop
-%{_datadir}/icons/%{name}.png
+%{_mandir}/man1/%{name}.1.*
+%{_bindir}/%{name}
+%{_initddir}/%{name}.conf
+
 
 %changelog
 * Mon Jul 20 2015 Pavel Bludov <pbludov@gmail.com>
