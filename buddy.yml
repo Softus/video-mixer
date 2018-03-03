@@ -37,12 +37,11 @@
     docker_image_name: "library/debian"
     docker_image_tag: "latest"
     execute_commands:
-    - lrelease *.ts
     - cp docs/* debian/
-    - dpkg-buildpackage -us -uc -tc -I*.yml -rfakeroot
+    - dpkg-buildpackage -us -uc -tc -Icache* -I*.yml -rfakeroot
     setup_commands:
     - apt update -q
-    - apt install -y lsb-release debhelper fakeroot libdcmtk2-dev libboost-dev libmediainfo-dev libssl-dev libwrap0-dev libqt5opengl5-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libqt5gstreamer-1.0-0 libqt5gstreamer-dev libavc1394-dev libraw1394-dev libv4l-dev qttools5-dev-tools qt5-default libqt5x11extras5-dev
+    - apt install -y lsb-release debhelper fakeroot libboost-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libqt5gstreamer-dev qttools5-dev-tools qt5-default
     trigger_condition: "ALWAYS"
     working_directory: "/buddy/debian"
 
@@ -52,9 +51,9 @@
     docker_image_tag: "latest"
     execute_commands:
     - export RPM_BUILD_NCPUS=2
-    - tar czf ../${project.name}.tar.gz --exclude=debian --exclude=*.yml * && rpmbuild -ta ../${project.name}.tar.gz
+    - tar czf ../${project.name}.tar.gz --exclude=cache* --exclude=debian --exclude=*.yml * && rpmbuild -ta ../${project.name}.tar.gz
     setup_commands:
-    - dnf install -y redhat-lsb rpm-build make gstreamer1-devel libv4l-devel qt5-qtbase-devel qt5-gstreamer-devel qt5-linguist qt5-qtx11extras-devel libavc1394-devel libmediainfo-devel dcmtk-devel openssl-devel gcc-c++
+    - dnf install -y redhat-lsb rpm-build make gcc-c++ gstreamer1-devel qt5-qtbase-devel qt5-gstreamer-devel qt5-linguist
     trigger_condition: "ALWAYS"
     working_directory: "/buddy/fedora"
 
@@ -64,9 +63,9 @@
     docker_image_tag: "latest"
     execute_commands:
     - export RPM_BUILD_NCPUS=2
-    - tar czf ../${project.name}.tar.gz --exclude=debian --exclude=*.yml * && rpmbuild -ta ../${project.name}.tar.gz
+    - tar czf ../${project.name}.tar.gz --exclude=cache* --exclude=debian --exclude=*.yml * && rpmbuild -ta ../${project.name}.tar.gz
     setup_commands:
-    - zypper install -y lsb-release rpm-build make libqt5-linguist libqt5-qtbase-devel gstreamer-plugins-qt5-devel dcmtk-devel libmediainfo-devel libqt5-qtx11extras-devel openssl-devel libavc1394-devel libv4l-devel
+    - zypper install -y lsb-release rpm-build make libqt5-linguist libqt5-qtbase-devel gstreamer-plugins-qt5-devel
     trigger_condition: "ALWAYS"
     working_directory: "/buddy/opensuse"
 
@@ -75,11 +74,10 @@
     docker_image_name: "library/ubuntu"
     docker_image_tag: "latest"
     execute_commands:
-    - lrelease *.ts
     - cp docs/* debian/
-    - dpkg-buildpackage -us -uc -tc -I*.yml -rfakeroot
+    - dpkg-buildpackage -us -uc -tc -Icache* -I*.yml -rfakeroot
     setup_commands:
     - apt update -q
-    - apt install -y lsb-release debhelper fakeroot libdcmtk2-dev libboost-dev libmediainfo-dev libssl-dev libwrap0-dev libqt5opengl5-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libqt5gstreamer-1.0-0 libqt5gstreamer-dev libavc1394-dev libraw1394-dev libv4l-dev qttools5-dev-tools qt5-default libqt5x11extras5-dev
+    - apt install -y lsb-release debhelper fakeroot libboost-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libqt5gstreamer-dev qttools5-dev-tools qt5-default
     trigger_condition: "ALWAYS"
     working_directory: "/buddy/ubuntu"

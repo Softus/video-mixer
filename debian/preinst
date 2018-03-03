@@ -1,0 +1,9 @@
+#!/bin/sh
+
+case "$1" in
+  install)
+
+    useradd -rmd /var/lib/video-mixer -s /sbin/nologin video-mixer || :
+  ;;
+
+esac

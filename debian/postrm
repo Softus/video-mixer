@@ -1,0 +1,13 @@
+#!/bin/sh
+
+case "$1" in
+  purge)
+
+    # Remove all files
+    rm -rf /var/lib/video-mixer
+    rm -f /var/log/video-mixer.log
+
+    userdel video-mixer || :
+  ;;
+
+esac

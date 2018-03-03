@@ -17,12 +17,14 @@ Combines multiple video streams into one.
 
 %global debug_package %{nil}
 
-BuildRequires: make, gcc-c++
+Requires(pre): /usr/sbin/useradd
+Requires(postun): /usr/sbin/userdel
+BuildRequires: make, gcc-c++, systemd
 
 %{?fedora:BuildRequires: gstreamer1-devel, qt5-qtbase-devel, qt5-gstreamer-devel}
 %{?fedora:Requires: gstreamer1-plugins-base, gstreamer1-plugins-good, gstreamer1-plugins-bad-free}
 
-%{?rhel:BuildRequires: gstreamer1-devel, qt5-qtbase-devel, qt5-qtx11extras-devel}
+%{?rhel:BuildRequires: gstreamer1-devel, qt5-qtbase-devel}
 %{?rhel:Requires: gstreamer1-plugins-base, gstreamer1-plugins-good, gstreamer1-plugins-bad-free}
 
 %{?suse_version:BuildRequires: libqt5-linguist, libqt5-qtbase-devel, gstreamer-plugins-qt5-devel}
@@ -55,11 +57,24 @@ make %{?_smp_mflags};
 make install INSTALL_ROOT="%buildroot"
 
 %files
+%defattr(-,root,root)
 %doc docs/*
+%config(noreplace) %{_sysconfdir}/xdg/softus.org/%{name}.conf
 %{_mandir}/man1/%{name}.1.*
 %{_bindir}/%{name}
-%{_initddir}/%{name}.conf
+%{_unitdir}/%{name}.service
 
+%pre
+/usr/sbin/useradd -rmd /var/lib/%{name} -s /sbin/nologin %{name} || :
+
+%post
+service %{name} start || :
+
+%preun
+service %{name} stop || :
+
+%postun
+/usr/sbin/userdel %{name} || :
 
 %changelog
 * Mon Jul 20 2015 Pavel Bludov <pbludov@gmail.com>

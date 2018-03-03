@@ -1,0 +1,20 @@
+[Unit]
+Description=Video mixer
+After=network.target
+
+[Service]
+Type=simple
+#User=video-mixer
+#Group=video-mixer
+WorkingDirectory=/var/lib/video-mixer
+ExecStart=/usr/bin/video-mixer
+Restart=always
+RestartSec=5
+#StandardError=file:/var/log/video-mixer.log
+#StandardOutput=file:/var/log/video-mixer.log
+
+# Give a reasonable amount of time for the server to start up/shut down
+TimeoutSec=300
+
+[Install]
+WantedBy=multi-user.target
