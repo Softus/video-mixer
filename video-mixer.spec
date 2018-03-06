@@ -60,12 +60,13 @@ make install INSTALL_ROOT="%buildroot"
 %defattr(-,root,root)
 %doc docs/*
 %config(noreplace) %{_sysconfdir}/xdg/softus.org/%{name}.conf
+%config(noreplace) %{_sysconfdir}/rsyslog.d/99-%{name}.conf
 %{_mandir}/man1/%{name}.1.*
 %{_bindir}/%{name}
 %{_unitdir}/%{name}.service
 
 %pre
-/usr/sbin/useradd -rmd /var/lib/%{name} -s /sbin/nologin %{name} || :
+/usr/sbin/useradd -rmb /var/lib -s /sbin/nologin %{name} || :
 
 %post
 service %{name} start || :

@@ -35,6 +35,8 @@ man.files = video-mixer.1
 man.path = $$PREFIX/share/man/man1
 cfg.files=video-mixer.conf
 cfg.path=/etc/xdg/softus.org
+syslog.files=99-video-mixer.conf
+syslog.path=/etc/rsyslog.d
 systemd.files=video-mixer.service
 equals(OS_DISTRO, debian) | equals(OS_DISTRO, ubuntu) {
     systemd.path=/lib/systemd/system
@@ -42,4 +44,4 @@ equals(OS_DISTRO, debian) | equals(OS_DISTRO, ubuntu) {
     systemd.path=/usr/lib/systemd/system
 }
 
-INSTALLS += target man cfg systemd
+INSTALLS += target man cfg systemd syslog

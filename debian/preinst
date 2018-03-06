@@ -3,7 +3,7 @@
 case "$1" in
   install)
 
-    useradd -rmd /var/lib/video-mixer -s /sbin/nologin video-mixer || :
+    useradd -rmb /var/lib -s /sbin/nologin video-mixer || :
   ;;
 
 esac
