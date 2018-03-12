@@ -34,8 +34,8 @@
 #define DEFAULT_MARGINS       QRect(32, 32, 32, 32)
 #define DEFAULT_MESSAGE       "No active sources"
 
-#define DEFAULT_SOURCE  "souphttpsrc is-live=1 do-timestamp=1 location="
-#define DEFAULT_SINK    "souphttpclientsink sync=0 location="
+#define DEFAULT_SOURCE  "souphttpsrc retries=0 is-live=1 do-timestamp=1 location="
+#define DEFAULT_SINK    "souphttpclientsink retries=0 sync=0 location="
 #define DEFAULT_DECODER "tsdemux ! avdec_mpeg2video"
 #define DEFAULT_ENCODER "avenc_mpeg2video bitrate=1000000 ! mpegtsmux"
 
