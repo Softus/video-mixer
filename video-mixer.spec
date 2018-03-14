@@ -66,9 +66,13 @@ make install INSTALL_ROOT="%buildroot"
 %{_unitdir}/%{name}.service
 
 %pre
-/usr/sbin/useradd -rmb /var/lib -s /sbin/nologin %{name} || :
+/usr/sbin/groupadd -r %{name} || :
+/usr/sbin/useradd -rmb /var/lib -s /sbin/nologin -g %{name} %{name} || :
+chown %{name}:%{name} /var/lib/%{name}
+chmod 775 /var/lib/%{name}
 
 %post
+systemctl enable %{name}
 service %{name} start || :
 
 %preun
@@ -76,6 +80,7 @@ service %{name} stop || :
 
 %postun
 /usr/sbin/userdel %{name} || :
+/usr/sbin/groupdel %{name} || :
 
 %changelog
 * Mon Jul 20 2015 Pavel Bludov <pbludov@gmail.com>
